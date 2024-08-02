@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, 
+                   initial-scale=1.0">
+    <title>Pie Chart Example</title>
+    <!-- Include Chart.js library -->
+    <script src="
+            https://cdn.jsdelivr.net/npm/chart.js">
+    </script>
+    <style>
+        div {
+            height: 50vh;
+            width: 50vw;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>GeeksForGeeks | Dynamically Update Pie Chart</h1>
+    <div>
+        <!-- Create a canvas element to render the chart -->
+        <canvas id="pieChart" width="400" height="400">
+        </canvas>
+    </div>
+
+    <script>
+        // Get the 2D rendering context of the canvas
+        let ctx = document
+        .getElementById('pieChart')
+        .getContext('2d');
+
+        // Create a new Pie Chart
+        let pieChart = new Chart(ctx, {
+            // Specify the chart type
+            type: 'radar',
+            // Provide data for the chart
+            data: {
+                // Labels for each segment of the pie
+                labels: ['JavaScript',
+                    'Python',
+                    'Java',
+                    'C++',
+                    'PHP'],
+                // Datasets for the chart
+                datasets: [{
+                    data: [40, 35, 25, 17, 18],
+                    // Data points for each segment
+                    backgroundColor: ['rgba(255, 99, 132, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 205, 86, 0.8)',
+                        'rgba(153, 102, 255, 0.8)'],
+                    borderWidth: 2 // Border width for each segment
+                }]
+            },
+            // Additional options for the chart
+            options: {
+                responsive: true, //It make the chart responsive
+                //This plugin will display Title of chart
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Number of Students Enrolled Course'
+                    }
+                }
+            }
+        });
+
+        // Dynamically update the chart after every 2 seconds
+        setInterval(function () {
+            //Creating a array with 5 random value 
+            let updatedData = Array(5).fill().map(getRandomValue);
+            //Update the chart object
+            pieChart.data.datasets[0].data = updatedData;
+            //Update the chart
+            pieChart.update();
+        }, 2000);
+
+        //This function will return Random value 
+        const getRandomValue = () => {
+            return Math.floor(Math.random() * 100)
+        }
+    </script>
+</body>
+
+</html>
