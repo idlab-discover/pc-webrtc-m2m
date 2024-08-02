@@ -1,4 +1,4 @@
-# SPIRIT WebRTC
+# Many-to-many WebRTC-based point cloud video conferencing
 
 In this repository, all files related to a multi-party volumetric video-based system are made available. Three parts are considered:
 
@@ -14,7 +14,7 @@ The developed system supports multi-party point cloud delivery using a multi-des
 
 ![Architecture](architecture.png)
 
-As shown in the above illustration, our solution provides a fixed number of encoders per participant, corresponding to number of descriptions. The number of local decoders for each client scales with the number of received descriptions. The SFU unit decides on what descriptions will be forwarded to each client, taking into account the user's field of view (FoV) and position in the sence, as well as the bandwidth that is available to the client (estimated through [Google congestion control](https://datatracker.ietf.org/doc/html/draft-ietf-rmcat-gcc-02)).
+As shown in the above illustration, our solution provides a fixed number of encoders per participant, corresponding to the number of descriptions. The number of local decoders for each client scales with the number of received descriptions. The SFU unit decides on what descriptions will be forwarded to each client, taking into account the user's field of view (FoV) and position in the sence, as well as the bandwidth that is available to the client (estimated through [Google congestion control](https://datatracker.ietf.org/doc/html/draft-ietf-rmcat-gcc-02)).
 
 For a more detailed explanation of the system, we refer to our recent publications [1, 2].
 

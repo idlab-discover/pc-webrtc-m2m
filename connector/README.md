@@ -1,73 +1,118 @@
-# L4S Proxy Unity Plugin
+# Connector
 
-This repository contains the Unity plugin that can be used to communicate with the L4S WSL2 client. You can build the plugin with Visual Studio (make sure you build the release version and not the debug one) and copy the .dll file to your Unity application.
+This repository contains the Unity plugin that can be used to connect the WebRTC client to Unity. You can build the plugin with Visual Studio (make sure you build the `release` version) and copy the .dll file to your Unity application.
 
-> Note by Jack: there's now also a `Makefile` to build the plugin on Mac (tested) and Linux (untested).
+TODO: fix the examples below (outdated)
 
-If you are using WSL and you want to know what ip to use check: https://github.ugent.be/madfr/l4s-proxy-windows-testapp
+## Using the plugin in Unity
 
-## C# Examples
+First you will need to place the built .dll file in a place where Unity can find it. Ideally this is the `Plugin` folder in the `Assets` folder.
 
-### Receive Example
+### DLL import
 
-https://github.ugent.be/madfr/PluginReceiveExample
-
-### Send Example
-
-https://github.ugent.be/madfr/PluginSendExample
-
-## Changes to Old Version
-private static extern int setup_connection(string ip) => private static extern int setup_connection(string ip, UInt32 port)
-
-private static extern void set_data(byte[] points) => private static extern void set_frame_data(byte[] points)
-
-### Additions
-
-private static extern int send_frame_data(byte[] data, uint size)
-
-private static extern int send_control_data(byte[] data, uint size)
-
-## Using it in Unity
-First you will need to place the built .dll file in a place where Unity can find it. Ideally this should be a Plugin folder in the Assets folder. 
-
-Now whenever you have a class that needs to use the plugin you will need to define the functions of the plugin that you want to use like follows:
+Whenever you have a class that needs to use the functionalities of the plugin, you will need to define the functions you want to use as follows:
 
 ```csharp
-  [DllImport("L4SProxyPlugin")]
-  private static extern int setup_connection(string ip, UInt32 port);
-  [DllImport("L4SProxyPlugin")]
-  private static extern void start_listening();
-  [DllImport("L4SProxyPlugin")]
-  private static extern int next_frame();
-  [DllImport("L4SProxyPlugin")]
-  private static extern int next_control_packet();
-  [DllImport("L4SProxyPlugin")]
-  // You should technically be able to pass any type of pointer (array) to the plugin, however this has not yet been tested
-  // This means that you should be able to pass an array of structures, i.e. points, and that the array should fill itself
-  // And that you don't need to do any parsing in Unity (however, not yet tested)
-  private static extern void set_frame_data(byte[] data);
-  [DllImport("L4SProxyPlugin")]
-  private static extern void set_control_data(byte[] data);
-  [DllImport("L4SProxyPlugin")]
-  private static extern int send_frame_data(byte[] data, uint size)
-  [DllImport("L4SProxyPlugin")]
-  private static extern int send_control_data(byte[] data, uint size)
-  [DllImport("L4SProxyPlugin")]
-  private static extern void clean_up();
+  // Logging in Unity
+[DllImport("WebRTCConnector")]
+public static extern void set_logging(string log_directory, int logLevel);
+[DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+public static extern void RegisterDebugCallback(debugCallback cb);
+
+// Initialization and cleanup
+[DllImport("WebRTCConnector")]
+public static extern int initialize(string ip_send, UInt32 port_send, string ip_recv, UInt32 port_recv, UInt32 number_of_tiles, UInt32 client_id, string api_version);
+[DllImport("WebRTCConnector")]
+public static extern void clean_up();
+
+// Video data
+[DllImport("WebRTCConnector")]
+public static extern int send_tile(byte* data, UInt32 size, UInt32 tile_number, UInt32 quality);
+[DllImport("WebRTCConnector")]
+public static extern int get_tile_size(UInt32 client_id, UInt32 tile_number);
+[DllImport("WebRTCConnector")]
+public static extern void retrieve_tile(byte* buffer, UInt32 size, UInt32 client_id, UInt32 tile_number);
+
+// Audio data
+[DllImport("WebRTCConnector")]
+public static extern int send_audio(byte* data, UInt32 size);
+[DllImport("WebRTCConnector")]
+public static extern int get_audio_size(UInt32 client_id);
+[DllImport("WebRTCConnector")]
+public static extern void retrieve_audio(byte* buffer, UInt32 size, UInt32 client_id);
+
+// Control messages (e.g., quality decision-making)
+[DllImport("WebRTCConnector")]
+public static extern int send_control_packet(byte* data, UInt32 size);
 ```
 
-First you should call the setup_connection(string ip) and start_listening() whenever you want to begin listening to L4S client, this could be in the Start() function or whenever a condition is fullfilled. When closing the application it is best to clean up any resources and make sure sockets are closed, this can be done by calling the clean_up() function. Unity has a function that is called whenever the application is closed which you can use as follows:
+### Initialization
+
+In Unity, first call `RegisterDebugCallback` like this:
+
+```csharp
+[MonoPInvokeCallback(typeof(debugCallback))]
+static void OnDebugCallback(IntPtr message, int console_level, int color, int size)
+{
+    // Ptr to string
+    string debug_string;
+    try {
+        debug_string = Marshal.PtrToStringAnsi(message, size);
+    }
+    catch(ArgumentException) {
+        debug_string = $"OnDebugCallback: Marshal.PtrToStringAnsi() raised an exception (string size={size})";
+    }
+    // Add specified color
+    debug_string = $"WebRTCConnectorPinvoke: <color={((Color)color).ToString()}>{debug_string}</color>";
+    // Output the message
+    if (console_level == 0)
+    {
+        Debug.Log(debug_string);
+    } else if (console_level == 1)
+    {
+        Debug.LogWarning(debug_string);
+    } else
+    {
+        Debug.LogError(debug_string);
+    }
+}
+```
+
+This is used to allow for console log and debug messages from the connector. Then, you can use `set_logging(string log_directory, int logLevel)` to specify a log directory (if any) where logs will be stored, and a log level that indicates the degree of output:
+
+- Default: generic setup information and potential error messages
+- Verbose: additional information on the setup (limited number of messages)
+- Debug: relevant information for each incoming/outgoing packet, buffer sizes, etc.
+
+On top of this, three console levels are considered for use with [Unity](../unity):
+
+- Log
+- Warning
+- Error
+
+Now, run `initialize(string ip_send, UInt32 port_send, string ip_recv, UInt32 port_recv, UInt32 number_of_tiles, UInt32 client_id, string api_version)` to start the session. The first four arguments are related to those of the WebRTC clients, while the number of tiles and the client ID should be known in the Unity application. The last arugment is meant for versioning, makeing sure that the DLL's version and the one expected by the Unity application are the same.
+
+### Sending and receiving video and audio
+
+From now on, you can send and receive video and audio using the provided functions. You yourself are responsible for parsing the raw data returned from the plugin: you can pass any pointer to the `send_tile()` and `send_audio()` functions, as these functions simply copy data from an internal buffer to your (array) pointer. More details can be found [here](../unity).
+
+### Cleaning up
+
+ When closing the application it is best to clean up any resources and make sure sockets are closed, this can be done by calling the clean_up() function. Unity has a function that is called whenever the application is closed which you can use as follows:
 
 ```csharp
 void OnApplicationQuit()
 {
-  clean_up();
+    clean_up();
 }
 ```
 
-You yourself are responsible for parsing the raw data returned from the plugin. You can pass any pointer to the set_data() function as this function just simply copies data from an internal buffer to your (array) pointer.
+***********************************
+# TODO: update the below (outdated)
+***********************************
 
-## Editing the Plugin (only use when developing the plugin, otherwise just use the above code)
+## Editing the plugin (only use when developing the plugin, otherwise just use the above code)
+
 You should know that once a plugin is loaded by Unity it is never unloaded unless the editor (or application) is closed. So if you want to make changes to the plugin you will need to close Unity for them to take effect. There is also an advanced method which allows you to reload plugins, if you want to do this use the Native.cs file from the Unity test application and work as follows:
 
 ```csharp
@@ -119,6 +164,7 @@ void OnApplicationQuit()
 If you do it this way make sure you place the .dll in the root of your project and not in the Plugin folder.
 
 ## Updating the server PanZoom
+
 If you also want to send the 6DOF of the HMD to the server you will need to do some additional work.
 
 You will also need to define the following function:
