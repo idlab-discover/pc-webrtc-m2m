@@ -2,8 +2,6 @@
 
 This repository contains the Unity plugin that can be used to connect the WebRTC client to Unity. You can build the plugin with Visual Studio (make sure you build the `release` version) and copy the .dll file to your Unity application.
 
-TODO: fix the examples below (outdated)
-
 ## Using the plugin in Unity
 
 First you will need to place the built .dll file in a place where Unity can find it. Ideally this is the `Plugin` folder in the `Assets` folder.
