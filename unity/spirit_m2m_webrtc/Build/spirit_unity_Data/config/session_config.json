@@ -1,7 +1,7 @@
 {
     "clientID": 0,
-    "sfuAddress": "193.190.127.152:8094",
-    "peerUDPPort": 9000,
+    "sfuAddress": "127.0.0.1:8080",
+    "peerUDPPort": 8000,
     "startPositions": [
         {"x": 19.7, "y":1, "z": -0.35},
         {"x": 19.0, "y":1, "z": -1.1},

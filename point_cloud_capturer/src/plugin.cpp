@@ -1,10 +1,8 @@
-#include "draco_mdc_encoder.hpp"
-#include "draco_mdc_decoder.hpp"
-#include "encoding_queue.hpp"
+
+
 #include "pch.h"
 #include "framework.h"
 #include "log.h"
-
 #include "plugin.h"
 
 #include <chrono>
@@ -13,7 +11,10 @@
 #include <map>
 #include <string>
 #include <thread>
-
+#include "rs2_frame.hpp"
+#include "framebuffer.hpp"
+#include "rs2_capturer.hpp"
+#include "artificical_capturer.hpp"
 using namespace std;
 
 uint32_t n_tiles;
@@ -29,11 +30,12 @@ uint32_t frame_number;
 
 static string log_file = "";
 static int log_level = 0;
+static bool use_cam = false;
 mutex m_logging;
 mutex m_capturing;
 std::condition_variable cv_capture;
 bool capture_done = false;
-EncodingQueue* enc_queue;
+Capturer* capturer = nullptr;
 
 // TODO make objects
 // Realsense2 stuff
@@ -46,8 +48,6 @@ enum LOG_LEVEL : int {
 	Verbose = 1,
 	Debug = 2
 };
-
-
 
 
 /*
@@ -99,11 +99,83 @@ void set_logging(char* log_directory, int _log_level) {
 	Log::log("set_logging: Log level set to " + to_string(log_level), LogColor::Orange);
 }
 
-int initialize() {
-	custom_log("initialize: inting", Default, LogColor::Orange);
-	enc_queue = new EncodingQueue(2);
-	initialized = true;
+
+/*
+	This function is responsible for capturing incoming realsense data. It is called from within a thread, which is started by the
+	initialize function. No action is required from within Unity.
+*/
+void start_capturing() {
+	custom_log("start_capturing: Starting to capture frames from realsense2 camera", Verbose, LogColor::Yellow);
+	capture_done = false;
+	keep_working = true;
+	while (keep_working) {
+
+		auto code = capturer->capture_next_frame();
+		if (code != 0) {
+			keep_working = false;
+		}
+		// auto vertices = points.get_vertices();
+		// auto texture_coordinates = points.get_texture_coordinates();
+		 // Fill in array with raw data
+	}
+	
+	std::unique_lock lk(m_capturing);
+	capture_done = true;
+	lk.unlock();
+	cv_capture.notify_all();
 }
+
+/*
+	This function is responsible for initializing the DLL. It should be called once per session from within Unity,
+	specifiying the required IP addresses and ports, the number of tiles that will be transmitted, and the client ID.
+*/
+int initialize(uint32_t width, uint32_t height, uint32_t fps, float min_dist, float max_dist, bool _use_cam) {
+	use_cam = _use_cam;
+	try {
+		if(use_cam) {
+			capturer = new RS2Capturer(width, height, fps, min_dist, max_dist);
+		} else {
+			capturer = new ArtificalCapturer(10, fps);
+		}
+	} catch (CAPTURER_SETUP_CODE e) {
+		initialized = true;
+		return e;
+	}
+	auto code = capturer->init();
+	if(code == 0) {
+		worker = thread(start_capturing);
+	}
+	initialized = true;
+	return code;
+}
+
+PointCloud* poll_next_point_cloud() {
+	Frame* frame = capturer->poll_next_frame();
+	if(frame == nullptr) {
+		return nullptr;
+	}
+	return new PointCloud{
+		frame->get_frame_nr(),
+		frame->get_frame_size(),
+		frame->get_x_offset(),
+		frame->get_y_offset(),
+		frame->get_z_offset(),
+		frame->get_vertex_array(),
+		frame->get_color_array(),
+		frame
+	};
+}
+
+size_t get_point_cloud_size(PointCloud* frame) {
+	if(frame == nullptr) return 0;
+	return frame->n_points;
+}
+
+void free_point_cloud(PointCloud * frame) {
+	if(frame == nullptr) return;
+	delete frame;
+}
+
 /*
 	This function is used to clean up threading and reset the required variables. It is called once per session from
 	within Unity.
@@ -126,8 +198,14 @@ void clean_up() {
 		if (worker.joinable())
 			worker.join();
 		// TODO Cleanup Realsense2
-		delete enc_queue;
-		enc_queue = nullptr;
+		if(capturer != nullptr) {
+			capturer->stop();
+			std::unique_lock lk(m_capturing);
+			cv_capture.wait(lk, [] { return capture_done; });
+			delete capturer;
+			capturer = nullptr;
+		}
+		
 
 		// Reset the initialized flag
 		initialized = false;
@@ -136,61 +214,5 @@ void clean_up() {
 	else {
 		// No action is required
 		custom_log("clean_up: Already cleaned up", Verbose, LogColor::Orange);
-	}
-}
-
-uint32_t encode_pc(PointCloud* pc) {
-	// TODO
-	//  Check number of active frames in queue
-	//	If more than X = dont enter in queue and wait for place to become frame 
-	//			* Set current_waiter PointCloud* to pc
-	//			* When current_waiter is set = alert previous current_waiter that he can free himself
-	//			* Use same condition variable?
-	//					* notify_all probably
-	//			* Set current_waiter = nullptr when going into real queue
-	//  Subsample into three layers
-	//			* Make job for each and insert into pool
-	//  If job ready => callback to send to SFU
-	//  All jobs ready => remove frame from queue and signal
-
-	return enc_queue->enqueue_pc(pc);
-}
-uint32_t get_encoded_size(DracoMDCEncoder* enc) {
-	return enc != nullptr ? enc->get_encoded_size() : 0;
-}
-char* get_raw_data(DracoMDCEncoder* enc) {
-	return enc != nullptr ? enc->get_raw_data() : nullptr;
-}
-DracoMDCDecoder* decode_pc(char* data, uint32_t size) {
-	DracoMDCDecoder* dec = new DracoMDCDecoder();
-	dec->decode_pc(data, size);
-	return dec;
-}
-uint32_t get_n_points(DracoMDCDecoder* dec) {
-	return dec != nullptr ? dec->get_n_points() : 0;
-}
-
-float* get_point_array(DracoMDCDecoder* dec) {
-	return dec != nullptr ? dec->get_point_array() : nullptr;
-}
-
-uint8_t* get_color_array(DracoMDCDecoder* dec) {
-	return dec != nullptr ? dec->get_color_array() : nullptr;
-}
-
-void free_encoder(DracoMDCEncoder* enc) {
-	if(enc != nullptr) {
-		delete enc;
-	}
-}
-void free_decoder(DracoMDCDecoder* dec) {
-	if(dec != nullptr) {
-		delete dec;
-	}
-}
-
-void free_description(Description* dsc) {
-	if(dsc != nullptr) {
-		delete dsc;
 	}
 }
