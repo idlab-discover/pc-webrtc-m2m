@@ -69,9 +69,9 @@ Once the server is running, you can start the clients. For these you need to mak
 The second most important parameter is the `peerUDPPort` this parameter determines which local port will be used to communicate with the Golang WebRTC application. You will only need to change this if you are playing to run multiple clients on the same machine.
 
 Finally, the `clientID` parameter determines the position at the table as follows:
-<div style="text-align: center;">
+<p align="center">
     <img src="table.png" alt="Table" width="200"/>
-</div>
+</p>
 
 You can visit the [README](unity/spirit_m2m_webrtc/README.md) of the Unity application for more information about the other parameters.
 
