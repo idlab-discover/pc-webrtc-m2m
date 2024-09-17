@@ -75,8 +75,7 @@ Finally, the `clientID` parameter determines the position at the table as follow
 
 You can visit the [README](unity/spirit_m2m_webrtc/README.md) of the Unity application for more information about the other parameters.
 
-A client is always able to leave and reconnect to the same session, and doing so will make them reappear at place at the table.
-
+When using the SFU you also have access to a dashboard that shows what clients are connected, what clients they can see and what quality is send for each client. You can access this dashboard using the same address you used to start the SFU together with the `/dashboard` path. Additionally, if you started the SFU with the `-d` parameter (which disables GCC bandwidth estimation), you can impose bandwidth limitations by using the dashboard.
 For more information about the dashboard you can visit the [README](webrtc//README.md) of the WebRTC directory.
 ## Funding
 
