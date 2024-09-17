@@ -1,10 +1,12 @@
 # Many-to-many WebRTC-based point cloud video conferencing
 
-In this repository, all files related to a multi-party volumetric video-based system are made available. Three parts are considered:
+In this repository, all files related to a multi-party volumetric video-based system are made available. Five parts are considered:
 
 - A [Unity project](unity) written in C#, used to create sessions and render point cloud video
 - A [WebRTC framework](webrtc) written in Golang, used to interconnect peers through a selective forwarding unit (SFU)
 - A [connector plugin](connector) written in C++, used to interconnect the Unity application to the WebRTC client (currently incomptabile)
+- A [point cloud capturer plugin](point_cloud_capturer) written in C++, used by the Unity application for capturing (at the moment only realsense is supported)
+- An [encoder plugin](mdc_encoder) written in C++, used by the Unity application the captured point clouds using a MDC-based approach (uses Draco for encoding)
 
 The system is currently under development by IDLab, Ghent University - imec. This README will be updated while development continues, with detailed instructions for each of these components.
 
