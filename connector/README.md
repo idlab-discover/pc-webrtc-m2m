@@ -124,7 +124,7 @@ private MeshFilter meshFilter;
 void Awake()
 {
     if (nativeLibraryPtr != IntPtr.Zero) return;
-    nativeLibraryPtr = Native.LoadLibrary("L4SProxyPlugin");
+    nativeLibraryPtr = Native.LoadLibrary("ProxyPlugin");
     if (nativeLibraryPtr == IntPtr.Zero)
     {
         Debug.LogError("Failed to load native library");
@@ -168,7 +168,7 @@ If you also want to send the 6DOF of the HMD to the server you will need to do s
 You will also need to define the following function:
 
 ```csharp
-[DllImport("L4SProxyPlugin")]
+[DllImport("ProxyProxyPlugin")]
 private static extern int send_control_data(byte[] data, uint size);
 ```
 
