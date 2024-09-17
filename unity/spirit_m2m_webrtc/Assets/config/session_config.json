@@ -1,0 +1,21 @@
+{
+    "clientID": 0,
+    "sfuAddress": "193.190.127.152:8094",
+    "peerUDPPort": 9000,
+    "startPositions": [
+        {"x": 19.7, "y":1, "z": -0.35},
+        {"x": 19.0, "y":1, "z": -1.1},
+        {"x": 18.5, "y":1, "z": -0.35},
+        {"x": 19, "y":1, "z": 0.4}
+    ],
+    "table": {
+        "position": {"x": 19, "y":0.69, "z": -0.46},
+        "scale":{"x": 1.4, "y":0.1, "z": 1.7}
+    },
+    "camClose": 0.0,
+    "camFar": 1.0,
+    "camWidth": 848,
+    "camHeight": 480,
+    "camFPS": 15,
+    "useCam": false
+}
