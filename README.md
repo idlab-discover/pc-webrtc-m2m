@@ -42,9 +42,9 @@ Capturing is done with a [custom Dll](point_cloud_capturer/). If you plan to mak
 
 Currently the application only supports Intel Realsense cameras as a means to capture the point clouds. Make sure your system has the nessecary libraries and drivers installed. If this is not the case follow the instructions below:
 
-For Windows you can just download and run the [latest SDK](https://github.com/IntelRealSense/librealsense/releases) which automatically includes all nessacties.
+For Windows, you can just download and run the [latest SDK](https://github.com/IntelRealSense/librealsense/releases) which automatically includes all nessacties.
 
-For Linux you will to follow the commands listed on [this page](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md), to properly install the SDK without having to manually build it.
+For Linux (currently untested), you will to follow the commands listed on [this page](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md), to properly install the SDK without having to manually build it.
  
 
 ### WebRTC Connector
