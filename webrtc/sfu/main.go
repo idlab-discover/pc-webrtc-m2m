@@ -56,7 +56,7 @@ type WebsocketPacket struct {
 }
 
 type bwEstimator struct {
-	estimator *cc.BandwidthEstimator
+	estimator cc.BandwidthEstimator
 }
 
 type peerConnectionState struct {
@@ -284,6 +284,12 @@ func main() {
 				startRate := 100000000
 				if *pc.clientID < len(allowedRates) {
 					startRate = allowedRates[*pc.clientID]
+				}
+				if pc.bwEstimator != nil {
+					startRate = (*pc.bwEstimator).estimator.GetTargetBitrate() / 8
+					if *pc.clientID < len(allowedRates) {
+						allowedRates[*pc.clientID] = startRate
+					}
 				}
 				tempRate := startRate // in bytes
 				// Assign max allowed value to track
@@ -831,13 +837,13 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	if !*disableGCC {
 
 		congestionController, err := cc.NewInterceptor(func() (cc.BandwidthEstimator, error) {
-			return gcc.NewSendSideBWE(gcc.SendSideBWEInitialBitrate(1_000_000))
+			return gcc.NewSendSideBWE(gcc.SendSideBWEMinBitrate(55000*30*8), gcc.SendSideBWEInitialBitrate(55000*30*8), gcc.SendSideBWEMaxBitrate(262_744_320))
 		})
 		if err != nil {
 			panic(err)
 		}
 		congestionController.OnNewPeerConnection(func(id string, estimator cc.BandwidthEstimator) {
-			bwEstimator.estimator = &estimator
+			bwEstimator.estimator = estimator
 		})
 		interceptorRegistry.Add(congestionController)
 	}
