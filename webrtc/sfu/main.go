@@ -21,11 +21,13 @@ import (
 	"github.com/pion/webrtc/v3"
 
 	"github.com/pion/interceptor/pkg/cc"
+	"github.com/pion/interceptor/pkg/gcc"
 )
 
 var (
-	addr     = flag.String("addr", ":8080", "http service address")
-	upgrader = websocket.Upgrader{
+	addr       = flag.String("addr", ":8080", "http service address")
+	disableGCC = flag.Bool("d", false, "Disables GCC based bandwidth estimation and instead uses the value from the dashboard")
+	upgrader   = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
 	}
 	indexTemplate = &template.Template{}
@@ -53,13 +55,17 @@ type WebsocketPacket struct {
 	Message     string
 }
 
+type bwEstimator struct {
+	estimator *cc.BandwidthEstimator
+}
+
 type peerConnectionState struct {
 	peerConnection *webrtc.PeerConnection
 	websocket      *threadSafeWriter
 	ID             int
 	clientID       *int
 	nActiveTracks  *int
-	estimator      cc.BandwidthEstimator
+	bwEstimator    *bwEstimator
 	trackBitrates  map[int]*trackBitrate
 
 	camInfo *cameraInfo
@@ -821,20 +827,21 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	if err := mediaEngine.RegisterHeaderExtension(webrtc.RTPHeaderExtensionCapability{URI: sdp.TransportCCURI}, webrtc.RTPCodecTypeVideo); err != nil {
 		panic(err)
 	}
+	bwEstimator := &bwEstimator{}
+	if !*disableGCC {
 
-	/*congestionController, err := cc.NewInterceptor(func() (cc.BandwidthEstimator, error) {
-		return gcc.NewSendSideBWE(gcc.SendSideBWEInitialBitrate(1_000_000))
-	})
-	if err != nil {
-		panic(err)
-	}*/
+		congestionController, err := cc.NewInterceptor(func() (cc.BandwidthEstimator, error) {
+			return gcc.NewSendSideBWE(gcc.SendSideBWEInitialBitrate(1_000_000))
+		})
+		if err != nil {
+			panic(err)
+		}
+		congestionController.OnNewPeerConnection(func(id string, estimator cc.BandwidthEstimator) {
+			bwEstimator.estimator = &estimator
+		})
+		interceptorRegistry.Add(congestionController)
+	}
 
-	/*estimatorChan := make(chan cc.BandwidthEstimator, 1)
-	congestionController.OnNewPeerConnection(func(id string, estimator cc.BandwidthEstimator) {
-		estimatorChan <- estimator
-	})*/
-
-	//interceptorRegistry.Add(congestionController)
 	if err = webrtc.ConfigureTWCCHeaderExtensionSender(mediaEngine, interceptorRegistry); err != nil {
 		panic(err)
 	}
@@ -881,7 +888,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	// Add our new PeerConnection to global list
 	listLock.Lock()
 	start := int(0)
-	var pcState = peerConnectionState{peerConnection, webSocketConnection, pcID, &start, new(int), nil, map[int]*trackBitrate{}, &cameraInfo{}}
+	var pcState = peerConnectionState{peerConnection, webSocketConnection, pcID, &start, new(int), bwEstimator, map[int]*trackBitrate{}, &cameraInfo{}}
 	pcID += 1
 	peerConnections = append(peerConnections, pcState)
 	fmt.Printf("WebRTCSFU: webSocketHandler: peerConnection #%d\n", len(peerConnections))
