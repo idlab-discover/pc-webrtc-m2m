@@ -26,21 +26,23 @@ For a more detailed explanation of the system, we refer to our recent publicatio
 
 ## Installation
 
-For the basic use case you will only need to build and run the [SFU server](https://github.com/idlab-discover/pc-webrtc-m2m/tree/main/webrtc) and the [Unity application](https://github.com/idlab-discover/pc-webrtc-m2m/tree/main/webrtc).
+In general, you will only need to build and run the [SFU server](webrtc) and the [Unity application](unity).
 
-To build the SFU you will need to make sure you have installed the [latest version of Golang](https://go.dev/doc/install). If this is the case you will be able to simply do `go build -o SFU_server.exe ./sfu` in the [root of the WebRTC diretory](https://github.com/idlab-discover/pc-webrtc-m2m/tree/main/webrtc) to build the SFU. This process will automatically download any nessesary dependencies.
+To build the SFU you will need to make sure you have installed the [latest version of Golang](https://go.dev/doc/install). If this is the case you will be able to simply do `go build -o SFU_server.exe ./sfu` in the [root of the WebRTC directory](https://github.com/idlab-discover/pc-webrtc-m2m/tree/main/webrtc) to build the SFU. This process will automatically download any necessary  dependencies.
 
-Simelary, you are able to build the client WebRTC application if you need to make changes to it. However, you will need to make sure that the Unity application will also make use of this. To do this you will have to the replace existing [webRTC-peer-win.exe](unity/spirit_m2m_webrtc/Assets/peer/) of the Unity application.
+Similarly, you can build the WebRTC client application if you need to make changes to it. However, you will to manually change the current version used by Unity. To do this you will have to the replace existing [webRTC-peer-win.exe](unity/spirit_m2m_webrtc/Assets/peer/) of the Unity application.
 
-Building the Unity application follows a very similar flow. First you will have to open the [unity](unity) folder of this repository in Unity hub. Doing so will automatically download any dependencies. Once inside you are able to build the application like any other Unity application (the scene you want to build is called `MainScene` and is located in `Assets/Scenes`.
+Building the Unity application follows a very similar flow. First you will have to open the [unity](unity) folder of this repository in Unity hub. Doing so will automatically download any dependencies. Once inside you are able to build the application like any other Unity application, the scene you want to build is called `MainScene` and is located in `Assets/Scenes`.
 
-> :exclamation: At the moment you will have to manually copy the `config` and `peer` directories from the `Assets` directory to the [Unity application datapath](https://docs.unity3d.com/ScriptReference/Application-dataPath.html) (In Windows this is: `spirit_unity_Data`).
+> :exclamation: When building the application, you will have to manually copy the `config` and `peer` directories from the `Assets` directory to the [Unity application datapath](https://docs.unity3d.com/ScriptReference/Application-dataPath.html) (In Windows this is: `spirit_unity_Data`).
 
 ### Realsense
 
 Capturing is done with a [custom Dll](point_cloud_capturer/). If you plan to make changes to it, you will have to manually copy it into the `Plugins` directory after building it.
 
-Currently the application only supports Intel Realsense cameras as a means to capture the point clouds. Make sure your system has the nessecary libraries and drivers installed. If this is not the case follow the instructions below:
+> :exclamation: Unity is unable to unload Dlls once they have been used, so if you plan to update a Dll you will also have to restart the editor.
+
+Currently the application only supports Intel Realsense cameras as a means to capture the point clouds. Make sure your system has the necessary libraries and drivers installed. If this is not the case follow the instructions below:
 
 For Windows, you can just download and run the [latest SDK](https://github.com/IntelRealSense/librealsense/releases) which automatically includes all nessacties.
 
@@ -48,10 +50,9 @@ For Linux (currently untested), you will to follow the commands listed on [this 
  
 
 ### WebRTC Connector
-The Unity application uses a Dll to connect to the Golang WebRTC application via sockets. Normally you should never have to build this yourself as the repository contains the latest version.
+The Unity application uses a Dll to connect to the Golang WebRTC application via sockets. Normally you should never have to build this yourself as this repository contains the latest version.
 
-However, if you do plan 
-
+However, if you do plan to make changes to it, you will have to manually copy it into the `Plugins` directory after building it.
 
 For more information about the Dll you can visit the [README](connector/README.md) of the WebRTC Connector.
 
@@ -62,9 +63,9 @@ The first step you need to is make sure that an instance of the SFU server is ru
 ```
 `./SFU-Server --addr 0.0.0.0:8000 -t 3`
 ```
-You are allowed to use any valid address and port for the value of `--addr`. When you use `0.0.0.0` it will automatically listen on every interface. The value of `t` is the maximum number of video tracks a client is going to transmit, i.e., if you have three base descriptions this value will be three.
+You are allowed to use any valid address and port for the value of `--addr`. When you use `0.0.0.0` it will automatically listen on every interface. The value of `t` is the maximum number of video tracks a client is going to transmit, i.e., if you have three base descriptions this value will be three. In general, you should just use three as this is the value used by the [MDC-based encoder](mdc_encoder).
 
-Once the server is running, you can start the clients. For these you need to make sure that their configuration file has the correct parameters, and that its placed in a `config` directory in the [Unity application datapath](https://docs.unity3d.com/ScriptReference/Application-dataPath.html). You can find an example config file [here](unity/spirit_m2m_webrtc/Assets/config/session_config.json). The most important parameter you will have to change is the `sfuAddress`, which needs to be changed to the address of your SFU server (note: you will have to change this even if you are using `0.0.0.0` for the server). 
+The Unity clients can be started once the server is fully running. For these you need to make sure that their configuration file has the correct parameters, and that it's placed in a `config` directory in the [Unity application datapath](https://docs.unity3d.com/ScriptReference/Application-dataPath.html). You can find an example config file [here](unity/spirit_m2m_webrtc/Assets/config/session_config.json). The most important parameter you will have to change is the `sfuAddress`, which needs to be changed to the address of your SFU server (note: you will have to change this even if you are using `0.0.0.0` for the server). 
 
 The second most important parameter is the `peerUDPPort` this parameter determines which local port will be used to communicate with the Golang WebRTC application. You will only need to change this if you are playing to run multiple clients on the same machine.
 
@@ -75,8 +76,16 @@ Finally, the `clientID` parameter determines the position at the table as follow
 
 You can visit the [README](unity/spirit_m2m_webrtc/README.md) of the Unity application for more information about the other parameters.
 
-When using the SFU you also have access to a dashboard that shows what clients are connected, what clients they can see and what quality is send for each client. You can access this dashboard using the same address you used to start the SFU together with the `/dashboard` path. Additionally, if you started the SFU with the `-d` parameter (which disables GCC bandwidth estimation), you can impose bandwidth limitations by using the dashboard.
+The arrow keys can be used to move the camera when not using any headset. If you are using a headset, make sure that headset is fully connected to your pc (e.g., for Meta Quest, make sure you are fully linked before starting the application).
+
+By using the SFU you also have access to a dashboard that shows which clients are connected, what clients they can see and what quality is send for each client. You can access this dashboard using the same address you used to start the SFU together with the `/dashboard` path. Additionally, if you started the SFU with the `-d` parameter (which disables GCC bandwidth estimation), you can impose bandwidth limitations by using the dashboard.
 For more information about the dashboard you can visit the [README](webrtc//README.md) of the WebRTC directory.
+
+## Supported HMDs
+In general every OpenXR compatible headset will work. However, below is a list of all headsets that have been tested and verified:
+#### Tested
+- Meta Quest 2
+
 ## Funding
 
 This work is funded by the European Union [SPIRIT project](https://www.spirit-project.eu), grant agreement 101070672.
