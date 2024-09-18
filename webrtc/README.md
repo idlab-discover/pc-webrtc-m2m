@@ -37,5 +37,5 @@ TODO add dashboard screenshot
 ## Building
 Simply use: `go build -o sfu.exe ./sfu` (similar for the peer) to build the application.
 
-## Dependancies
+## Dependencies
 You do not need to worry about any dependancies as Golang will automatically download them for you.
