@@ -33,7 +33,8 @@ Below are the possible parameters you can use to configure the SFU:
 ##### Server dashboard
 You can also access a dashboard in your browser by using the same address you used for the SFU, followed by `/dashboard`. This dashboard gives you access to certain statistics of each user such as: what clients can the user see, what quality is send to this user, what bitrate is send to this user. If you disable GCC, you will also get access to a bandwidth limiter that restricts the maximum bandwidth that can be assigned by the bitrate allocation algorithm.
 
-TODO add dashboard screenshot
+![Dashboard](dashboard.png)
+
 ## Building
 Simply use: `go build -o sfu.exe ./sfu` (similar for the peer) to build the application.
 
