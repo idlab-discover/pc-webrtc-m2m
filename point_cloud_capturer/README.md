@@ -39,5 +39,5 @@ cleanup()
 ## Tested operating systems
 - Windows 10/11
 
-## Dependancies
+## Dependencies
 - [Intel Realsense SDK 2](https://www.intelrealsense.com/sdk-2/)
