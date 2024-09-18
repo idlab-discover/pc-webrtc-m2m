@@ -91,5 +91,5 @@ cleanup()
 ## Tested operating systems
 - Windows 10/11
 
-## Dependancies
+## Dependencies
 - [Draco](https://github.com/google/draco)
