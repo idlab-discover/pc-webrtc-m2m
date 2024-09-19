@@ -7,11 +7,13 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
 	"text/template"
 	"time"
+	"unsafe"
 
 	"golang.org/x/exp/slices"
 
@@ -570,10 +572,18 @@ func removeTrack(t *webrtc.TrackLocalStaticRTP) {
 func addTrackforPeer(pcState peerConnectionState, trackID string) {
 	trackLocal := trackLocals[trackID]
 	fmt.Printf("WebRTCSFU: addTrackforPeer: t.ID %s\n", trackLocal.ID())
-	if _, err := pcState.peerConnection.AddTrack(trackLocal); err != nil {
+	rtpSender, err := pcState.peerConnection.AddTrack(trackLocal)
+	if err != nil {
 		panic(err)
 	}
-
+	go func() {
+		rtcpBuf := make([]byte, 1500)
+		for {
+			if _, _, err := rtpSender.Read(rtcpBuf); err != nil {
+				panic(err)
+			}
+		}
+	}()
 	v := undesireableTracks[pcState.ID]
 	for i, t := range v {
 		if t == trackID {
@@ -642,9 +652,18 @@ func signalPeerConnections() {
 			for trackID := range trackLocals {
 				if _, ok := existingSenders[trackID]; !ok {
 					if !slices.Contains(undesireableTracks[peerConnections[i].ID], trackID) {
-						if _, err := peerConnections[i].peerConnection.AddTrack(trackLocals[trackID]); err != nil {
+						rtpSender, err := peerConnections[i].peerConnection.AddTrack(trackLocals[trackID])
+						if err != nil {
 							return true
 						}
+						go func() {
+							rtcpBuf := make([]byte, 1500)
+							for {
+								if _, _, err := rtpSender.Read(rtcpBuf); err != nil {
+									return
+								}
+							}
+						}()
 					}
 				}
 			}
@@ -833,6 +852,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	if err := mediaEngine.RegisterHeaderExtension(webrtc.RTPHeaderExtensionCapability{URI: sdp.TransportCCURI}, webrtc.RTPCodecTypeVideo); err != nil {
 		panic(err)
 	}
+
 	bwEstimator := &bwEstimator{}
 	if !*disableGCC {
 
@@ -843,6 +863,22 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 		congestionController.OnNewPeerConnection(func(id string, estimator cc.BandwidthEstimator) {
+			pointerVal := reflect.ValueOf(estimator)
+			val := reflect.Indirect(pointerVal)
+
+			lossControllerFieldPtr := val.FieldByName("lossController")
+			lossControllerField := reflect.Indirect((lossControllerFieldPtr))
+
+			minBitrateField := lossControllerField.FieldByName("minBitrate")
+			ptrToMin := unsafe.Pointer(minBitrateField.UnsafeAddr())
+			actualMinPtr := (*int)(ptrToMin)
+			*actualMinPtr = 55000 * 30 * 8
+
+			maxBitrateField := lossControllerField.FieldByName("maxBitrate")
+			ptrToMax := unsafe.Pointer(maxBitrateField.UnsafeAddr())
+			actualMaxPtr := (*int)(ptrToMax)
+			*actualMaxPtr = 262_744_320
+
 			bwEstimator.estimator = estimator
 		})
 		interceptorRegistry.Add(congestionController)

@@ -119,9 +119,9 @@ func main() {
 	//})
 
 	//i.Add(congestionController)
-	//if err = webrtc.ConfigureTWCCHeaderExtensionSender(m, i); err != nil {
-	//	panic(err)
-	//}
+	if err := webrtc.ConfigureTWCCHeaderExtensionSender(m, i); err != nil {
+		panic(err)
+	}
 
 	responder, _ := nack.NewResponderInterceptor()
 	i.Add(responder)
