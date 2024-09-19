@@ -34,10 +34,10 @@ set_target_properties(spirit_idlab_draco PROPERTIES
 # Set the CMake module path to find the custom FindREALSENSE2.cmake
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeFiles")
 
-# Find the REALSENSE2 library
+# Find the DRACO library
 find_package(DRACO REQUIRED)
 message(${DRACO_INCLUDE_DIRS})
-# Link the REALSENSE2 library to the DLL
+# Link the DRACO library to the DLL
 target_link_libraries(spirit_idlab_draco ${DRACO_LIBRARIES})
 
 # Include REALSENSE2 directories
