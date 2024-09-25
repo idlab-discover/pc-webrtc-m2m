@@ -160,30 +160,3 @@ void OnApplicationQuit()
 ```
 
 If you do it this way make sure you place the .dll in the root of your project and not in the Plugin folder.
-
-## Updating the server PanZoom
-
-If you also want to send the 6DOF of the HMD to the server you will need to do some additional work.
-
-You will also need to define the following function:
-
-```csharp
-[DllImport("ProxyProxyPlugin")]
-private static extern int send_control_data(byte[] data, uint size);
-```
-
-Then you are able to use it by doing the following:
-
-```csharp
-byte[] data = new byte[28];
-Array.Copy(BitConverter.GetBytes(x), 0, data, 0, 4);
-Array.Copy(BitConverter.GetBytes(y), 0, data, 4, 4);
-Array.Copy(BitConverter.GetBytes(rotation), 0, data, 8, 4);
-Array.Copy(BitConverter.GetBytes(z), 0, data, 12, 4);
-// Position
-Array.Copy(BitConverter.GetBytes(x_pos), 0, data, 16, 4);
-Array.Copy(BitConverter.GetBytes(y_pos), 0, data, 20, 4);
-Array.Copy(BitConverter.GetBytes(z_pos), 0, data, 24, 4);
-send_data_to_server(data, 28);
-```
-However you can also implement this you own way as the plugin just expects a data structure and memcopies this to a buffer anyway.
