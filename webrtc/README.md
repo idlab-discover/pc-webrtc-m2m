@@ -39,4 +39,4 @@ You can also access a dashboard in your browser by using the same address you us
 Simply use: `go build -o sfu.exe ./sfu` (similar for the peer) to build the application.
 
 ## Dependencies
-You do not need to worry about any dependancies as Golang will automatically download them for you.
+You do not need to worry about any dependencies as Golang will automatically download them for you.
