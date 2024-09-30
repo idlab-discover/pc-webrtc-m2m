@@ -67,7 +67,7 @@ You are allowed to use any valid address and port for the value of `--addr`. Whe
 
 The Unity clients can be started once the server is fully running. For these you need to make sure that their configuration file has the correct parameters, and that it's placed in a `config` directory in the [Unity application datapath](https://docs.unity3d.com/ScriptReference/Application-dataPath.html). You can find an example config file [here](unity/spirit_m2m_webrtc/Assets/config/session_config.json). The most important parameter you will have to change is the `sfuAddress`, which needs to be changed to the address of your SFU server (note: you will have to change this even if you are using `0.0.0.0` for the server). 
 
-The second most important parameter is the `peerUDPPort` this parameter determines which local port will be used to communicate with the Golang WebRTC application. You will only need to change this if you are playing to run multiple clients on the same machine.
+The second most important parameter is the `peerUDPPort` this parameter determines which local port will be used to communicate with the Golang WebRTC application. You will only need to change this if you are planning to run multiple clients on the same machine.
 
 Finally, the `clientID` parameter determines the position at the table as follows:
 <p align="center">
