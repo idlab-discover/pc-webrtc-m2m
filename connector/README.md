@@ -104,11 +104,6 @@ void OnApplicationQuit()
     clean_up();
 }
 ```
-
-***********************************
-# TODO: update the below (outdated)
-***********************************
-
 ## Editing the plugin (only use when developing the plugin, otherwise just use the above code)
 
 You should know that once a plugin is loaded by Unity it is never unloaded unless the editor (or application) is closed. So if you want to make changes to the plugin you will need to close Unity for them to take effect. There is also an advanced method which allows you to reload plugins, if you want to do this use the Native.cs file from the Unity test application and work as follows:
