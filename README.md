@@ -58,7 +58,7 @@ For more information about the Dll you can visit the [README](connector/README.m
 
 ## Usage
 
-The first step you need to is make sure that an instance of the SFU server is running. Assuming that you have build this you are able to start with the following command: 
+The first step is to make sure that an instance of the SFU server is running. Assuming that you have build this you are able to start with the following command: 
 
 ```
 `./SFU-Server --addr 0.0.0.0:8000 -t 3`
