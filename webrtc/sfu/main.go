@@ -29,6 +29,7 @@ import (
 var (
 	addr       = flag.String("addr", ":8080", "http service address")
 	disableGCC = flag.Bool("d", false, "Disables GCC based bandwidth estimation and instead uses the value from the dashboard")
+	disableABR = flag.Bool("b", false, "Disables adaptive bitrate allocation algorithm")
 	upgrader   = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
 	}
@@ -71,6 +72,8 @@ type peerConnectionState struct {
 	trackBitrates  map[int]*trackBitrate
 
 	camInfo *cameraInfo
+
+	pendingCandidatesString []string
 }
 
 type trackBitrate struct {
@@ -136,6 +139,9 @@ func main() {
 	//quit := make(chan struct{})
 	go func() {
 		// Do bitrate calculationsfor {
+		if *disableABR {
+			return
+		}
 		for _ = range time.Tick(1 * time.Second) {
 			fmt.Printf("WebRTCSFU: rateCalc: Starting rate calculation for tracks\n")
 			for i := 0; i < len(allowedRates); i++ {
@@ -930,7 +936,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	// Add our new PeerConnection to global list
 	listLock.Lock()
 	start := int(0)
-	var pcState = peerConnectionState{peerConnection, webSocketConnection, pcID, &start, new(int), bwEstimator, map[int]*trackBitrate{}, &cameraInfo{}}
+	var pcState = peerConnectionState{peerConnection, webSocketConnection, pcID, &start, new(int), bwEstimator, map[int]*trackBitrate{}, &cameraInfo{}, make([]string, 0)}
 	pcID += 1
 	peerConnections = append(peerConnections, pcState)
 	fmt.Printf("WebRTCSFU: webSocketHandler: peerConnection #%d\n", len(peerConnections))
@@ -988,15 +994,17 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 
 		idTokens := strings.Split(t.ID(), "_")
 		tileNr := 99
-		if t.Kind() == webrtc.RTPCodecTypeVideo {
-			tileNr, _ = strconv.Atoi(idTokens[2])
-			listLock.Lock()
-			pcState.trackBitrates[tileNr] = &trackBitrate{}
-			pcState.trackBitrates[tileNr].trackID = t.ID()
-			pcState.trackBitrates[tileNr].trackNR = tileNr
-			pcState.trackBitrates[tileNr].counters = make([]uint32, 20)
-			*pcState.nActiveTracks++
-			listLock.Unlock()
+		if !*disableABR {
+			if t.Kind() == webrtc.RTPCodecTypeVideo {
+				tileNr, _ = strconv.Atoi(idTokens[2])
+				listLock.Lock()
+				pcState.trackBitrates[tileNr] = &trackBitrate{}
+				pcState.trackBitrates[tileNr].trackID = t.ID()
+				pcState.trackBitrates[tileNr].trackNR = tileNr
+				pcState.trackBitrates[tileNr].counters = make([]uint32, 20)
+				*pcState.nActiveTracks++
+				listLock.Unlock()
+			}
 		}
 
 		buf := make([]byte, 1500)
@@ -1009,20 +1017,21 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 				fmt.Printf("WebRTCSFU: OnTrack: error during read: %s\n", err)
 				break
 			}
+			if !*disableABR {
+				nextTime := time.Now().UnixNano() //
+				nsDiff := nextTime - startTime
+				msBucket := nsDiff / int64(50*time.Millisecond)
 
-			nextTime := time.Now().UnixNano() //
-			nsDiff := nextTime - startTime
-			msBucket := nsDiff / int64(50*time.Millisecond)
-
-			if msBucket != int64(prevBucket) {
-				pcState.trackBitrates[tileNr].currentCounterCompleted = pcState.trackBitrates[tileNr].currentCounter
-				pcState.trackBitrates[tileNr].counters[pcState.trackBitrates[tileNr].currentCounter] = pcState.trackBitrates[tileNr].tempCounter
-				pcState.trackBitrates[tileNr].currentCounter = (pcState.trackBitrates[tileNr].currentCounter + 1) % 20
-				pcState.trackBitrates[tileNr].currentCounterMax++
-				pcState.trackBitrates[tileNr].tempCounter = 0
+				if msBucket != int64(prevBucket) {
+					pcState.trackBitrates[tileNr].currentCounterCompleted = pcState.trackBitrates[tileNr].currentCounter
+					pcState.trackBitrates[tileNr].counters[pcState.trackBitrates[tileNr].currentCounter] = pcState.trackBitrates[tileNr].tempCounter
+					pcState.trackBitrates[tileNr].currentCounter = (pcState.trackBitrates[tileNr].currentCounter + 1) % 20
+					pcState.trackBitrates[tileNr].currentCounterMax++
+					pcState.trackBitrates[tileNr].tempCounter = 0
+				}
+				pcState.trackBitrates[tileNr].tempCounter += uint32(i)
+				prevBucket = msBucket
 			}
-			pcState.trackBitrates[tileNr].tempCounter += uint32(i)
-			prevBucket = msBucket
 			if _, err = trackLocal.Write(buf[:i]); err != nil {
 				fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)
 				break
@@ -1056,11 +1065,21 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 			if err := peerConnection.SetRemoteDescription(answer); err != nil {
 				panic(err)
 			}
+
+			for _, c := range pcState.pendingCandidatesString {
+				if candidateErr := peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: c}); candidateErr != nil {
+					panic(candidateErr)
+				}
+			}
 		// candidate
 		case 4:
-			candidate := webrtc.ICECandidateInit{Candidate: message}
-			if err := peerConnection.AddICECandidate(candidate); err != nil {
-				panic(err)
+			desc := peerConnection.RemoteDescription()
+			if desc == nil {
+				pcState.pendingCandidatesString = append(pcState.pendingCandidatesString, message)
+			} else {
+				if candidateErr := peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: message}); candidateErr != nil {
+					panic(candidateErr)
+				}
 			}
 		// remove track
 		case 5:

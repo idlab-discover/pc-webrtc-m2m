@@ -1,0 +1,17 @@
+{
+    "fps": 30,
+    "descriptions": [
+        {
+            "delay": 0,
+            "bitrate": 12500000
+        },
+        {
+            "delay": 0,
+            "bitrate": 12500000
+        },
+        {
+            "delay": 0,
+            "bitrate": 12500000
+        }
+    ]
+}
