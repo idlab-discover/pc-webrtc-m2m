@@ -2,7 +2,7 @@
 
 In this repository, all files related to a multi-party volumetric video-based system are made available. Five parts are considered:
 
-- A [Unity project](unity) written in C#, used to create sessions and render point cloud video
+- A [Unity project](unity/spirit_m2m_webrtc) written in C#, used to create sessions and render point cloud video
 - A [WebRTC framework](webrtc) written in Golang, used to interconnect peers through a selective forwarding unit (SFU)
 - A [connector plugin](connector) written in C++, used to interconnect the Unity application to the WebRTC client
 - A [point cloud capturer plugin](point_cloud_capturer) written in C++, used by the Unity application for capturing (at the moment only realsense is supported)
@@ -26,13 +26,13 @@ For a more detailed explanation of the system, we refer to our recent publicatio
 
 ## Installation
 
-In general, you will only need to build and run the [SFU server](webrtc) and the [Unity application](unity).
+In general, you will only need to build and run the [SFU server](webrtc) and the [Unity application](unity/spirit_m2m_webrtc).
 
 To build the SFU you will need to make sure you have installed the [latest version of Golang](https://go.dev/doc/install). If this is the case you will be able to simply do `go build -o SFU_server.exe ./sfu` in the [root of the WebRTC directory](https://github.com/idlab-discover/pc-webrtc-m2m/tree/main/webrtc) to build the SFU. This process will automatically download any necessary  dependencies.
 
 Similarly, you can build the WebRTC client application if you need to make changes to it. However, you will to manually change the current version used by Unity. To do this you will have to the replace existing [webRTC-peer-win.exe](unity/spirit_m2m_webrtc/Assets/peer/) of the Unity application.
 
-Building the Unity application follows a very similar flow. First you will have to open the [unity](unity) folder of this repository in Unity hub. Doing so will automatically download any dependencies. Once inside you are able to build the application like any other Unity application, the scene you want to build is called `MainScene` and is located in `Assets/Scenes`.
+Building the Unity application follows a very similar flow. First you will have to open the [unity](unity/spirit_m2m_webrtc) folder of this repository in Unity hub. Doing so will automatically download any dependencies. Once inside you are able to build the application like any other Unity application, the scene you want to build is called `MainScene` and is located in `Assets/Scenes`.
 
 > :exclamation: When building the application, you will have to manually copy the `config` and `peer` directories from the `Assets` directory to the [Unity application datapath](https://docs.unity3d.com/ScriptReference/Application-dataPath.html) (In Windows this is: `spirit_unity_Data`).
 
@@ -79,7 +79,7 @@ You can visit the [README](unity/spirit_m2m_webrtc/README.md) of the Unity appli
 The arrow keys can be used to move the camera when not using any headset. If you are using a headset, make sure that headset is fully connected to your pc (e.g., for Meta Quest, make sure you are fully linked before starting the application).
 
 By using the SFU you also have access to a dashboard that shows which clients are connected, what clients they can see and what quality is send for each client. You can access this dashboard using the same address you used to start the SFU together with the `/dashboard` path. Additionally, if you started the SFU with the `-d` parameter (which disables GCC bandwidth estimation), you can impose bandwidth limitations by using the dashboard.
-For more information about the dashboard you can visit the [README](webrtc//README.md) of the WebRTC directory.
+For more information about the dashboard you can visit the [README](webrtc/README.md) of the WebRTC directory.
 
 ## Supported HMDs
 In general every OpenXR compatible headset will work. However, below is a list of all headsets that have been tested and verified:
