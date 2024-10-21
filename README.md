@@ -86,6 +86,20 @@ In general every OpenXR compatible headset will work. However, below is a list o
 #### Tested
 - Meta Quest 2
 
+## Potential Problems
+If you are noticing packet loss (i.e. frames not being delivered), there is a high chance that this is related to your machine not being powerful enough to process the network buffer in time. You can solve this by increasing the default buffer as follows:
+
+### Linux 
+```
+sudo sysctl -w net.core.rmem_max=<new_value>
+sudo sysctl -w net.core.wmem_max=<new_value>
+sudo sysctl -w net.core.rmem_default=<new_value>
+sudo sysctl -w net.core.wmem_default=<new_value>
+```
+With `<new_value>` being a pretty high value such as `52428800`. If you want these changes to be permanent you will also have to add them to `/etc/sysctl.conf`.
+### Windows
+Open the Registry and go to `Computer\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\AFD\Parameters` Once you are here you will need to add `DefaultReceiveWindow` and `DefaultSendWindow` as `DWORD` with a high value (e.g. `2097152` for receive and `64512` for send).
+
 ## Funding
 
 This work is funded by the European Union [SPIRIT project](https://www.spirit-project.eu), grant agreement 101070672.
