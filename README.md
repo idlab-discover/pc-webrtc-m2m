@@ -32,7 +32,7 @@ To build the SFU you will need to make sure you have installed the [latest versi
 
 Similarly, you can build the WebRTC client application if you need to make changes to it. However, you will to manually change the current version used by Unity. To do this you will have to the replace existing [webRTC-peer-win.exe](unity/spirit_m2m_webrtc/Assets/peer/) of the Unity application.
 
-Building the Unity application follows a very similar flow. First you will have to open the [unity](unity/spirit_m2m_webrtc) folder of this repository in Unity hub. Doing so will automatically download any dependencies. Once inside you are able to build the application like any other Unity application, the scene you want to build is called `MainScene` and is located in `Assets/Scenes`.
+Building the Unity application follows a very similar flow. First you will have to open the [Unity](unity/spirit_m2m_webrtc) folder of this repository in Unity hub. Doing so will automatically download any dependencies. Once inside you are able to build the application like any other Unity application, the scene you want to build is called `MainScene` and is located in `Assets/Scenes`.
 
 > :exclamation: When building the application, you will have to manually copy the `config` and `peer` directories from the `Assets` directory to the [Unity application datapath](https://docs.unity3d.com/ScriptReference/Application-dataPath.html) (In Windows this is: `spirit_unity_Data`).
 
