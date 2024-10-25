@@ -1093,6 +1093,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func updateCamInfoforPeer(pcState peerConnectionState, data string) {
+	data = strings.ReplaceAll(data, ",", ".")
 	tokens := strings.Split(data, ";")
 	if len(tokens) == 36 {
 		pcState.camInfo.init = true
