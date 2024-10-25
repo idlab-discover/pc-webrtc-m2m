@@ -44,4 +44,4 @@ However, you do need the two Dlls responsible for [capturing](../capturer) and [
 ## Supported HMDs
 In general every OpenXR compatible headset will work. However, below is a list of all headsets that have been tested and verified:
 #### Tested
-- Meta Quest 2
+- Meta Quest 2 ([guide](https://www.meta.com/en-gb/help/quest/articles/headsets-and-accessories/oculus-link/connect-with-air-link/))
