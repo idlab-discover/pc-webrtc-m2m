@@ -293,7 +293,7 @@ func main() {
 				if *pc.clientID < len(allowedRates) {
 					startRate = allowedRates[*pc.clientID]
 				}
-				if pc.bwEstimator != nil {
+				if pc.bwEstimator.estimator != nil {
 					startRate = (*pc.bwEstimator).estimator.GetTargetBitrate() / 8
 					if *pc.clientID < len(allowedRates) {
 						allowedRates[*pc.clientID] = startRate
