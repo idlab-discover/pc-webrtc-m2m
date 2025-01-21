@@ -16,6 +16,13 @@ This repository uses CMake to build the library. For Windows you can use the fol
  ```
 After this you will to open the generated solution, change the build type to `Release` and press `Ctrl+Shift+B` to build the  Dll.
 
+If you do not have `Draco` library installed you will also need to do the following steps:
+
+* Clone the [Draco repository](https://github.com/google/draco) 
+* Create the CMake files (e.g. `cmake -G "Visual Studio 17 2022" -A x64 -S . -B "x64" -DBUILD_SHARED_LIBS=ON -DCMAKE_CONFIGURATION_TYPES=Release`)
+* Make sure to run and build the `INSTALL` project
+* If it does not install properly you might have to run `cmake --install . --config Release` (as administrator) in the build directory as well 
+
 ## Usage
 
 ##### Creates the encoding queue:
