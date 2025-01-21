@@ -37,6 +37,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeFiles")
 # Find the DRACO library
 find_package(DRACO REQUIRED)
 message(${DRACO_INCLUDE_DIRS})
+message(${DRACO_LIBRARIES})
 # Link the DRACO library to the DLL
 target_link_libraries(spirit_idlab_draco ${DRACO_LIBRARIES})
 

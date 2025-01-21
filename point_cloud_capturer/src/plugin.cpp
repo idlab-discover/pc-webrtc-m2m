@@ -155,11 +155,9 @@ PointCloud* poll_next_point_cloud() {
 		return nullptr;
 	}
 	return new PointCloud{
+		frame->get_timestamp(),
 		frame->get_frame_nr(),
 		frame->get_frame_size(),
-		frame->get_x_offset(),
-		frame->get_y_offset(),
-		frame->get_z_offset(),
 		frame->get_vertex_array(),
 		frame->get_color_array(),
 		frame

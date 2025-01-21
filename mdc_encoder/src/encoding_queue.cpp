@@ -41,7 +41,7 @@ void EncodingQueue::complete_encoding(Description* dsc)
     }
     lk.unlock();
     // TODO do description finished callback
-    description_done_callback_instance(dsc, dsc->enc->get_raw_data(), dsc->n_points_in_total, dsc->enc->get_encoded_size(), dsc->frame_nr, dsc->description_nr);
+    description_done_callback_instance(dsc, dsc->enc->get_raw_data(), dsc->n_points_in_total, dsc->enc->get_encoded_size(), dsc->frame_nr, dsc->description_nr, dsc->timestamp);
 }
 
 void EncodingQueue::internal_enqueue_pc(PointCloud *pc)

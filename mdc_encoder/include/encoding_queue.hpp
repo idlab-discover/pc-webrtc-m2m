@@ -11,7 +11,7 @@
 #include "threadpool.h"
 #include "framework.h"
 extern "C" {
-    typedef void(*DescriptionDoneCallback)(Description* dsc, char* raw_data_ptr, uint32_t n_points_in_total, uint32_t dsc_size, uint32_t frame_nr, uint32_t dsc_nr);
+    typedef void(*DescriptionDoneCallback)(Description* dsc, char* raw_data_ptr, uint32_t n_points_in_total, uint32_t dsc_size, uint32_t frame_nr, uint32_t dsc_nr, uint64_t timestamp);
     static DescriptionDoneCallback description_done_callback_instance = nullptr;
     typedef void(*FreePointCloudCallback)(PointCloud* pc);
     static FreePointCloudCallback free_pc_callback_instance = nullptr;

@@ -3,6 +3,7 @@
 #include "point_cloud.h"
 #include "draco_mdc_encoder.hpp"
 struct Description {
+    uint64_t timestamp;
     unsigned int frame_nr;
     unsigned int description_nr;
     unsigned int n_points_in_total;
