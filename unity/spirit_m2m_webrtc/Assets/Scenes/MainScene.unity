@@ -1298,8 +1298,8 @@ MonoBehaviour:
   - {fileID: 1595278737}
   - {fileID: 2079401778}
   - {fileID: 1502180560}
-  PCSelfPrefab: {fileID: 5525593982517720611, guid: ac694f47884081949a584b48edabb7eb, type: 3}
-  PCReceiverPrefab: {fileID: 3474630412075943439, guid: cdb69d015e5e92e4fab9fef23cc30ee2, type: 3}
+  PCSelfPrefab: {fileID: 5525593982517720611, guid: 78cd6f8a7ab631a439adfd7bfdc53c4a, type: 3}
+  PCReceiverPrefab: {fileID: 3474630412075943439, guid: 56ad909b63784454b927296705a7b8c0, type: 3}
   Table: {fileID: 393058888}
 --- !u!4 &1343483266
 Transform:

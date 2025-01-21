@@ -303,7 +303,7 @@ func main() {
 			go func() {
 				// Potentially combine audio frames into single packet?
 				// Would add small delay but might be more optimal?
-				// Atm audio frame is around 126 bytes so WebRTC overhead might be too much
+				// Atm audio frame is around 126 (compressed) bytes so WebRTC overhead might be too much
 				if *useProxyInput {
 					for {
 						audioTrack.WriteAudioFrame(proxyConn.NextAudioFrame())

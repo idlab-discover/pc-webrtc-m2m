@@ -13,24 +13,28 @@ using UnityEngine.Rendering;
 
 public class PCReceiver : MonoBehaviour
 {
+    public AudioPlayback AudioPlaybackPrefab;
+    public AudioPlaybackParams AudioParams;
     public uint ClientID;
     public int NDescriptions;
+    public bool useAudio;
     private List<bool> activeDescriptions = new List<bool> { false, false, false };
     private List<System.Threading.Thread> workerThreads = new List<System.Threading.Thread>();
-  //  private List<ConcurrentQueue<DecodedPointCloudData>> queues = new List<ConcurrentQueue<DecodedPointCloudData>>();
+    private System.Threading.Thread audioThread;
+    //  private List<ConcurrentQueue<DecodedPointCloudData>> queues = new List<ConcurrentQueue<DecodedPointCloudData>>();
 
     private Dictionary<int, DecodedPointCloudData> inProgessFrames;
     private ConcurrentQueue<DecodedPointCloudData> queue;
     private static Mutex mut = new Mutex();
     private int lastCompletedFrameNr = -1;
-
+    
     private bool keep_working = true;
 
     // ####################### Unity GameObjects #########################
     public List<GameObject> PCRenderers;
     Mesh currentMesh;
     private List<MeshFilter> meshFilters;
-
+    private AudioPlayback audioPlayback;
     // Start is called before the first frame update
     void Start()
     {
@@ -55,6 +59,15 @@ public class PCReceiver : MonoBehaviour
                 pollDescription((uint)descriptionID);
             }));
             workerThreads[i].Start();
+        }
+        if(useAudio)
+        {
+            audioPlayback = Instantiate(AudioPlaybackPrefab, transform);
+            audioPlayback.Init(48000, AudioParams);
+            audioThread = new System.Threading.Thread(() =>
+            {
+                pollAudio(ClientID, audioPlayback);
+            });
         }
     }
 
@@ -97,6 +110,10 @@ public class PCReceiver : MonoBehaviour
                     }
                    
                 }
+                if(useAudio)
+                {
+                    audioPlayback.SetTimestampLatestPC(dec.Timestamp);
+                }
                 
             }
         }
@@ -132,13 +149,14 @@ public class PCReceiver : MonoBehaviour
                 fixed (byte* ptr = messageBuffer)
                 {
                     WebRTCInvoker.retrieve_tile(ptr, (uint)descriptionSize, ClientID, descriptionID);
-                    int descriptionFrameNr = BitConverter.ToInt32(messageBuffer, 0);
+                    UInt64 timestamp = BitConverter.ToUInt64(messageBuffer, 0); ;
+                    int descriptionFrameNr = BitConverter.ToInt32(messageBuffer, 8);
                     if(descriptionFrameNr <= lastCompletedFrameNr)
                     {
                         continue;
                     }
                     Debug.Log($"Start decoding");
-                    decoderPtr = DracoInvoker.decode_pc(ptr + 8, (uint)descriptionSize);
+                    decoderPtr = DracoInvoker.decode_pc(ptr + 12, (uint)descriptionSize);
                     Debug.Log($"Decoding done");           
                     if (decoderPtr == IntPtr.Zero)
                     {
@@ -150,7 +168,7 @@ public class PCReceiver : MonoBehaviour
                     if (!inProgessFrames.TryGetValue(descriptionFrameNr, out pcData))
                     {
                         int nTotalPointsInFrame = BitConverter.ToInt32(messageBuffer, 4);
-                        pcData = new DecodedPointCloudData(descriptionFrameNr, nTotalPointsInFrame, NDescriptions, activeDescriptions);
+                        pcData = new DecodedPointCloudData(descriptionFrameNr, nTotalPointsInFrame, NDescriptions, activeDescriptions, timestamp);
                         inProgessFrames.Add(descriptionFrameNr, pcData);
                     }
                     UInt32 nDecodedPoints = DracoInvoker.get_n_points(decoderPtr);
@@ -270,5 +288,39 @@ public class PCReceiver : MonoBehaviour
                 return 3;
         }
         return -1;
+    }
+
+    private void pollAudio(uint clientID, AudioPlayback pb)
+    {
+        WebRTCInvoker.wait_for_peer();
+        while (keep_working)
+        {
+            Debug.Log("Polling size");
+            int audioSize = WebRTCInvoker.get_audio_size(clientID);
+
+            if (audioSize == 0)
+            {
+                keep_working = false;
+                Debug.Log("Got no tile");
+                continue;
+            }
+            Debug.Log("Got a tile");
+            byte[] messageBuffer = new byte[12+audioSize];
+            float[] audioBuffer = new float[audioSize / sizeof(float)];
+            IntPtr decoderPtr = IntPtr.Zero;
+            //int descriptionFrameNr = WebRTCInvoker.get_tile_frame_number(ClientID, descriptionID);
+            unsafe
+            {
+                fixed (byte* ptr = messageBuffer)
+                {
+                    WebRTCInvoker.retrieve_audio(ptr, (uint)audioSize, clientID);
+                    Debug.Log("audio received");
+                    UInt64 timestamp = BitConverter.ToUInt64(messageBuffer, 0); ;
+                    uint audioFrameNr = BitConverter.ToUInt32(messageBuffer, 8);
+                    pb.CopyToBuffer(timestamp, audioFrameNr, audioBuffer);
+                    // queues[(int)descriptionID].Enqueue(new DecodedPointCloudData(points, colors));
+                }
+            }
+        }
     }
 }

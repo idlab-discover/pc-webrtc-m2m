@@ -1,5 +1,5 @@
 using AOT;
-using Draco;
+//using Draco;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -59,12 +59,12 @@ public class CapturingTestMulti : MonoBehaviour
     }
 
     [MonoPInvokeCallback(typeof(DracoInvoker.descriptionDoneCallback))]
-    static void OnDescriptionDoneCallback(IntPtr dsc, IntPtr rawDataPtr, UInt32 totalPointsInCloud, UInt32 dscSize, UInt32 frameNr, UInt32 dscNr)
+    static void OnDescriptionDoneCallback(IntPtr dsc, IntPtr rawDataPtr, UInt32 totalPointsInCloud, UInt32 dscSize, UInt32 frameNr, UInt32 dscNr, UInt64 timestamp)
     {
         
         if(frameNr % 100 == 0)
         {
-            Debug.Log($"{dscSize} {frameNr} {dscNr}");
+            Debug.Log($"{dscSize} {frameNr} {dscNr} {timestamp}");
         }
         
    
@@ -73,7 +73,7 @@ public class CapturingTestMulti : MonoBehaviour
         DecodedPointCloudData pcData;
         if (!inProgessFrames.TryGetValue(frameNr, out pcData))
         {
-            pcData = new DecodedPointCloudData((int)frameNr, 125000, 3, new List<bool> { true, true, true })  ;
+            pcData = new DecodedPointCloudData((int)frameNr, 125000, 3, new List<bool> { true, true, true }, timestamp)  ;
             inProgessFrames.Add(frameNr, pcData);
         }
         unsafe

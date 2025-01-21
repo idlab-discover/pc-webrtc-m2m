@@ -98,6 +98,10 @@ public class SessionManager : MonoBehaviour
                 pcSelf.CamFPS = sessionInfo.camFPS;
                 pcSelf.CamWidth = sessionInfo.camWidth;
                 pcSelf.CamHeight = sessionInfo.camHeight;
+                if(sessionInfo.useMic)
+                {
+                    pcSelf.InitAudioCapture();
+                }
                 
             } else // Other users
             {
@@ -106,6 +110,7 @@ public class SessionManager : MonoBehaviour
                 pcReceiver.transform.parent = StartLocations[i].transform;
                 pcReceiver.ClientID = (uint)i;
                 pcReceiver.NDescriptions = NDescriptions;
+                pcReceiver.AudioParams = sessionInfo.audioPlayback;
                 pcReceivers.Add(pcReceiver);
                 PCHelperWrapper.Receivers.Add(pcReceiver.ClientID,  pcReceiver);
             }

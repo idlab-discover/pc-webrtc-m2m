@@ -27,11 +27,11 @@ public unsafe class WebRTCInvoker
 
     // Audio frame functions
     [DllImport("WebRTCConnector")]
-    public static extern int send_audio(IntPtr data, UInt32 size);
+    public static extern int send_audio(byte* data, UInt32 size);
     [DllImport("WebRTCConnector")]
     public static extern int get_audio_size(UInt32 client_id);
     [DllImport("WebRTCConnector")]
-    public static extern void retrieve_audio(IntPtr buffer, UInt32 size, UInt32 client_id);
+    public static extern void retrieve_audio(byte* buffer, UInt32 size, UInt32 client_id);
 
     [DllImport("WebRTCConnector")]
     public static extern int send_control(IntPtr data, UInt32 size);

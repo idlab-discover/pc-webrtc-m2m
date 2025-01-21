@@ -1017,7 +1017,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 				fmt.Printf("WebRTCSFU: OnTrack: error during read: %s\n", err)
 				break
 			}
-			if !*disableABR {
+			if !*disableABR && t.Kind() == webrtc.RTPCodecTypeVideo {
 				nextTime := time.Now().UnixNano() //
 				nsDiff := nextTime - startTime
 				msBucket := nsDiff / int64(50*time.Millisecond)

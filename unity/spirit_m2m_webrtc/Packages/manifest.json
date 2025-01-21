@@ -1,16 +1,15 @@
 {
   "scopedRegistries": [
-  {
-    "name": "Keijiro",
-    "url": "https://registry.npmjs.com",
-    "scopes": [
-      "jp.keijiro"
-    ]
-  }
-],
+    {
+      "name": "Keijiro",
+      "url": "https://registry.npmjs.com",
+      "scopes": [
+        "jp.keijiro"
+      ]
+    }
+  ],
   "dependencies": {
-    "com.atteneder.draco": "https://github.com/atteneder/DracoUnity.git",
-    "jp.keijiro.pcx": "1.0.1",
+    "com.meta.xr.sdk.acoustics": "file:C:/Users/matth/Downloads/meta_xr_audio_sdk_fmod_69.0/FMOD/Unity/MetaXRSDKAcousticsFMOD.tgz",
     "com.unity.collab-proxy": "2.3.1",
     "com.unity.feature.development": "1.0.1",
     "com.unity.feature.vr": "1.0.0",
@@ -22,6 +21,7 @@
     "com.unity.xr.interaction.toolkit": "2.4.3",
     "com.unity.xr.management": "4.3.3",
     "com.unity.xr.openxr": "1.8.2",
+    "jp.keijiro.pcx": "1.0.1",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",

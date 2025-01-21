@@ -17,5 +17,6 @@
     "camWidth": 848,
     "camHeight": 480,
     "camFPS": 15,
-    "useCam": false
+    "useCam": false,
+    "useMic": true
 }

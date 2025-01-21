@@ -45,7 +45,7 @@ public static class DracoInvoker
     public static extern void free_description(IntPtr dsc);
 
 
-    public delegate void descriptionDoneCallback(IntPtr dsc, IntPtr rawDataPtr, UInt32 totalPointsInCloud, UInt32 dscSize, UInt32 frameNr, UInt32 dscNr);
+    public delegate void descriptionDoneCallback(IntPtr dsc, IntPtr rawDataPtr, UInt32 totalPointsInCloud, UInt32 dscSize, UInt32 frameNr, UInt32 dscNr, UInt64 timestamp);
     public delegate void freePCCallback(IntPtr cb);
 
     [DllImport(dllName, CallingConvention = CallingConvention.Cdecl)]

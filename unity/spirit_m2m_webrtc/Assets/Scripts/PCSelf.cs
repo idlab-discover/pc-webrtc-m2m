@@ -16,24 +16,30 @@ public class PCSelf : MonoBehaviour
     public uint CamHeight;
     public uint CamFPS;
     public bool UseCam;
+    
 
     public Camera cam;
+    public AudioCapture AudioCapturePrefab;
     public GameObject camOffset;
     public float CameraUpdateTimer = 0.300f;
     private float currentCameraUpdateTimer = 0;
+    private AudioCapture audioCapture;
+    private bool useMic;
 
     System.Threading.Thread workerThread;
     static bool keep_working = true;
     [MonoPInvokeCallback(typeof(DracoInvoker.descriptionDoneCallback))]
-    static void OnDescriptionDoneCallback(IntPtr dsc, IntPtr rawDataPtr, UInt32 totalPointsInCloud, UInt32 dscSize, UInt32 frameNr, UInt32 dscNr)
+    static void OnDescriptionDoneCallback(IntPtr dsc, IntPtr rawDataPtr, UInt32 totalPointsInCloud, UInt32 dscSize, UInt32 frameNr, UInt32 dscNr, UInt64 timestamp)
     {
         if (keep_working)
         {
-            byte[] frameHeader = new byte[8];
+            byte[] frameHeader = new byte[16];
+            var timestampField = BitConverter.GetBytes(timestamp);
+            timestampField.CopyTo(frameHeader, 0);
             var frameNrField = BitConverter.GetBytes(frameNr);
-            frameNrField.CopyTo(frameHeader, 0);
+            frameNrField.CopyTo(frameHeader, 8);
             var nPointsFrameField = BitConverter.GetBytes(totalPointsInCloud);
-            nPointsFrameField.CopyTo(frameHeader, 4);
+            nPointsFrameField.CopyTo(frameHeader, 12);
             byte[] messageBuffer = new byte[frameHeader.Length + dscSize];
             System.Buffer.BlockCopy(frameHeader, 0, messageBuffer, 0, frameHeader.Length);
             Marshal.Copy(rawDataPtr, messageBuffer, frameHeader.Length, (int)dscSize);
@@ -169,5 +175,32 @@ public class PCSelf : MonoBehaviour
     void dataEncodedCallback()
     {
 
+    }
+
+    public void InitAudioCapture()
+    {
+        useMic = true;
+        audioCapture = Instantiate(AudioCapturePrefab, this.transform.position, this.transform.rotation);
+        audioCapture.CB = CopyDataToPlayback;
+        audioCapture.Init();
+    }
+    void CopyDataToPlayback(UInt32 frameNr, float[] data, int lengthElements)
+    {
+        Debug.Log("copyData");
+        byte[] frameHeader = new byte[12];
+        byte[] messageBuffer = new byte[4 + lengthElements*sizeof(float)];
+        long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        var timestampField = BitConverter.GetBytes(timestamp);
+        timestampField.CopyTo(frameHeader, 0);
+        var frameNrField = BitConverter.GetBytes(frameNr);
+        frameNrField.CopyTo(frameHeader, 8);
+        Buffer.BlockCopy(data, 0, messageBuffer, 4, lengthElements * sizeof(float));
+        unsafe
+        {
+            fixed (byte* bufferPointer = messageBuffer)
+            {
+                WebRTCInvoker.send_audio(bufferPointer, (uint)lengthElements * sizeof(float));
+            }
+        }
     }
 }
