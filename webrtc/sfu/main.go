@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -24,6 +25,9 @@ import (
 
 	"github.com/pion/interceptor/pkg/cc"
 	"github.com/pion/interceptor/pkg/gcc"
+
+	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/process"
 )
 
 var (
@@ -115,6 +119,12 @@ type DashboardClientBandwidthMessage struct {
 	Qual      [][]int `json:"qual"`
 }
 
+type DashboardSystemResourcesMessage struct {
+	Type     int `json:"type"`
+	CPUUsage int `json:"cpuUsage"`
+	MemUsage int `json:"memUsage"`
+}
+
 //					* Start category
 //					* Current category
 //					* Current combo
@@ -137,6 +147,29 @@ func main() {
 
 	//ticker := time.NewTicker(1 * time.Second)
 	//quit := make(chan struct{})
+	// System metrics loop:
+	go func() {
+		nCPUs, _ := cpu.Counts(true)
+		proc, _ := process.NewProcess(int32(os.Getpid()))
+		for _ = range time.Tick(2 * time.Second) {
+			memUsage, _ := proc.MemoryInfo()
+			cpuUsage, _ := proc.CPUPercent()
+			//t, _ := proc.Cmdline()
+
+			dashboardListLock.Lock()
+			for _, v := range dashboardConnections {
+				v.writer.Lock()
+				v.writer.Conn.WriteJSON(DashboardSystemResourcesMessage{
+					Type:     2,
+					CPUUsage: int(cpuUsage / float64(nCPUs)),
+					MemUsage: int(memUsage.RSS / (1024 * 1024)),
+				})
+				v.writer.Unlock()
+			}
+			dashboardListLock.Unlock()
+		}
+	}()
+
 	go func() {
 		// Do bitrate calculationsfor {
 		if *disableABR {

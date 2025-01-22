@@ -176,6 +176,14 @@
             margin-top: -15px;
             margin-bottom: -15px;
         }
+
+        .usage_header {
+            margin-right: 35px;
+            font-size: 20px;
+        }
+        .usage_metric {
+            font-size: 20px;
+        }
     </style>
 </head>
 
@@ -186,6 +194,12 @@
                 <div class="cell">
                     <div class="client-div">
                         <div class="title_cell">Demo Setup</div>
+                        <div class="row_visible">
+                            <div class="usage_header">CPU Usage:</div>
+                            <div id="cpu" class="usage_metric">0%</div>
+                            <div class="usage_header">Mem Usage:</div>
+                            <div id="mem" class="usage_metric">0MB</div>
+                        </div>
                         <canvas id="myCanvas" width="100%" height="100%"
                             style="border:1px solidrgb(216, 12, 12)y"></canvas>
                     </div>
@@ -559,6 +573,12 @@
                           //}
                          
                     }
+                } else if (msgJson.type == 2) {
+                    let cpuField = document.getElementById("cpu")
+                    let memField = document.getElementById("mem")
+                    cpuField.innerText = msgJson.cpuUsage + "%"
+                    memField.innerText = msgJson.memUsage + "MB"
+
                 }
             });
             const canvas = document.getElementById("myCanvas");
