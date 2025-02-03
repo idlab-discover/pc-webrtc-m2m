@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -26,6 +27,7 @@ import (
 	"github.com/pion/interceptor/pkg/cc"
 	"github.com/pion/interceptor/pkg/gcc"
 
+	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/process"
 )
@@ -123,6 +125,7 @@ type DashboardSystemResourcesMessage struct {
 	Type     int `json:"type"`
 	CPUUsage int `json:"cpuUsage"`
 	MemUsage int `json:"memUsage"`
+	CPUTemp  int `json:"cpuTemp"`
 }
 
 //					* Start category
@@ -151,11 +154,26 @@ func main() {
 	go func() {
 		nCPUs, _ := cpu.Counts(true)
 		proc, _ := process.NewProcess(int32(os.Getpid()))
+		pattern := `coretemp_core(\d+)_input: (\d+(\.\d+)?)°C`
+		re := regexp.MustCompile(pattern)
 		for _ = range time.Tick(2 * time.Second) {
 			memUsage, _ := proc.MemoryInfo()
 			cpuUsage, _ := proc.CPUPercent()
+			sensors, _ := host.SensorsTemperatures()
+			cpuCounter := 0.0
+			cpuTotalTemp := 0.0
+			for _, sensor := range sensors {
+				matches := re.FindStringSubmatch(sensor.SensorKey)
+				if matches != nil {
+					cpuCounter++
+					cpuTotalTemp += sensor.Temperature
+				}
+			}
 			//t, _ := proc.Cmdline()
-
+			avgTemp := 0
+			if cpuCounter != 0 {
+				avgTemp = int(cpuTotalTemp / cpuCounter)
+			}
 			dashboardListLock.Lock()
 			for _, v := range dashboardConnections {
 				v.writer.Lock()
@@ -163,6 +181,7 @@ func main() {
 					Type:     2,
 					CPUUsage: int(cpuUsage / float64(nCPUs)),
 					MemUsage: int(memUsage.RSS / (1024 * 1024)),
+					CPUTemp:  avgTemp,
 				})
 				v.writer.Unlock()
 			}
