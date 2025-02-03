@@ -129,19 +129,21 @@ public class SessionManagerAudioTest : MonoBehaviour
     }
     void CopyDataToPlayback(UInt32 frameNr, float[] data, int lengthElements)
     {
-        byte[] frameHeader = new byte[12];
-        byte[] messageBuffer = new byte[4 + lengthElements * sizeof(float)];
+        // byte[] frameHeader = new byte[12];
+        //Debug.Log("[AUDIO SENDING]" + lengthElements + " " + );
+        byte[] messageBuffer = new byte[12 + data.Length * sizeof(float)];
+        Debug.Log("audio send" + messageBuffer.Length);
         long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var timestampField = BitConverter.GetBytes(timestamp);
-        timestampField.CopyTo(frameHeader, 0);
+        timestampField.CopyTo(messageBuffer, 0);
         var frameNrField = BitConverter.GetBytes(frameNr);
-        frameNrField.CopyTo(frameHeader, 8);
-        Buffer.BlockCopy(data, 0, messageBuffer, 4, lengthElements * sizeof(float));
+        frameNrField.CopyTo(messageBuffer, 8);
+        Buffer.BlockCopy(data, 0, messageBuffer, 12, data.Length * sizeof(float));
         unsafe
         {
             fixed (byte* bufferPointer = messageBuffer)
-            {
-                WebRTCInvoker.send_audio(bufferPointer, (uint)lengthElements * sizeof(float));
+            { 
+                WebRTCInvoker.send_audio(bufferPointer, (uint)messageBuffer.Length);
             }
         }
     }
@@ -161,7 +163,7 @@ public class SessionManagerAudioTest : MonoBehaviour
             }
             Debug.Log("Got a tile");
             byte[] messageBuffer = new byte[12 + audioSize];
-            float[] audioBuffer = new float[audioSize / sizeof(float)];
+            float[] audioBuffer = new float[4096];
             IntPtr decoderPtr = IntPtr.Zero;
             //int descriptionFrameNr = WebRTCInvoker.get_tile_frame_number(ClientID, descriptionID);
             unsafe
@@ -169,10 +171,12 @@ public class SessionManagerAudioTest : MonoBehaviour
                 fixed (byte* ptr = messageBuffer)
                 {
                     WebRTCInvoker.retrieve_audio(ptr, (uint)audioSize, clientID);
-                    Debug.Log("audio received");
+                    Debug.Log("audio received" + audioSize);
                     UInt64 timestamp = BitConverter.ToUInt64(messageBuffer, 0);
                     uint audioFrameNr = BitConverter.ToUInt32(messageBuffer, 8);
+                    Buffer.BlockCopy(messageBuffer, 12, audioBuffer, 0, audioBuffer.Length*sizeof(float));
                     pb.CopyToBuffer(timestamp, audioFrameNr, audioBuffer);
+
                     // queues[(int)descriptionID].Enqueue(new DecodedPointCloudData(points, colors));
                 }
             }

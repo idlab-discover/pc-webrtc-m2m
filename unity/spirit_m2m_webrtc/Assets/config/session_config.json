@@ -18,5 +18,18 @@
     "camHeight": 480,
     "camFPS": 15,
     "useCam": false,
-    "useMic": true
+    "useMic": true,
+    "audioPlayback": {
+        "maxQueueSize": 5,
+        "targetSamples": 3,
+        "audioDelay": 0,
+        "minPlaybackFrequency": 47000,
+        "maxPlaybackFrequency": 49000,
+        "latencyPlaybackMultiplier": 0.02,
+        "defaultPlaybackFrequency": 48000,
+        "ignoreTargetDelay": false,
+        "ignoreJitter": false,
+        "doNotWaitForPc": false,
+        "sampleSizeInBytes": 4096
+    }
 }

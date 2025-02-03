@@ -331,7 +331,8 @@ public class AudioPlayback : MonoBehaviour
             return;
         }
         buffer.AddItem(timestamp, frameNr, receivedData);
-        if(frameNr == 500)
+        Debug.Log("[AUDIO] frame number " + frameNr + " " + timestamp);
+        if(frameNr >= 500 && !buffer.PlaybackStarted)
         {
             buffer.Sound = sound;
             buffer.Channel = ch;

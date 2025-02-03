@@ -5,10 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TestScenes/CameraTest.unity
     guid: 10842c16e0be55042b747cd7fcd5d6e6
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/TestScenes/MicTest.unity
     guid: d7e0adbc7ad0d214bb34ac8eb08d1c01
   - enabled: 0

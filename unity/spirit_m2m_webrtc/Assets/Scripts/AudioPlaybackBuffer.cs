@@ -78,6 +78,7 @@ public class AudioPlaybackBuffer
     }
     public void ForceStartPlayback()
     {
+        Debug.Log("start playback force");
         Channel.setPosition(0, TIMEUNIT.PCM);
         // Copy all existing samples to sound buffer => stop when sound is full
         FlushQueueIntoBuffer();
