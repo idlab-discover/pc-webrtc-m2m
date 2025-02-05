@@ -26,7 +26,7 @@ public static class AudioCodecFactory
 
     public static AudioEncoder CreateEncoder(string encName, int freq, uint dspSize)
     {
-        if(encoders.TryGetValue(encName, out var encoder))
+        if(encName != null && encoders.TryGetValue(encName, out var encoder))
         {
             return encoder(freq, dspSize);
         }
@@ -34,7 +34,7 @@ public static class AudioCodecFactory
     }
     public static AudioDecoder CreateDecoder(string decName, int freq, uint dspSize)
     {
-        if (decoders.TryGetValue(decName, out var decoder))
+        if (decName != null && decoders.TryGetValue(decName, out var decoder))
         {
             return decoder(freq, dspSize);
         }

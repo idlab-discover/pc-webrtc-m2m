@@ -51,6 +51,7 @@ public class AudioPlayback : MonoBehaviour
 
     private AudioDecoder dec;
     private uint dspSize;
+    private bool forceStart;
     static FMOD.RESULT PlaybackDSPReadCallback(ref FMOD.DSP_STATE dsp_state, IntPtr inbuffer, IntPtr outbuffer, uint length, int inchannels, ref int outchannels)
     {
         FMOD.DSP_STATE_FUNCTIONS functions = (FMOD.DSP_STATE_FUNCTIONS)Marshal.PtrToStructure(dsp_state.functions, typeof(FMOD.DSP_STATE_FUNCTIONS));
@@ -170,6 +171,7 @@ public class AudioPlayback : MonoBehaviour
         dec = AudioCodecFactory.CreateDecoder(pms.codecName, capRate, pms.dspSize);
         
         this.dspSize = pms.dspSize;
+        this.forceStart = pms.forceStart;
         captureSrate = capRate;
         audioLength = captureSrate * sizeof(short) * 2;
         buffer = new AudioPlaybackBuffer((uint)audioLength, pms);
@@ -350,7 +352,7 @@ public class AudioPlayback : MonoBehaviour
         }
         buffer.AddItem(timestamp, frameNr, receivedData);
         Debug.Log("[AUDIO] frame number " + frameNr + " " + timestamp);
-        if(frameNr >= 500 && !buffer.PlaybackStarted)
+        if(forceStart && frameNr >= 500 && !buffer.PlaybackStarted)
         {
             buffer.Sound = sound;
             buffer.Channel = ch;

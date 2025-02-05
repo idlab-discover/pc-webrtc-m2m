@@ -30,6 +30,9 @@
         "ignoreTargetDelay": false,
         "ignoreJitter": false,
         "doNotWaitForPc": false,
-        "sampleSizeInBytes": 4096
+        "sampleSizeInBytes": 3840,
+        "dspSize": 480,
+        "forceStart": true,
+        "codecName": "opus"
     }
 }

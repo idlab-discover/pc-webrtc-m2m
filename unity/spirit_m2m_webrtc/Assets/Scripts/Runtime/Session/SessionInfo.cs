@@ -55,5 +55,6 @@ public class AudioPlaybackParams
     public uint sampleSizeInBytes;
 
     public string codecName;
-    public uint dspSize; 
+    public uint dspSize;
+    public bool forceStart;
 }

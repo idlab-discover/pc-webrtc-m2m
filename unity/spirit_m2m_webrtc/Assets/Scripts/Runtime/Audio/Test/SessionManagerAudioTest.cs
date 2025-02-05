@@ -172,10 +172,11 @@ public class SessionManagerAudioTest : MonoBehaviour
                 {
                     WebRTCInvoker.retrieve_audio(ptr, (uint)audioSize, clientID);
                     Debug.Log("audio received" + audioSize);
-                    UInt64 timestamp = BitConverter.ToUInt64(messageBuffer, 0);
+                    pb.DecodeAndCopyToBuffer(messageBuffer);
+                    /*  UInt64 timestamp = BitConverter.ToUInt64(messageBuffer, 0);
                     uint audioFrameNr = BitConverter.ToUInt32(messageBuffer, 8);
                     Buffer.BlockCopy(messageBuffer, 12, audioBuffer, 0, audioBuffer.Length*sizeof(float));
-                    pb.CopyToBuffer(timestamp, audioFrameNr, audioBuffer);
+                    pb.CopyToBuffer(timestamp, audioFrameNr, audioBuffer);*/
 
                     // queues[(int)descriptionID].Enqueue(new DecodedPointCloudData(points, colors));
                 }

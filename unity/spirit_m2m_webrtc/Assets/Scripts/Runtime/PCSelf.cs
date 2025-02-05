@@ -202,5 +202,12 @@ public class PCSelf : MonoBehaviour
                 WebRTCInvoker.send_audio(bufferPointer, (uint)lengthElements * sizeof(float));
             }
         }*/
+        unsafe
+        {
+            fixed (byte* bufferPointer = encodedData)
+            {
+                WebRTCInvoker.send_audio(bufferPointer, (uint)encodedData.Length);
+            }
+        }
     }
 }

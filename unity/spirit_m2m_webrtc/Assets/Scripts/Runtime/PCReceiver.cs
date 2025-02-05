@@ -315,9 +315,10 @@ public class PCReceiver : MonoBehaviour
                 {
                     WebRTCInvoker.retrieve_audio(ptr, (uint)audioSize, clientID);
                     Debug.Log("audio received");
-                    UInt64 timestamp = BitConverter.ToUInt64(messageBuffer, 0); ;
-                    uint audioFrameNr = BitConverter.ToUInt32(messageBuffer, 8);
-                    pb.CopyToBuffer(timestamp, audioFrameNr, audioBuffer);
+                    pb.DecodeAndCopyToBuffer(messageBuffer);
+                    /* UInt64 timestamp = BitConverter.ToUInt64(messageBuffer, 0); ;
+                     uint audioFrameNr = BitConverter.ToUInt32(messageBuffer, 8);
+                     pb.CopyToBuffer(timestamp, audioFrameNr, audioBuffer);*/
                     // queues[(int)descriptionID].Enqueue(new DecodedPointCloudData(points, colors));
                 }
             }
