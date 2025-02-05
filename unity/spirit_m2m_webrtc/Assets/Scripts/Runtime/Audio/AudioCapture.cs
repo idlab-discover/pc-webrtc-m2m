@@ -7,6 +7,7 @@ using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 using FMOD;
 using Unity.VisualScripting;
+using Adrenak.UnityOpus;
 
 public class AudioCapture : MonoBehaviour
 {
@@ -42,7 +43,7 @@ public class AudioCapture : MonoBehaviour
 
 
     public bool RecordingStarted = false;
-    public delegate void CopyData(UInt32 frameNr, float[] data, int lengthElements);
+    public delegate void CopyData(byte[] encodedData);
     public CopyData CB;
 
     FMOD.ChannelGroup masterCG;
@@ -51,7 +52,7 @@ public class AudioCapture : MonoBehaviour
     FMOD.Sound sound;
 
     private UInt32 frameNr;
-
+    private AudioEncoder encoder;
 
     [AOT.MonoPInvokeCallback(typeof(FMOD.DSP_READ_CALLBACK))]
     static FMOD.RESULT CaptureDSPReadCallback(ref FMOD.DSP_STATE dsp_state, IntPtr inbuffer, IntPtr outbuffer, uint length, int inchannels, ref int outchannels)
@@ -74,7 +75,9 @@ public class AudioCapture : MonoBehaviour
         if(inchannels == 2 )
         {
             Marshal.Copy(inbuffer, obj.mDataBuffer, 0, (int)lengthElements);
-            obj.CB?.Invoke(obj.frameNr, obj.mDataBuffer, (int)lengthElements);
+            ulong timestamp = (ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            byte[] encodedData = obj.encoder.EncodeSample(new AudioFrame(obj.frameNr, timestamp, obj.mDataBuffer));
+            obj.CB?.Invoke(encodedData);
             obj.frameNr++;
         }
         
@@ -91,7 +94,7 @@ public class AudioCapture : MonoBehaviour
       //  RuntimeManager.CoreSystem.set3DListenerAttributes(0, ref f, , 0, 0);
     }
     // Start is called before the first frame update
-    public void Init()
+    public void Init(string codecName, uint dspSize)
     {
         // how many capture devices are plugged in for us to use.
         int numOfDriversConnected;
@@ -135,9 +138,10 @@ public class AudioCapture : MonoBehaviour
         Debug.Log("captureNumChannels of capture device: " + captureNumChannels);
         Debug.Log("captureSrate: " + CaptureSrate);
 
+        encoder = AudioCodecFactory.CreateEncoder(codecName, CaptureSrate, dspSize);
 
         // create sound where capture is recorded
-        
+
         exinfo.cbsize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FMOD.CREATESOUNDEXINFO));
         exinfo.numchannels = captureNumChannels;
         exinfo.format = FMOD.SOUND_FORMAT.PCMFLOAT;
@@ -172,7 +176,7 @@ public class AudioCapture : MonoBehaviour
         uint bufferLength;
         int numBuffers;
         FMODUnity.RuntimeManager.CoreSystem.getDSPBufferSize(out bufferLength, out numBuffers);
-        mDataBuffer = new float[bufferLength * 8];
+        mDataBuffer = new float[bufferLength * 2];
         mBufferLength = bufferLength;
 
         // Tentatively changed buffer length by calling setDSPBufferSize in file Assets/Plugins/FMOD/src/RuntimeManager.cs	

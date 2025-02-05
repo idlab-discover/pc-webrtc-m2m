@@ -53,4 +53,7 @@ public class AudioPlaybackParams
     public bool ignoreJitter;
     public bool doNotWaitForPc;
     public uint sampleSizeInBytes;
+
+    public string codecName;
+    public uint dspSize; 
 }

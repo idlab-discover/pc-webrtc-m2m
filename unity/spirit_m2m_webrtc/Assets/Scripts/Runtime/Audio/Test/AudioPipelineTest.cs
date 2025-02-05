@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class AudioPipelineTest : MonoBehaviour
@@ -10,12 +11,17 @@ public class AudioPipelineTest : MonoBehaviour
     public int NPlayback;
     List<AudioPlayback> play;
     public AudioPlaybackParams AudioParams;
+    private AudioEncoder enc;
+    private AudioDecoder dec;
     // Start is called before the first frame update
     void Start()
     {
         play = new List<AudioPlayback>();
         Cap.CB = CopyDataToPlayback;
-        Cap.Init();
+        Cap.Init(AudioParams.codecName, AudioParams.dspSize);
+
+        enc = AudioCodecFactory.CreateEncoder(AudioParams.codecName, Cap.CaptureSrate, AudioParams.dspSize);
+        dec = AudioCodecFactory.CreateDecoder(AudioParams.codecName, Cap.CaptureSrate, AudioParams.dspSize);
         for (int i = 0; i < NPlayback; i++)
         {
             AudioPlayback p = Instantiate(PlaybackPrefab);
@@ -37,14 +43,11 @@ public class AudioPipelineTest : MonoBehaviour
             }
         }
     }
-    void CopyDataToPlayback(UInt32 frameNr, float[] data, int lengthElements)
+    void CopyDataToPlayback(byte[] encodedData)
     {
-        float[] temp = new float[data.Length];
-        data.CopyTo(temp, 0);
-        long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         foreach (AudioPlayback play in play)
         {
-            play.CopyToBuffer((ulong)timestamp, frameNr, temp);
+            play.DecodeAndCopyToBuffer(encodedData);
         }
     }
 }

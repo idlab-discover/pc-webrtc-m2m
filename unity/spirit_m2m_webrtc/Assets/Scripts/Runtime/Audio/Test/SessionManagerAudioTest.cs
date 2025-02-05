@@ -68,7 +68,7 @@ public class SessionManagerAudioTest : MonoBehaviour
 
         // Make correct prefabs
         Cap.CB = CopyDataToPlayback;
-        Cap.Init();
+        Cap.Init(sessionInfo.audioPlayback.codecName, sessionInfo.audioPlayback.dspSize);
         for (int i = 0; i < NPlayback; i++)
         {
             AudioPlayback p = Instantiate(PlaybackPrefab);
@@ -127,23 +127,23 @@ public class SessionManagerAudioTest : MonoBehaviour
             }
         }
     }
-    void CopyDataToPlayback(UInt32 frameNr, float[] data, int lengthElements)
+    void CopyDataToPlayback(byte[] encodedData)
     {
         // byte[] frameHeader = new byte[12];
         //Debug.Log("[AUDIO SENDING]" + lengthElements + " " + );
-        byte[] messageBuffer = new byte[12 + data.Length * sizeof(float)];
+     /*   byte[] messageBuffer = new byte[12 + data.Length * sizeof(float)];
         Debug.Log("audio send" + messageBuffer.Length);
         long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var timestampField = BitConverter.GetBytes(timestamp);
         timestampField.CopyTo(messageBuffer, 0);
         var frameNrField = BitConverter.GetBytes(frameNr);
         frameNrField.CopyTo(messageBuffer, 8);
-        Buffer.BlockCopy(data, 0, messageBuffer, 12, data.Length * sizeof(float));
+        Buffer.BlockCopy(data, 0, messageBuffer, 12, data.Length * sizeof(float));*/
         unsafe
         {
-            fixed (byte* bufferPointer = messageBuffer)
+            fixed (byte* bufferPointer = encodedData)
             { 
-                WebRTCInvoker.send_audio(bufferPointer, (uint)messageBuffer.Length);
+                WebRTCInvoker.send_audio(bufferPointer, (uint)encodedData.Length);
             }
         }
     }

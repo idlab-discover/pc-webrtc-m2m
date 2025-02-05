@@ -181,12 +181,12 @@ public class PCSelf : MonoBehaviour
     {
         useMic = true;
         audioCapture = Instantiate(AudioCapturePrefab, this.transform.position, this.transform.rotation);
-        audioCapture.CB = CopyDataToPlayback;
-        audioCapture.Init();
+        //audioCapture.CB = CopyDataToPlayback;
+        //audioCapture.Init();
     }
-    void CopyDataToPlayback(UInt32 frameNr, float[] data, int lengthElements)
+    void CopyDataToPlayback(byte[] encodedData)
     {
-        Debug.Log("copyData");
+        /*Debug.Log("copyData");
         byte[] frameHeader = new byte[12];
         byte[] messageBuffer = new byte[4 + lengthElements*sizeof(float)];
         long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -201,6 +201,6 @@ public class PCSelf : MonoBehaviour
             {
                 WebRTCInvoker.send_audio(bufferPointer, (uint)lengthElements * sizeof(float));
             }
-        }
+        }*/
     }
 }

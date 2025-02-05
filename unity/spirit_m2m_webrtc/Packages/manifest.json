@@ -6,6 +6,14 @@
       "scopes": [
         "jp.keijiro"
       ]
+    },
+    {
+      "name": "npmjs",
+      "url": "https://registry.npmjs.org",
+      "scopes": [
+          "com.npmjs",
+          "com.adrenak.unityopus"
+      ]
     }
   ],
   "dependencies": {
@@ -52,6 +60,7 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0"
+    "com.unity.modules.xr": "1.0.0",
+    "com.adrenak.unityopus" : "1.0.0"
   }
 }

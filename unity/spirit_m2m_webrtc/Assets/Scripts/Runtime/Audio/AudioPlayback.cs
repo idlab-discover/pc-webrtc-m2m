@@ -48,6 +48,9 @@ public class AudioPlayback : MonoBehaviour
     FMOD.Sound sound;
     FMOD.Channel ch;
     FMOD.Studio.EventInstance voiceInstance;
+
+    private AudioDecoder dec;
+    private uint dspSize;
     static FMOD.RESULT PlaybackDSPReadCallback(ref FMOD.DSP_STATE dsp_state, IntPtr inbuffer, IntPtr outbuffer, uint length, int inchannels, ref int outchannels)
     {
         FMOD.DSP_STATE_FUNCTIONS functions = (FMOD.DSP_STATE_FUNCTIONS)Marshal.PtrToStructure(dsp_state.functions, typeof(FMOD.DSP_STATE_FUNCTIONS));
@@ -163,6 +166,10 @@ public class AudioPlayback : MonoBehaviour
     public void Init(int capRate, AudioPlaybackParams pms)
     {
         Debug.Log("Audio playback inited");
+
+        dec = AudioCodecFactory.CreateDecoder(pms.codecName, capRate, pms.dspSize);
+        
+        this.dspSize = pms.dspSize;
         captureSrate = capRate;
         audioLength = captureSrate * sizeof(short) * 2;
         buffer = new AudioPlaybackBuffer((uint)audioLength, pms);
@@ -321,6 +328,17 @@ public class AudioPlayback : MonoBehaviour
     }
     private int audioCounter;
     private int audioLength;
+
+    public void DecodeAndCopyToBuffer(byte[] receivedData)
+    {
+        if (audioLength == 0)
+        {
+            return;
+        }
+        AudioFrame af = dec.DecodeSample(receivedData);
+        CopyToBuffer(af.Timestamp, af.FrameNr, af.AudioData);
+
+    }
     //private uint frameNr;
     // TODO fix starting point => current position audio track
     //      fid static sometimes

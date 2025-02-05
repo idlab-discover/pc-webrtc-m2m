@@ -1,7 +1,7 @@
 Library: C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\unity\spirit_m2m_webrtc\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
 --platform=Windows
 --backend=burst-llvm-15
---target=AVX2
+--target=X64_SSE2
 --global-safety-checks-setting=Off
 --disable-safety-checks
 --meta-data-generation=False
@@ -31,6 +31,7 @@ Library: C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\unity\spirit_m2
 --assembly-defines=Unity.Burst;
 --assembly-defines=Unity.Tutorials.Core;
 --assembly-defines=Unity.VisualScripting.Core;
+--assembly-defines=Adrenak.UnityOpus.Runtime;
 --assembly-defines=Unity.RenderPipeline.Universal.ShaderLibrary;
 --assembly-defines=Unity.Timeline;
 --assembly-defines=Unity.InputSystem;
@@ -78,7 +79,7 @@ Library: C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\unity\spirit_m2
 --method=Unity.Jobs.IJobForExtensions+ForJobStruct`1[[UnityEngine.Rendering.Universal.TilingJob, Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]], UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null::Execute(UnityEngine.Rendering.Universal.TilingJob&, Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null|System.IntPtr, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|System.IntPtr, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|Unity.Jobs.LowLevel.Unsafe.JobRanges&, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null|System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)--a6f5259e22ed809ef3937424c4bd686d
 --platform=Windows
 --backend=burst-llvm-15
---target=AVX2
+--target=X64_SSE2
 --global-safety-checks-setting=Off
 --meta-data-generation=False
 --dump=Function
@@ -106,6 +107,7 @@ Library: C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\unity\spirit_m2
 --assembly-defines=Unity.Burst;
 --assembly-defines=Unity.Tutorials.Core;
 --assembly-defines=Unity.VisualScripting.Core;
+--assembly-defines=Adrenak.UnityOpus.Runtime;
 --assembly-defines=Unity.RenderPipeline.Universal.ShaderLibrary;
 --assembly-defines=Unity.Timeline;
 --assembly-defines=Unity.InputSystem;
@@ -189,7 +191,7 @@ Library: C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\unity\spirit_m2
 --method=Unity.Burst.Intrinsics.X86, Unity.Burst, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null::DoGetCSRTrampoline()--89425a97f3f500fa810ad03f0c382542
 --platform=Windows
 --backend=burst-llvm-15
---target=X64_SSE2
+--target=AVX2
 --global-safety-checks-setting=Off
 --disable-safety-checks
 --meta-data-generation=False
@@ -219,6 +221,7 @@ Library: C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\unity\spirit_m2
 --assembly-defines=Unity.Burst;
 --assembly-defines=Unity.Tutorials.Core;
 --assembly-defines=Unity.VisualScripting.Core;
+--assembly-defines=Adrenak.UnityOpus.Runtime;
 --assembly-defines=Unity.RenderPipeline.Universal.ShaderLibrary;
 --assembly-defines=Unity.Timeline;
 --assembly-defines=Unity.InputSystem;
@@ -266,7 +269,7 @@ Library: C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\unity\spirit_m2
 --method=Unity.Jobs.IJobForExtensions+ForJobStruct`1[[UnityEngine.Rendering.Universal.TilingJob, Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]], UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null::Execute(UnityEngine.Rendering.Universal.TilingJob&, Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null|System.IntPtr, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|System.IntPtr, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|Unity.Jobs.LowLevel.Unsafe.JobRanges&, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null|System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)--a6f5259e22ed809ef3937424c4bd686d
 --platform=Windows
 --backend=burst-llvm-15
---target=X64_SSE2
+--target=AVX2
 --global-safety-checks-setting=Off
 --meta-data-generation=False
 --dump=Function
@@ -294,6 +297,7 @@ Library: C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\unity\spirit_m2
 --assembly-defines=Unity.Burst;
 --assembly-defines=Unity.Tutorials.Core;
 --assembly-defines=Unity.VisualScripting.Core;
+--assembly-defines=Adrenak.UnityOpus.Runtime;
 --assembly-defines=Unity.RenderPipeline.Universal.ShaderLibrary;
 --assembly-defines=Unity.Timeline;
 --assembly-defines=Unity.InputSystem;
