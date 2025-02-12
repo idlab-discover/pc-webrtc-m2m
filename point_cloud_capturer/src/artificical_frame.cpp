@@ -58,4 +58,36 @@ void ArtificalFrame::make_data_arrays(unsigned int side_size)
     }
 }
 
+void ArtificalFrame::make_raw_data_arrays(unsigned int side_size)
+{
+    n_points = side_size * side_size * side_size;
+    raw_color.reserve(n_points*3);
+    raw_depth.reserve(n_points);
+
+    uint16_t base_z = 1;
+
+    unsigned int current_point = 0;
+    
+
+    for (unsigned int i = 0; i < side_size; i++) {
+        float hue = std::fmod(static_cast<float>(std::clock()) / CLOCKS_PER_SEC * 60, 360.0f);
+        float r, g, b;
+        int s_i = (10*i) % 100;
+        float s = (float)(s_i)/100.0;
+        HSVtoRGB(hue, s, 1.0f, r, g, b);
+        uint8_t r_small = static_cast<uint8_t>(r * 255);
+        uint8_t g_small = static_cast<uint8_t>(g * 255);
+        uint8_t b_small = static_cast<uint8_t>(b * 255);
+        uint16_t d = base_z*i;
+        for (unsigned int j = 0; j < side_size; j++) {
+            for (unsigned int k = 0; k < side_size; k++) {
+                raw_depth[current_point]= d;
+                raw_color[(current_point * 3)] = r_small;
+                raw_color[(current_point * 3)+1] = g_small;
+                raw_color[(current_point * 3)+2] = b_small;
+                current_point++;
+            }
+        }
+    }
+}
 

@@ -22,6 +22,7 @@ CAPTURER_SETUP_CODE ArtificalCapturer::capture_next_frame()
     // Need to call end here for optimisation
     timeEndPeriod(1);
     frame_buffer.add_to_buffer(new ArtificalFrame(
+        mode,
         side_size,
         frame_nr
     ));

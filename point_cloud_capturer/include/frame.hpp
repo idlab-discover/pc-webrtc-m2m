@@ -7,6 +7,11 @@ struct Point {
     float x, y, z;
     uint8_t r, g, b;
 };
+enum FrameMode {
+    RealData = 0,
+    RawData = 1,
+    Both = 2,
+};
 
 class Frame {
     public:
@@ -17,6 +22,11 @@ class Frame {
         virtual unsigned int get_frame_size() = 0;
         virtual Vertex* get_vertex_array() = 0;
         virtual Color* get_color_array() = 0;
+        virtual uint16_t* get_raw_depth() = 0;
+        virtual uint8_t* get_raw_colors() = 0;
+        virtual unsigned int get_capture_width() = 0;
+        virtual unsigned int get_capture_height() = 0;
+        virtual unsigned int get_raw_n_points() = 0;
 
         unsigned int get_frame_nr() {return frame_nr;};
         float get_x_offset() {return x_offset; };

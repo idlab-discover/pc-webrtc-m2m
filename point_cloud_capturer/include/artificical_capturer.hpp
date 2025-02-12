@@ -7,7 +7,7 @@
 
 class ArtificalCapturer : public Capturer {
     public:
-        ArtificalCapturer(unsigned int side_size, unsigned int fps) : Capturer(fps), side_size(side_size) {
+        ArtificalCapturer(FrameMode mode, unsigned int side_size, unsigned int fps) : Capturer(mode, fps), side_size(side_size) {
             interframe_delay = std::chrono::milliseconds(1000 / fps);
             previous_time = std::chrono::high_resolution_clock::now();
         };

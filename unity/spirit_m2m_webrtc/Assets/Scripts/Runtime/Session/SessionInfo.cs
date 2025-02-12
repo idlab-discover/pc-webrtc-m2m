@@ -17,6 +17,9 @@ public class SessionInfo
     public uint camFPS;
     public bool useCam;
     public bool useMic;
+    public FrameMode frameMode;
+    public FrameCodec frameCodec;
+    public uint jpegQuality;
     public AudioPlaybackParams audioPlayback;
     public static SessionInfo CreateFromJSON(string path)
     {

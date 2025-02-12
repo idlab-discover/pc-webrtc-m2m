@@ -1,0 +1,187 @@
+#include "encoding_queue.hpp"
+#include "depth_decoder.hpp"
+#include "jpeg_decoder.hpp"
+#include "pch.h"
+#include "framework.h"
+#include "log.h"
+
+#include "plugin.h"
+
+#include <chrono>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <string>
+#include <thread>
+
+using namespace std;
+
+uint32_t n_tiles;
+
+static thread worker;
+static bool keep_working = true;
+static bool initialized = false;
+
+//mutex m_receivers;
+
+
+uint32_t frame_number;
+
+static string log_file = "";
+static int log_level = 0;
+mutex m_logging;
+mutex m_capturing;
+std::condition_variable cv_capture;
+bool capture_done = false;
+EncodingQueue* enc_queue;
+DepthDecoder* depth_dec;
+JpegDecoder* color_dec;
+
+// TODO make objects
+// Realsense2 stuff
+
+string api_version = "1.0";
+
+
+enum LOG_LEVEL : int {
+	Default = 0,
+	Verbose = 1,
+	Debug = 2
+};
+
+
+
+
+/*
+	This function is used to get the current date/time in a predefined format, used by the custom_log function.
+*/
+inline string get_current_date_time(bool date_only) {
+	time_t now = time(0);
+	char buf[80];
+	struct tm tstruct;
+#if defined(_WIN64) || defined(_WIN32)
+	localtime_s(&tstruct, &now);
+#else
+	localtime_r(&now, &tstruct);
+#endif
+	if (date_only) {
+		strftime(buf, sizeof(buf), "%Y-%m-%d", &tstruct);
+	}
+	else {
+		strftime(buf, sizeof(buf), "%Y-%m-%d %X", &tstruct);
+	}
+	return string(buf);
+};
+
+/*
+	This function is used to pass log messages to the user. Verbose logging can be enabled, and different colors can be
+	used to inidicate a specific function (e.g., sending or receiving data).
+*/
+void custom_log(string message, int _log_level = 0, LogColor color = LogColor::Black) {
+	unique_lock<mutex> guard(m_logging);
+	if (_log_level <= log_level) {
+		Log::log(message, color);
+	}
+	if (log_file != "") {
+		ofstream ofs(log_file.c_str(), ios_base::out | ios_base::app);
+		ofs << get_current_date_time(false) << '\t' << message << '\n';
+		ofs.close();
+	}
+	guard.unlock();
+}
+
+/*
+	This function allows to specify a directory in which logs are created, and allows to specify if a verbose mode
+	should be used. It should be called once per session from within Unity.
+*/
+void set_logging(char* log_directory, int _log_level) {
+	log_file = string(log_directory) + "\\" + get_current_date_time(true) + ".txt";
+	Log::log("set_logging: Log directory set to " + string(log_directory), LogColor::Orange);
+	log_level = _log_level;
+	Log::log("set_logging: Log level set to " + to_string(log_level), LogColor::Orange);
+}
+
+int initialize(unsigned int width, unsigned int height, unsigned int jpeg_quality) {
+	custom_log("initialize: inting", Default, LogColor::Orange);
+	enc_queue = new EncodingQueue(2, width, height, jpeg_quality);
+	depth_dec = new DepthDecoder();
+	color_dec = new JpegDecoder();
+	initialized = true;
+	return 0;
+}
+/*
+	This function is used to clean up threading and reset the required variables. It is called once per session from
+	within Unity.
+*/
+void clean_up() {
+	custom_log("clean_up: Attempting to clean up", Verbose, LogColor::Orange);
+
+	// Check if the DLL has already been initialized
+	if (initialized) {
+
+		// Halt sending/receiving operations
+		keep_working = false;
+		
+		// Close sockets, using the mutex for sending data
+		//unique_lock<mutex> guard(m_send_data);
+		
+		//guard.unlock();
+
+		// Join the listening thread
+		if (worker.joinable())
+			worker.join();
+		// TODO Cleanup Realsense2
+		delete enc_queue;
+		enc_queue = nullptr;
+		delete depth_dec;
+		depth_dec = nullptr;
+		delete color_dec;
+		color_dec = nullptr;
+
+		// Reset the initialized flag
+		initialized = false;
+		custom_log("clean_up: Cleaned up", Verbose, LogColor::Orange);
+	}
+	else {
+		// No action is required
+		custom_log("clean_up: Already cleaned up", Verbose, LogColor::Orange);
+	}
+}
+
+uint32_t encode_frame(RawFrame* f) {
+	enc_queue->enqueue_frame(f);
+	return 0;
+}
+
+DecodedDepth* decode_depth(unsigned char* data, unsigned int width, unsigned int height) {
+	return depth_dec->decode_depth(data, width, height);
+}
+
+DecodedJpeg* decode_color(unsigned char* data, unsigned long size, unsigned int width, unsigned int height) {
+	return color_dec->decompress_frame(data, size, width, height);
+}
+
+unsigned short* get_decoded_depth_data(DecodedDepth* ptr) {
+	if(ptr != nullptr) {
+		return ptr->get_buffer();
+	}
+	return nullptr;
+}
+
+unsigned char* get_decoded_color_data(DecodedJpeg* ptr) {
+	if(ptr != nullptr) {
+		return ptr->get_buffer();
+	}
+	return nullptr;
+}
+
+void free_decoded_depth(DecodedDepth* ptr) {
+	if(ptr != nullptr) {
+		delete ptr;
+	}
+}
+void free_decoded_color(DecodedJpeg* ptr) {
+	if(ptr != nullptr) {
+		delete ptr;
+	}
+}

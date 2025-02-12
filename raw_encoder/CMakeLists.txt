@@ -1,0 +1,45 @@
+cmake_minimum_required(VERSION 3.18)
+option(ENABLE_VCPKG OFF)
+
+# Define the project name and the type of project
+project(spirit_idlab_raw LANGUAGES CXX)
+
+# Set the version of the library
+set(spirit_idlab_raw_VERSION_MAJOR 1)
+set(spirit_idlab_raw_VERSION_MINOR 0)
+set(spirit_idlab_raw_VERSION_PATCH 0)
+
+# Specify the C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Add the include directory
+include_directories(include)
+
+# Add the source directory
+file(GLOB SOURCES "src/*.cpp")
+
+# Set the output directory for the DLL
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# Add the library target
+add_library(spirit_idlab_raw SHARED ${SOURCES})
+
+# Set the version properties for the library
+set_target_properties(spirit_idlab_raw PROPERTIES
+    VERSION ${spirit_idlab_raw_VERSION_MAJOR}.${spirit_idlab_raw_VERSION_MINOR}.${spirit_idlab_raw_VERSION_PATCH}
+    SOVERSION ${spirit_idlab_raw_VERSION_MAJOR}
+)
+
+# Set the CMake module path to find the custom FindREALSENSE2.cmake
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeFiles")
+
+# Find the DRACO library
+find_package(libjpeg-turbo REQUIRED)
+message(${libjpeg-turbo_INCLUDE_DIRS})
+message(${libjpeg-turbo_LIBRARIES})
+# Link the DRACO library to the DLL
+target_link_libraries(spirit_idlab_raw ${libjpeg-turbo_LIBRARIES})
+
+# Include REALSENSE2 directories
+include_directories(${libjpeg-turbo_INCLUDE_DIRS})

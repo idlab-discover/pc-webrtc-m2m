@@ -15,6 +15,8 @@
 #include "framebuffer.hpp"
 #include "rs2_capturer.hpp"
 #include "artificical_capturer.hpp"
+#include "raw_frame.hpp"
+#include "artificical_raw_converter.hpp"
 using namespace std;
 
 uint32_t n_tiles;
@@ -129,13 +131,13 @@ void start_capturing() {
 	This function is responsible for initializing the DLL. It should be called once per session from within Unity,
 	specifiying the required IP addresses and ports, the number of tiles that will be transmitted, and the client ID.
 */
-int initialize(uint32_t width, uint32_t height, uint32_t fps, float min_dist, float max_dist, bool _use_cam) {
+int initialize(uint32_t width, uint32_t height, uint32_t fps, float min_dist, float max_dist, bool _use_cam, FrameMode mode) {
 	use_cam = _use_cam;
 	try {
 		if(use_cam) {
-			capturer = new RS2Capturer(width, height, fps, min_dist, max_dist);
+			capturer = new RS2Capturer(mode, width, height, fps, min_dist, max_dist);
 		} else {
-			capturer = new ArtificalCapturer(10, fps);
+			capturer = new ArtificalCapturer(mode, 75, fps);
 		}
 	} catch (CAPTURER_SETUP_CODE e) {
 		initialized = true;
@@ -164,14 +166,71 @@ PointCloud* poll_next_point_cloud() {
 	};
 }
 
+Frame* poll_next_frame() {
+	Frame* frame = capturer->poll_next_frame();
+	return frame;
+}
+
+RawFrame* poll_next_raw_frame() {
+	Frame* frame = capturer->poll_next_frame();
+	return new RawFrame{
+		frame->get_timestamp(),
+		frame->get_frame_nr(),
+		frame->get_capture_width(),
+		frame->get_capture_height(),
+		frame->get_raw_n_points(),
+		frame->get_raw_depth(),
+		frame->get_raw_colors(),
+		frame
+	};
+}
+
 size_t get_point_cloud_size(PointCloud* frame) {
 	if(frame == nullptr) return 0;
 	return frame->n_points;
 }
+size_t get_frame_size(Frame* frame) {
+	if (frame == nullptr) return 0;
+	return frame->get_frame_size();
+}
+
+uint16_t* get_raw_depth(Frame* frame) {
+	if (frame == nullptr) return 0;
+	return frame->get_raw_depth();
+}
+uint8_t* get_raw_color(Frame* frame) {
+	if (frame == nullptr) return 0;
+	return frame->get_raw_colors();
+}
+
 
 void free_point_cloud(PointCloud * frame) {
 	if(frame == nullptr) return;
 	delete frame;
+}
+
+void free_frame(Frame* frame) {
+	if (frame == nullptr) return;
+	delete frame;
+}
+
+void free_raw_frame(RawFrame* frame) {
+	if (frame == nullptr) return;
+	delete frame;
+}
+
+RawConverter* create_new_raw_converter(unsigned int width, unsigned int height) {
+	return new ArtificalRawConverter(75);
+}
+
+void convert_raw_frame(RawConverter* c, uint16_t* depth, uint8_t* color, Vector3* pos_out, Color32* col_out) {
+	c->convert_raw(depth, color, pos_out, col_out);
+}
+
+void free_raw_converter(RawConverter* c) {
+	if(c != nullptr) {
+		delete c;
+	}
 }
 
 /*

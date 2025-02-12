@@ -28,6 +28,7 @@ public class CapturingTestMulti : MonoBehaviour
     Mesh currentMesh;
     //private MeshFilter meshFilter;
     public int debug = 0;
+    private FrameMode frameMode;
 
     static bool keep_working = true;
     enum Color { red, green, blue, black, white, yellow, orange };
@@ -133,7 +134,9 @@ public class CapturingTestMulti : MonoBehaviour
         Application.targetFrameRate = 120;
         var sessionInfo = SessionInfo.CreateFromJSON(Application.dataPath + "/config/session_config.json");
         Debug.Log(sessionInfo.sfuAddress + " " + sessionInfo.peerUDPPort);
+        sessionInfo.frameMode = FrameMode.RealData;
         ClientID = sessionInfo.clientID;
+        frameMode = sessionInfo.frameMode;
         queue = new ConcurrentQueue<DecodedPointCloudData>();
         inProgessFrames = new();
         //meshFilter = GetComponent<MeshFilter>();
@@ -141,7 +144,7 @@ public class CapturingTestMulti : MonoBehaviour
         Realsense2Invoker.set_logging("", debug);
         DracoInvoker.RegisterDebugCallback(OnDebugCallbackDraco);
         DracoInvoker.set_logging("", debug);
-        int initCode = Realsense2Invoker.initialize(sessionInfo.camWidth, sessionInfo.camHeight, sessionInfo.camFPS, sessionInfo.camClose, sessionInfo.camFar, sessionInfo.useCam);
+        int initCode = Realsense2Invoker.initialize(sessionInfo.camWidth, sessionInfo.camHeight, sessionInfo.camFPS, sessionInfo.camClose, sessionInfo.camFar, sessionInfo.useCam, sessionInfo.frameMode);
         DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
         DracoInvoker.register_free_pc_callback(OnFreePCCallback);
         DracoInvoker.initialize();
@@ -220,20 +223,49 @@ public class CapturingTestMulti : MonoBehaviour
       
         while(keep_working)
         {
-            Debug.Log($"Poll next");
-            IntPtr frame = Realsense2Invoker.poll_next_point_cloud();
-            Debug.Log($"Poll done");
-            if ( frame != IntPtr.Zero )
+            switch(frameMode)
             {
-                Debug.Log($"Get size");
-                uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
-                Debug.Log($"Number of points: {nPoints}");
-                int returnCode = DracoInvoker.encode_pc(frame);
-            } else
-            {
-                Debug.Log("No frame"); 
-                keep_working = false;
+                    case FrameMode.RealData:
+                    {
+                        Debug.Log($"Poll next");
+                        IntPtr frame = Realsense2Invoker.poll_next_point_cloud();
+                        Debug.Log($"Poll done");
+                        if (frame != IntPtr.Zero)
+                        {
+                            Debug.Log($"Get size");
+                            uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
+                            Debug.Log($"Number of points: {nPoints}");
+                            int returnCode = DracoInvoker.encode_pc(frame);
+                        }
+                        else
+                        {
+                            Debug.Log("No frame");
+                            keep_working = false;
+                        }
+                        break;
+                    }
+                    case FrameMode.RawData:
+                    {
+                        Debug.Log($"Poll next");
+                        IntPtr frame = Realsense2Invoker.poll_next_frame();
+                        Debug.Log($"Poll done");
+                        if (frame != IntPtr.Zero)
+                        {
+                            Debug.Log($"Get size");
+                         //   uint frameWidth = Realsense2Invoker.get_frame_width(frame);
+                       //     uint frameHeight = Realsense2Invoker.get_frame_height(frame);
+                            //  Debug.Log($"Number of points: {nPoints}");
+                            //  int returnCode = DracoInvoker.encode_pc(frame);
+                        }
+                        else
+                        {
+                            Debug.Log("No frame");
+                            keep_working = false;
+                        }
+                        break;
+                    }
             }
+            
             
         }
         Realsense2Invoker.clean_up();

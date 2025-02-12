@@ -7,7 +7,7 @@
 
 class RS2Capturer : public Capturer {
     public:
-        RS2Capturer(unsigned int width, unsigned int height, unsigned int fps, float min_dist, float max_dist) try : width(width), height(height), min_dist(min_dist), max_dist(max_dist), Capturer(fps),depth_align(rs2::align((RS2_STREAM_DEPTH))) {
+        RS2Capturer(FrameMode mode, unsigned int width, unsigned int height, unsigned int fps, float min_dist, float max_dist) try : width(width), height(height), min_dist(min_dist), max_dist(max_dist), Capturer(mode, fps), depth_align(rs2::align((RS2_STREAM_DEPTH))) {
 
         } catch(...) {
             auto e = exception_handler();

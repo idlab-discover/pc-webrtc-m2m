@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "thread": "cpp"
+        "thread": "cpp",
+        "vector": "cpp",
+        "stack": "cpp"
     }
 }

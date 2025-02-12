@@ -16,6 +16,7 @@ public class PCSelf : MonoBehaviour
     public uint CamHeight;
     public uint CamFPS;
     public bool UseCam;
+    public FrameMode FrameMode;
     
 
     public Camera cam;
@@ -77,7 +78,7 @@ public class PCSelf : MonoBehaviour
         DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
         DracoInvoker.register_free_pc_callback(OnFreePCCallback);
         DracoInvoker.initialize();
-        int initCode = Realsense2Invoker.initialize(CamWidth, CamHeight, CamFPS, CamClose, CamFar, UseCam);
+        int initCode = Realsense2Invoker.initialize(CamWidth, CamHeight, CamFPS, CamClose, CamFar, UseCam, FrameMode);
         if (initCode == 0)
         {
             workerThread = new System.Threading.Thread(pollFrames);

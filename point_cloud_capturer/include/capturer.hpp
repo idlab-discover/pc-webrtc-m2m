@@ -16,7 +16,7 @@ enum CAPTURER_SETUP_CODE : int {
 
 class Capturer {
     public:
-        Capturer(unsigned int fps) : fps(fps) {
+        Capturer(FrameMode mode, unsigned int fps) : mode(mode), fps(fps) {
 
         };
         virtual ~Capturer() {
@@ -28,6 +28,7 @@ class Capturer {
         virtual void stop() { frame_buffer.stop_buffer(); };
         virtual Frame* poll_next_frame() = 0; 
     protected:
+        FrameMode mode;
         unsigned int frame_nr = 0;
         unsigned int fps;
         FrameBuffer frame_buffer;

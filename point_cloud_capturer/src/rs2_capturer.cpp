@@ -45,14 +45,15 @@ CAPTURER_SETUP_CODE RS2Capturer::capture_next_frame()
         auto depth = frames.get_depth_frame();
     	depth = thres_filter.process(depth);
         auto rgb = frames.get_color_frame();
-        pc.map_to(rgb);
-        frame_buffer.add_to_buffer(new RS2Frame(
-			rgb.get_width(),
-			rgb.get_height(),
+		frame_buffer.add_to_buffer(new RS2Frame(
+			mode,
+			width,
+			height,
 			rgb.get_bytes_per_pixel(),
 			rgb.get_stride_in_bytes(),
-            pc.calculate(depth),
-			static_cast<const uint8_t*>(rgb.get_data()),
+			pc,
+            depth,
+			rgb,
 			frame_nr
         ));
     } catch (...) {

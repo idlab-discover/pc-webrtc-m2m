@@ -48,4 +48,25 @@ void RS2Frame::make_color_array(unsigned int width, unsigned height, unsigned in
     z_offset = 0.45;
 }
 
-
+void RS2Frame::make_raw_data_arrays(unsigned int width, unsigned int height, const rs2::depth_frame& depth_frame, const rs2::video_frame& color_frame) {
+    const uint16_t* depth_ptr = static_cast<const uint16_t*>(depth_frame.get_data());
+    const uint8_t* color_ptr = static_cast<const uint8_t*>(color_frame.get_data());
+    raw_color.reserve(width*height*3);
+    raw_depth.reserve(width*height);
+    for(int i=0; i < width*height; i++) {
+        if(depth_ptr[i] > 1500 || depth_ptr[i] == 0) {
+            raw_depth[i]=0;
+            raw_color[(i*3)+0]=0;
+            raw_color[(i*3)+1]=0;
+            raw_color[(i*3)+2]=0;
+        } else {
+            raw_depth[i]=depth_ptr[i];
+            raw_color[(i*3)+0]=color_ptr[(i*3)+0];
+            raw_color[(i*3)+1]=color_ptr[(i*3)+1];
+            raw_color[(i*3)+2]=color_ptr[(i*3)+2];
+            n_points++;
+        }
+    }
+    //raw_depth.assign(depth_ptr, depth_ptr+width*height);
+    //raw_color.assign(color_ptr, color_ptr+width*height*3);
+}
