@@ -12,7 +12,16 @@ enum CAPTURER_SETUP_CODE : int {
 	DeviceInRecovery = 6,
 	UnknownException = 7
 };
-
+struct CapturerIntrinsics {
+    unsigned int  width;    
+    unsigned int  height;  
+    unsigned int  model;
+    float         ppx;       
+    float         ppy;     
+    float         fx;     
+    float         fy;        
+    float         coeffs[5]; 
+};
 
 class Capturer {
     public:
@@ -27,6 +36,8 @@ class Capturer {
         virtual CAPTURER_SETUP_CODE capture_next_frame() = 0;
         virtual void stop() { frame_buffer.stop_buffer(); };
         virtual Frame* poll_next_frame() = 0; 
+        virtual CapturerIntrinsics get_depth_intrinsics() = 0;
+        virtual CapturerIntrinsics get_color_intrinsics() = 0;
     protected:
         FrameMode mode;
         unsigned int frame_nr = 0;

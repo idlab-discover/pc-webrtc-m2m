@@ -73,7 +73,7 @@ void ArtificalFrame::make_raw_data_arrays(unsigned int side_size)
         float hue = std::fmod(static_cast<float>(std::clock()) / CLOCKS_PER_SEC * 60, 360.0f);
         float r, g, b;
         int s_i = (10*i) % 100;
-        float s = (float)(s_i)/100.0;
+        float s = (float)(i)/(float)(side_size);
         HSVtoRGB(hue, s, 1.0f, r, g, b);
         uint8_t r_small = static_cast<uint8_t>(r * 255);
         uint8_t g_small = static_cast<uint8_t>(g * 255);

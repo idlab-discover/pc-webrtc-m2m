@@ -36,7 +36,7 @@ class EncodedRaw {
         unsigned int frame_nr;
         unsigned int width;
         unsigned int height;
-        unsigned int n_points
+        unsigned int n_points;
         EncodedDepth* enc_depth;
         EncodedJpeg* enc_color;
 };

@@ -17,6 +17,8 @@
 #include "artificical_capturer.hpp"
 #include "raw_frame.hpp"
 #include "artificical_raw_converter.hpp"
+#include "rs2_raw_converter.hpp"
+
 using namespace std;
 
 uint32_t n_tiles;
@@ -219,8 +221,26 @@ void free_raw_frame(RawFrame* frame) {
 	delete frame;
 }
 
-RawConverter* create_new_raw_converter(unsigned int width, unsigned int height) {
-	return new ArtificalRawConverter(75);
+CapturerIntrinsics get_depth_intrinsics() {
+	if(capturer == nullptr) {
+		return {};
+	}
+	return capturer->get_depth_intrinsics();
+}
+
+CapturerIntrinsics get_color_intrinsics() {
+	if(capturer == nullptr) {
+		return {};
+	}
+	return capturer->get_color_intrinsics();
+}
+
+RawConverter* create_new_raw_converter(bool use_cam, CapturerIntrinsics depth_intrinsics, CapturerIntrinsics color_intrinsics) {
+	if(use_cam) {
+		return new RS2RawConverter(depth_intrinsics, color_intrinsics);
+	} else {
+		return new ArtificalRawConverter(75);
+	}
 }
 
 void convert_raw_frame(RawConverter* c, uint16_t* depth, uint8_t* color, Vector3* pos_out, Color32* col_out) {

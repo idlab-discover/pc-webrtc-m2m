@@ -27,6 +27,10 @@ public class CapturingTestMultiRaw : MonoBehaviour
     System.Threading.Thread myThread;
     static Dictionary<UInt32, DecodedRawFrame> inProgessFrames;
     static ConcurrentQueue<DecodedRawFrame> queue;
+
+    static Dictionary<UInt32, DecodedRawFrame2> inProgessFrames2;
+    static ConcurrentQueue<DecodedRawFrame2> queue2;
+
     private static Mutex mut = new Mutex();
     Mesh currentMesh;
     //private MeshFilter meshFilter;
@@ -40,7 +44,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
    /// private static UnityEngine.Color[] c;
    /// </summary>
     private static bool colUpdate;
-    private IntPtr rawConverter = IntPtr.Zero;
+    private static IntPtr rawConverter = IntPtr.Zero;
     enum Color { red, green, blue, black, white, yellow, orange };
     [MonoPInvokeCallback(typeof(DLLLogger.debugCallback))]
     static void OnDebugCallback(IntPtr request, int color, int size)
@@ -70,7 +74,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
     }
 
     [MonoPInvokeCallback(typeof(RawInvoker.colorDoneCallback))]
-    static void OnColorDoneCallback(IntPtr rawDataPtr, UInt32 size, UInt32 frameNr, UInt32 width, UInt32 height, UInt64 timestamp)
+    static void OnColorDoneCallback(IntPtr rawDataPtr, UInt32 size, UInt32 frameNr, UInt32 width, UInt32 height, UInt32 nPoints, UInt64 timestamp)
     {
         if (frameNr % 100 == 0)
         {
@@ -78,6 +82,45 @@ public class CapturingTestMultiRaw : MonoBehaviour
         }
         
         IntPtr decoded_color = RawInvoker.decode_color(rawDataPtr, size, width, height);
+        if (rawConverter != IntPtr.Zero)
+        {
+            mut.WaitOne();
+            DecodedRawFrame2 pcData2;
+            if (!inProgessFrames2.TryGetValue(frameNr, out pcData2))
+            {
+                pcData2 = new DecodedRawFrame2((int)frameNr, (int)nPoints, timestamp);
+                inProgessFrames2.Add(frameNr, pcData2);
+            }
+            pcData2.DecodedColor = decoded_color;
+            pcData2.ColorsCompleted = true;
+            if (pcData2.IsCompleted)
+            {
+                
+                IntPtr buf_depth = RawInvoker.get_decoded_depth_data(pcData2.DecodedDepth);
+                IntPtr buf_color = RawInvoker.get_decoded_depth_data(pcData2.DecodedColor);
+                GCHandle hDepth = GCHandle.Alloc(pcData2.Points, GCHandleType.Pinned);
+                GCHandle hColor = GCHandle.Alloc(pcData2.Colors, GCHandleType.Pinned);
+                try
+                {
+                    Realsense2Invoker.convert_raw_frame(rawConverter, buf_depth, buf_color, hDepth.AddrOfPinnedObject(), hColor.AddrOfPinnedObject());
+                }
+                finally
+                {
+                    hDepth.Free();
+                    hColor.Free();
+                }
+                RawInvoker.free_decoded_color(pcData2.DecodedColor);
+                RawInvoker.free_decoded_depth(pcData2.DecodedDepth);
+                if (frameNr % 100 == 0)
+                {
+                    Debug.Log("Frame done2: " + frameNr + " " + ((ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - timestamp));
+                }
+                inProgessFrames2.Remove(frameNr);
+                queue2.Enqueue(pcData2);
+            }
+            mut.ReleaseMutex();
+            return;
+        }
         IntPtr buf = RawInvoker.get_decoded_color_data(decoded_color);
         
         mut.WaitOne();
@@ -122,11 +165,49 @@ public class CapturingTestMultiRaw : MonoBehaviour
     }
 
     [MonoPInvokeCallback(typeof(RawInvoker.depthDoneCallback))]
-    static void OnDepthDoneCallback(IntPtr rawDataPtr, UInt32 size, UInt32 frameNr, UInt32 width, UInt32 height, UInt64 timestamp)
+    static void OnDepthDoneCallback(IntPtr rawDataPtr, UInt32 size, UInt32 frameNr, UInt32 width, UInt32 height, UInt32 nPoints, UInt64 timestamp)
     {
         // Debug.Log("depth done: " + size + " " + width + " " + height);
        
         IntPtr decoded_depth = RawInvoker.decode_depth(rawDataPtr, width, height);
+        if(rawConverter != IntPtr.Zero)
+        {
+            mut.WaitOne();
+            DecodedRawFrame2 pcData2;
+            if (!inProgessFrames2.TryGetValue(frameNr, out pcData2))
+            {
+                pcData2 = new DecodedRawFrame2((int)frameNr, (int)nPoints, timestamp);
+                inProgessFrames2.Add(frameNr, pcData2);
+            }
+            pcData2.DecodedDepth = decoded_depth;
+            pcData2.PointsCompleted = true;
+            if (pcData2.IsCompleted)
+            {
+                
+                IntPtr buf_depth = RawInvoker.get_decoded_depth_data(pcData2.DecodedDepth);
+                IntPtr buf_color = RawInvoker.get_decoded_depth_data(pcData2.DecodedColor);
+                GCHandle hDepth = GCHandle.Alloc(pcData2.Points, GCHandleType.Pinned);
+                GCHandle hColor = GCHandle.Alloc(pcData2.Colors, GCHandleType.Pinned);
+                try
+                {
+                    Realsense2Invoker.convert_raw_frame(rawConverter, buf_depth, buf_color, hDepth.AddrOfPinnedObject(), hColor.AddrOfPinnedObject());
+                } finally
+                {
+                    hDepth.Free();
+                    hColor.Free();
+                }
+                RawInvoker.free_decoded_color(pcData2.DecodedColor);
+                RawInvoker.free_decoded_depth(pcData2.DecodedDepth);
+                if (frameNr % 100 == 0)
+                {
+                    Debug.Log("Frame done2: " + frameNr + " " + ((ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - timestamp));
+                }
+                inProgessFrames2.Remove(frameNr);
+                queue2.Enqueue(pcData2);
+            }
+            mut.ReleaseMutex();
+            return;
+        }
         IntPtr buf = RawInvoker.get_decoded_depth_data(decoded_depth);
         
   
@@ -161,7 +242,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
             }
             if (frameNr % 100 == 0)
             {
-                Debug.Log("NPoints: " + frameNr + " " + pcData.Points.Count);
+                Debug.Log("NPoints: " + frameNr + " " + pcData.Points.Count + " " + nPoints);
             }
         }
         
@@ -203,6 +284,8 @@ public class CapturingTestMultiRaw : MonoBehaviour
         frameMode = sessionInfo.frameMode;
         queue = new ConcurrentQueue<DecodedRawFrame>();
         inProgessFrames = new();
+        queue2 = new ConcurrentQueue<DecodedRawFrame2>();
+        inProgessFrames2 = new();
         //meshFilter = GetComponent<MeshFilter>();
         Realsense2Invoker.RegisterDebugCallback(OnDebugCallback);
         Realsense2Invoker.set_logging("", debug);
@@ -217,13 +300,24 @@ public class CapturingTestMultiRaw : MonoBehaviour
             tex = new Texture2D((int)sessionInfo.camWidth, (int)sessionInfo.camHeight);
             RawImg.rectTransform.sizeDelta = new Vector2(sessionInfo.camWidth, (int)sessionInfo.camHeight);
             RawImg.rectTransform.localScale = new Vector2(0.5f, 0.5f);
+            CapturerIntrinsics depthInt = Realsense2Invoker.get_depth_intrinsics();
+            CapturerIntrinsics colorInt = Realsense2Invoker.get_color_intrinsics();
+            Debug.Log("D INT: " + depthInt.ToString());
+           Debug.Log("C INT: " + colorInt.ToString());
             RawInvoker.initialize(sessionInfo.camWidth, sessionInfo.camHeight, sessionInfo.jpegQuality);
+            rawConverter = Realsense2Invoker.create_new_raw_converter(true, depthInt, colorInt);
         } else
         {
             tex = new Texture2D((int)75*75, (int)75);
-            //tex.filterMode = FilterMode.Point;
-            tex.wrapMode =TextureWrapMode.Clamp;
+         //   tex.filterMode = FilterMode.Point;
+           tex.wrapMode =TextureWrapMode.Clamp;
             RawInvoker.initialize(75*75, 75, sessionInfo.jpegQuality);
+           // RawImg.rectTransform.sizeDelta = new Vector2(75, 75);
+            RawImg.rectTransform.localScale = new Vector2(2f, 2f);
+            CapturerIntrinsics depthInt = Realsense2Invoker.get_depth_intrinsics();
+            CapturerIntrinsics colorInt = Realsense2Invoker.get_color_intrinsics();
+            Debug.Log("INT: "+ depthInt.ToString());
+            rawConverter = Realsense2Invoker.create_new_raw_converter(false, depthInt, colorInt);
         }
         RawImg.texture = tex;
         
@@ -241,7 +335,15 @@ public class CapturingTestMultiRaw : MonoBehaviour
                     pcSelf.transform.parent = renderers[i].transform;
                 } else
                 {
-                    renderers[i].transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+                    if(sessionInfo.useCam)
+                    {
+                        renderers[i].transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+                      //  renderers[i].transform.rotation = 
+                    } else
+                    {
+                        renderers[i].transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
+                    }
+                   
                 }
                 
             }
@@ -267,29 +369,60 @@ public class CapturingTestMultiRaw : MonoBehaviour
                 Debug.Log("Dequeue Successful!");
                 tex.SetPixels32(c.Colors.ToArray());
                 tex.Apply();
-            /*   Destroy(currentMesh);
-                currentMesh = new Mesh();
-                currentMesh.indexFormat = c.NPoints > 65535 ?
-                        IndexFormat.UInt32 : IndexFormat.UInt16;
-                currentMesh.SetVertices(c.Points);
-                currentMesh.SetColors(c.Colors);
-                currentMesh.SetIndices(
-                    Enumerable.Range(0, currentMesh.vertexCount).ToArray(),
-                    MeshTopology.Points, 0
-                );
-                Debug.Log($"NVertex: {currentMesh.vertexCount}");
-                Debug.Log($"Bounds: {currentMesh.bounds}");
-                currentMesh.UploadMeshData(true);
-                for (int i = 0; i < filters.Count; i++)
-                {
-                    if (i != ClientID)
+                   Destroy(currentMesh);
+                    currentMesh = new Mesh();
+                    currentMesh.indexFormat = c.NPoints > 65535 ?
+                            IndexFormat.UInt32 : IndexFormat.UInt16;
+                    currentMesh.SetVertices(c.Points);
+                    currentMesh.SetColors(c.Colors);
+                    currentMesh.SetIndices(
+                        Enumerable.Range(0, currentMesh.vertexCount).ToArray(),
+                        MeshTopology.Points, 0
+                    );
+                    Debug.Log($"NVertex: {currentMesh.vertexCount}");
+                    Debug.Log($"Bounds: {currentMesh.bounds}");
+                    currentMesh.UploadMeshData(true);
+                    for (int i = 0; i < filters.Count; i++)
                     {
-                        filters[i].mesh = currentMesh;
+                        if (i != ClientID)
+                        {
+                            filters[i].mesh = currentMesh;
+                        }
                     }
-                }
-            */
+                
             }
 
+        }
+        if (!queue2.IsEmpty)
+        {
+            bool succes = queue2.TryDequeue(out var c);
+            if (succes)
+            {
+                Debug.Log("Dequeue Successful!");
+             //   tex.SetPixels32(c.Colors);
+             //   tex.Apply();
+                   Destroy(currentMesh);
+                    currentMesh = new Mesh();
+                    currentMesh.indexFormat = c.NPoints > 65535 ?
+                            IndexFormat.UInt32 : IndexFormat.UInt16;
+                    currentMesh.SetVertices(c.Points);
+                    currentMesh.SetColors(c.Colors);
+                    currentMesh.SetIndices(
+                        Enumerable.Range(0, currentMesh.vertexCount).ToArray(),
+                        MeshTopology.Points, 0
+                    );
+                    Debug.Log($"NVertex: {currentMesh.vertexCount}");
+                    Debug.Log($"Bounds: {currentMesh.bounds}");
+                    currentMesh.UploadMeshData(true);
+                    for (int i = 0; i < filters.Count; i++)
+                    {
+                        if (i != ClientID)
+                        {
+                            filters[i].mesh = currentMesh;
+                        }
+                    }
+                
+            }
         }
     }
 
@@ -335,7 +468,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
                         {
                             Debug.Log($"Get size");
                //             if (fr % 20 == 0)
-                                RawInvoker.encode_frame(frame);
+                               RawInvoker.encode_frame(frame);
                           
                             
                             //  Debug.Log($"Number of points: {nPoints}");

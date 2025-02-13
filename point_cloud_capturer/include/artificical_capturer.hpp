@@ -3,8 +3,6 @@
 #include "framework.h"
 #include "capturer.hpp"
 
-
-
 class ArtificalCapturer : public Capturer {
     public:
         ArtificalCapturer(FrameMode mode, unsigned int side_size, unsigned int fps) : Capturer(mode, fps), side_size(side_size) {
@@ -17,6 +15,8 @@ class ArtificalCapturer : public Capturer {
         CAPTURER_SETUP_CODE init();
         CAPTURER_SETUP_CODE capture_next_frame();
         Frame* poll_next_frame();
+        virtual CapturerIntrinsics get_depth_intrinsics();
+        virtual CapturerIntrinsics get_color_intrinsics();
     private:
         unsigned int side_size;
         std::chrono::milliseconds interframe_delay;

@@ -46,12 +46,15 @@ public static class Realsense2Invoker
     [DllImport(dllName)]
     public static extern void free_raw_frame(IntPtr frame);
     [DllImport(dllName)]
-    public static extern IntPtr create_new_raw_converter(uint width, uint height);
+    public static extern IntPtr create_new_raw_converter(bool use_cam, CapturerIntrinsics depth_intrinsics, CapturerIntrinsics color_intrinsics);
     
     [DllImport(dllName)]
     public static extern void convert_raw_frame(IntPtr c, IntPtr depth, IntPtr color, IntPtr pos_out, IntPtr col_out);
     [DllImport(dllName)]
     public static extern void free_raw_converter(IntPtr c);
-
+    [DllImport(dllName)]
+    public static extern CapturerIntrinsics get_depth_intrinsics();
+    [DllImport(dllName)]
+    public static extern CapturerIntrinsics get_color_intrinsics();
 
 }

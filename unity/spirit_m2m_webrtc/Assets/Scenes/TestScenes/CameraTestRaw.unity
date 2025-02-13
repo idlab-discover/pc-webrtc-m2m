@@ -879,6 +879,8 @@ MonoBehaviour:
   renderers:
   - {fileID: 1887392947}
   - {fileID: 1491986620}
+  - {fileID: 623739658}
+  - {fileID: 583637374}
   VRCam: {fileID: 4592956391713993908, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
   Table: {fileID: 545747847}
   ClientID: 0

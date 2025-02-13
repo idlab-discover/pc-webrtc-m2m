@@ -9,34 +9,43 @@ struct RS2Bounds {
 
 class RS2Frame : public Frame {
     public:
-        RS2Frame(FrameMode mode, unsigned int width, unsigned height, unsigned int bpp , unsigned int stride, rs2::pointcloud& pc, const rs2::depth_frame& depth_frame, const rs2::video_frame& color_frame, unsigned int frame_nr) : width(width), height(height), Frame(frame_nr) {
+        RS2Frame(FrameMode mode, unsigned int width, unsigned height, unsigned int bpp , unsigned int stride, const rs2::depth_frame& depth_frame, const rs2::video_frame& color_frame, unsigned int frame_nr) : width(width), height(height), Frame(frame_nr) {
             switch (mode)
             {
-                case FrameMode::RealData:
+                case FrameMode::RealData: {
+                    rs2::pointcloud pc;
                     pc.map_to(color_frame);
                     points = pc.calculate(depth_frame);
                     make_color_array(width, height, bpp, stride, static_cast<const uint8_t*>(color_frame.get_data()));
                     break;
-                case FrameMode::RawData:
+                } 
+                case FrameMode::RawData: {
                     make_raw_data_arrays(width, height, depth_frame, color_frame);
                     break;
-                case FrameMode::Both:
+                }
+                case FrameMode::Both: {
+                    rs2::pointcloud pc;
                     pc.map_to(color_frame);
                     pc.calculate(depth_frame);
                     make_color_array(width, height, bpp, stride, static_cast<const uint8_t*>(color_frame.get_data()));
                     make_raw_data_arrays(width, height, depth_frame, color_frame);
                     break;
+                }
+                    
             }
             
         };
         ~RS2Frame() {
+            if(vertices != nullptr) {
+                delete[] vertices;
+            }
             if(colors != nullptr) {
                 delete[] colors;
             }
             
         }
-        unsigned int get_frame_size() { return points.size(); }
-        Vertex* get_vertex_array() { return const_cast<Vertex*>(reinterpret_cast<const Vertex*>(points.get_vertices())); };
+        unsigned int get_frame_size() { return n_points; }
+        Vertex* get_vertex_array() { return vertices; };
         Color* get_color_array() { return colors;};
 
         uint16_t* get_raw_depth() {return raw_depth.data();};
@@ -48,6 +57,7 @@ class RS2Frame : public Frame {
     private:
         rs2::points points;
         Color* colors = nullptr;
+        Vertex* vertices = nullptr;
         std::vector<uint16_t> raw_depth;
         std::vector<uint8_t> raw_color;
         unsigned int width;

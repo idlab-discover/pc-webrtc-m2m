@@ -97,6 +97,7 @@ public class CapturingTestMulti : MonoBehaviour
                     if (pointsUnsafePtr[(i * 3)] == 0 && pointsUnsafePtr[(i * 3) + 1] == 0 && pointsUnsafePtr[(i * 3) + 2] == 0)
                     {
                         zeros++;
+                        continue;
                     }
                     pcData.Points.Add(new Vector3(pointsUnsafePtr[(i * 3)] * -1, pointsUnsafePtr[(i * 3) + 1] * -1, pointsUnsafePtr[(i * 3) + 2] * -1));
                     pcData.Colors.Add(new Color32(colorsUnsafePtr[(i * 3)], colorsUnsafePtr[(i * 3) + 1], colorsUnsafePtr[(i * 3) + 2], 255));
@@ -111,7 +112,11 @@ public class CapturingTestMulti : MonoBehaviour
           pcData.CurrentNDescriptions++;
           if (pcData.MaxDescriptions == pcData.CurrentNDescriptions)
           {
-              inProgessFrames.Remove(frameNr);
+            if (frameNr % 100 == 0)
+            {
+                Debug.Log("Frame done draco: " + frameNr + " " + ((ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - timestamp));
+            }
+            inProgessFrames.Remove(frameNr);
               queue.Enqueue(pcData);
           }
         mut.ReleaseMutex();
@@ -220,7 +225,7 @@ public class CapturingTestMulti : MonoBehaviour
 
     void pollFrames()
     {
-      
+       
         while(keep_working)
         {
             switch(frameMode)
@@ -228,6 +233,7 @@ public class CapturingTestMulti : MonoBehaviour
                     case FrameMode.RealData:
                     {
                         Debug.Log($"Poll next");
+                   
                         IntPtr frame = Realsense2Invoker.poll_next_point_cloud();
                         Debug.Log($"Poll done");
                         if (frame != IntPtr.Zero)
