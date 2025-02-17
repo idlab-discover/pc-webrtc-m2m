@@ -12,11 +12,12 @@ import (
 )
 
 const (
-	ReadyPacketType       uint32 = 0
-	TilePacketType        uint32 = 1
-	AudioPacketType       uint32 = 2
-	ControlPacketType     uint32 = 3
-	TrackStatusPacketType uint32 = 4
+	ReadyPacketType        uint32 = 0
+	TilePacketType         uint32 = 1
+	AudioPacketType        uint32 = 2
+	ControlPacketType      uint32 = 3
+	TrackStatusPacketType  uint32 = 4
+	CapturerIntrinsicsType uint32 = 5
 )
 
 // TODO seperate this into different struct. We also want to use packet type for control packets (i.e. fov)
@@ -256,6 +257,17 @@ func (pc *ProxyConnection) StartListening() {
 					})
 				}
 
+			} else if ptype == CapturerIntrinsicsType {
+				go func() {
+					for pc.wsHandler == nil {
+						time.Sleep(100 * time.Millisecond)
+					}
+					pc.wsHandler.SendMessage(WebsocketPacket{
+						uint64(*clientID),
+						8,
+						string(buffer[4:]),
+					})
+				}()
 			}
 
 		}
@@ -295,6 +307,14 @@ func (pc *ProxyConnection) SendTrackStatusPacket(clientID uint32, lastFrameNr ui
 		b[13] = 0
 	}
 	pc.sendPacket(b, 0, TrackStatusPacketType)
+}
+
+func (pc *ProxyConnection) SendCapturerIntrinsicsPacket(clientID uint32, cameraIntrinsics string) {
+	b := make([]byte, 4+len(cameraIntrinsics))
+	binary.LittleEndian.PutUint32(b[0:], clientID)
+	copy(b[4:], []byte(cameraIntrinsics))
+
+	pc.sendPacket(b, 0, CapturerIntrinsicsType)
 }
 
 func (pc *ProxyConnection) NextTile(tile uint32) []byte {

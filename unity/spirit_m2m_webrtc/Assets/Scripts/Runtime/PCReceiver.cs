@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Xml;
@@ -25,6 +26,11 @@ public class PCReceiver : MonoBehaviour
 
     private Dictionary<int, DecodedPointCloudData> inProgessFrames;
     private ConcurrentQueue<DecodedPointCloudData> queue;
+
+    private IntPtr rawConverter;
+    private Dictionary<UInt32, DecodedRawFrame> inProgessFramesRaw;
+    private ConcurrentQueue<DecodedRawFrame> queueRaw;
+
     private static Mutex mut = new Mutex();
     private int lastCompletedFrameNr = -1;
     
@@ -45,8 +51,11 @@ public class PCReceiver : MonoBehaviour
         }
         queue = new();
         inProgessFrames = new();
-       // activeDescriptions = new(NDescriptions);
-        for(int i = 0; i < NDescriptions; i++)
+        queueRaw = new();
+        inProgessFramesRaw = new();
+
+        // activeDescriptions = new(NDescriptions);
+        for (int i = 0; i < NDescriptions; i++)
         {
             activeDescriptions.Add(false);
         }
@@ -116,16 +125,213 @@ public class PCReceiver : MonoBehaviour
                 }
                 
             }
+        } else
+        {
+            if (!queueRaw.IsEmpty)
+            {
+                DecodedRawFrame dec = null;
+                bool succes = false;
+                while (!queueRaw.IsEmpty)
+                {
+                    succes = queueRaw.TryDequeue(out dec);
+                }
+
+                if (succes)
+                {
+                    Debug.Log("Dequeue Successful!");
+                    Destroy(currentMesh);
+                    currentMesh = new Mesh();
+                    currentMesh.indexFormat = dec.NPoints > 65535 ?
+                            IndexFormat.UInt32 : IndexFormat.UInt16;
+                    currentMesh.SetVertices(dec.Points);
+                    currentMesh.SetColors(dec.Colors);
+                    currentMesh.SetIndices(
+                        Enumerable.Range(0, currentMesh.vertexCount).ToArray(),
+                        MeshTopology.Points, 0
+                    );
+                    currentMesh.UploadMeshData(true);
+                    int rendererIndex = qualityToRenderIndex(100);
+                    for (int i = 0; i < PCRenderers.Count; i++)
+                    {
+                        if (i == rendererIndex)
+                        {
+                            PCRenderers[i].SetActive(true);
+                            meshFilters[i].mesh = currentMesh;
+                        }
+                        else
+                        {
+                            PCRenderers[i].SetActive(false);
+                        }
+
+                    }
+                    if (useAudio)
+                    {
+                        audioPlayback.SetTimestampLatestPC(dec.Timestamp);
+                    }
+
+                }
+            }
         }
        
     }
     void OnDestroy()
     {
-        for(int i = 0;i < NDescriptions;i++)
+        if (rawConverter != IntPtr.Zero)
+        {
+            Realsense2Invoker.free_raw_converter(rawConverter);
+            rawConverter = IntPtr.Zero;
+        }
+        for (int i = 0;i < NDescriptions;i++)
         {
        //     workerThreads[i].Join();
         }    
     }
+    private unsafe void decodeDracoFrame(byte* ptr, byte[] messageBuffer, uint clientID, uint descriptionID, UInt64 timestamp, int descriptionFrameNr, int descriptionSize)
+    {
+        IntPtr decoderPtr = IntPtr.Zero;
+        Debug.Log($"Start decoding");
+        decoderPtr = DracoInvoker.decode_pc(ptr + 20, (uint)descriptionSize);
+        Debug.Log($"Decoding done");
+        if (decoderPtr == IntPtr.Zero)
+        {
+            Debug.Log($"Debug error at client {ClientID} for description {descriptionID}");
+            return;
+        }
+        mut.WaitOne();
+        DecodedPointCloudData pcData;
+        if (!inProgessFrames.TryGetValue(descriptionFrameNr, out pcData))
+        {
+            int nTotalPointsInFrame = BitConverter.ToInt32(messageBuffer, 12);
+            pcData = new DecodedPointCloudData(descriptionFrameNr, nTotalPointsInFrame, NDescriptions, activeDescriptions, timestamp);
+            inProgessFrames.Add(descriptionFrameNr, pcData);
+        }
+        UInt32 nDecodedPoints = DracoInvoker.get_n_points(decoderPtr);
+        IntPtr pointsPtr = DracoInvoker.get_point_array(decoderPtr);
+        IntPtr colorPtr = DracoInvoker.get_color_array(decoderPtr);
+        float* pointsUnsafePtr = (float*)pointsPtr;
+        byte* colorsUnsafePtr = (byte*)colorPtr;
+
+        for (int i = 0; i < nDecodedPoints; i++)
+        {
+            //    points[i] = new Vector3(0, 0, 0);
+            pcData.Points.Add(new Vector3(pointsUnsafePtr[(i * 3)] * -1, pointsUnsafePtr[(i * 3) + 1] * -1, pointsUnsafePtr[(i * 3) + 2] * -1));
+            pcData.Colors.Add(new Color32(colorsUnsafePtr[(i * 3)], colorsUnsafePtr[(i * 3) + 1], colorsUnsafePtr[(i * 3) + 2], 255));
+        }
+        DracoInvoker.free_decoder(decoderPtr);
+        Debug.Log($"Decoders freed");
+        pcData.CompletionStatus[(int)descriptionID] = true;
+        pcData.CurrentNDescriptions++;
+        pcData.Quality += descToQual(descriptionID);
+        if (pcData.IsCompleted)
+        {
+            if (descriptionFrameNr % 10 == 0)
+            {
+                Debug.Log($"Frame {descriptionFrameNr} completed, last compl= {lastCompletedFrameNr}");
+            }
+
+            inProgessFrames.Remove(descriptionFrameNr);
+            if (descriptionFrameNr >= lastCompletedFrameNr)
+            {
+                lastCompletedFrameNr = pcData.FrameNr;
+                queue.Enqueue(pcData);
+            }
+
+        }
+        mut.ReleaseMutex();
+    }
+
+    private unsafe void decodeDepthFrame(byte* ptr, byte[] messageBuffer, UInt64 timestamp, int frameNr)
+    {
+        
+        if (rawConverter != IntPtr.Zero)
+        {
+            mut.WaitOne();
+
+            uint nPoints = BitConverter.ToUInt32(messageBuffer, 16);
+            uint width = BitConverter.ToUInt32(messageBuffer, 20);
+            uint height = BitConverter.ToUInt32(messageBuffer, 24);
+            uint size = BitConverter.ToUInt32(messageBuffer, 28);
+
+            IntPtr decoded_depth = RawInvoker.decode_depth(new IntPtr(ptr + 32), width, height);
+           
+            DecodedRawFrame rawData;
+            if (!inProgessFramesRaw.TryGetValue((uint)frameNr, out rawData))
+            {
+                rawData = new DecodedRawFrame(frameNr, (int)nPoints, timestamp);
+                inProgessFramesRaw.Add((uint)frameNr, rawData);
+            }
+            rawData.DecodedDepth = decoded_depth;
+            rawData.PointsCompleted = true;
+       
+          
+            if (rawData.IsCompleted)
+            {
+                completeRawFrame(rawData);
+            }
+            mut.ReleaseMutex();
+        }
+    }
+
+    private unsafe void decodeColorFrame(byte* ptr, byte[] messageBuffer, UInt64 timestamp, int frameNr)
+    {
+        
+        if (rawConverter != IntPtr.Zero)
+        {
+            mut.WaitOne();
+
+            uint nPoints = BitConverter.ToUInt32(messageBuffer, 16);
+            uint width = BitConverter.ToUInt32(messageBuffer, 20);
+            uint height = BitConverter.ToUInt32(messageBuffer, 24);
+            uint size = BitConverter.ToUInt32(messageBuffer, 28);
+            Debug.Log(nPoints + " " + width + " " + height + " " + size);
+            IntPtr decoded_color = RawInvoker.decode_color(new IntPtr(ptr+32), size, width, height);
+
+             DecodedRawFrame rawData;
+             if (!inProgessFramesRaw.TryGetValue((uint)frameNr, out rawData))
+             {
+                 rawData = new DecodedRawFrame(frameNr, (int)nPoints, timestamp);
+                 inProgessFramesRaw.Add((uint)frameNr, rawData);
+             }
+          
+             rawData.DecodedColor = decoded_color;
+             rawData.ColorsCompleted = true;
+       
+            if (rawData.IsCompleted)
+             {
+                 completeRawFrame(rawData);
+             }
+             mut.ReleaseMutex();
+        }
+    }
+
+    private void completeRawFrame(DecodedRawFrame rawFrame)
+    {
+        
+            IntPtr buf_depth = RawInvoker.get_decoded_depth_data(rawFrame.DecodedDepth);
+            IntPtr buf_color = RawInvoker.get_decoded_color_data(rawFrame.DecodedColor);
+            GCHandle hDepth = GCHandle.Alloc(rawFrame.Points, GCHandleType.Pinned);
+            GCHandle hColor = GCHandle.Alloc(rawFrame.Colors, GCHandleType.Pinned);
+            try
+            {
+                Realsense2Invoker.convert_raw_frame(rawConverter, buf_depth, buf_color, hDepth.AddrOfPinnedObject(), hColor.AddrOfPinnedObject());
+            }
+            finally
+            {
+                hDepth.Free();
+                hColor.Free();
+            }
+          
+            RawInvoker.free_decoded_color(rawFrame.DecodedColor);
+            RawInvoker.free_decoded_depth(rawFrame.DecodedDepth);
+            if (rawFrame.FrameNr % 100 == 0)
+            {
+                Debug.Log("Frame done2: " + rawFrame.FrameNr + " " + ((ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - rawFrame.Timestamp));
+            }
+            inProgessFramesRaw.Remove((uint)rawFrame.FrameNr);
+            queueRaw.Enqueue(rawFrame);
+        
+    }
+
     private void pollDescription(uint descriptionID)
     {
         WebRTCInvoker.wait_for_peer();
@@ -142,7 +348,7 @@ public class PCReceiver : MonoBehaviour
             }
             Debug.Log("Got a tile");
             byte[] messageBuffer = new byte[descriptionSize];
-            IntPtr decoderPtr = IntPtr.Zero;
+            
             //int descriptionFrameNr = WebRTCInvoker.get_tile_frame_number(ClientID, descriptionID);
             unsafe
             {
@@ -155,70 +361,26 @@ public class PCReceiver : MonoBehaviour
                     {
                         continue;
                     }
-                    Debug.Log($"Start decoding");
-                    decoderPtr = DracoInvoker.decode_pc(ptr + 12, (uint)descriptionSize);
-                    Debug.Log($"Decoding done");           
-                    if (decoderPtr == IntPtr.Zero)
+                    uint frameCodec = BitConverter.ToUInt32(messageBuffer, 12);
+                    if((FrameCodec)frameCodec == FrameCodec.Draco)
                     {
-                        Debug.Log($"Debug error at client {ClientID} for description {descriptionID}");
-                        continue;
-                    }
-                    mut.WaitOne();
-                    DecodedPointCloudData pcData;
-                    if (!inProgessFrames.TryGetValue(descriptionFrameNr, out pcData))
+                        decodeDracoFrame(ptr, messageBuffer, ClientID, descriptionID, timestamp, descriptionFrameNr, descriptionSize);
+                    } else
                     {
-                        int nTotalPointsInFrame = BitConverter.ToInt32(messageBuffer, 4);
-                        pcData = new DecodedPointCloudData(descriptionFrameNr, nTotalPointsInFrame, NDescriptions, activeDescriptions, timestamp);
-                        inProgessFrames.Add(descriptionFrameNr, pcData);
-                    }
-                    UInt32 nDecodedPoints = DracoInvoker.get_n_points(decoderPtr);
-                    // TODO
-                    //      * Get header from frame
-                    //      * Check if frame exists
-                    //      * If not 
-
-                    // Header:
-                    //          * FrameNr
-                    //          * NPointsFrame
-                    //          * DescriptionNr
-
-                    // Frame:
-                    //          * NCompleted
-                    //          * Quality
-
-                    // TODO check if frame exists
-                    IntPtr pointsPtr = DracoInvoker.get_point_array(decoderPtr);
-                    IntPtr colorPtr = DracoInvoker.get_color_array(decoderPtr);
-                    float* pointsUnsafePtr = (float*)pointsPtr;
-                    byte* colorsUnsafePtr = (byte*)colorPtr;
-
-                    for (int i = 0; i < nDecodedPoints; i++)
-                    {
-                        //    points[i] = new Vector3(0, 0, 0);
-                        pcData.Points.Add(new Vector3(pointsUnsafePtr[(i * 3)] * -1, pointsUnsafePtr[(i * 3) + 1] * -1, pointsUnsafePtr[(i * 3) + 2] * -1));
-                        pcData.Colors.Add(new Color32(colorsUnsafePtr[(i * 3)], colorsUnsafePtr[(i * 3) + 1], colorsUnsafePtr[(i * 3) + 2], 255));
-                    }
-                    DracoInvoker.free_decoder(decoderPtr);
-                    Debug.Log($"Decoders freed");
-                    pcData.CompletionStatus[(int)descriptionID] = true;
-                    pcData.CurrentNDescriptions++;
-                    pcData.Quality += descToQual(descriptionID);
-                    if (pcData.IsCompleted)
-                    {
-                        if(descriptionFrameNr % 10 == 0)
+                        switch(descriptionID)
                         {
-                            Debug.Log($"Frame {descriptionFrameNr} completed, last compl= {lastCompletedFrameNr}");
+                            case 0: {
+                                    decodeDepthFrame(ptr, messageBuffer, timestamp, (int)descriptionFrameNr);
+                                    break;
+                            };
+                            case 1:
+                            {
+                                    decodeColorFrame(ptr, messageBuffer, timestamp, (int)descriptionFrameNr);
+                                    break;
+                            }
                         }
-                       
-                        inProgessFrames.Remove(descriptionFrameNr);
-                        if (descriptionFrameNr >= lastCompletedFrameNr)
-                        {
-                            lastCompletedFrameNr = pcData.FrameNr;
-                            queue.Enqueue(pcData);
-                        }
-                        
                     }
-                    mut.ReleaseMutex();
+                    
                 // queues[(int)descriptionID].Enqueue(new DecodedPointCloudData(points, colors));
                 }
             }              
@@ -257,6 +419,15 @@ public class PCReceiver : MonoBehaviour
             }
         }
         mut.ReleaseMutex();
+    }
+    public void OnIntrisicsUpdated(CapturerIntrinsics dInt, CapturerIntrinsics cInt)
+    {
+        if (rawConverter != IntPtr.Zero)
+        {
+            Realsense2Invoker.free_raw_converter(rawConverter);
+            rawConverter = IntPtr.Zero;
+        }
+        rawConverter = Realsense2Invoker.create_new_raw_converter(dInt.model != 7777, dInt, cInt);
     }
     private int descToQual(uint dscNr)
     {

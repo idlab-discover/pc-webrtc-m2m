@@ -31,7 +31,8 @@ struct PacketType {
 		AudioPacket = 2,
 		ControlPacket = 3,
 		TrackStatusPacket = 4,
-		NumTilePacket = 5
+		CapturerIntrinsics = 5
+		//NumTilePacket = 5
 	};
 };
 
@@ -143,6 +144,24 @@ struct TrackStatusChangedHeader {
 	}
 
 	TrackStatusChangedHeader(char** buf, size_t& avail) {
+		std::memcpy(data(), *buf, size());
+		*buf += size();
+		avail -= size();
+	}
+
+	char* data() {
+		return reinterpret_cast<char*>(this);
+	}
+};
+
+struct CameraIntrinsicsHeader {
+	uint32_t client_id;
+
+	static constexpr auto size() {
+		return sizeof(struct CameraIntrinsicsHeader);
+	}
+
+	CameraIntrinsicsHeader(char** buf, size_t& avail) {
 		std::memcpy(data(), *buf, size());
 		*buf += size();
 		avail -= size();

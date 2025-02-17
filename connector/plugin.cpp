@@ -8,6 +8,7 @@
 #include "packet_data.hpp"
 #include "plugin.h"
 #include "received_control.hpp"
+#include "capturer_intrinsics.hpp"
 
 #include <chrono>
 #include <fstream>
@@ -70,9 +71,17 @@ extern "C"
 	typedef void(*TrackChangeCallBack)(uint32_t client_id, uint32_t frame_nr, uint32_t tile_nr, bool is_added);
 	static TrackChangeCallBack trackChangeCallbackInstance = nullptr;
 	DLLExport void register_track_change_callback(TrackChangeCallBack cb);
+
+	typedef void(*IntrinsicsUpdatedCallBack)(uint32_t client_id, CapturerIntrinsics d_int, CapturerIntrinsics c_int);
+	static IntrinsicsUpdatedCallBack intrinsicsUpdatedCallBackInstance = nullptr;
+	DLLExport void register_intrisics_updated_callback(IntrinsicsUpdatedCallBack cb);
 }
 void register_track_change_callback(TrackChangeCallBack cb) {
 	trackChangeCallbackInstance = cb;
+}
+
+void register_intrisics_updated_callback(IntrinsicsUpdatedCallBack cb) {
+	intrinsicsUpdatedCallBackInstance = cb;
 }
 
 enum CONNECTION_SETUP_CODE : int {
@@ -469,6 +478,16 @@ void listen_for_data() {
 				
 				break;
 			};
+			case (PacketType::CapturerIntrinsics): {
+				if (intrinsicsUpdatedCallBackInstance != nullptr) {
+					struct CameraIntrinsicsHeader i_head(&buf, size);
+					struct CapturerIntrinsics d_int(&buf, size);
+					struct CapturerIntrinsics c_int(&buf, size);
+					intrinsicsUpdatedCallBackInstance(i_head.client_id, d_int, c_int);
+				}
+				
+				break;
+			}
 			default:
 				custom_log("listen_for_data: ERROR: unknown packet type " + to_string(p_type.type), Default, Color::Red);
 				guard.unlock();
@@ -926,7 +945,52 @@ int send_control_packet(void* data, uint32_t size) {
 }
 
 
+/*
+	This function allows to send out an audio frame to the Golang peer. It returns the amount of bytes sent.
+*/
+int send_intrisics_packet(void* data, uint32_t size) {
+	custom_log("send_intrisics_packet: Size " + to_string(size), Debug, Color::Green);
 
+	if (!initialized) {
+		custom_log("send_tile: ERROR: The DLL has not yet been initialized!", Default, Color::Red);
+		return -1;
+	}
+
+	// Required parameters
+	int full_size_sent = 0;
+	char* temp_d = reinterpret_cast<char*>(data);
+
+	// Make sure only one process is sending out packets
+	unique_lock<mutex> guard(m_send_data);
+
+	// Send out packets as long as needed
+	// Determine the amount of bytes to send out
+
+	// Insert all data into a buffer
+	char buf_msg[BUFLEN];
+	memcpy(buf_msg, reinterpret_cast<char*>(data), size);
+
+	// Send out the packet
+	int size_sent = send_packet(buf_msg, size, PacketType::CapturerIntrinsics);
+	if (size_sent < 0) {
+		guard.unlock();
+		custom_log("send_control_packet: ERROR: the return value of send_packet should not be negative!", Default,
+			Color::Red);
+		return -1;
+	}
+
+	// Update parameters
+	full_size_sent += size_sent;
+
+
+
+	custom_log("send_control_packet: Sent out control frame  " + to_string(full_size_sent) + " bytes", Debug, Color::Green);
+	// Release the mutex
+	guard.unlock();
+
+	// Return the amount of bytes sent
+	return full_size_sent;
+}
 
 void wait_for_peer() {
 	unique_lock<mutex> lk(m_peer_ready);

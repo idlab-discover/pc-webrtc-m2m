@@ -28,6 +28,6 @@ extern "C"
 	DLLExport void convert_raw_frame(RawConverter* c, uint16_t* depth, uint8_t* color, Vector3* pos_out, Color32* col_out);
 	DLLExport CapturerIntrinsics get_depth_intrinsics();
 	DLLExport CapturerIntrinsics get_color_intrinsics();
-	DLLExport int initialize(uint32_t width, uint32_t height, uint32_t fps, float min_dist, float max_dist, bool _use_cam, FrameMode mode);
+	DLLExport int initialize(uint32_t width, uint32_t height, uint32_t artificial_size, uint32_t fps, float min_dist, float max_dist, bool _use_cam, FrameMode mode);
 	DLLExport void clean_up();
 }

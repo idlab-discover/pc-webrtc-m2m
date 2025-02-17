@@ -8,7 +8,7 @@ void ArtificalRawConverter::convert_raw(uint16_t *depth, uint8_t *color, Vector3
         for(int i=0; i < side_size; i++) {
             for(int j=0; j < side_size; j++) {
                 if(depth[p] != 0) {
-                    p_out[a_p] = Vector3{(float)i, (float)j, (float)depth[p]};
+                    p_out[a_p] = Vector3{(float)i/100.0f, (float)j/100.0f, (float)depth[p]/100.0f};
                     c_out[a_p]= Color32{color[(p*3)], color[(p*3)+1], color[(p*3)+2], 255};
                     a_p++;
                 }           

@@ -40,7 +40,8 @@ public class SessionManager : MonoBehaviour
         Table.transform.localScale = new Vector3(sessionInfo.table.scale.x, sessionInfo.table.scale.y, sessionInfo.table.scale.z);
         // Init DLLs for logging
         DLLWrapper.LoggingInit(LoggingLevel);
-        // TODO Start peer
+        PCHelperWrapper.Init();
+
         WebRTCInvoker.initialize("127.0.0.1", (uint)sessionInfo.peerUDPPort, "127.0.0.1", (uint)sessionInfo.peerUDPPort, (uint)NDescriptions, (uint)ClientID, "1.0");
         
         peerProcess = new Process();
@@ -53,7 +54,7 @@ public class SessionManager : MonoBehaviour
             peerProcess.StartInfo.FileName = "CMD.EXE";
       //  }*/
 
-        PCHelperWrapper.Init();
+        
         // Init WebRTC
         
 
@@ -92,12 +93,8 @@ public class SessionManager : MonoBehaviour
                 StartLocations[i].transform.position = new Vector3(sessionInfo.startPositions[i].x, sessionInfo.startPositions[i].y - 1, sessionInfo.startPositions[i].z);
                 pcSelf = Instantiate(PCSelfPrefab, StartLocations[i].transform.position, StartLocations[i].transform.rotation);
                 pcSelf.transform.parent = StartLocations[i].transform;
-                pcSelf.UseCam = sessionInfo.useCam;
-                pcSelf.CamClose = sessionInfo.camClose;
-                pcSelf.CamFar = sessionInfo.camFar;
-                pcSelf.CamFPS = sessionInfo.camFPS;
-                pcSelf.CamWidth = sessionInfo.camWidth;
-                pcSelf.CamHeight = sessionInfo.camHeight;
+                pcSelf.SessionInfo = sessionInfo;
+        
                 if(sessionInfo.useMic)
                 {
                     pcSelf.InitAudioCapture();

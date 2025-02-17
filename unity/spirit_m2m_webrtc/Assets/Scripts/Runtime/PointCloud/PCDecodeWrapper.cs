@@ -18,9 +18,22 @@ public static class PCHelperWrapper
         }
     }
 
+    [MonoPInvokeCallback(typeof(WebRTCInvoker.intrinsicsUpdatedCb))]
+    static void OnIntrinsicsUpdatedCallback(UInt32 clientID, CapturerIntrinsics dInt, CapturerIntrinsics cInt)
+    {
+        PCReceiver receiver;
+        Debug.Log($"Intrinsics Updated from {clientID} DINT: {dInt.ToString()} CINT: {cInt.ToString()}");
+        if (Receivers.TryGetValue(clientID, out receiver))
+        {
+            receiver.OnIntrisicsUpdated(dInt, cInt);
+        }
+    }
+
+    
     public static void Init()
     {
         Receivers = new();
         WebRTCInvoker.register_track_change_callback(OnTrackChangeCallback);
+        WebRTCInvoker.register_intrisics_updated_callback(OnIntrinsicsUpdatedCallback);
     }
 }

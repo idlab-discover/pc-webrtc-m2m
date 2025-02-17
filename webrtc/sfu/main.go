@@ -77,7 +77,8 @@ type peerConnectionState struct {
 	bwEstimator    *bwEstimator
 	trackBitrates  map[int]*trackBitrate
 
-	camInfo *cameraInfo
+	camInfo            *cameraInfo
+	capturerIntrinsics *string
 
 	pendingCandidatesString []string
 }
@@ -638,7 +639,8 @@ func addTrackforPeer(pcState peerConnectionState, trackID string) {
 		rtcpBuf := make([]byte, 1500)
 		for {
 			if _, _, err := rtpSender.Read(rtcpBuf); err != nil {
-				panic(err)
+				//panic(err)
+				return
 			}
 		}
 	}()
@@ -988,7 +990,15 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	// Add our new PeerConnection to global list
 	listLock.Lock()
 	start := int(0)
-	var pcState = peerConnectionState{peerConnection, webSocketConnection, pcID, &start, new(int), bwEstimator, map[int]*trackBitrate{}, &cameraInfo{}, make([]string, 0)}
+	wsLock.Lock()
+	for _, pcT := range peerConnections {
+		if *pcT.capturerIntrinsics != "" {
+			s := fmt.Sprintf("%d@%d@%s", *pcT.clientID, 8, *pcT.capturerIntrinsics)
+			webSocketConnection.WriteMessage(websocket.TextMessage, []byte(s))
+		}
+	}
+	wsLock.Unlock()
+	var pcState = peerConnectionState{peerConnection, webSocketConnection, pcID, &start, new(int), bwEstimator, map[int]*trackBitrate{}, &cameraInfo{}, new(string), make([]string, 0)}
 	pcID += 1
 	peerConnections = append(peerConnections, pcState)
 	fmt.Printf("WebRTCSFU: webSocketHandler: peerConnection #%d\n", len(peerConnections))
@@ -1073,7 +1083,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 				nextTime := time.Now().UnixNano() //
 				nsDiff := nextTime - startTime
 				msBucket := nsDiff / int64(50*time.Millisecond)
-
+				// Todo implement concurrency safety => get pointer to trackbitrates once!
 				if msBucket != int64(prevBucket) {
 					pcState.trackBitrates[tileNr].currentCounterCompleted = pcState.trackBitrates[tileNr].currentCounter
 					pcState.trackBitrates[tileNr].counters[pcState.trackBitrates[tileNr].currentCounter] = pcState.trackBitrates[tileNr].tempCounter
@@ -1141,9 +1151,30 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 			addTrackforPeer(pcState, message)
 		case 7:
 			updateCamInfoforPeer(pcState, message)
+		case 8:
+			updateCapturerIntrinsicsForPeer(pcState, message)
 		}
 	}
 }
+
+func updateCapturerIntrinsicsForPeer(pcState peerConnectionState, data string) {
+	listLock.Lock()
+	wsLock.Lock()
+	defer func() {
+		listLock.Unlock()
+		wsLock.Unlock()
+	}()
+	*pcState.capturerIntrinsics = data
+	println("INTRSINICS")
+	for _, pc := range peerConnections {
+		if pcState.clientID != pc.clientID {
+			s := fmt.Sprintf("%d@%d@%s", *pcState.clientID, 8, data)
+			pc.websocket.WriteMessage(websocket.TextMessage, []byte(s))
+		}
+
+	}
+}
+
 func updateCamInfoforPeer(pcState peerConnectionState, data string) {
 	data = strings.ReplaceAll(data, ",", ".")
 	tokens := strings.Split(data, ";")

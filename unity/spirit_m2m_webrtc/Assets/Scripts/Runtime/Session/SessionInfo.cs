@@ -14,6 +14,7 @@ public class SessionInfo
     public float camFar;
     public uint camWidth;
     public uint camHeight;
+    public uint artificialSize;
     public uint camFPS;
     public bool useCam;
     public bool useMic;

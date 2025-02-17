@@ -133,13 +133,13 @@ void start_capturing() {
 	This function is responsible for initializing the DLL. It should be called once per session from within Unity,
 	specifiying the required IP addresses and ports, the number of tiles that will be transmitted, and the client ID.
 */
-int initialize(uint32_t width, uint32_t height, uint32_t fps, float min_dist, float max_dist, bool _use_cam, FrameMode mode) {
+int initialize(uint32_t width, uint32_t height, uint32_t artificial_size, uint32_t fps, float min_dist, float max_dist, bool _use_cam, FrameMode mode) {
 	use_cam = _use_cam;
 	try {
 		if(use_cam) {
 			capturer = new RS2Capturer(mode, width, height, fps, min_dist, max_dist);
 		} else {
-			capturer = new ArtificalCapturer(mode, 75, fps);
+			capturer = new ArtificalCapturer(mode, artificial_size, fps);
 		}
 	} catch (CAPTURER_SETUP_CODE e) {
 		initialized = true;
@@ -239,7 +239,7 @@ RawConverter* create_new_raw_converter(bool use_cam, CapturerIntrinsics depth_in
 	if(use_cam) {
 		return new RS2RawConverter(depth_intrinsics, color_intrinsics);
 	} else {
-		return new ArtificalRawConverter(75);
+		return new ArtificalRawConverter(depth_intrinsics.height);
 	}
 }
 

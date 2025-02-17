@@ -156,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="audio_buffer.hpp" />
+    <ClInclude Include="capturer_intrinsics.hpp" />
     <ClInclude Include="data_parser.hpp" />
     <ClInclude Include="log.h" />
     <ClInclude Include="framework.h" />

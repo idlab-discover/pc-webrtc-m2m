@@ -2,22 +2,24 @@ using AOT;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading;
-
 using UnityEngine;
 
 public class PCSelf : MonoBehaviour
 {
-    public float CamClose;
-    public float CamFar;
-    public uint CamWidth;
-    public uint CamHeight;
-    public uint CamFPS;
-    public bool UseCam;
-    public FrameMode FrameMode;
-    
+   // public float CamClose;
+   // public float CamFar;
+   // public uint CamWidth;
+   // public uint CamHeight;
+  //  public uint CamFPS;
+  //  public bool UseCam;
+  //  public FrameMode FrameMode;
+    public SessionInfo SessionInfo;
+
 
     public Camera cam;
     public AudioCapture AudioCapturePrefab;
@@ -29,18 +31,21 @@ public class PCSelf : MonoBehaviour
 
     System.Threading.Thread workerThread;
     static bool keep_working = true;
+    #region Draco Functions
     [MonoPInvokeCallback(typeof(DracoInvoker.descriptionDoneCallback))]
     static void OnDescriptionDoneCallback(IntPtr dsc, IntPtr rawDataPtr, UInt32 totalPointsInCloud, UInt32 dscSize, UInt32 frameNr, UInt32 dscNr, UInt64 timestamp)
     {
         if (keep_working)
         {
-            byte[] frameHeader = new byte[16];
+            byte[] frameHeader = new byte[20];
             var timestampField = BitConverter.GetBytes(timestamp);
             timestampField.CopyTo(frameHeader, 0);
             var frameNrField = BitConverter.GetBytes(frameNr);
             frameNrField.CopyTo(frameHeader, 8);
+            var codecType = BitConverter.GetBytes((uint)FrameCodec.Draco);
+            codecType.CopyTo(frameHeader, 12);
             var nPointsFrameField = BitConverter.GetBytes(totalPointsInCloud);
-            nPointsFrameField.CopyTo(frameHeader, 12);
+            nPointsFrameField.CopyTo(frameHeader, 16);
             byte[] messageBuffer = new byte[frameHeader.Length + dscSize];
             System.Buffer.BlockCopy(frameHeader, 0, messageBuffer, 0, frameHeader.Length);
             Marshal.Copy(rawDataPtr, messageBuffer, frameHeader.Length, (int)dscSize);
@@ -72,15 +77,96 @@ public class PCSelf : MonoBehaviour
     {
         Realsense2Invoker.free_point_cloud(pc);
     }
+    #endregion
+
+    #region Raw Functions
+    static void SendRawData(IntPtr rawDataPtr, UInt32 size, UInt32 frameNr, UInt32 width, UInt32 height, UInt32 nPoints, UInt64 timestamp, FrameType frameType)
+    {
+       // return;
+        if (keep_working)
+        {
+            byte[] frameHeader = new byte[32];
+            var timestampField = BitConverter.GetBytes(timestamp);
+            timestampField.CopyTo(frameHeader, 0);
+            var frameNrField = BitConverter.GetBytes(frameNr);
+            frameNrField.CopyTo(frameHeader, 8);
+            var codecType = BitConverter.GetBytes((uint)FrameCodec.Raw);
+            codecType.CopyTo(frameHeader, 12);
+            var nPointsFrameField = BitConverter.GetBytes(nPoints);
+            nPointsFrameField.CopyTo(frameHeader, 16);
+            var widthFrameField = BitConverter.GetBytes(width);
+            widthFrameField.CopyTo(frameHeader, 20);
+            var heightFrameField = BitConverter.GetBytes(height);
+            heightFrameField.CopyTo(frameHeader, 24);
+            var sizeFrameField = BitConverter.GetBytes(size);
+            sizeFrameField.CopyTo(frameHeader, 28);
+            byte[] messageBuffer = new byte[frameHeader.Length + size];
+            System.Buffer.BlockCopy(frameHeader, 0, messageBuffer, 0, frameHeader.Length);
+            Marshal.Copy(rawDataPtr, messageBuffer, frameHeader.Length, (int)size);
+            int nSend = 0;
+
+            unsafe
+            {
+                fixed (byte* bufferPointer = messageBuffer)
+                {
+                    nSend = WebRTCInvoker.send_tile(bufferPointer, (uint)messageBuffer.Length, (uint)frameType);
+                }
+            }
+
+            if (nSend == -1)
+            {
+                keep_working = false;
+                Debug.Log("Stop capturing");
+            }
+        }
+    }
+    [MonoPInvokeCallback(typeof(RawInvoker.colorDoneCallback))]
+    static void OnColorDoneCallback(IntPtr rawDataPtr, UInt32 size, UInt32 frameNr, UInt32 width, UInt32 height, UInt32 nPoints, UInt64 timestamp)
+    {
+            SendRawData(rawDataPtr, size, frameNr, width, height, nPoints, timestamp, FrameType.ColorFrame);
+    }
+
+    [MonoPInvokeCallback(typeof(RawInvoker.depthDoneCallback))]
+    static void OnDepthDoneCallback(IntPtr rawDataPtr, UInt32 size, UInt32 frameNr, UInt32 width, UInt32 height, UInt32 nPoints, UInt64 timestamp)
+    {
+            SendRawData(rawDataPtr, size, frameNr, width, height, nPoints, timestamp, FrameType.DepthFrame);
+    }
+
+
+    [MonoPInvokeCallback(typeof(RawInvoker.freeFrameCallback))]
+    static void OnFreeFrameCallback(IntPtr f)
+    {
+        Realsense2Invoker.free_raw_frame(f);
+    }
+    #endregion
     // Start is called before the first frame update
     void Start()
     {
-        DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
-        DracoInvoker.register_free_pc_callback(OnFreePCCallback);
-        DracoInvoker.initialize();
-        int initCode = Realsense2Invoker.initialize(CamWidth, CamHeight, CamFPS, CamClose, CamFar, UseCam, FrameMode);
+        if(SessionInfo.frameCodec == FrameCodec.Draco)
+        {
+            DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
+            DracoInvoker.register_free_pc_callback(OnFreePCCallback);
+            DracoInvoker.initialize();
+        } else if(SessionInfo.frameCodec == FrameCodec.Raw)
+        {
+            RawInvoker.register_color_done_callback(OnColorDoneCallback);
+            RawInvoker.register_depth_done_callback(OnDepthDoneCallback);
+            RawInvoker.register_free_frame_callback(OnFreeFrameCallback);
+            if(SessionInfo.useCam)
+            {
+                RawInvoker.initialize(SessionInfo.camWidth, SessionInfo.camHeight, SessionInfo.jpegQuality);
+            } else
+            {
+                RawInvoker.initialize(SessionInfo.artificialSize* SessionInfo.artificialSize, SessionInfo.artificialSize, SessionInfo.jpegQuality);
+            }
+            
+        }
+        
+        int initCode = Realsense2Invoker.initialize(SessionInfo.camWidth, SessionInfo.camHeight, SessionInfo.artificialSize, SessionInfo.camFPS, 
+            SessionInfo.camClose, SessionInfo.camFar, SessionInfo.useCam, SessionInfo.frameMode);
         if (initCode == 0)
         {
+
             workerThread = new System.Threading.Thread(pollFrames);
             workerThread.Start();
         }
@@ -140,69 +226,84 @@ public class PCSelf : MonoBehaviour
     {
         keep_working = false;
         workerThread.Join();
+
+        // No need to check frame codec here as cleanup will only happen when init
         DracoInvoker.clean_up();
+        RawInvoker.clean_up();
     }
     void pollFrames()
     {
         keep_working = true;
         WebRTCInvoker.wait_for_peer();
-       
-
-         while(keep_working)
+        if(SessionInfo.frameCodec == FrameCodec.Raw)
         {
-            Debug.Log($"Poll next");
-            IntPtr frame = Realsense2Invoker.poll_next_point_cloud();
-            Debug.Log($"Poll done");
-            if ( frame != IntPtr.Zero )
+            CapturerIntrinsics dInt = Realsense2Invoker.get_depth_intrinsics();
+            CapturerIntrinsics cInt = Realsense2Invoker.get_color_intrinsics();
+            byte[] b = new byte[CapturerIntrinsics.Size() * 2];
+            dInt.ConvertToBuffer().CopyTo(b, 0);
+            cInt.ConvertToBuffer().CopyTo(b, CapturerIntrinsics.Size());
+            unsafe
             {
-                Debug.Log($"Get size");
-                uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
-                Debug.Log($"Number of points: {nPoints}");
-                int returnCode = DracoInvoker.encode_pc(frame);
-                if(returnCode == 0 )
+                fixed (byte* bufferPointer = b)
                 {
-                    Debug.Log("Enqueue frame");
+                    Debug.Log("sending intrsincs");
+                    WebRTCInvoker.send_intrisics_packet(bufferPointer, (uint)b.Length);
                 }
-            } else
-            {
-                Debug.Log("No frame"); 
-                keep_working = false;
             }
-            
+        }
+        
+
+        while (keep_working)
+        {
+            switch (SessionInfo.frameMode)
+            {
+                case FrameMode.RealData:
+                    {
+                        IntPtr frame = Realsense2Invoker.poll_next_point_cloud();
+                        Debug.Log($"Poll done");
+                        if (frame != IntPtr.Zero)
+                        {
+                            uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
+                            Debug.Log($"Number of points: {nPoints}");
+                            int returnCode = DracoInvoker.encode_pc(frame);
+                        }
+                        else
+                        {
+                            keep_working = false;
+                        }
+                        break;
+                    }
+                case FrameMode.RawData:
+                    {
+                        IntPtr frame = Realsense2Invoker.poll_next_raw_frame();
+                        if (frame != IntPtr.Zero)
+                        {
+                            RawInvoker.encode_frame(frame);
+                        }
+                        else
+                        {
+                            Debug.Log("No frame");
+                            keep_working = false;
+                        }
+                        break;
+                    }
+            }
+
         }
         Realsense2Invoker.clean_up();
     }
 
-    void dataEncodedCallback()
-    {
 
-    }
-
+    #region Audio Functions
     public void InitAudioCapture()
     {
         useMic = true;
         audioCapture = Instantiate(AudioCapturePrefab, this.transform.position, this.transform.rotation);
-        //audioCapture.CB = CopyDataToPlayback;
-        //audioCapture.Init();
+        audioCapture.CB = CopyDataToPlayback;
+        audioCapture.Init(SessionInfo.audioPlayback.codecName, SessionInfo.audioPlayback.dspSize);;
     }
     void CopyDataToPlayback(byte[] encodedData)
     {
-        /*Debug.Log("copyData");
-        byte[] frameHeader = new byte[12];
-        byte[] messageBuffer = new byte[4 + lengthElements*sizeof(float)];
-        long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        var timestampField = BitConverter.GetBytes(timestamp);
-        timestampField.CopyTo(frameHeader, 0);
-        var frameNrField = BitConverter.GetBytes(frameNr);
-        frameNrField.CopyTo(frameHeader, 8);
-        Buffer.BlockCopy(data, 0, messageBuffer, 4, lengthElements * sizeof(float));
-        unsafe
-        {
-            fixed (byte* bufferPointer = messageBuffer)
-            {
-                WebRTCInvoker.send_audio(bufferPointer, (uint)lengthElements * sizeof(float));
-            }
-        }*/
         unsafe
         {
             fixed (byte* bufferPointer = encodedData)
@@ -211,4 +312,5 @@ public class PCSelf : MonoBehaviour
             }
         }
     }
+    #endregion
 }

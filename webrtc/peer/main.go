@@ -514,6 +514,8 @@ func main() {
 					panic(candidateErr)
 				}
 			}
+		case 8: // Camera intrinsics
+			proxyConn.SendCapturerIntrinsicsPacket(uint32(wsPacket.ClientID), wsPacket.Message)
 		default:
 			fmt.Printf("WebRTCPeer: Received non-compliant message type %d\n", wsPacket.MessageType)
 		}

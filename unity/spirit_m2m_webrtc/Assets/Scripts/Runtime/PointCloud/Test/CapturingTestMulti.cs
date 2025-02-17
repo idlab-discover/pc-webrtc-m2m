@@ -149,7 +149,7 @@ public class CapturingTestMulti : MonoBehaviour
         Realsense2Invoker.set_logging("", debug);
         DracoInvoker.RegisterDebugCallback(OnDebugCallbackDraco);
         DracoInvoker.set_logging("", debug);
-        int initCode = Realsense2Invoker.initialize(sessionInfo.camWidth, sessionInfo.camHeight, sessionInfo.camFPS, sessionInfo.camClose, sessionInfo.camFar, sessionInfo.useCam, sessionInfo.frameMode);
+        int initCode = Realsense2Invoker.initialize(sessionInfo.camWidth, sessionInfo.camHeight, sessionInfo.artificialSize, sessionInfo.camFPS, sessionInfo.camClose, sessionInfo.camFar, sessionInfo.useCam, sessionInfo.frameMode);
         DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
         DracoInvoker.register_free_pc_callback(OnFreePCCallback);
         DracoInvoker.initialize();
