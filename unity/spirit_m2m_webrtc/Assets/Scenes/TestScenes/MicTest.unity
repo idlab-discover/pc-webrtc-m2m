@@ -669,7 +669,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1248223242
 Transform:
   m_ObjectHideFlags: 0
@@ -973,7 +973,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1835949433
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -990,7 +990,7 @@ MonoBehaviour:
   PlaybackPrefab: {fileID: 5282048405531931642, guid: 58fda14eec4a8414abef3c710b536723, type: 3}
   NPlayback: 1
   AudioParams:
-    maxQueueSize: 5
+    maxQueueSize: 1
     targetSamples: 3
     audioDelay: 0
     minPlaybackFrequency: 47000
@@ -1003,6 +1003,7 @@ MonoBehaviour:
     sampleSizeInBytes: 3840
     codecName: 
     dspSize: 480
+    forceStart: 1
 --- !u!4 &1835949434
 Transform:
   m_ObjectHideFlags: 0

@@ -4,10 +4,14 @@ The repository contains the Unity project that serves as the client in the many-
 As Unity does not have solid support for WebRTC, a seperate Golang based application is used. This application allows us to make use of advanced WebRTC features, such as GCC based bandwidth estimation and NACK retransmissions. Unity communicates with this external application (which is automatically started by Unity) using sockets.
 ## Project structure
 
-- Scenes: contains the scenes of the project (you will mostly need to use `MainScene`)
+- Scenes: contains the scenes of the project (you will mostly need to use `MainScene` but the test scenes might also be useful if you want to extend the application)
 - Scripts: contains the C# scripts used by the application
 - Prefabs: contains the Unity `GameObject` prefabs for sending and receiving
 - Plugins: contains all the Dlls used by the application
+
+## Audio
+
+To ensure lower latency audio compared to the traditional Unity audio solution, FMOD is used. You might need to install [FMOD Studio](https://www.fmod.com/) and the [Meta FMOD plugin](https://developers.meta.com/horizon/documentation/unity/meta-xr-audio-sdk-fmod-req-setup/) to properly run and build the application.
 
 ## Building
 Building the application is very simple, and is the same as building a normal Unity application. 
@@ -34,7 +38,11 @@ You can configure the application, including the camera, by changing the values 
 | `camHeight`     |  The height (pixels) of the camera frame     |
 | `camFPS`        |  The frame rate of the camera, the possible values of this depend on the camera you are using     |
 | `useCam`        | Setting this to false will replace the camera with an artifical point cloud in the shape of a cube       |
-
+| `artificialSize`        | Size of the side of the artificial cube when `useCam` is false (total points in the point cloud will be `artificialSize*artificialSize*artificialSize`)       |
+| `useMic`        | Select if the application will record audio using the default microphone       |
+| `frameMode`        | Value that determines how frames should be captured (0=point cloud, 1=raw frames, 2=both point cloud and raw)       |
+| `frameCodec`        | Value that determines how frames should be encoded (0=use draco for point clouds, 1=use raw encoding for raw frames)       |
+| `jpegQuality`        | Determines the quality level of the color image that is used when selecting raw encoding       |
 
 ## Dependencies
 All dependencies will be automatically downloaded when opening the project.

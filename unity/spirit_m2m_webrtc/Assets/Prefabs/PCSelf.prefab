@@ -45,12 +45,46 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0aeca8bd68bcc2d409784bc97cbbdeae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CamClose: 0
-  CamFar: 0
-  CamWidth: 0
-  CamHeight: 0
-  CamFPS: 0
-  UseCam: 0
+  SessionInfo:
+    clientID: 0
+    startPositions: []
+    table:
+      position:
+        x: 0
+        y: 0
+        z: 0
+      scale:
+        x: 0
+        y: 0
+        z: 0
+    sfuAddress: 
+    peerUDPPort: 0
+    camClose: 0
+    camFar: 0
+    camWidth: 0
+    camHeight: 0
+    artificialSize: 0
+    camFPS: 0
+    useCam: 0
+    useMic: 0
+    frameMode: 0
+    frameCodec: 0
+    jpegQuality: 0
+    audioPlayback:
+      maxQueueSize: 0
+      targetSamples: 0
+      audioDelay: 0
+      minPlaybackFrequency: 0
+      maxPlaybackFrequency: 0
+      latencyPlaybackMultiplier: 0
+      defaultPlaybackFrequency: 0
+      ignoreTargetDelay: 0
+      ignoreJitter: 0
+      doNotWaitForPc: 0
+      sampleSizeInBytes: 0
+      codecName: 
+      dspSize: 0
+      forceStart: 0
   cam: {fileID: 5286985962313031726}
   AudioCapturePrefab: {fileID: 0}
   camOffset: {fileID: 5286985962266197003}

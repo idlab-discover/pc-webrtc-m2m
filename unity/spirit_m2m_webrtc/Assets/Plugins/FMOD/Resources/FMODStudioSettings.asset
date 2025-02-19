@@ -391,8 +391,8 @@ MonoBehaviour:
   switchSettingsMigration: 1
   HasSourceProject: 1
   HasPlatforms: 1
-  sourceProjectPath: ../../../../FMOD Studio/spirit_audio/spirit_audio.fspro
-  sourceBankPath: ../../../../FMOD Studio/spirit_audio/Build
+  sourceProjectPath: ../spirit_audio/spirit_audio.fspro
+  sourceBankPath: ../spirit_audio/Build
   sourceBankPathUnformatted: 
   BankRefreshCooldown: 5
   ShowBankRefreshWindow: 1

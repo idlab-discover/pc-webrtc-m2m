@@ -20,8 +20,8 @@
     "camFPS": 15,
     "useCam": false,
     "useMic": true,
-    "frameMode": 1,
-    "frameCodec": 1,
+    "frameMode": 0,
+    "frameCodec": 0,
     "jpegQuality": 75,
     "audioPlayback": {
         "maxQueueSize": 5,
