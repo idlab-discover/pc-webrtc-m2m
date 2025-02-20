@@ -6,7 +6,8 @@ In this repository, all files related to a multi-party volumetric video-based sy
 - A [WebRTC framework](webrtc) written in Golang, used to interconnect peers through a selective forwarding unit (SFU)
 - A [connector plugin](connector) written in C++, used to interconnect the Unity application to the WebRTC client
 - A [point cloud capturer plugin](point_cloud_capturer) written in C++, used by the Unity application for capturing (at the moment only realsense is supported)
-- An [encoder plugin](mdc_encoder) written in C++, used by the Unity application the captured point clouds using a MDC-based approach (uses Draco for encoding)
+- An [encoder plugin](mdc_encoder) written in C++, used by the Unity application to encode the captured point clouds using a MDC-based approach (uses Draco for encoding)
+- An [raw encoder plugin](raw_encoder) written in C++, used by the Unity application the encode raw color and depth frames using a different encoding method for each type of frame
 
 The system is currently under development by IDLab, Ghent University - imec. This README will be updated while development continues, with detailed instructions for each of these components.
 
