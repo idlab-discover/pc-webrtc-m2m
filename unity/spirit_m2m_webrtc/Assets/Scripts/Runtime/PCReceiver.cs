@@ -156,7 +156,7 @@ public class PCReceiver : MonoBehaviour
                         continue;
                     }
                     Debug.Log($"Start decoding");
-                    decoderPtr = DracoInvoker.decode_pc(ptr + 12, (uint)descriptionSize);
+                    decoderPtr = DracoInvoker.decode_pc(ptr + 16, (uint)descriptionSize);
                     Debug.Log($"Decoding done");           
                     if (decoderPtr == IntPtr.Zero)
                     {
@@ -226,6 +226,10 @@ public class PCReceiver : MonoBehaviour
     }
     public void OnTrackChange(uint frameNr, int descriptionID, bool isAdded)
     {
+        if(descriptionID == 99)
+        {
+            return;
+        }
         mut.WaitOne();
         activeDescriptions[descriptionID] = isAdded;
         if (isAdded)

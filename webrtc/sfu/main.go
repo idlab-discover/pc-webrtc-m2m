@@ -638,7 +638,8 @@ func addTrackforPeer(pcState peerConnectionState, trackID string) {
 		rtcpBuf := make([]byte, 1500)
 		for {
 			if _, _, err := rtpSender.Read(rtcpBuf); err != nil {
-				panic(err)
+				//panic(err)
+				return
 			}
 		}
 	}()

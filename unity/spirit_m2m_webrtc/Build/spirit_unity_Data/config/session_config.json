@@ -1,7 +1,7 @@
 {
-    "clientID": 2,
+    "clientID": 1,
     "sfuAddress": "127.0.0.1:8080",
-    "peerUDPPort": 7050,
+    "peerUDPPort": 9005,
     "startPositions": [
         {"x": 19.7, "y":1, "z": -0.35},
         {"x": 19.0, "y":1, "z": -1.1},
@@ -17,7 +17,8 @@
     "camWidth": 848,
     "camHeight": 480,
     "camFPS": 15,
-    "useCam": true,
+    "useCam": false,
+    "useMic": false,
     "audioPlayback": {
         "maxQueueSize": 5,
         "targetSamples": 3,
