@@ -1,5 +1,5 @@
 {
-    "clientID": 2,
+    "clientID": 0,
     "sfuAddress": "127.0.0.1:8080",
     "peerUDPPort": 7050,
     "startPositions": [
@@ -17,10 +17,10 @@
     "camWidth": 848,
     "camHeight": 480,
     "camFPS": 15,
-    "useCam": false,
-    "useMic": true,
-    "frameMode": 1,
-    "frameCodec": 1,
+    "useCam": true,
+    "useMic": false,
+    "frameMode": 0,
+    "frameCodec": 0,
     "artificialSize": 15,
     "jpegQuality": 75,
     "audioPlayback": {
@@ -37,6 +37,6 @@
         "sampleSizeInBytes": 3840,
         "dspSize": 480,
         "forceStart": true,
-        "codecName": "opus"
+        "codecName": ""
     }
 }

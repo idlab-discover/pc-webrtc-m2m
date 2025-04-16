@@ -23,7 +23,13 @@ extern "C" {
 class EncodingQueue {
     public:
         RawEncoder enc;
-        EncodingQueue(unsigned int max_queue, unsigned int width, unsigned int height, unsigned int jpeg_quality) : max_queue(max_queue), enc(width, height, jpeg_quality) {
+        EncodingQueue
+        (
+            unsigned int max_queue, unsigned int width, unsigned int height, 
+            ColorCodecType col_codec, void* col_codec_settings,
+            DepthCodecType dep_codec, void* dep_codec_settings
+        ) : max_queue(max_queue), enc(width, height, col_codec, col_codec_settings, dep_codec, dep_codec_settings) 
+        {
             pool.start(3);
         };
         ~EncodingQueue() {
@@ -32,6 +38,8 @@ class EncodingQueue {
         // TODO stop threads
         int enqueue_frame(RawFrame* pc);
         
+        bool is_ready() {return enc.is_ready();};
+
         // ###### Callbacks #########
         
         

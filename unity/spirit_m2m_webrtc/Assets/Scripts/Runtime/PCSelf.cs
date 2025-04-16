@@ -92,14 +92,16 @@ public class PCSelf : MonoBehaviour
             frameNrField.CopyTo(frameHeader, 8);
             var codecType = BitConverter.GetBytes((uint)FrameCodec.Raw);
             codecType.CopyTo(frameHeader, 12);
+           // var codecType = BitConverter.GetBytes((uint)FrameCodec.Raw);
+           // codecType.CopyTo(frameHeader, 12);
             var nPointsFrameField = BitConverter.GetBytes(nPoints);
-            nPointsFrameField.CopyTo(frameHeader, 16);
+            nPointsFrameField.CopyTo(frameHeader, 20);
             var widthFrameField = BitConverter.GetBytes(width);
-            widthFrameField.CopyTo(frameHeader, 20);
+            widthFrameField.CopyTo(frameHeader, 24);
             var heightFrameField = BitConverter.GetBytes(height);
-            heightFrameField.CopyTo(frameHeader, 24);
+            heightFrameField.CopyTo(frameHeader, 28);
             var sizeFrameField = BitConverter.GetBytes(size);
-            sizeFrameField.CopyTo(frameHeader, 28);
+            sizeFrameField.CopyTo(frameHeader, 32);
             byte[] messageBuffer = new byte[frameHeader.Length + size];
             System.Buffer.BlockCopy(frameHeader, 0, messageBuffer, 0, frameHeader.Length);
             Marshal.Copy(rawDataPtr, messageBuffer, frameHeader.Length, (int)size);
@@ -147,23 +149,44 @@ public class PCSelf : MonoBehaviour
             DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
             DracoInvoker.register_free_pc_callback(OnFreePCCallback);
             DracoInvoker.initialize();
-        } else if(SessionInfo.frameCodec == FrameCodec.Raw)
+        } else
         {
             RawInvoker.register_color_done_callback(OnColorDoneCallback);
             RawInvoker.register_depth_done_callback(OnDepthDoneCallback);
             RawInvoker.register_free_frame_callback(OnFreeFrameCallback);
+            var cCodec = ColorCodecHelper.GetCodecSettings(SessionInfo.rawEncodingSettings);
+            var dCodec = DepthCodecHelper.GetCodecSettings(SessionInfo.rawEncodingSettings);
             if(SessionInfo.useCam)
             {
-                RawInvoker.initialize(SessionInfo.camWidth, SessionInfo.camHeight, SessionInfo.jpegQuality);
+
+                RawInvoker.initialize(SessionInfo.camWidth, SessionInfo.camHeight, 
+                    cCodec.CodecType, cCodec.SettingsPtr, dCodec.CodecType, dCodec.SettingsPtr
+                );
             } else
             {
-                RawInvoker.initialize(SessionInfo.artificialSize* SessionInfo.artificialSize, SessionInfo.artificialSize, SessionInfo.jpegQuality);
+                RawInvoker.initialize(SessionInfo.artificialSize* SessionInfo.artificialSize, SessionInfo.artificialSize, 
+                    cCodec.CodecType, cCodec.SettingsPtr, dCodec.CodecType, dCodec.SettingsPtr
+                );
+            }
+            if(cCodec != null)
+            {
+                cCodec.Dispose();
             }
             
         }
         
-        int initCode = Realsense2Invoker.initialize(SessionInfo.camWidth, SessionInfo.camHeight, SessionInfo.artificialSize, SessionInfo.camFPS, 
-            SessionInfo.camClose, SessionInfo.camFar, SessionInfo.useCam, SessionInfo.frameMode);
+        int initCode = Realsense2Invoker.initialize
+        (
+            SessionInfo.camWidth, SessionInfo.camHeight, SessionInfo.artificialSize, SessionInfo.camFPS, 
+            SessionInfo.camClose, SessionInfo.camFar, SessionInfo.useCam, SessionInfo.frameMode,
+            new FrameCleanupSettingsEx
+            {
+                blackoutBlockSize = SessionInfo.frameCleanupSettings.blackoutBlockSize,
+                shouldApplyDepthFilter = SessionInfo.frameCleanupSettings.shouldApplyDepthFilter,
+                shouldBlackout = SessionInfo.frameCleanupSettings.shouldBlackout,
+                shouldCleanupDepth = SessionInfo.frameCleanupSettings.shouldCleanupDepth
+            }
+        );
         if (initCode == 0)
         {
 
@@ -235,7 +258,7 @@ public class PCSelf : MonoBehaviour
     {
         keep_working = true;
         WebRTCInvoker.wait_for_peer();
-        if(SessionInfo.frameCodec == FrameCodec.Raw)
+        if(SessionInfo.frameCodec != FrameCodec.Draco)
         {
             CapturerIntrinsics dInt = Realsense2Invoker.get_depth_intrinsics();
             CapturerIntrinsics cInt = Realsense2Invoker.get_color_intrinsics();

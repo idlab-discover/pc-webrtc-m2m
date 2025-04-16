@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System.Runtime.InteropServices;
+
 [System.Serializable]
 public class SessionInfo
 {
     public int clientID;
     public StartPosition[] startPositions;
     public Table table;
+    public StartPosition pushBack;
     public string sfuAddress;
     public int peerUDPPort;
     public float camClose;
@@ -18,9 +21,11 @@ public class SessionInfo
     public uint camFPS;
     public bool useCam;
     public bool useMic;
+   
     public FrameMode frameMode;
     public FrameCodec frameCodec;
-    public uint jpegQuality;
+    public FrameCleanupSettings frameCleanupSettings;
+    public RawEncodingSettings rawEncodingSettings;
     public AudioPlaybackParams audioPlayback;
     public static SessionInfo CreateFromJSON(string path)
     {
@@ -46,6 +51,7 @@ public class Table
 [System.Serializable]
 public class AudioPlaybackParams
 {
+    public bool useAudio;
     public uint maxQueueSize;
     public uint targetSamples;
     public uint audioDelay;
@@ -61,4 +67,37 @@ public class AudioPlaybackParams
     public string codecName;
     public uint dspSize;
     public bool forceStart;
+}
+
+[System.Serializable]
+public class RawEncodingSettings
+{
+    public string colorCodecName = "jpeg";
+    public string depthCodecName = "vle";
+    public JPEGSettings jpegSettings;
+    public WebPSettings webPSettings;
+}
+
+[System.Serializable]
+public class FrameCleanupSettings
+{
+    public uint blackoutBlockSize;
+    public bool shouldApplyDepthFilter;
+    public bool shouldCleanupDepth;
+    public bool shouldBlackout;
+}
+
+
+[System.Serializable]
+public class JPEGSettings
+{
+    public uint quality = 75;
+}
+
+[System.Serializable]
+public class WebPSettings
+{
+    public uint quality = 75;
+    public uint method = 0; // From 0 (fastest / worst compression) to 6 (slow / best compression)
+
 }

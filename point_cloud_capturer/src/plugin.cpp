@@ -133,13 +133,13 @@ void start_capturing() {
 	This function is responsible for initializing the DLL. It should be called once per session from within Unity,
 	specifiying the required IP addresses and ports, the number of tiles that will be transmitted, and the client ID.
 */
-int initialize(uint32_t width, uint32_t height, uint32_t artificial_size, uint32_t fps, float min_dist, float max_dist, bool _use_cam, FrameMode mode) {
+int initialize(uint32_t width, uint32_t height, uint32_t artificial_size, uint32_t fps, float min_dist, float max_dist, bool _use_cam, FrameMode mode, FrameCleanupSettings cleanup_settings) {
 	use_cam = _use_cam;
 	try {
 		if(use_cam) {
-			capturer = new RS2Capturer(mode, width, height, fps, min_dist, max_dist);
+			capturer = new RS2Capturer(mode, width, height, fps, min_dist, max_dist, cleanup_settings);
 		} else {
-			capturer = new ArtificalCapturer(mode, artificial_size, fps);
+			capturer = new ArtificalCapturer(mode, artificial_size, fps, cleanup_settings);
 		}
 	} catch (CAPTURER_SETUP_CODE e) {
 		initialized = true;
@@ -252,6 +252,13 @@ void free_raw_converter(RawConverter* c) {
 		delete c;
 	}
 }
+
+void set_capturer_frame_cleanup_settings(FrameCleanupSettings cleanup_settings) {
+	if(capturer) {
+		capturer->set_cleanup_settings(cleanup_settings);
+	}
+}
+
 
 /*
 	This function is used to clean up threading and reset the required variables. It is called once per session from

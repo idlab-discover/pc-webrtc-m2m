@@ -28,6 +28,8 @@ public class PCReceiver : MonoBehaviour
     private ConcurrentQueue<DecodedPointCloudData> queue;
 
     private IntPtr rawConverter;
+    private IntPtr colorDecoder;
+    private IntPtr depthDecoder;
     private Dictionary<UInt32, DecodedRawFrame> inProgessFramesRaw;
     private ConcurrentQueue<DecodedRawFrame> queueRaw;
 
@@ -69,7 +71,8 @@ public class PCReceiver : MonoBehaviour
             }));
             workerThreads[i].Start();
         }
-        if(useAudio)
+        Debug.Log("audio used" + AudioParams.useAudio);
+        if(AudioParams.useAudio)
         {
             audioPlayback = Instantiate(AudioPlaybackPrefab, transform);
             audioPlayback.Init(48000, AudioParams);
@@ -77,6 +80,7 @@ public class PCReceiver : MonoBehaviour
             {
                 pollAudio(ClientID, audioPlayback);
             });
+            audioThread.Start();
         }
     }
 
@@ -119,9 +123,9 @@ public class PCReceiver : MonoBehaviour
                     }
                    
                 }
-                if(useAudio)
+                if(AudioParams.useAudio)
                 {
-                    audioPlayback.SetTimestampLatestPC(dec.Timestamp);
+                    //audioPlayback.SetTimestampLatestPC(dec.Timestamp);
                 }
                 
             }
@@ -164,7 +168,7 @@ public class PCReceiver : MonoBehaviour
                         }
 
                     }
-                    if (useAudio)
+                    if (AudioParams.useAudio)
                     {
                         audioPlayback.SetTimestampLatestPC(dec.Timestamp);
                     }
@@ -180,6 +184,16 @@ public class PCReceiver : MonoBehaviour
         {
             Realsense2Invoker.free_raw_converter(rawConverter);
             rawConverter = IntPtr.Zero;
+        }
+        if(colorDecoder != IntPtr.Zero)
+        {
+            RawInvoker.free_color_decoder(colorDecoder); 
+            colorDecoder = IntPtr.Zero;
+        }
+        if (depthDecoder != IntPtr.Zero)
+        {
+            RawInvoker.free_depth_decoder(depthDecoder);
+            depthDecoder = IntPtr.Zero;
         }
         for (int i = 0;i < NDescriptions;i++)
         {
@@ -214,6 +228,11 @@ public class PCReceiver : MonoBehaviour
         for (int i = 0; i < nDecodedPoints; i++)
         {
             //    points[i] = new Vector3(0, 0, 0);
+            if (pointsUnsafePtr[(i * 3)] == 0 && pointsUnsafePtr[(i * 3) + 1] == 0 && pointsUnsafePtr[(i * 3) + 2] == 0)
+            {
+                
+                continue;
+            }
             pcData.Points.Add(new Vector3(pointsUnsafePtr[(i * 3)] * -1, pointsUnsafePtr[(i * 3) + 1] * -1, pointsUnsafePtr[(i * 3) + 2] * -1));
             pcData.Colors.Add(new Color32(colorsUnsafePtr[(i * 3)], colorsUnsafePtr[(i * 3) + 1], colorsUnsafePtr[(i * 3) + 2], 255));
         }
@@ -246,13 +265,17 @@ public class PCReceiver : MonoBehaviour
         if (rawConverter != IntPtr.Zero)
         {
             mut.WaitOne();
+            uint codecType = BitConverter.ToUInt32(messageBuffer, 16);
+            if (depthDecoder == IntPtr.Zero)
+            {
+                depthDecoder = RawInvoker.create_depth_decoder((DepthCodecType)codecType);
+            }
+            uint nPoints = BitConverter.ToUInt32(messageBuffer, 20);
+            uint width = BitConverter.ToUInt32(messageBuffer, 24);
+            uint height = BitConverter.ToUInt32(messageBuffer, 28);
+            uint size = BitConverter.ToUInt32(messageBuffer, 32);
 
-            uint nPoints = BitConverter.ToUInt32(messageBuffer, 16);
-            uint width = BitConverter.ToUInt32(messageBuffer, 20);
-            uint height = BitConverter.ToUInt32(messageBuffer, 24);
-            uint size = BitConverter.ToUInt32(messageBuffer, 28);
-
-            IntPtr decoded_depth = RawInvoker.decode_depth(new IntPtr(ptr + 32), width, height);
+            IntPtr decoded_depth = RawInvoker.decode_depth(depthDecoder, new IntPtr(ptr + 36), width, height);
            
             DecodedRawFrame rawData;
             if (!inProgessFramesRaw.TryGetValue((uint)frameNr, out rawData))
@@ -278,13 +301,20 @@ public class PCReceiver : MonoBehaviour
         if (rawConverter != IntPtr.Zero)
         {
             mut.WaitOne();
-
-            uint nPoints = BitConverter.ToUInt32(messageBuffer, 16);
-            uint width = BitConverter.ToUInt32(messageBuffer, 20);
-            uint height = BitConverter.ToUInt32(messageBuffer, 24);
-            uint size = BitConverter.ToUInt32(messageBuffer, 28);
+            // Get codec type
+            // Check if codec == same
+            uint codecType = BitConverter.ToUInt32(messageBuffer, 16);
+            if (colorDecoder == IntPtr.Zero)
+            {
+                colorDecoder = RawInvoker.create_color_decoder((ColorCodecType)codecType);
+            }
+        
+            uint nPoints = BitConverter.ToUInt32(messageBuffer, 20);
+            uint width = BitConverter.ToUInt32(messageBuffer, 24);
+            uint height = BitConverter.ToUInt32(messageBuffer, 28);
+            uint size = BitConverter.ToUInt32(messageBuffer, 32);
             Debug.Log(nPoints + " " + width + " " + height + " " + size);
-            IntPtr decoded_color = RawInvoker.decode_color(new IntPtr(ptr+32), size, width, height);
+            IntPtr decoded_color = RawInvoker.decode_color(colorDecoder, new IntPtr(ptr+36), size, width, height);
 
              DecodedRawFrame rawData;
              if (!inProgessFramesRaw.TryGetValue((uint)frameNr, out rawData))
@@ -386,9 +416,27 @@ public class PCReceiver : MonoBehaviour
             }              
         }
     }
+    private bool audioPrevAdded = false;
     public void OnTrackChange(uint frameNr, int descriptionID, bool isAdded)
     {
         mut.WaitOne();
+        Debug.Log("[TRACK CHANGE]:" + descriptionID);
+        if(descriptionID == 99)
+        {
+            if(isAdded)
+            {
+                if(audioPrevAdded)
+                {
+                    audioPlayback.RestartPlaying();
+                }
+                audioPrevAdded = true;
+            } else
+            {
+                audioPlayback.StopPlaying();
+            }
+            mut.ReleaseMutex();
+            return;
+        }
         activeDescriptions[descriptionID] = isAdded;
         if (isAdded)
         {
@@ -466,7 +514,7 @@ public class PCReceiver : MonoBehaviour
         WebRTCInvoker.wait_for_peer();
         while (keep_working)
         {
-            Debug.Log("Polling size");
+            Debug.Log("Polling audio size");
             int audioSize = WebRTCInvoker.get_audio_size(clientID);
 
             if (audioSize == 0)
@@ -486,6 +534,7 @@ public class PCReceiver : MonoBehaviour
                 {
                     WebRTCInvoker.retrieve_audio(ptr, (uint)audioSize, clientID);
                     Debug.Log("audio received");
+                    pb.StartPlayback();
                     pb.DecodeAndCopyToBuffer(messageBuffer);
                     /* UInt64 timestamp = BitConverter.ToUInt64(messageBuffer, 0); ;
                      uint audioFrameNr = BitConverter.ToUInt32(messageBuffer, 8);

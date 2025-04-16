@@ -9,26 +9,29 @@ struct RS2Bounds {
 
 class RS2Frame : public Frame {
     public:
-        RS2Frame(FrameMode mode, unsigned int width, unsigned height, unsigned int bpp , unsigned int stride, const rs2::depth_frame& depth_frame, const rs2::video_frame& color_frame, unsigned int frame_nr) : width(width), height(height), Frame(frame_nr) {
+        RS2Frame(FrameMode mode, unsigned int width, unsigned height, unsigned int bpp, unsigned int stride, 
+            const rs2::depth_frame& depth_frame, const rs2::video_frame& color_frame, unsigned int frame_nr,
+            FrameCleanupSettings cleanup_settings) 
+            : width(width), height(height), Frame(frame_nr) {
             switch (mode)
             {
                 case FrameMode::RealData: {
                     rs2::pointcloud pc;
                     pc.map_to(color_frame);
                     points = pc.calculate(depth_frame);
-                    make_color_array(width, height, bpp, stride, static_cast<const uint8_t*>(color_frame.get_data()));
+                    make_color_array(bpp, stride, static_cast<const uint8_t*>(color_frame.get_data()));
                     break;
                 } 
                 case FrameMode::RawData: {
-                    make_raw_data_arrays(width, height, depth_frame, color_frame);
+                    make_raw_data_arrays(depth_frame, color_frame, cleanup_settings);
                     break;
                 }
                 case FrameMode::Both: {
                     rs2::pointcloud pc;
                     pc.map_to(color_frame);
                     pc.calculate(depth_frame);
-                    make_color_array(width, height, bpp, stride, static_cast<const uint8_t*>(color_frame.get_data()));
-                    make_raw_data_arrays(width, height, depth_frame, color_frame);
+                    make_color_array(bpp, stride, static_cast<const uint8_t*>(color_frame.get_data()));
+                    make_raw_data_arrays(depth_frame, color_frame, cleanup_settings);
                     break;
                 }
                     
@@ -63,6 +66,10 @@ class RS2Frame : public Frame {
         unsigned int width;
         unsigned int height;
         unsigned int n_points = 0;
-        void make_color_array(unsigned int width, unsigned height, unsigned int bpp , unsigned int stride, const uint8_t* texture);
-        void make_raw_data_arrays(unsigned int width, unsigned int height, const rs2::depth_frame& depth_frame, const rs2::video_frame& color_frame);
+        void make_color_array(unsigned int bpp , unsigned int stride, const uint8_t* texture);
+        void make_raw_data_arrays(
+            const rs2::depth_frame& depth_frame, const rs2::video_frame& color_frame,
+            FrameCleanupSettings cleanup_settings
+        );
+        void apply_depth_filter_to_raw(const uint16_t* rs_depth, const uint8_t* rs_color, FrameCleanupSettings cleanup_settings);
 };

@@ -16,7 +16,12 @@ public static class Realsense2Invoker
     public static extern void RegisterDebugCallback(DLLLogger.debugCallback cb);
 
     [DllImport(dllName)]
-    public static extern int initialize(UInt32 width, UInt32 height, UInt32 artificial_size, UInt32 fps, float min_dist, float max_dist, bool use_cam, FrameMode frame_mode);
+    public static extern int initialize
+    (
+        UInt32 width, UInt32 height, UInt32 artificial_size,
+        UInt32 fps, float min_dist, float max_dist, bool use_cam, 
+        FrameMode frame_mode, FrameCleanupSettingsEx cleanup_settings
+    );
     [DllImport(dllName)]
     public static extern void clean_up();
 

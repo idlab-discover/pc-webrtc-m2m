@@ -1,0 +1,3 @@
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/raw_encoder/build/CMakeFiles/spirit_idlab_raw.dir
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/raw_encoder/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/raw_encoder/build/CMakeFiles/ZERO_CHECK.dir

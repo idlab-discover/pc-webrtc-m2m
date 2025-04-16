@@ -13,6 +13,14 @@ enum FrameMode {
     Both = 2,
 };
 
+struct FrameCleanupSettings {
+    unsigned int blackout_block_size;
+    bool should_apply_depth_filter;
+    bool should_cleanup_depth;
+    bool should_blackout;
+};
+
+
 class Frame {
     public:
         Frame(unsigned int frame_nr) : frame_nr(frame_nr) {

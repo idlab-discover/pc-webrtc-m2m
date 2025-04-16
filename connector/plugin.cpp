@@ -806,14 +806,18 @@ int get_audio_size(uint32_t client_id) {
 	ClientReceiver* c = find_or_add_receiver(client_id);
 	
 	// Wait until a new frame is available
+	bool audio_ready = c->audio_buffer.wait_for_audio();
+	if (!audio_ready) {
+		return 0;
+	}
 	//timeBeginPeriod(1);
-	while (c->audio_buffer.get_buffer_size() == 0) {
+	/*while (c->audio_buffer.get_buffer_size() == 0) {
 		this_thread::sleep_for(chrono::milliseconds(1)); // TODO: remove all of this pull logic and replace it with callbacks
 		c = find_or_add_receiver(client_id);
 		if (!keep_working) {
 			return 0;
 		}
-	}
+	}*/
 	//timeEndPeriod(1);
 	// Retrieve the next frame and forward it to the data parser
 	ReceivedAudio t = c->audio_buffer.next();

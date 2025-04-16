@@ -88,6 +88,10 @@ MonoBehaviour:
         x: 0
         y: 0
         z: 0
+    pushBack:
+      x: 0
+      y: 0
+      z: 0
     sfuAddress: 
     peerUDPPort: 0
     camClose: 0

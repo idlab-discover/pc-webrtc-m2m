@@ -1001,7 +1001,7 @@ MonoBehaviour:
     ignoreJitter: 0
     doNotWaitForPc: 0
     sampleSizeInBytes: 3840
-    codecName: 
+    codecName: opus
     dspSize: 480
     forceStart: 1
 --- !u!4 &1835949434

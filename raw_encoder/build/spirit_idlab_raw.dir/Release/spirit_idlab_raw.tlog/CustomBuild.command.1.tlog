@@ -1,0 +1,10 @@
+^C:\USERS\MATTH\ONEDRIVE\DOCUMENTEN\SPIRIT\PC-WEBRTC-M2M\RAW_ENCODER\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/raw_encoder -BC:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/raw_encoder/build --check-stamp-file C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/raw_encoder/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

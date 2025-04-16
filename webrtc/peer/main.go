@@ -349,6 +349,8 @@ func main() {
 		if trackIdTokens[0] == "video" {
 			isVideo = true
 			trackID, _ = strconv.ParseUint(trackIdTokens[2], 10, 32)
+		} else {
+			trackID = 99
 		}
 		if *useProxyInput {
 			proxyConn.SendTrackStatusPacket(uint32(clientID), 0, uint32(trackID), isVideo, true)
@@ -425,8 +427,8 @@ func main() {
 				}
 				frames[p.FrameNr] += p.SeqLen
 				if frames[p.FrameNr] == p.FrameLen && p.FrameNr%100 == 0 {
-					fmt.Printf("WebRTCPeer: [AUDIO] Received audio frame %d from client %d with length %d\n",
-						p.FrameNr, p.ClientNr, p.FrameLen)
+					fmt.Printf("WebRTCPeer: [AUDIO] Received audio frame %d from client %d with length %d at %d\n",
+						p.FrameNr, p.ClientNr, p.FrameLen, time.Now().UnixNano()/int64(time.Millisecond))
 				}
 
 			}

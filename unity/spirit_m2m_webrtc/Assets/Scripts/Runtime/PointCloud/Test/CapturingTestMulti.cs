@@ -139,6 +139,7 @@ public class CapturingTestMulti : MonoBehaviour
         Application.targetFrameRate = 120;
         var sessionInfo = SessionInfo.CreateFromJSON(Application.dataPath + "/config/session_config.json");
         Debug.Log(sessionInfo.sfuAddress + " " + sessionInfo.peerUDPPort);
+        
         sessionInfo.frameMode = FrameMode.RealData;
         ClientID = sessionInfo.clientID;
         frameMode = sessionInfo.frameMode;
@@ -149,7 +150,18 @@ public class CapturingTestMulti : MonoBehaviour
         Realsense2Invoker.set_logging("", debug);
         DracoInvoker.RegisterDebugCallback(OnDebugCallbackDraco);
         DracoInvoker.set_logging("", debug);
-        int initCode = Realsense2Invoker.initialize(sessionInfo.camWidth, sessionInfo.camHeight, sessionInfo.artificialSize, sessionInfo.camFPS, sessionInfo.camClose, sessionInfo.camFar, sessionInfo.useCam, sessionInfo.frameMode);
+        int initCode = Realsense2Invoker.initialize
+        (
+            sessionInfo.camWidth, sessionInfo.camHeight, sessionInfo.artificialSize, sessionInfo.camFPS, 
+            sessionInfo.camClose, sessionInfo.camFar, sessionInfo.useCam, sessionInfo.frameMode,
+            new FrameCleanupSettingsEx
+            {
+                blackoutBlockSize = sessionInfo.frameCleanupSettings.blackoutBlockSize,
+                shouldApplyDepthFilter = sessionInfo.frameCleanupSettings.shouldApplyDepthFilter,
+                shouldBlackout = sessionInfo.frameCleanupSettings.shouldBlackout,
+                shouldCleanupDepth = sessionInfo.frameCleanupSettings.shouldCleanupDepth
+            }
+        );
         DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
         DracoInvoker.register_free_pc_callback(OnFreePCCallback);
         DracoInvoker.initialize();
@@ -163,7 +175,12 @@ public class CapturingTestMulti : MonoBehaviour
                 renderers[i].transform.position = new Vector3(sessionInfo.startPositions[i].x, sessionInfo.startPositions[i].y-offset, sessionInfo.startPositions[i].z);
                 if (i == ClientID)
                 {
+                    float xPush = renderers[i].transform.position.x - sessionInfo.table.position.x;
+                    float zPush = renderers[i].transform.position.z - sessionInfo.table.position.z;
+                    Vector2 vPush = new Vector2(xPush, zPush);
+                    renderers[i].transform.position = new Vector3(renderers[i].transform.position.x+vPush.normalized.x*0.5f, renderers[i].transform.position.y, renderers[i].transform.position.z + vPush.normalized.y*0.5f);
                     var pcSelf = Instantiate(VRCam, renderers[i].transform.position, renderers[i].transform.rotation);
+              
                     pcSelf.transform.parent = renderers[i].transform;
                 }
                 

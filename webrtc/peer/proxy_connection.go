@@ -226,7 +226,7 @@ func (pc *ProxyConnection) StartListening() {
 						make([]byte, p.FrameLen),
 					}
 					pc.incomplete_audio_frames[p.FrameNr] = r
-					//fmt.Printf("WebRTCPeer: [AUDIO] DLL first packet of audio frame %d with length %d  at %d\n",
+					//		fmt.Printf("WebRTCPeer: [AUDIO] DLL first packet of audio frame %d with length %d  at %d\n",
 					//	p.FrameNr, p.FrameLen, time.Now().UnixNano()/int64(time.Millisecond))
 				}
 				value := pc.incomplete_audio_frames[p.FrameNr]
@@ -370,8 +370,8 @@ func (pc *ProxyConnection) NextAudioFrame() []byte {
 	}
 	data := pc.complete_audio_frames[0].fileData
 	//frameNr := pc.complete_audio_frames[0].frameNr
-	//fmt.Printf("WebRTCPeer: [AUDIO] Sending out audio frame %d with size %d at %d\n",
-	//	frameNr, pc.complete_audio_frames[0].fileLen, time.Now().UnixNano()/int64(time.Millisecond))
+	/*	fmt.Printf("WebRTCPeer: [AUDIO] Sending out audio frame %d with size %d at %d\n",
+		pc.complete_audio_frames[0].frameNr, pc.complete_audio_frames[0].fileLen, time.Now().UnixNano()/int64(time.Millisecond))*/
 	pc.complete_audio_frames = pc.complete_audio_frames[:0]
 	// Do we still need frame counter? Seems more logical to use the actual frame nr
 	pc.mtx_audio.Unlock()

@@ -163,11 +163,14 @@ public class AudioPlayback : MonoBehaviour
 
         return FMOD.RESULT.OK;
     }
+    public AudioPlaybackParams audioPms;
+    public int Capp;
     // Start is called before the first frame update
     public void Init(int capRate, AudioPlaybackParams pms)
     {
         Debug.Log("Audio playback inited");
-
+        Capp = capRate;
+        audioPms = pms;
         dec = AudioCodecFactory.CreateDecoder(pms.codecName, capRate, pms.dspSize);
         
         this.dspSize = pms.dspSize;
@@ -199,6 +202,7 @@ public class AudioPlayback : MonoBehaviour
         exinfo.numchannels = 2;
         exinfo.format = FMOD.SOUND_FORMAT.PCMFLOAT;
         exinfo.defaultfrequency = captureSrate;
+      
         
         exinfo.length = (uint)audioLength;
         RuntimeManager.CoreSystem.createSound(exinfo.userdata, FMOD.MODE.LOOP_NORMAL | FMOD.MODE.OPENUSER | FMOD.MODE.NONBLOCKING | FMOD.MODE._3D,
@@ -252,16 +256,23 @@ public class AudioPlayback : MonoBehaviour
             Debug.LogWarningFormat("FMOD: Unable to create a GCHandle: mObjHandle");
         }
     }
+    public void FreeResources()
+    {
+   
+
+
+    }
     void OnDestroy()
     {
         voiceInstance.release();
         ch.removeDSP(mPlaybackDSP);
         mPlaybackDSP.release();
+
         sound.release();
-        if (mObjHandle.IsAllocated)
-        {
-            // mObjHandle.Free();
-        }
+        /* if (mObjHandle.IsAllocated)
+         {
+              mObjHandle.Free();
+         }*/
 
 
 
@@ -333,6 +344,8 @@ public class AudioPlayback : MonoBehaviour
 
     public void DecodeAndCopyToBuffer(byte[] receivedData)
     {
+        Debug.Log($"DDD {audioLength} {receivedData.Length}");
+
         if (audioLength == 0)
         {
             return;
@@ -344,19 +357,26 @@ public class AudioPlayback : MonoBehaviour
     //private uint frameNr;
     // TODO fix starting point => current position audio track
     //      fid static sometimes
+    private int audioFr = 0;
+    public void StopPlaying()
+    {
+        buffer.StopPlaying();
+    }
+    public void RestartPlaying()
+    {
+        audioFr = 0;
+    }
     public void CopyToBuffer(ulong timestamp, UInt32 frameNr, float[] receivedData)
     {
-        if(audioLength == 0)
-        {
-            return;
-        }
+        
         buffer.AddItem(timestamp, frameNr, receivedData);
-        Debug.Log("[AUDIO] frame number " + frameNr + " " + timestamp);
-        if(forceStart && frameNr >= 500 && !buffer.PlaybackStarted)
+        audioFr++;
+        if (forceStart && audioFr >= 500 && !buffer.PlaybackStarted)
         {
+          
             buffer.Sound = sound;
             buffer.Channel = ch;
-            buffer.ForceStartPlayback();
+            buffer.ForceStartPlayback(frameNr);
         }
        /* uint playPos = 0;
         ch.getPosition(out playPos, FMOD.TIMEUNIT.PCM);
@@ -388,7 +408,11 @@ public class AudioPlayback : MonoBehaviour
         {
             //buffer.StartPlayback();
             // TODO change to start playback
-            buffer.ForceStartPlayback();
+           // buffer.ForceStartPlayback();
         }
+    }
+    public bool HasStarted()
+    {
+        return buffer.ReceivedAudio;
     }
 }

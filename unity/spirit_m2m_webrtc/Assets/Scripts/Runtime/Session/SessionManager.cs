@@ -94,7 +94,7 @@ public class SessionManager : MonoBehaviour
                 pcSelf = Instantiate(PCSelfPrefab, StartLocations[i].transform.position, StartLocations[i].transform.rotation);
                 pcSelf.transform.parent = StartLocations[i].transform;
                 pcSelf.SessionInfo = sessionInfo;
-        
+               
                 if(sessionInfo.useMic)
                 {
                     pcSelf.InitAudioCapture();

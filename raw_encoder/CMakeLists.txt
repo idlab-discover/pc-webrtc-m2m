@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 option(ENABLE_VCPKG OFF)
-
+add_definitions(-DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Define the project name and the type of project
 project(spirit_idlab_raw LANGUAGES CXX)
 
@@ -10,14 +11,14 @@ set(spirit_idlab_raw_VERSION_MINOR 0)
 set(spirit_idlab_raw_VERSION_PATCH 0)
 
 # Specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Add the include directory
 include_directories(include)
 
 # Add the source directory
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # Set the output directory for the DLL
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -38,8 +39,15 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeFiles")
 find_package(libjpeg-turbo REQUIRED)
 message(${libjpeg-turbo_INCLUDE_DIRS})
 message(${libjpeg-turbo_LIBRARIES})
-# Link the DRACO library to the DLL
-target_link_libraries(spirit_idlab_raw ${libjpeg-turbo_LIBRARIES})
+
+find_package(webp REQUIRED)
+message(${webp_INCLUDE_DIRS})
+message(${webp_LIBRARIES})
+
 
 # Include REALSENSE2 directories
-include_directories(${libjpeg-turbo_INCLUDE_DIRS})
+include_directories(${libjpeg-turbo_INCLUDE_DIRS} ${webp_INCLUDE_DIRS})
+
+
+# Link the DRACO library to the DLL
+target_link_libraries(spirit_idlab_raw ${libjpeg-turbo_LIBRARIES} ${webp_LIBRARIES})

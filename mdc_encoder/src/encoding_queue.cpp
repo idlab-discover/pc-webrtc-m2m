@@ -46,7 +46,11 @@ void EncodingQueue::complete_encoding(Description* dsc)
 
 void EncodingQueue::internal_enqueue_pc(PointCloud *pc)
 {
-    UniformSampler us(std::vector<float>({ 0.6, 0.25, 0.15 }));
+    float multi = 125000.0f /(float) pc->n_points;
+    if(multi > 1.0f) {
+        multi = 1.0f;
+    }
+    UniformSampler us(std::vector<float>({ 0.6f*multi, 0.25f*multi, 0.15f*multi }));
     std::vector<Description*> descs = us.create_descriptions(pc);
     coding_status[pc->frame_nr] = 3;
     q_enqueued.push(true);

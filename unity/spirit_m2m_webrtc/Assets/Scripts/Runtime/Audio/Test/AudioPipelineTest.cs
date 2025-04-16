@@ -45,6 +45,7 @@ public class AudioPipelineTest : MonoBehaviour
     }
     void CopyDataToPlayback(byte[] encodedData)
     {
+        Debug.Log("copyyyy");
         foreach (AudioPlayback play in play)
         {
             play.DecodeAndCopyToBuffer(encodedData);

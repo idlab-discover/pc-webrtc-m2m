@@ -1,1 +1,0 @@
-#include "jpeg_encoder.hpp"

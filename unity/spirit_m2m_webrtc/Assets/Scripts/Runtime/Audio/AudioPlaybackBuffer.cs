@@ -27,12 +27,14 @@ public class AudioPlaybackBuffer
     private bool ignoreTargetDelay;
     private bool ignoreJitter;
     private uint currentWritePos;
-    private uint latestReceivedFrameNr;
+    private uint latestReceivedFrameNr = 0;
     private uint sampleSizeInBytes;
+    public bool ReceivedAudio { get; private set; }
     public bool PlaybackStarted { get; private set; }
     public UInt64 LatestPcTimestamp;
     public FMOD.Sound Sound;
     public FMOD.Channel Channel;
+    private UInt64 latestAudioTimestamp;
     public AudioPlaybackBuffer(uint soundLength, AudioPlaybackParams pms)
     {
         samples = new Queue<AudioSample>();
@@ -51,43 +53,63 @@ public class AudioPlaybackBuffer
     {
 
         bool foundGoodSample = false;
-        while(!foundGoodSample)
+        while (!foundGoodSample)
         {
             if (samples.Count == 0)
             {
+                foundGoodSample = false;
+                break;
+            }
+            if (samples.Count == 1)
+            {
                 foundGoodSample = true;
+                break;
             }
             UInt64 audioTimestamp = samples.Peek().Timestamp;
-            if(audioTimestamp > LatestPcTimestamp)
+            if (audioTimestamp > LatestPcTimestamp)
             {
                 foundGoodSample = true;
             }
-            if(LatestPcTimestamp - audioTimestamp > forcedAudioDelay + 20)
+            if (LatestPcTimestamp - audioTimestamp > forcedAudioDelay + 20)
             {
                 samples.Dequeue();
             } else
             {
                 foundGoodSample = true;
                 // Set position of channel to 0 PCM
-                Channel.setPosition(0, TIMEUNIT.PCM);
-                // Copy all existing samples to sound buffer => stop when sound is full
-                FlushQueueIntoBuffer();
+
             }
         }
-        PlaybackStarted = true;
+        if (foundGoodSample)
+        {
+           // Channel.setFrequency(41000);
+            Channel.setPosition(0, TIMEUNIT.PCM);
+        //    Channel.setFrequency(41000);
+            // Copy all existing samples to sound buffer => stop when sound is full
+            FlushQueueIntoBuffer();
+            PlaybackStarted = true;
+        }
+   
     }
-    public void ForceStartPlayback()
+    public void ForceStartPlayback(uint firstFrame)
     {
         Debug.Log("start playback force");
-        Channel.setPosition(0, TIMEUNIT.PCM);
-        // Copy all existing samples to sound buffer => stop when sound is full
-        FlushQueueIntoBuffer();
-        PlaybackStarted = true;
+        if(!PlaybackStarted)
+        {
+            latestReceivedFrameNr = firstFrame - 10;
+            Channel.setPosition(0, TIMEUNIT.PCM);
+            Channel.setFrequency(45000);
+            // Copy all existing samples to sound buffer => stop when sound is full
+            FlushQueueIntoBuffer();
+            PlaybackStarted = true;
+        }
+      
     }
     public void AddItem(UInt64 timestamp, UInt32 frameNr, float[] sample)
     {
+        ReceivedAudio = true;
         // Got old audio packet so just drop it
-        if(frameNr < latestReceivedFrameNr)
+        if (frameNr < latestReceivedFrameNr)
         {
             return;
         }
@@ -118,22 +140,30 @@ public class AudioPlaybackBuffer
 
     }
     private void FlushQueueIntoBuffer() {
+    
         uint currentPos = GetChannelPositionInBytes();
         uint emptySpace = GetEmptySpaceInSound(currentPos);
         uint tEmptySpace = emptySpace;
         uint flushCounter = 0;
+        uint offset = 0;
         while (emptySpace > sampleSizeInBytes && samples.Count > 0)
         {
             AudioSample sm = samples.Dequeue();
+          /*  if(sm.Timestamp - latestAudioTimestamp < 5)
+            {
+                latestReceivedFrameNr = sm.FrameNr;
+                continue;
+            }*/
+            latestAudioTimestamp = sm.Timestamp;
             // Correct write position for any frame drops
-            correctWritePosForPacketLoss(sm.FrameNr);
+            offset = correctWritePosForPacketLoss(sm.FrameNr);
             CopySampleToSound(sm.AudioData, sampleSizeInBytes);
             latestReceivedFrameNr = sm.FrameNr;
             emptySpace = GetEmptySpaceInSound(currentPos);
             flushCounter++;
            // Debug.Log("Writing: " + currentWritePos);
         }
-        Debug.Log("Flushed audio samples: " + flushCounter + " Q size " + samples.Count + " SPACE " + tEmptySpace +  " RPOS " + currentPos + " WPOS " + currentWritePos);
+    //    Debug.Log("Flushed audio samples: " + offset + " " +  latestReceivedFrameNr + " " + flushCounter + " Q size " + samples.Count + " SPACE " + emptySpace +  " RPOS " + currentPos + " WPOS " + currentWritePos);
     }
     public float[] DequeueSample()
     {
@@ -268,16 +298,44 @@ public class AudioPlaybackBuffer
         {
             Marshal.Copy(sampleData, (int)lenBytes1 / sizeof(float), ptr2, (int)lenBytes2 / sizeof(float));
         }
+        res = Sound.unlock(ptr1, ptr2, lenBytes1, lenBytes2);
         currentWritePos = (currentWritePos + sampleSizeInBytes) % soundLength;
     }
-    private void correctWritePosForPacketLoss(uint newestFrameNr)
+    private uint correctWritePosForPacketLoss(uint newestFrameNr)
     {
         uint frameNrOffset = newestFrameNr - latestReceivedFrameNr;
         // No audio frames were dropped
         if (frameNrOffset == 1)
         {
-            return;
+            return frameNrOffset;
         }
+        Debug.Log("CORRECTING:" + sampleSizeInBytes * (frameNrOffset) + " " + soundLength);
         currentWritePos = (currentWritePos + (sampleSizeInBytes*(frameNrOffset))) % soundLength;
+        return frameNrOffset;
+    }
+    public void StopPlaying()
+    {
+        PlaybackStarted = false;
+        currentWritePos = 0;
+        samples.Clear();
+        // Reset all audio
+        IntPtr ptr1, ptr2;
+        uint lenBytes1, lenBytes2;
+        var res = Sound.@lock(0, (uint)soundLength, out ptr1, out ptr2, out lenBytes1, out lenBytes2);
+        float[] empty1 = new float[lenBytes1 * sizeof(float)];
+        float[] empty2 = new float[lenBytes2 * sizeof(float)];
+        if (lenBytes1 > 0)
+        {
+            Marshal.Copy(empty1, 0, ptr1, (int)lenBytes1 / sizeof(float));
+        }
+        if (lenBytes2 > 0)
+        {
+            Marshal.Copy(empty2, (int)lenBytes1 / sizeof(float), ptr2, (int)lenBytes2 / sizeof(float));
+        }
+        res = Sound.unlock(ptr1, ptr2, lenBytes1, lenBytes2);
+    }
+    public void RestartPlaying()
+    {
+
     }
 }

@@ -60,7 +60,8 @@ CAPTURER_SETUP_CODE RS2Capturer::capture_next_frame()
 			rgb.get_stride_in_bytes(),
 			depth,
 			rgb,
-			frame_nr
+			frame_nr,
+			cleanup_settings
 		));
         
     } catch (...) {

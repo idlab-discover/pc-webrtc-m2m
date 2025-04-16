@@ -146,7 +146,8 @@ public class AudioCapture : MonoBehaviour
         exinfo.numchannels = captureNumChannels;
         exinfo.format = FMOD.SOUND_FORMAT.PCMFLOAT;
         exinfo.defaultfrequency = CaptureSrate;
-        exinfo.length = (uint)CaptureSrate * sizeof(short) * (uint)captureNumChannels / 8;
+        exinfo.length = (uint)CaptureSrate * sizeof(short) * (uint)captureNumChannels;
+        exinfo.decodebuffersize = dspSize;
 
         RuntimeManager.CoreSystem.createSound(exinfo.userdata, FMOD.MODE.LOOP_NORMAL | FMOD.MODE.OPENUSER,
             ref exinfo, out sound);

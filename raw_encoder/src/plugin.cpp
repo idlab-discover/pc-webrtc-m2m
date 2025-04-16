@@ -1,6 +1,6 @@
 #include "encoding_queue.hpp"
-#include "depth_decoder.hpp"
-#include "jpeg_decoder.hpp"
+#include "depth/depth_codec_factory.hpp"
+#include "color/color_codec_factory.hpp"
 #include "pch.h"
 #include "framework.h"
 #include "log.h"
@@ -34,8 +34,7 @@ mutex m_capturing;
 std::condition_variable cv_capture;
 bool capture_done = false;
 EncodingQueue* enc_queue;
-DepthDecoder* depth_dec;
-JpegDecoder* color_dec;
+
 
 // TODO make objects
 // Realsense2 stuff
@@ -101,13 +100,24 @@ void set_logging(char* log_directory, int _log_level) {
 	Log::log("set_logging: Log level set to " + to_string(log_level), LogColor::Orange);
 }
 
-int initialize(unsigned int width, unsigned int height, unsigned int jpeg_quality) {
+int initialize
+(
+	unsigned int width, unsigned int height, 
+	ColorCodecType col_codec, void* col_codec_settings,
+	DepthCodecType dep_codec, void* dep_codec_settings
+) {
 	custom_log("initialize: inting", Default, LogColor::Orange);
-	enc_queue = new EncodingQueue(2, width, height, jpeg_quality);
-	depth_dec = new DepthDecoder();
-	color_dec = new JpegDecoder();
-	initialized = true;
-	return 0;
+	enc_queue = new EncodingQueue(
+		2, width, height, col_codec, col_codec_settings, dep_codec, dep_codec_settings
+	);
+	
+	
+	if(enc_queue->is_ready()) {
+		initialized = true;
+		return 0;
+	} else {
+		return -1;
+	}	
 }
 /*
 	This function is used to clean up threading and reset the required variables. It is called once per session from
@@ -133,11 +143,7 @@ void clean_up() {
 		// TODO Cleanup Realsense2
 		delete enc_queue;
 		enc_queue = nullptr;
-		delete depth_dec;
-		depth_dec = nullptr;
-		delete color_dec;
-		color_dec = nullptr;
-
+	
 		// Reset the initialized flag
 		initialized = false;
 		custom_log("clean_up: Cleaned up", Verbose, LogColor::Orange);
@@ -153,11 +159,11 @@ uint32_t encode_frame(RawFrame* f) {
 	return 0;
 }
 
-DecodedDepth* decode_depth(unsigned char* data, unsigned int width, unsigned int height) {
+DecodedDepth* decode_depth(DepthDecoder* depth_dec, unsigned char* data, unsigned int width, unsigned int height) {
 	return depth_dec->decode_depth(data, width, height);
 }
 
-DecodedJpeg* decode_color(unsigned char* data, unsigned long size, unsigned int width, unsigned int height) {
+DecodedColor* decode_color(ColorDecoder* color_dec, unsigned char* data, unsigned long size, unsigned int width, unsigned int height) {
 	return color_dec->decompress_frame(data, size, width, height);
 }
 
@@ -168,7 +174,7 @@ unsigned short* get_decoded_depth_data(DecodedDepth* ptr) {
 	return nullptr;
 }
 
-unsigned char* get_decoded_color_data(DecodedJpeg* ptr) {
+unsigned char* get_decoded_color_data(DecodedColor* ptr) {
 	if(ptr != nullptr) {
 		return ptr->get_buffer();
 	}
@@ -180,8 +186,35 @@ void free_decoded_depth(DecodedDepth* ptr) {
 		delete ptr;
 	}
 }
-void free_decoded_color(DecodedJpeg* ptr) {
+void free_decoded_color(DecodedColor* ptr) {
 	if(ptr != nullptr) {
 		delete ptr;
 	}
+}
+
+void free_color_decoder(ColorDecoder* ptr) {
+	if(ptr != nullptr) {
+		delete ptr;
+	}
+}
+void free_depth_decoder(DepthDecoder* ptr) {
+	if(ptr != nullptr) {
+		delete ptr;
+	}
+}
+
+ColorDecoder* create_color_decoder(ColorCodecType codec) {
+	ColorDecoder* color_dec = ColorCodecFactory::get_instance().create_color_decoder(codec);
+	if(color_dec == nullptr) {
+		custom_log("create_color_decoder: Failed to create color decoder", Default, LogColor::Red);
+	}
+	return color_dec;
+}
+
+DepthDecoder* create_depth_decoder(DepthCodecType codec) {
+	DepthDecoder* depth_dec = DepthCodecFactory::get_instance().create_depth_decoder(codec);
+	if(depth_dec == nullptr) {
+		custom_log("create_depth_decoder: Failed to create depth decoder", Default, LogColor::Red);
+	}
+	return depth_dec;
 }

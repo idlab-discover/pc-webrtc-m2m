@@ -33,10 +33,10 @@ void EncodingQueue::complete_encoding(EncodedRaw* f)
     }
     lk.unlock();
     // TODO do description finished callback
-    EncodedJpeg* enc_jpeg = f->get_enc_color();
+    EncodedColor* enc_color = f->get_enc_color();
     EncodedDepth* enc_depth = f->get_enc_depth();
     depth_done_callback_instance(enc_depth->get_bytes(), enc_depth->get_size(), f->get_frame_nr(), f->get_width(), f->get_height(), f->get_n_points(), f->get_timestamp());
-    color_done_callback_instance(enc_jpeg->get_bytes(), enc_jpeg->get_size(), f->get_frame_nr(), f->get_width(), f->get_height(), f->get_n_points(), f->get_timestamp());
+    color_done_callback_instance(enc_color->get_bytes(), enc_color->get_size(), f->get_frame_nr(), f->get_width(), f->get_height(), f->get_n_points(), f->get_timestamp());
 }
 
 void EncodingQueue::internal_enqueue_frame(RawFrame *f)
@@ -51,7 +51,6 @@ void EncodingQueue::internal_enqueue_frame(RawFrame *f)
         delete enc_raw;
     });
 }
-
 
 void register_color_done_callback(ColorDoneCallback cb)
 {

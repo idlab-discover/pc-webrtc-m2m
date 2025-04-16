@@ -6,8 +6,12 @@
 class AudioBuffer {
 
 public:
-	AudioBuffer() {}
-
+	AudioBuffer() {
+		frame_number = 0;
+	}
+	~AudioBuffer() {
+		cv.notify_all();
+	}
 	void set_number_of_tiles(uint32_t number_of_tiles) {
 		frame_number = 0;
 	}
@@ -24,6 +28,7 @@ public:
 		}
 		frame_number = next_audio_frame.get_frame_number();
 		guard.unlock();
+	
 		return std::move(next_audio_frame);
 	}
 
@@ -34,15 +39,13 @@ public:
 			guard.unlock();
 			return false;
 		}
-		while (audio_queue.size() > 100) {
-			audio_queue.pop();
-		}
 		audio_queue.push(std::move(audio_frame));
-		// frame_numbers[tile_number] = frame_number;
 		guard.unlock();
+		cv.notify_one();
+		// frame_numbers[tile_number] = frame_number;
+
 		return true;
 	}
-
 	size_t get_buffer_size() {;
 		return audio_queue.size();
 	}
@@ -51,8 +54,21 @@ public:
 		return audio_queue;
 	}
 
+	bool wait_for_audio() {
+		std::unique_lock<std::mutex> guard(m);
+
+		cv.wait(guard, [this] { return stop_waiting || audio_queue.size() > 0; });
+		guard.unlock();
+		if (stop_waiting) {
+			return false;
+		}
+		return true;
+	}
+
 private:
 	std::priority_queue<ReceivedAudio> audio_queue;
+	std::condition_variable cv;
 	uint32_t frame_number;
 	std::mutex m;
+	bool stop_waiting = false;
 };

@@ -12,6 +12,7 @@ public class DecodedRawFrame : MonoBehaviour
     public ulong Timestamp;
     public Vector3[] Points;
     public Color32[] Colors;
+    public Color32[] DecodedColors;
     public bool PointsCompleted;
     public bool ColorsCompleted;
     public IntPtr DecodedDepth;
@@ -26,6 +27,10 @@ public class DecodedRawFrame : MonoBehaviour
         Colors = new Color32[nPoints];
         Timestamp = timestamp;
 
+    }
+    public void InitRawColors(uint size)
+    {
+        DecodedColors = new Color32[size];
     }
     public void LockClass()
     {

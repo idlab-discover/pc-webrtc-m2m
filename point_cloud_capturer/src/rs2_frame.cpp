@@ -1,7 +1,7 @@
 #include "rs2_frame.hpp"
 #include <algorithm>
 
-void RS2Frame::make_color_array(unsigned int width, unsigned height, unsigned int bpp, unsigned int sib, const uint8_t *texture)
+void RS2Frame::make_color_array(unsigned int bpp, unsigned int sib, const uint8_t *texture)
 {
     if(colors != nullptr) {
         delete colors;
@@ -59,25 +59,126 @@ void RS2Frame::make_color_array(unsigned int width, unsigned height, unsigned in
     z_offset = 0.45;
 }
 
-void RS2Frame::make_raw_data_arrays(unsigned int width, unsigned int height, const rs2::depth_frame& depth_frame, const rs2::video_frame& color_frame) {
+void RS2Frame::make_raw_data_arrays(
+    const rs2::depth_frame& depth_frame, const rs2::video_frame& color_frame,
+    FrameCleanupSettings cleanup_settings
+) {
     const uint16_t* depth_ptr = static_cast<const uint16_t*>(depth_frame.get_data());
     const uint8_t* color_ptr = static_cast<const uint8_t*>(color_frame.get_data());
     raw_color.reserve(width*height*3);
     raw_depth.reserve(width*height);
-    for(int i=0; i < width*height; i++) {
-        if(depth_ptr[i] > 1500 || depth_ptr[i] == 0) {
-            raw_depth[i]=0;
-            raw_color[(i*3)+0]=0;
-            raw_color[(i*3)+1]=0;
-            raw_color[(i*3)+2]=0;
-        } else {
-            raw_depth[i]=depth_ptr[i];
-            raw_color[(i*3)+0]=color_ptr[(i*3)+0];
-            raw_color[(i*3)+1]=color_ptr[(i*3)+1];
-            raw_color[(i*3)+2]=color_ptr[(i*3)+2];
-            n_points++;
-        }
+    cleanup_settings.blackout_block_size = 8;
+    cleanup_settings.should_blackout = true;
+    cleanup_settings.should_cleanup_depth = true;
+    cleanup_settings.should_apply_depth_filter = true;
+  
+    if(cleanup_settings.should_apply_depth_filter) {
+         apply_depth_filter_to_raw(depth_ptr, color_ptr, cleanup_settings);
     }
+    
     //raw_depth.assign(depth_ptr, depth_ptr+width*height);
     //raw_color.assign(color_ptr, color_ptr+width*height*3);
+}
+
+void RS2Frame::apply_depth_filter_to_raw(
+    const uint16_t* rs_depth, const uint8_t* rs_color, FrameCleanupSettings cleanup_settings
+) {
+    unsigned int block_size = cleanup_settings.blackout_block_size;
+    unsigned int half_block = block_size*block_size/2;
+    unsigned int fith_block = block_size*block_size/5;
+    for (int row = 0; row <= height - block_size; row += block_size) {
+        for (int col = 0; col <= width - block_size; col += block_size) {
+            bool is_zero_block = true;
+            bool is_avg_block = false;
+            unsigned int n_zero_points = 0;
+           
+            // Check the 8x8 block
+            for (int dy = 0; dy < block_size; ++dy) {
+                int row_y = (row + dy) * width;
+                for (int dx = 0; dx < block_size; ++dx) {
+                    int row_x = (col + dx);
+                    if (rs_depth[row_y + row_x] > 0 && rs_depth[row_y + row_x] < 1500) {
+                        is_zero_block = false;
+                        int i_index = (row_y + (row_x))*3;
+                        raw_depth[row_y + row_x] = rs_depth[row_y + row_x];
+                        n_points++;
+                    } else {
+                        if(cleanup_settings.should_cleanup_depth) {
+                            // TODO make better / more cleanup methods
+                            if(row_x > 0 && row_x < width - 1) {
+                                unsigned short left = rs_depth[row_y + row_x-1];
+                                unsigned short right = rs_depth[row_y + row_x+1];
+                                if(left != 0 && right != 0 && right < 1500) {
+                                    raw_depth[row_y + row_x] = (left + right) / 2;
+                                     // TODO also repair color
+                                    is_zero_block = false;
+                                    n_points++;
+                                    continue;
+                                }
+                            }
+                        }
+                        n_zero_points++;
+                        raw_depth[row_y + row_x] = 0;
+                 
+                    }
+                }
+            }
+            // If block to the left is zero
+            // and this block is more than 50% zero = zet whole block to zero
+            // or this block is less than 50% zero = set whole block to average value
+            // (less than 50 but more than 20%)
+            // Below 20% fix each black pixel separately
+            //
+            unsigned int avg_r = 0;
+            unsigned int avg_g = 0;
+            unsigned int avg_b = 0;
+            if(n_zero_points >= fith_block && !is_zero_block) {
+                is_avg_block = true;
+              //  is_zero_block = true;
+                // Make whole block average color
+                // Calculate average r,g,b values of block
+                for (int dy = 0; dy < block_size; ++dy) {
+                    int row_y = (row + dy) * width;
+                    for (int dx = 0; dx < block_size; ++dx) {
+                        int row_x = (col + dx);
+                        int i_index = (row_y + row_x)*3;
+                        if(rs_depth[row_y + row_x] > 0 && rs_depth[row_y + row_x] < 1500) {
+                            avg_r += rs_color[i_index+0];
+                            avg_g += rs_color[i_index+1];
+                            avg_b += rs_color[i_index+2];
+                        }
+                    }
+                }
+                avg_r /= (block_size*block_size-n_zero_points);
+                avg_g /= (block_size*block_size-n_zero_points);
+                avg_b /= (block_size*block_size-n_zero_points);
+            } else if(n_zero_points > 0 && n_zero_points < fith_block) {
+                is_zero_block = false;
+                // Repair block => repair each pixel separately
+                // Set color value to average surrounding pixels
+                
+            }
+            for (int dy = 0; dy < block_size; ++dy) {
+                for (int dx = 0; dx < block_size; ++dx) {
+                    int i_index = ((row + dy) * width + (col + dx))*3;
+                    uint8_t r = 0;
+                    uint8_t g = 0;
+                    uint8_t b = 0;
+                    if(!is_zero_block) {
+                        r = rs_color[i_index+0];
+                        g = rs_color[i_index+1];
+                        b = rs_color[i_index+2];
+                    } else if(is_avg_block){
+                  //      r = avg_r;
+                   //     g = avg_g;
+                     //   b = avg_b;
+                    }
+                    raw_color[i_index+0] = r;
+                    raw_color[i_index+1] = g;
+                    raw_color[i_index+2] = b;
+                }
+            }
+            
+        }
+    }
 }

@@ -9,7 +9,7 @@ set(spirit_idlab_realsense_VERSION_MINOR 0)
 set(spirit_idlab_realsense_VERSION_PATCH 0)
 
 # Specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Add the include directory

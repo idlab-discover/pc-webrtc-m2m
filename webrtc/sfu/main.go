@@ -1069,11 +1069,10 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		buf := make([]byte, 1500)
-
 		startTime := time.Now().UnixNano() // / int64(time.Millisecond)
 		prevBucket := int64(0)
 		for {
+			buf := make([]byte, 1500)
 			i, _, err := t.Read(buf)
 			if err != nil {
 				fmt.Printf("WebRTCSFU: OnTrack: error during read: %s\n", err)
@@ -1094,10 +1093,13 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 				pcState.trackBitrates[tileNr].tempCounter += uint32(i)
 				prevBucket = msBucket
 			}
-			if _, err = trackLocal.Write(buf[:i]); err != nil {
-				fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)
-				break
-			}
+			go func() {
+				if _, err = trackLocal.Write(buf[:i]); err != nil {
+					fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)
+					//	break
+				}
+			}()
+
 		}
 	})
 

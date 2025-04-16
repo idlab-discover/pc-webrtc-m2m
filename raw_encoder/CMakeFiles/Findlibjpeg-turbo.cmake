@@ -3,7 +3,7 @@ set(_libjpeg-turbo_SEARCHES)
 # On Windows, we add the default install location
 
 if(WIN32)
-  list(APPEND _libjpeg-turbo_SEARCHES "C:/Program Files/libjpeg")
+  list(APPEND _libjpeg-turbo_SEARCHES "C:\\Program Files\\libjpeg")
 #  set(CMAKE_FIND_LIBRARY_SUFFIXES .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
 endif()
 
@@ -19,7 +19,7 @@ find_package_handle_standard_args(libjpeg-turbo DEFAULT_MSG libjpeg-turbo_LIB li
 if(libjpeg-turbo_FOUND)
 message("yes")
 message( ${libjpeg-turbo_LIB})
-  set(libjpeg-turbo_INCLUDE_DIRS "C:/Program Files/libjpeg/include")
+  set(libjpeg-turbo_INCLUDE_DIRS "C:\\Program Files\\libjpeg\\include")
   set(libjpeg-turbo_LIBRARIES ${libjpeg-turbo_LIB})
   
   if(NOT TARGET libjpeg-turbo::turbojpeg)
