@@ -82,7 +82,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
         {
             Debug.Log("Color enc: " + frameNr + " " + size + " " + (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - (long)timestamp));
         }
-        if(frameNr == 500)
+        if(frameNr == 100)
         {
             byte[] buffer = new byte[size];
 
@@ -92,7 +92,9 @@ public class CapturingTestMultiRaw : MonoBehaviour
             // Write the byte array to the file
             File.WriteAllBytes("test.jpg", buffer);
         }
+      
         IntPtr decoded_color = RawInvoker.decode_color(colorDecoder, rawDataPtr, size, width, height);
+      
         if (rawConverter != IntPtr.Zero)
         {
             mut.WaitOne();
@@ -155,8 +157,10 @@ public class CapturingTestMultiRaw : MonoBehaviour
         {
             Debug.Log("Depth enc: " + frameNr + " " + size + " " + (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - (long)timestamp));
         }
+     
         IntPtr decoded_depth = RawInvoker.decode_depth(depthDecoder, rawDataPtr, width, height);
-        if(rawConverter != IntPtr.Zero)
+       
+        if (rawConverter != IntPtr.Zero)
         {
             mut.WaitOne();
             DecodedRawFrame pcData2;
@@ -233,7 +237,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
         int initCode = Realsense2Invoker.initialize
         (
             sessionInfo.camWidth, sessionInfo.camHeight, sessionInfo.artificialSize, sessionInfo.camFPS, 
-            sessionInfo.camClose, sessionInfo.camFar, sessionInfo.useCam, sessionInfo.frameMode,
+            sessionInfo.camClose, sessionInfo.camFar, sessionInfo.alignToDepth, sessionInfo.useCam, sessionInfo.frameMode,
             new FrameCleanupSettingsEx{
                 blackoutBlockSize=sessionInfo.frameCleanupSettings.blackoutBlockSize, 
                 shouldApplyDepthFilter=sessionInfo.frameCleanupSettings.shouldApplyDepthFilter,

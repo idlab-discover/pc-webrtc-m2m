@@ -19,7 +19,7 @@ public static class Realsense2Invoker
     public static extern int initialize
     (
         UInt32 width, UInt32 height, UInt32 artificial_size,
-        UInt32 fps, float min_dist, float max_dist, bool use_cam, 
+        UInt32 fps, float min_dist, float max_dist, bool align_to_depth, bool use_cam, 
         FrameMode frame_mode, FrameCleanupSettingsEx cleanup_settings
     );
     [DllImport(dllName)]

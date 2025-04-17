@@ -21,6 +21,7 @@
     "camFPS": 15,
     "useCam": true,
     "useMic": false,
+    "alignToDepth": true,
     "frameMode": 0,
     "frameCodec": 0,
     "frameCleanupSettings": {
@@ -30,7 +31,8 @@
         "shouldBlackout": true
     },
     "rawEncodingSettings": {
-        "codecName": "webp",
+        "colorCodecName": "webp",
+        "depthCodecName": "zdepth",
         "jpegSettings": {
             "quality": 75
         },

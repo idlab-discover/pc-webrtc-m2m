@@ -153,7 +153,7 @@ public class CapturingTestMulti : MonoBehaviour
         int initCode = Realsense2Invoker.initialize
         (
             sessionInfo.camWidth, sessionInfo.camHeight, sessionInfo.artificialSize, sessionInfo.camFPS, 
-            sessionInfo.camClose, sessionInfo.camFar, sessionInfo.useCam, sessionInfo.frameMode,
+            sessionInfo.camClose, sessionInfo.camFar, sessionInfo.alignToDepth, sessionInfo.useCam, sessionInfo.frameMode,
             new FrameCleanupSettingsEx
             {
                 blackoutBlockSize = sessionInfo.frameCleanupSettings.blackoutBlockSize,

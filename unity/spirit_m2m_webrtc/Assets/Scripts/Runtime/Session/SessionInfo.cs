@@ -21,6 +21,7 @@ public class SessionInfo
     public uint camFPS;
     public bool useCam;
     public bool useMic;
+    public bool alignToDepth;
    
     public FrameMode frameMode;
     public FrameCodec frameCodec;

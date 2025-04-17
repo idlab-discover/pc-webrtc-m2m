@@ -178,7 +178,7 @@ public class PCSelf : MonoBehaviour
         int initCode = Realsense2Invoker.initialize
         (
             SessionInfo.camWidth, SessionInfo.camHeight, SessionInfo.artificialSize, SessionInfo.camFPS, 
-            SessionInfo.camClose, SessionInfo.camFar, SessionInfo.useCam, SessionInfo.frameMode,
+            SessionInfo.camClose, SessionInfo.camFar, SessionInfo.alignToDepth, SessionInfo.useCam, SessionInfo.frameMode,
             new FrameCleanupSettingsEx
             {
                 blackoutBlockSize = SessionInfo.frameCleanupSettings.blackoutBlockSize,
