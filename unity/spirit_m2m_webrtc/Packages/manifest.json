@@ -17,7 +17,7 @@
     }
   ],
   "dependencies": {
-    "com.meta.xr.sdk.acoustics": "file:C:/Users/matth/Downloads/meta_xr_audio_sdk_fmod_69.0/FMOD/Unity/MetaXRSDKAcousticsFMOD.tgz",
+    "com.meta.xr.sdk.acoustics": "file:MetaXRSDKAcousticsFMOD.tgz",
     "com.unity.collab-proxy": "2.3.1",
     "com.unity.feature.development": "1.0.1",
     "com.unity.feature.vr": "1.0.0",

@@ -8,7 +8,7 @@
       "url": "https://registry.npmjs.org"
     },
     "com.meta.xr.sdk.acoustics": {
-      "version": "file:C:/Users/matth/Downloads/meta_xr_audio_sdk_fmod_69.0/FMOD/Unity/MetaXRSDKAcousticsFMOD.tgz",
+      "version": "file:MetaXRSDKAcousticsFMOD.tgz",
       "depth": 0,
       "source": "local-tarball",
       "dependencies": {}
