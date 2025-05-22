@@ -34,9 +34,6 @@ Frame *ArtificalCapturer::poll_next_frame()
 {
     return frame_buffer.poll_next_frame();
 }
-CapturerIntrinsics ArtificalCapturer::get_depth_intrinsics() {
-    return {side_size, side_size, 7777, 0.0f, 0.0f, 0.0f, 0.0f, {0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-}
-CapturerIntrinsics ArtificalCapturer::get_color_intrinsics() {
-    return {side_size, side_size, 7777, 0.0f, 0.0f, 0.0f, 0.0f, {0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+void* ArtificalCapturer::get_calibration() {
+    return new ArtificialCalibration{side_size};
 }

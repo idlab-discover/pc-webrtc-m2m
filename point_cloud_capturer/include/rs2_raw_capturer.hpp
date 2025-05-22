@@ -20,6 +20,10 @@ class RS2Capturer : public Capturer {
         CAPTURER_SETUP_CODE init();
         CAPTURER_SETUP_CODE capture_next_frame();
         Frame* poll_next_frame();
+
+        static void free_calibration(void* cal) {
+            free_calibration_internal<RealsenseCalibration>(cal);
+        };
     private:
         rs2::pipeline pipe;
         rs2::align depth_align; // Do this only once because its expensive

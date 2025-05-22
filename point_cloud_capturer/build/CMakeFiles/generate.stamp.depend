@@ -1,0 +1,24 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeCXXInformation.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeGenericSystem.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeInitializeConfigs.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeLanguageInformation.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeRCInformation.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeSystemSpecificInformation.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeSystemSpecificInitialize.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Compiler/CMakeCommonCompilerMacros.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Compiler/MSVC-CXX.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Compiler/MSVC.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/FindPackageMessage.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Platform/Windows-MSVC-CXX.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Platform/Windows-MSVC.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Platform/Windows.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Platform/WindowsPaths.cmake
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/CMakeFiles/FindREALSENSE2.cmake
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/CMakeFiles/Findk4a.cmake
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/CMakeLists.txt
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/build/CMakeFiles/3.25.3/CMakeCXXCompiler.cmake
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/build/CMakeFiles/3.25.3/CMakeRCCompiler.cmake
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/build/CMakeFiles/3.25.3/CMakeSystem.cmake

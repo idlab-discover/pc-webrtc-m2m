@@ -73,7 +73,7 @@ void RS2Frame::make_raw_data_arrays(
     cleanup_settings.should_apply_depth_filter = true;
   
     if(cleanup_settings.should_apply_depth_filter) {
-         apply_depth_filter_to_raw(depth_ptr, color_ptr, cleanup_settings);
+        apply_depth_filter_to_raw(depth_ptr, color_ptr, cleanup_settings);
     }
     
     //raw_depth.assign(depth_ptr, depth_ptr+width*height);

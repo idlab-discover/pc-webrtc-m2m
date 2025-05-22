@@ -16,6 +16,7 @@ using Debug = UnityEngine.Debug;
 
 public class CapturingTestMulti : MonoBehaviour
 {
+    private SingleCapture capture;
     public List<GameObject> renderers = new List<GameObject>();
     private List<MeshFilter> filters = new List<MeshFilter>();
     public GameObject VRCam;
@@ -65,7 +66,7 @@ public class CapturingTestMulti : MonoBehaviour
         
         if(frameNr % 100 == 0)
         {
-            Debug.Log($"{dscSize} {frameNr} {dscNr} {timestamp}");
+            Debug.Log($"draco enc: {dscSize} {frameNr} {dscNr} {timestamp}");
         }
         
    
@@ -150,25 +151,14 @@ public class CapturingTestMulti : MonoBehaviour
         Realsense2Invoker.set_logging("", debug);
         DracoInvoker.RegisterDebugCallback(OnDebugCallbackDraco);
         DracoInvoker.set_logging("", debug);
-        int initCode = Realsense2Invoker.initialize
-        (
-            sessionInfo.camWidth, sessionInfo.camHeight, sessionInfo.artificialSize, sessionInfo.camFPS, 
-            sessionInfo.camClose, sessionInfo.camFar, sessionInfo.alignToDepth, sessionInfo.useCam, sessionInfo.frameMode,
-            new FrameCleanupSettingsEx
-            {
-                blackoutBlockSize = sessionInfo.frameCleanupSettings.blackoutBlockSize,
-                shouldApplyDepthFilter = sessionInfo.frameCleanupSettings.shouldApplyDepthFilter,
-                shouldBlackout = sessionInfo.frameCleanupSettings.shouldBlackout,
-                shouldCleanupDepth = sessionInfo.frameCleanupSettings.shouldCleanupDepth
-            }
-        );
+        capture = CaptureFactory.CreateNewSingleCapture(sessionInfo);
         DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
         DracoInvoker.register_free_pc_callback(OnFreePCCallback);
         DracoInvoker.initialize();
-        Debug.Log(initCode);
-        if(initCode == 0)
+       
+        if(capture != null)
         {
-            for(int i = 0; i < renderers.Count; i++)
+            for (int i = 0; i < renderers.Count; i++)
             {
                 filters.Add(renderers[i].GetComponent<MeshFilter>());
                 int offset = i == ClientID ? 1 : 0;
@@ -191,7 +181,7 @@ public class CapturingTestMulti : MonoBehaviour
             myThread.Start();
         } else
         {
-            Debug.Log($"Something went wrong inting the Realsense2: {initCode}");
+            Debug.Log($"Something went wrong inting the Realsense2");
         }
         
     }
@@ -235,6 +225,7 @@ public class CapturingTestMulti : MonoBehaviour
 
     public void OnDestroy()
     {
+        Debug.Log("DESTROYING");
         keep_working = false;
         myThread.Join();
         DracoInvoker.clean_up();
@@ -249,9 +240,9 @@ public class CapturingTestMulti : MonoBehaviour
             {
                     case FrameMode.RealData:
                     {
-                        Debug.Log($"Poll next");
+                        Debug.Log($"Poll next pc");
                    
-                        IntPtr frame = Realsense2Invoker.poll_next_point_cloud();
+                       IntPtr frame = capture.PollNextPointCloud();
                         Debug.Log($"Poll done");
                         if (frame != IntPtr.Zero)
                         {
@@ -270,7 +261,7 @@ public class CapturingTestMulti : MonoBehaviour
                     case FrameMode.RawData:
                     {
                         Debug.Log($"Poll next");
-                        IntPtr frame = Realsense2Invoker.poll_next_frame();
+                        IntPtr frame = capture.PollNextRawFrame();
                         Debug.Log($"Poll done");
                         if (frame != IntPtr.Zero)
                         {
@@ -292,6 +283,11 @@ public class CapturingTestMulti : MonoBehaviour
             
         }
         Realsense2Invoker.clean_up();
+        if(capture != null)
+        {
+            capture.Dispose();
+            capture = null;
+        }
 
     }
 }

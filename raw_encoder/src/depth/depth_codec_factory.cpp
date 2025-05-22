@@ -1,7 +1,8 @@
 #include "depth/depth_codec_factory.hpp"
 #include "depth/vle/vle_encoder.hpp"
 #include "depth/vle/vle_decoder.hpp"
-
+#include "depth/zdepth/zdepth_encoder.hpp"
+#include "depth/zdepth/zdepth_decoder.hpp"
 #include <iostream>
 
 DepthCodecFactory &DepthCodecFactory::get_instance() {
@@ -16,8 +17,12 @@ DepthEncoder *DepthCodecFactory::create_depth_encoder(DepthCodecType codec, unsi
 {
     switch (codec)
     {
-    case VLE: {
+        case VLE: {
             return new VLEEncoder(width, height);
+            break;
+        }
+        case ZDEPTH: {
+            return new ZDepthEncoder(width, height);
             break;
         }
     }
@@ -28,8 +33,12 @@ DepthDecoder *DepthCodecFactory::create_depth_decoder(DepthCodecType codec)
 {
     switch (codec)
     {
-    case VLE: {
+        case VLE: {
             return new VLEDecoder();
+            break;
+        }
+        case ZDEPTH: {
+            return new ZDepthDecoder();
             break;
         }
  

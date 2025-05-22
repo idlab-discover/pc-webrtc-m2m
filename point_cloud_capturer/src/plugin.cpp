@@ -18,89 +18,28 @@
 #include "raw_frame.hpp"
 #include "artificical_raw_converter.hpp"
 #include "rs2_raw_converter.hpp"
-
+#include "prerecorded_kinect_capturer.hpp"
+#include "kinect_raw_converter.hpp"
 using namespace std;
 
 uint32_t n_tiles;
 
 static thread worker;
-static bool keep_working = true;
-static bool initialized = false;
+//static bool keep_working = true;
+//static bool initialized = false;
 
 //mutex m_receivers;
 
 
 uint32_t frame_number;
 
-static string log_file = "";
-static int log_level = 0;
-static bool use_cam = false;
-mutex m_logging;
-mutex m_capturing;
-std::condition_variable cv_capture;
-bool capture_done = false;
-Capturer* capturer = nullptr;
-
-// TODO make objects
-// Realsense2 stuff
-
-string api_version = "1.0";
-
-
-enum LOG_LEVEL : int {
-	Default = 0,
-	Verbose = 1,
-	Debug = 2
-};
-
-
-/*
-	This function is used to get the current date/time in a predefined format, used by the custom_log function.
-*/
-inline string get_current_date_time(bool date_only) {
-	time_t now = time(0);
-	char buf[80];
-	struct tm tstruct;
-#if defined(_WIN64) || defined(_WIN32)
-	localtime_s(&tstruct, &now);
-#else
-	localtime_r(&now, &tstruct);
-#endif
-	if (date_only) {
-		strftime(buf, sizeof(buf), "%Y-%m-%d", &tstruct);
-	}
-	else {
-		strftime(buf, sizeof(buf), "%Y-%m-%d %X", &tstruct);
-	}
-	return string(buf);
-};
-
-/*
-	This function is used to pass log messages to the user. Verbose logging can be enabled, and different colors can be
-	used to inidicate a specific function (e.g., sending or receiving data).
-*/
-void custom_log(string message, int _log_level = 0, LogColor color = LogColor::Black) {
-	unique_lock<mutex> guard(m_logging);
-	if (_log_level <= log_level) {
-		Log::log(message, color);
-	}
-	if (log_file != "") {
-		ofstream ofs(log_file.c_str(), ios_base::out | ios_base::app);
-		ofs << get_current_date_time(false) << '\t' << message << '\n';
-		ofs.close();
-	}
-	guard.unlock();
-}
 
 /*
 	This function allows to specify a directory in which logs are created, and allows to specify if a verbose mode
 	should be used. It should be called once per session from within Unity.
 */
 void set_logging(char* log_directory, int _log_level) {
-	log_file = string(log_directory) + "\\" + get_current_date_time(true) + ".txt";
-	Log::log("set_logging: Log directory set to " + string(log_directory), LogColor::Orange);
-	log_level = _log_level;
-	Log::log("set_logging: Log level set to " + to_string(log_level), LogColor::Orange);
+	Log::set_logging(log_directory, _log_level);
 }
 
 
@@ -108,52 +47,53 @@ void set_logging(char* log_directory, int _log_level) {
 	This function is responsible for capturing incoming realsense data. It is called from within a thread, which is started by the
 	initialize function. No action is required from within Unity.
 */
-void start_capturing() {
-	custom_log("start_capturing: Starting to capture frames from realsense2 camera", Verbose, LogColor::Yellow);
-	capture_done = false;
-	keep_working = true;
-	while (keep_working) {
-
-		auto code = capturer->capture_next_frame();
-		if (code != 0) {
-			keep_working = false;
-		}
-		// auto vertices = points.get_vertices();
-		// auto texture_coordinates = points.get_texture_coordinates();
-		 // Fill in array with raw data
-	}
-	
-	std::unique_lock lk(m_capturing);
-	capture_done = true;
-	lk.unlock();
-	cv_capture.notify_all();
+void start_capturing(Capturer* capturer) {
+	Log::custom_log("start_capturing: Starting to capture frames from realsense2 camera", Verbose, LogColor::Yellow);
+	capturer->start_capturing();
+	Log::custom_log("start_capturing: Stopped capturing frames from realsense2 camera", Verbose, LogColor::Yellow);
 }
 
 /*
 	This function is responsible for initializing the DLL. It should be called once per session from within Unity,
 	specifiying the required IP addresses and ports, the number of tiles that will be transmitted, and the client ID.
 */
-int initialize(uint32_t width, uint32_t height, uint32_t artificial_size, uint32_t fps, float min_dist, float max_dist, bool _use_cam, FrameMode mode, FrameCleanupSettings cleanup_settings) {
-	use_cam = _use_cam;
+Capturer* create_new_capturer(uint32_t fps, 
+	FrameMode mode, FrameCleanupSettings cleanup_settings, 
+	CAPTURE_TYPE type, void* capture_settings
+) {
+
+	Capturer* capturer = nullptr;
 	try {
-		if(use_cam) {
-			capturer = new RS2Capturer(mode, width, height, fps, min_dist, max_dist, cleanup_settings);
-		} else {
-			capturer = new ArtificalCapturer(mode, artificial_size, fps, cleanup_settings);
+		switch(type) {
+			case CAPTURE_TYPE::Artifical: {
+				Log::custom_log("create_new_capturer: Creating artificial capturer", LOG_LEVEL::Default, LogColor::Orange);
+				capturer = new ArtificalCapturer(fps, mode, cleanup_settings, static_cast<ArtificalCaptureSettings*>(capture_settings));
+				break;
+			}
+			case CAPTURE_TYPE::RealSense: {
+				Log::custom_log("create_new_capturer: Creating realsense2 capturer", LOG_LEVEL::Default, LogColor::Orange);
+				capturer = new RS2Capturer(fps, mode, cleanup_settings, static_cast<RS2CaptureSettings*>(capture_settings));
+				break;
+			}
+			case CAPTURE_TYPE::PrerecordedKinect: {
+				Log::custom_log("create_new_capturer: Creating prerecorded kinect capturer", LOG_LEVEL::Default, LogColor::Orange);
+				capturer = new PrerecordedKinectCapturer(fps, mode, cleanup_settings, static_cast<PrerecordedKinectCaptureSettings*>(capture_settings));
+				break;
+			}
+			default: {
+				Log::custom_log("create_new_capturer: Invalid capture type", LOG_LEVEL::Default, LogColor::Red);
+				capturer =  nullptr;
+			}
 		}
+	
 	} catch (CAPTURER_SETUP_CODE e) {
-		initialized = true;
-		return e;
+		return nullptr;
 	}
-	auto code = capturer->init();
-	if(code == 0) {
-		worker = thread(start_capturing);
-	}
-	initialized = true;
-	return code;
+	return capturer;
 }
 
-PointCloud* poll_next_point_cloud() {
+
+PointCloud* poll_next_point_cloud(Capturer* capturer) {
 	Frame* frame = capturer->poll_next_frame();
 	if(frame == nullptr) {
 		return nullptr;
@@ -168,12 +108,12 @@ PointCloud* poll_next_point_cloud() {
 	};
 }
 
-Frame* poll_next_frame() {
+Frame* poll_next_frame(Capturer* capturer) {
 	Frame* frame = capturer->poll_next_frame();
 	return frame;
 }
 
-RawFrame* poll_next_raw_frame() {
+RawFrame* poll_next_raw_frame(Capturer* capturer) {
 	Frame* frame = capturer->poll_next_frame();
 	return new RawFrame{
 		frame->get_timestamp(),
@@ -221,25 +161,29 @@ void free_raw_frame(RawFrame* frame) {
 	delete frame;
 }
 
-CapturerIntrinsics get_depth_intrinsics() {
-	if(capturer == nullptr) {
-		return {};
-	}
-	return capturer->get_depth_intrinsics();
+void* get_calibration(Capturer* capturer) {
+	if(capturer == nullptr) return nullptr;
+	return capturer->get_calibration();
 }
 
-CapturerIntrinsics get_color_intrinsics() {
-	if(capturer == nullptr) {
-		return {};
-	}
-	return capturer->get_color_intrinsics();
-}
-
-RawConverter* create_new_raw_converter(bool use_cam, CapturerIntrinsics depth_intrinsics, CapturerIntrinsics color_intrinsics) {
-	if(use_cam) {
-		return new RS2RawConverter(depth_intrinsics, color_intrinsics);
-	} else {
-		return new ArtificalRawConverter(depth_intrinsics.height);
+RawConverter* create_new_raw_converter(CAPTURE_TYPE type, void* cal) {
+	switch(type) {
+		case CAPTURE_TYPE::Artifical: {
+			Log::custom_log("create_new_raw_converter: Creating artificial raw converter", LOG_LEVEL::Default, LogColor::Orange);
+			return new ArtificalRawConverter(cal);
+		}
+		case CAPTURE_TYPE::RealSense: {
+			Log::custom_log("create_new_raw_converter: Creating realsense2 raw converter", LOG_LEVEL::Default, LogColor::Orange);
+			return new RS2RawConverter(cal);
+		}
+		case CAPTURE_TYPE::PrerecordedKinect: {
+			Log::custom_log("create_new_raw_converter: Creating prerecorded kinect raw converter", LOG_LEVEL::Default, LogColor::Orange);
+			return new KinectRawConverter(cal);
+		}
+		default: {
+			Log::custom_log("create_new_raw_converter: Invalid capture type", LOG_LEVEL::Default, LogColor::Red);
+			return nullptr;
+		}
 	}
 }
 
@@ -253,26 +197,50 @@ void free_raw_converter(RawConverter* c) {
 	}
 }
 
-void set_capturer_frame_cleanup_settings(FrameCleanupSettings cleanup_settings) {
+void set_capturer_frame_cleanup_settings(Capturer* capturer, FrameCleanupSettings cleanup_settings) {
 	if(capturer) {
 		capturer->set_cleanup_settings(cleanup_settings);
 	}
 }
 
+void free_capturer(Capturer* capturer) {
+	if(capturer != nullptr) {
+		capturer->stop();
+		capturer->wait_for_capture_done();
+		delete capturer;
+	}
+}
 
+void free_capturer_calibration(CAPTURE_TYPE type, void* cal) {
+	switch(type) {
+		case CAPTURE_TYPE::Artifical: {
+			ArtificalCapturer::free_calibration(cal);
+			break;
+		}
+		case CAPTURE_TYPE::RealSense: {
+			RS2Capturer::free_calibration(cal);
+			break;
+		}
+		case CAPTURE_TYPE::PrerecordedKinect: {
+			PrerecordedKinectCapturer::free_calibration(cal);
+			break;
+		}
+		default: {
+			Log::custom_log("free_capturer_calibration: Invalid capture type", LOG_LEVEL::Default, LogColor::Red);
+			break;
+		}
+	}
+}
 /*
 	This function is used to clean up threading and reset the required variables. It is called once per session from
 	within Unity.
 */
 void clean_up() {
-	custom_log("clean_up: Attempting to clean up", Verbose, LogColor::Orange);
-
+	Log::custom_log("clean_up: Attempting to clean up", Verbose, LogColor::Orange);
+/*
 	// Check if the DLL has already been initialized
 	if (initialized) {
 
-		// Halt sending/receiving operations
-		keep_working = false;
-		
 		// Close sockets, using the mutex for sending data
 		//unique_lock<mutex> guard(m_send_data);
 		
@@ -282,15 +250,6 @@ void clean_up() {
 		if (worker.joinable())
 			worker.join();
 		// TODO Cleanup Realsense2
-		if(capturer != nullptr) {
-			capturer->stop();
-			std::unique_lock lk(m_capturing);
-			cv_capture.wait(lk, [] { return capture_done; });
-			delete capturer;
-			capturer = nullptr;
-		}
-		
-
 		// Reset the initialized flag
 		initialized = false;
 		custom_log("clean_up: Cleaned up", Verbose, LogColor::Orange);
@@ -298,5 +257,5 @@ void clean_up() {
 	else {
 		// No action is required
 		custom_log("clean_up: Already cleaned up", Verbose, LogColor::Orange);
-	}
+	}*/
 }

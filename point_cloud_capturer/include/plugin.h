@@ -13,22 +13,42 @@
 extern "C"
 {
 	DLLExport void set_logging(char* log_directory, int _log_level);
-	DLLExport PointCloud* poll_next_point_cloud();
-	DLLExport Frame* poll_next_frame();
-	DLLExport RawFrame* poll_next_raw_frame();
+	
+	
+	
+	// Capturer functions
+	//	    General functions
+	DLLExport Capturer* create_new_capturer(uint32_t fps, 
+		FrameMode mode, FrameCleanupSettings cleanup_settings, 
+		CAPTURE_TYPE type, void* capture_settings);
+	DLLExport void start_capturing(Capturer* capturer);
+	DLLExport void set_capturer_frame_cleanup_settings(Capturer* capturer, 
+		FrameCleanupSettings cleanup_settings);
+	DLLExport void* get_calibration(Capturer* capturer);
+	//		Poll functions
+	DLLExport PointCloud* poll_next_point_cloud(Capturer* capturer);
+	DLLExport Frame* poll_next_frame(Capturer* capturer);
+	DLLExport RawFrame* poll_next_raw_frame(Capturer* capturer);
+
+	// Point cloud functions
 	DLLExport size_t get_point_cloud_size(PointCloud* pc);
+
+	// Frame functions
 	DLLExport size_t get_frame_size(Frame* pc);
 	DLLExport uint16_t* get_raw_depth(Frame* pc);
 	DLLExport uint8_t* get_raw_color(Frame* pc);
+
+	// Raw converter functions
+	DLLExport RawConverter* create_new_raw_converter(CAPTURE_TYPE type, void* cal);
+	DLLExport void convert_raw_frame(RawConverter* c, uint16_t* depth, uint8_t* color, Vector3* pos_out, Color32* col_out);
+	
+	// Free memory functions
 	DLLExport void free_point_cloud(PointCloud * pc);
 	DLLExport void free_frame(Frame * pc);
 	DLLExport void free_raw_frame(RawFrame * pc);
-	DLLExport RawConverter* create_new_raw_converter(bool use_cam, CapturerIntrinsics depth_intrinsics, CapturerIntrinsics color_intrinsics) ;
+	DLLExport void free_capturer(Capturer* capturer);
 	DLLExport void free_raw_converter(RawConverter* c);
-	DLLExport void convert_raw_frame(RawConverter* c, uint16_t* depth, uint8_t* color, Vector3* pos_out, Color32* col_out);
-	DLLExport CapturerIntrinsics get_depth_intrinsics();
-	DLLExport CapturerIntrinsics get_color_intrinsics();
-	DLLExport int initialize(uint32_t width, uint32_t height, uint32_t artificial_size, uint32_t fps, float min_dist, float max_dist, bool _use_cam, FrameMode mode, FrameCleanupSettings cleanup_settings);
-	DLLExport void set_capturer_frame_cleanup_settings(FrameCleanupSettings cleanup_settings);
+	DLLExport void free_capturer_calibration(CAPTURE_TYPE type, void* cal);
+	
 	DLLExport void clean_up();
 }

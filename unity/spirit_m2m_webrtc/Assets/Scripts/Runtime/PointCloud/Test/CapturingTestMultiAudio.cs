@@ -16,6 +16,7 @@ using Debug = UnityEngine.Debug;
 
 public class CapturingTestMultiAudio : MonoBehaviour
 {
+    public SingleCapture capture;
     public List<GameObject> renderers = new List<GameObject>();
     private List<MeshFilter> filters = new List<MeshFilter>();
     public AudioPlayback AudioPlaybackPrefab;
@@ -154,25 +155,14 @@ public class CapturingTestMultiAudio : MonoBehaviour
         Realsense2Invoker.set_logging("", debug);
         DracoInvoker.RegisterDebugCallback(OnDebugCallbackDraco);
         DracoInvoker.set_logging("", debug);
-        int initCode = Realsense2Invoker.initialize
-        (
-            sessionInfo.camWidth, sessionInfo.camHeight, sessionInfo.artificialSize, sessionInfo.camFPS, 
-            sessionInfo.camClose, sessionInfo.camFar, sessionInfo.alignToDepth, sessionInfo.useCam, sessionInfo.frameMode,
-            new FrameCleanupSettingsEx
-            {
-                blackoutBlockSize = sessionInfo.frameCleanupSettings.blackoutBlockSize,
-                shouldApplyDepthFilter = sessionInfo.frameCleanupSettings.shouldApplyDepthFilter,
-                shouldBlackout = sessionInfo.frameCleanupSettings.shouldBlackout,
-                shouldCleanupDepth = sessionInfo.frameCleanupSettings.shouldCleanupDepth
-            }
-        );
+        capture = CaptureFactory.CreateNewSingleCapture(sessionInfo);
         DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
         DracoInvoker.register_free_pc_callback(OnFreePCCallback);
         DracoInvoker.initialize();
-        Debug.Log(initCode);
+   
         Capture.CB = CopyDataToPlayback;
         Capture.Init(AudioParams.codecName, AudioParams.dspSize);
-        if (initCode == 0)
+        if (capture != null)
         {
             for (int i = 0; i < renderers.Count; i++)
             {
@@ -206,7 +196,7 @@ public class CapturingTestMultiAudio : MonoBehaviour
             myThread.Start();
         } else
         {
-            Debug.Log($"Something went wrong inting the Realsense2: {initCode}");
+            Debug.Log($"Something went wrong inting the Realsense2:");
         }
         
     }
@@ -282,7 +272,7 @@ public class CapturingTestMultiAudio : MonoBehaviour
                     {
                         Debug.Log($"Poll next");
                    
-                        IntPtr frame = Realsense2Invoker.poll_next_point_cloud();
+                        IntPtr frame = capture.PollNextPointCloud();
                         Debug.Log($"Poll done");
                         if (frame != IntPtr.Zero)
                         {
@@ -301,7 +291,7 @@ public class CapturingTestMultiAudio : MonoBehaviour
                     case FrameMode.RawData:
                     {
                         Debug.Log($"Poll next");
-                        IntPtr frame = Realsense2Invoker.poll_next_frame();
+                        IntPtr frame = capture.PollNextRawFrame();
                         Debug.Log($"Poll done");
                         if (frame != IntPtr.Zero)
                         {
@@ -323,6 +313,10 @@ public class CapturingTestMultiAudio : MonoBehaviour
             
         }
         Realsense2Invoker.clean_up();
+        if(capture != null)
+        {
+            capture.Dispose();
+        }
 
     }
 

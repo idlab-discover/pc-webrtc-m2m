@@ -47,7 +47,11 @@ CAPTURER_SETUP_CODE RS2Capturer::capture_next_frame()
 			frames = pipe.wait_for_frames();
 			n_frames = frames.size();
 		}
-		frames = depth_align.process(frames);
+		if(align_to_depth) {
+			frames = depth_align.process(frames);
+		} else {
+			frames = color_align.process(frames);
+		}
 		auto depth = frames.get_depth_frame();
 		depth = thres_filter.process(depth);
 		auto rgb = frames.get_color_frame();
@@ -102,8 +106,9 @@ std::pair<CAPTURER_SETUP_CODE, std::string> RS2Capturer::exception_handler() noe
 	}
 }
 
-CapturerIntrinsics RS2Capturer::get_intrinsincs_from_stream(rs2::video_stream_profile profile) {
+realsense_in RS2Capturer::get_intrinsincs_from_stream(rs2::video_stream_profile profile) {
 	auto intr = profile.get_intrinsics();
+	
 	unsigned int width = (unsigned int)intr.width;
 	unsigned int height = (unsigned int)intr.height;
 	return {width, height, static_cast<unsigned int>(intr.model), intr.ppx, intr.ppy, intr.fx, intr.fy, 
@@ -111,17 +116,18 @@ CapturerIntrinsics RS2Capturer::get_intrinsincs_from_stream(rs2::video_stream_pr
 	}; 
 }
 
-CapturerIntrinsics RS2Capturer::get_depth_intrinsics() {
+void* RS2Capturer::get_calibration() {
 	if (!depth_sensor.has_value()) {
-		return {};
+		return nullptr;
 	}
-	auto profile = depth_sensor->get_active_streams()[0].as<rs2::video_stream_profile>();
-	return get_intrinsincs_from_stream(profile);
-}
-CapturerIntrinsics RS2Capturer::get_color_intrinsics() {
 	if(!color_sensor.has_value()) {
-		return {};
+		return nullptr;
 	}
-	auto profile = color_sensor->get_active_streams()[0].as<rs2::video_stream_profile>();
-	return get_intrinsincs_from_stream(profile);
+	
+	auto depth_profile = depth_sensor->get_active_streams()[0].as<rs2::video_stream_profile>();
+	auto color_profile = color_sensor->get_active_streams()[0].as<rs2::video_stream_profile>();
+	return new RealsenseCalibration{
+		get_intrinsincs_from_stream(depth_profile),
+		get_intrinsincs_from_stream(color_profile)
+	};
 }

@@ -12,8 +12,7 @@ set(spirit_idlab_realsense_VERSION_PATCH 0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Add the include directory
-include_directories(include)
+
 
 # Add the source directory
 file(GLOB SOURCES "src/*.cpp")
@@ -35,9 +34,12 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeFiles")
 
 # Find the REALSENSE2 library
 find_package(REALSENSE2 REQUIRED)
+find_package(k4a REQUIRED)
 
 # Link the REALSENSE2 library to the DLL
 target_link_libraries(spirit_idlab_realsense ${REALSENSE2_LIBRARIES})
+target_link_libraries(spirit_idlab_realsense ${k4a_LIBRARY} ${k4arecord_LIBRARY})
+
 target_link_libraries(spirit_idlab_realsense winmm.lib)
 # Include REALSENSE2 directories
-include_directories(${REALSENSE2_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR}/include ${k4a_INCLUDE_DIR} ${REALSENSE2_INCLUDE_DIRS})

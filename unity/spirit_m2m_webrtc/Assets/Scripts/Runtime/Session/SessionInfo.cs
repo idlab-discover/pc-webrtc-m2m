@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System.Runtime.InteropServices;
-
+using Newtonsoft.Json;
 [System.Serializable]
 public class SessionInfo
 {
@@ -13,24 +13,24 @@ public class SessionInfo
     public StartPosition pushBack;
     public string sfuAddress;
     public int peerUDPPort;
-    public float camClose;
-    public float camFar;
-    public uint camWidth;
-    public uint camHeight;
-    public uint artificialSize;
+
+
     public uint camFPS;
-    public bool useCam;
     public bool useMic;
-    public bool alignToDepth;
+
    
     public FrameMode frameMode;
     public FrameCodec frameCodec;
+    public string capturerName = "artificial";
+    public ArtificialSettings artificialSettings;
+    public RealsenseSettings realsenseSettings;
+    public PrerecordedKinecteSettings prerecKinectSettings;
     public FrameCleanupSettings frameCleanupSettings;
     public RawEncodingSettings rawEncodingSettings;
     public AudioPlaybackParams audioPlayback;
     public static SessionInfo CreateFromJSON(string path)
     {
-        return JsonUtility.FromJson<SessionInfo>(File.ReadAllText(path));
+        return JsonConvert.DeserializeObject<SessionInfo>(File.ReadAllText(path));
     }
 
 }
@@ -87,6 +87,9 @@ public class FrameCleanupSettings
     public bool shouldCleanupDepth;
     public bool shouldBlackout;
 }
+
+
+
 
 
 [System.Serializable]

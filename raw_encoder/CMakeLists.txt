@@ -44,10 +44,18 @@ find_package(webp REQUIRED)
 message(${webp_INCLUDE_DIRS})
 message(${webp_LIBRARIES})
 
+find_package(zstd REQUIRED)
+message(${zstd_INCLUDE_DIRS})
+message(${zstd_LIBRARIES})
+
+find_package(zdepth REQUIRED)
+message(${zdepth_INCLUDE_DIRS})
+message(${zdepth_LIBRARIES})
+
 
 # Include REALSENSE2 directories
-include_directories(${libjpeg-turbo_INCLUDE_DIRS} ${webp_INCLUDE_DIRS})
+include_directories(${libjpeg-turbo_INCLUDE_DIRS} ${webp_INCLUDE_DIRS} ${zstd_INCLUDE_DIRS} ${zdepth_INCLUDE_DIRS})
 
 
 # Link the DRACO library to the DLL
-target_link_libraries(spirit_idlab_raw ${libjpeg-turbo_LIBRARIES} ${webp_LIBRARIES})
+target_link_libraries(spirit_idlab_raw ${libjpeg-turbo_LIBRARIES} ${webp_LIBRARIES} ${zstd_LIBRARIES} ${zdepth_LIBRARIES})

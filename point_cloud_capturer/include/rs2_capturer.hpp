@@ -4,14 +4,27 @@
 #include "capturer.hpp"
 #include <optional>
 
+struct RS2CaptureSettings {
+    unsigned int width;
+    unsigned int height;
+    float min_dist;
+    float max_dist;
+    bool align_to_depth;
+};
 
 class RS2Capturer : public Capturer {
     public:
         RS2Capturer(
-            FrameMode mode, unsigned int width, unsigned int height, unsigned int fps, 
-            float min_dist, float max_dist, FrameCleanupSettings cleanup_settings
-        ) try : width(width), height(height), min_dist(min_dist), max_dist(max_dist), 
-            Capturer(mode, fps, cleanup_settings), depth_align(rs2::align((RS2_STREAM_DEPTH))) 
+            unsigned int fps, FrameMode mode,
+            FrameCleanupSettings cleanup_settings,
+            RS2CaptureSettings* capture_settings
+        ) try : width(capture_settings->width), height(capture_settings->height), 
+            min_dist(capture_settings->min_dist), 
+            max_dist(capture_settings->max_dist),
+            align_to_depth(capture_settings->align_to_depth), 
+            Capturer(mode, fps, cleanup_settings), 
+            depth_align(rs2::align(RS2_STREAM_DEPTH)), 
+            color_align(rs2::align(RS2_STREAM_COLOR)) 
         {
             
         } catch(...) {
@@ -25,12 +38,16 @@ class RS2Capturer : public Capturer {
         CAPTURER_SETUP_CODE init();
         CAPTURER_SETUP_CODE capture_next_frame();
         Frame* poll_next_frame();
-        CapturerIntrinsics get_depth_intrinsics();
-        CapturerIntrinsics get_color_intrinsics();
+        void* get_calibration();
+
+        static void free_calibration(void* cal) {
+            free_calibration_internal<RealsenseCalibration>(cal);
+        };
     private:
         rs2::pipeline pipe;
         rs2::pointcloud pc;
         rs2::align depth_align; // Do this only once because its expensive
+        rs2::align color_align; // Do this only once because its expensive
         rs2::threshold_filter thres_filter;
         std::optional<rs2::depth_sensor> depth_sensor;
         std::optional<rs2::color_sensor> color_sensor;
@@ -38,6 +55,7 @@ class RS2Capturer : public Capturer {
         unsigned int height;
         float min_dist;
         float max_dist;
+        bool align_to_depth;
         std::pair<CAPTURER_SETUP_CODE, std::string> exception_handler() noexcept;
-        CapturerIntrinsics get_intrinsincs_from_stream(rs2::video_stream_profile profile);
+        realsense_in get_intrinsincs_from_stream(rs2::video_stream_profile profile);
 };

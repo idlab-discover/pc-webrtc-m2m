@@ -16,6 +16,7 @@ using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 using Debug = UnityEngine.Debug;
+using System.Drawing;
 
 public class CapturingTestMultiRaw : MonoBehaviour
 {
@@ -47,6 +48,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
     private static IntPtr rawConverter = IntPtr.Zero;
     private static IntPtr colorDecoder = IntPtr.Zero;
     private static IntPtr depthDecoder = IntPtr.Zero;
+    private SingleCapture capture;
     enum Color { red, green, blue, black, white, yellow, orange };
     [MonoPInvokeCallback(typeof(DLLLogger.debugCallback))]
     static void OnDebugCallback(IntPtr request, int color, int size)
@@ -78,11 +80,12 @@ public class CapturingTestMultiRaw : MonoBehaviour
     [MonoPInvokeCallback(typeof(RawInvoker.colorDoneCallback))]
     static void OnColorDoneCallback(IntPtr rawDataPtr, UInt32 size, UInt32 frameNr, UInt32 width, UInt32 height, UInt32 nPoints, UInt64 timestamp)
     {
-        if (frameNr % 100 == 0)
-        {
+      //  if (frameNr % 100 == 0)
+      //  {
             Debug.Log("Color enc: " + frameNr + " " + size + " " + (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - (long)timestamp));
-        }
-        if(frameNr == 100)
+     //   }
+        Debug.Log("Color enc: " + fr + " " + " " + (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
+        if (frameNr == 100)
         {
             byte[] buffer = new byte[size];
 
@@ -90,7 +93,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
             Marshal.Copy(rawDataPtr, buffer, 0,(int) size);
 
             // Write the byte array to the file
-            File.WriteAllBytes("test.jpg", buffer);
+            File.WriteAllBytes("kinect.jpg", buffer);
         }
       
         IntPtr decoded_color = RawInvoker.decode_color(colorDecoder, rawDataPtr, size, width, height);
@@ -115,14 +118,14 @@ public class CapturingTestMultiRaw : MonoBehaviour
                 GCHandle hColor = GCHandle.Alloc(pcData2.Colors, GCHandleType.Pinned);
                 try
                 {
-                    Realsense2Invoker.convert_raw_frame(rawConverter, buf_depth, buf_color, hDepth.AddrOfPinnedObject(), hColor.AddrOfPinnedObject());
+                //   Realsense2Invoker.convert_raw_frame(rawConverter, buf_depth, buf_color, hDepth.AddrOfPinnedObject(), hColor.AddrOfPinnedObject());
                 }
                 finally
                 {
                     hDepth.Free();
                     hColor.Free();
                 }
-
+/*
                 pcData2.InitRawColors(width*height);
                 unsafe
                 {
@@ -133,7 +136,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
                     }
                 }
                
-
+                */
                 RawInvoker.free_decoded_color(pcData2.DecodedColor);
                 RawInvoker.free_decoded_depth(pcData2.DecodedDepth);
                 if (frameNr % 100 == 0)
@@ -141,7 +144,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
                     Debug.Log("Frame done2: " + frameNr + " " + ((ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - timestamp));
                 }
                 inProgessFrames2.Remove(frameNr);
-                queue2.Enqueue(pcData2);
+             //   queue2.Enqueue(pcData2);
             }
             mut.ReleaseMutex();
             return;
@@ -157,7 +160,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
         {
             Debug.Log("Depth enc: " + frameNr + " " + size + " " + (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - (long)timestamp));
         }
-     
+        
         IntPtr decoded_depth = RawInvoker.decode_depth(depthDecoder, rawDataPtr, width, height);
        
         if (rawConverter != IntPtr.Zero)
@@ -234,62 +237,47 @@ public class CapturingTestMultiRaw : MonoBehaviour
         Realsense2Invoker.set_logging("", debug);
         RawInvoker.RegisterDebugCallback(OnDebugCallbackDraco);
         RawInvoker.set_logging("", debug);
-        int initCode = Realsense2Invoker.initialize
-        (
-            sessionInfo.camWidth, sessionInfo.camHeight, sessionInfo.artificialSize, sessionInfo.camFPS, 
-            sessionInfo.camClose, sessionInfo.camFar, sessionInfo.alignToDepth, sessionInfo.useCam, sessionInfo.frameMode,
-            new FrameCleanupSettingsEx{
-                blackoutBlockSize=sessionInfo.frameCleanupSettings.blackoutBlockSize, 
-                shouldApplyDepthFilter=sessionInfo.frameCleanupSettings.shouldApplyDepthFilter,
-                shouldBlackout=sessionInfo.frameCleanupSettings.shouldBlackout,
-                shouldCleanupDepth = sessionInfo.frameCleanupSettings.shouldCleanupDepth
-            }    
-        );
+        capture = CaptureFactory.CreateNewSingleCapture(sessionInfo);
         RawInvoker.register_depth_done_callback(OnDepthDoneCallback);
         RawInvoker.register_color_done_callback(OnColorDoneCallback);
         RawInvoker.register_free_frame_callback(OnFreeFrameCallback);
         
-        if(sessionInfo.useCam)
+        if(sessionInfo.capturerName != "artificial")
         {
-            tex = new Texture2D((int)sessionInfo.camWidth, (int)sessionInfo.camHeight);
-            RawImg.rectTransform.sizeDelta = new Vector2(sessionInfo.camWidth, (int)sessionInfo.camHeight);
+            tex = new Texture2D((int)sessionInfo.realsenseSettings.width, (int)sessionInfo.realsenseSettings.height);
+            RawImg.rectTransform.sizeDelta = new Vector2(sessionInfo.realsenseSettings.width, (int)sessionInfo.realsenseSettings.height);
             RawImg.rectTransform.localScale = new Vector2(0.5f, 0.5f);
-            CapturerIntrinsics depthInt = Realsense2Invoker.get_depth_intrinsics();
-            CapturerIntrinsics colorInt = Realsense2Invoker.get_color_intrinsics();
-            Debug.Log("D INT: " + depthInt.ToString());
-            Debug.Log("C INT: " + colorInt.ToString());
+            IntPtr cal = capture.GetCalibration();
             var cCodec = ColorCodecHelper.GetCodecSettings(sessionInfo.rawEncodingSettings);
             var dCodec = DepthCodecHelper.GetCodecSettings(sessionInfo.rawEncodingSettings);
             colorDecoder = RawInvoker.create_color_decoder(cCodec.CodecType);
             depthDecoder = RawInvoker.create_depth_decoder(dCodec.CodecType);
-            RawInvoker.initialize(sessionInfo.camWidth, sessionInfo.camHeight, 
+            RawInvoker.initialize(1280, 720, 
                 cCodec.CodecType, cCodec.SettingsPtr, dCodec.CodecType, dCodec.SettingsPtr
             );
-            rawConverter = Realsense2Invoker.create_new_raw_converter(true, depthInt, colorInt);
+            rawConverter = Realsense2Invoker.create_new_raw_converter(capture.Type, cal);
         } else
         {
-            tex = new Texture2D((int)sessionInfo.artificialSize * (int)sessionInfo.artificialSize, (int)sessionInfo.artificialSize);
+            tex = new Texture2D((int)sessionInfo.artificialSettings.artificialSize * (int)sessionInfo.artificialSettings.artificialSize, (int)sessionInfo.artificialSettings.artificialSize);
          //   tex.filterMode = FilterMode.Point;
            tex.wrapMode =TextureWrapMode.Clamp;
             var cCodec = ColorCodecHelper.GetCodecSettings(sessionInfo.rawEncodingSettings);
             var dCodec = DepthCodecHelper.GetCodecSettings(sessionInfo.rawEncodingSettings);
-            RawInvoker.initialize(sessionInfo.artificialSize* sessionInfo.artificialSize, sessionInfo.artificialSize, 
+            RawInvoker.initialize(sessionInfo.artificialSettings.artificialSize * sessionInfo.artificialSettings.artificialSize, sessionInfo.artificialSettings.artificialSize, 
                 cCodec.CodecType, cCodec.SettingsPtr,
                 dCodec.CodecType, dCodec.SettingsPtr
             );
            // RawImg.rectTransform.sizeDelta = new Vector2(75, 75);
             RawImg.rectTransform.localScale = new Vector2(2f, 2f);
-            CapturerIntrinsics depthInt = Realsense2Invoker.get_depth_intrinsics();
-            CapturerIntrinsics colorInt = Realsense2Invoker.get_color_intrinsics();
-            Debug.Log("INT: "+ depthInt.ToString());
-            rawConverter = Realsense2Invoker.create_new_raw_converter(false, depthInt, colorInt);
+            IntPtr cal = capture.GetCalibration();
+            rawConverter = Realsense2Invoker.create_new_raw_converter(capture.Type, cal);
             colorDecoder = RawInvoker.create_color_decoder(cCodec.CodecType);
             depthDecoder = RawInvoker.create_depth_decoder(dCodec.CodecType);
         }
         RawImg.texture = tex;
         
-        Debug.Log(initCode);
-        if(initCode == 0)
+       
+        if(capture != null)
         {
             for(int i = 0; i < renderers.Count; i++)
             {
@@ -302,7 +290,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
                     pcSelf.transform.parent = renderers[i].transform;
                 } else
                 {
-                    if(sessionInfo.useCam)
+                    if(sessionInfo.capturerName != "artificial")
                     {
                         renderers[i].transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                       //  renderers[i].transform.rotation = 
@@ -320,7 +308,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
             myThread.Start();
         } else
         {
-            Debug.Log($"Something went wrong inting the Realsense2: {initCode}");
+            Debug.Log($"Something went wrong inting the Realsense2: ");
         }
         
     }
@@ -368,7 +356,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
         myThread.Join();
         RawInvoker.clean_up();
     }
-    
+    static int fr = 0;
     void pollFrames()
     {
       
@@ -379,7 +367,8 @@ public class CapturingTestMultiRaw : MonoBehaviour
                     case FrameMode.RealData:
                     {
                         Debug.Log($"Poll next");
-                        IntPtr frame = Realsense2Invoker.poll_next_raw_frame();
+                            fr++;
+                        IntPtr frame = capture.PollNextPointCloud();
                         Debug.Log($"Poll done");
                         if (frame != IntPtr.Zero)
                         {
@@ -398,15 +387,18 @@ public class CapturingTestMultiRaw : MonoBehaviour
                     case FrameMode.RawData:
                     {
                         Debug.Log($"Poll next");
-                        IntPtr frame = Realsense2Invoker.poll_next_raw_frame();
+                      
+                        IntPtr frame = capture.PollNextRawFrame();
+                        fr++;
+                        Debug.Log("Color enc: " + fr + " "  + " " + (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
                         Debug.Log($"Poll done");
                         if (frame != IntPtr.Zero)
                         {
                             Debug.Log($"Get size");
-               //             if (fr % 20 == 0)
-                               RawInvoker.encode_frame(frame);
+               //            if (fr % 20 == 0)
+                              RawInvoker.encode_frame(frame);
                           
-                            
+                             
                             //  Debug.Log($"Number of points: {nPoints}");
                             // int returnCode = RawInvoker.encode_frame(frame);
                         }
@@ -422,6 +414,10 @@ public class CapturingTestMultiRaw : MonoBehaviour
             
         }
         Realsense2Invoker.clean_up();
+        if(capture != null)
+        {
+            capture.Dispose();
+        }
         if(rawConverter != IntPtr.Zero)
         {
             Realsense2Invoker.free_raw_converter(rawConverter);

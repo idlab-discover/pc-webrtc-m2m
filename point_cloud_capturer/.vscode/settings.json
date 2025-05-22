@@ -73,6 +73,7 @@
         "array": "cpp",
         "functional": "cpp",
         "list": "cpp",
-        "unordered_map": "cpp"
+        "unordered_map": "cpp",
+        "cinttypes": "cpp"
     }
 }

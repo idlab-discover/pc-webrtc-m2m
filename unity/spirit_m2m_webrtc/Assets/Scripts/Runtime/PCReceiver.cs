@@ -475,7 +475,7 @@ public class PCReceiver : MonoBehaviour
             Realsense2Invoker.free_raw_converter(rawConverter);
             rawConverter = IntPtr.Zero;
         }
-        rawConverter = Realsense2Invoker.create_new_raw_converter(dInt.model != 7777, dInt, cInt);
+        //rawConverter = Realsense2Invoker.create_new_raw_converter(dInt.model != 7777, dInt, cInt); TODO Fix
     }
     private int descToQual(uint dscNr)
     {

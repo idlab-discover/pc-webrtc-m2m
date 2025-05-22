@@ -19,7 +19,7 @@ public class PCSelf : MonoBehaviour
   //  public bool UseCam;
   //  public FrameMode FrameMode;
     public SessionInfo SessionInfo;
-
+    private SingleCapture capture;
 
     public Camera cam;
     public AudioCapture AudioCapturePrefab;
@@ -156,15 +156,15 @@ public class PCSelf : MonoBehaviour
             RawInvoker.register_free_frame_callback(OnFreeFrameCallback);
             var cCodec = ColorCodecHelper.GetCodecSettings(SessionInfo.rawEncodingSettings);
             var dCodec = DepthCodecHelper.GetCodecSettings(SessionInfo.rawEncodingSettings);
-            if(SessionInfo.useCam)
+            if(SessionInfo.capturerName != "artificial")
             {
 
-                RawInvoker.initialize(SessionInfo.camWidth, SessionInfo.camHeight, 
+                RawInvoker.initialize(SessionInfo.realsenseSettings.width, SessionInfo.realsenseSettings.height, 
                     cCodec.CodecType, cCodec.SettingsPtr, dCodec.CodecType, dCodec.SettingsPtr
                 );
             } else
             {
-                RawInvoker.initialize(SessionInfo.artificialSize* SessionInfo.artificialSize, SessionInfo.artificialSize, 
+                RawInvoker.initialize(SessionInfo.artificialSettings.artificialSize* SessionInfo.artificialSettings.artificialSize, SessionInfo.artificialSettings.artificialSize, 
                     cCodec.CodecType, cCodec.SettingsPtr, dCodec.CodecType, dCodec.SettingsPtr
                 );
             }
@@ -174,20 +174,9 @@ public class PCSelf : MonoBehaviour
             }
             
         }
-        
-        int initCode = Realsense2Invoker.initialize
-        (
-            SessionInfo.camWidth, SessionInfo.camHeight, SessionInfo.artificialSize, SessionInfo.camFPS, 
-            SessionInfo.camClose, SessionInfo.camFar, SessionInfo.alignToDepth, SessionInfo.useCam, SessionInfo.frameMode,
-            new FrameCleanupSettingsEx
-            {
-                blackoutBlockSize = SessionInfo.frameCleanupSettings.blackoutBlockSize,
-                shouldApplyDepthFilter = SessionInfo.frameCleanupSettings.shouldApplyDepthFilter,
-                shouldBlackout = SessionInfo.frameCleanupSettings.shouldBlackout,
-                shouldCleanupDepth = SessionInfo.frameCleanupSettings.shouldCleanupDepth
-            }
-        );
-        if (initCode == 0)
+        capture = CaptureFactory.CreateNewSingleCapture(SessionInfo);
+       
+        if (capture != null)
         {
 
             workerThread = new System.Threading.Thread(pollFrames);
@@ -195,7 +184,7 @@ public class PCSelf : MonoBehaviour
         }
         else
         {
-            Debug.Log($"Something went wrong inting the Realsense2: {initCode}");
+            Debug.Log($"Something went wrong inting the Realsense2");
         }
     }
 
@@ -260,8 +249,8 @@ public class PCSelf : MonoBehaviour
         WebRTCInvoker.wait_for_peer();
         if(SessionInfo.frameCodec != FrameCodec.Draco)
         {
-            CapturerIntrinsics dInt = Realsense2Invoker.get_depth_intrinsics();
-            CapturerIntrinsics cInt = Realsense2Invoker.get_color_intrinsics();
+            CapturerIntrinsics dInt = capture.GetDepthIntrinsics();
+            CapturerIntrinsics cInt = capture.GetColorIntrinsics();
             byte[] b = new byte[CapturerIntrinsics.Size() * 2];
             dInt.ConvertToBuffer().CopyTo(b, 0);
             cInt.ConvertToBuffer().CopyTo(b, CapturerIntrinsics.Size());
@@ -282,7 +271,7 @@ public class PCSelf : MonoBehaviour
             {
                 case FrameMode.RealData:
                     {
-                        IntPtr frame = Realsense2Invoker.poll_next_point_cloud();
+                        IntPtr frame = capture.PollNextPointCloud();
                         Debug.Log($"Poll done");
                         if (frame != IntPtr.Zero)
                         {
@@ -298,7 +287,7 @@ public class PCSelf : MonoBehaviour
                     }
                 case FrameMode.RawData:
                     {
-                        IntPtr frame = Realsense2Invoker.poll_next_raw_frame();
+                        IntPtr frame = capture.PollNextRawFrame();
                         if (frame != IntPtr.Zero)
                         {
                             RawInvoker.encode_frame(frame);
@@ -314,6 +303,10 @@ public class PCSelf : MonoBehaviour
 
         }
         Realsense2Invoker.clean_up();
+        if (capture != null)
+        {
+            capture.Dispose();
+        }
     }
 
 

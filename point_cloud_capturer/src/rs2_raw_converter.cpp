@@ -1,8 +1,11 @@
 #include "rs2_raw_converter.hpp"
 #include <algorithm>
-RS2RawConverter::RS2RawConverter(CapturerIntrinsics depth_intrinsics, CapturerIntrinsics color_intrinsics) 
-    : depth_sensor(dev.add_sensor("Depth")), color_sensor(dev.add_sensor("Color")), RawConverter(depth_intrinsics.width, depth_intrinsics.height) 
+RS2RawConverter::RS2RawConverter(void* cal) 
+    : depth_sensor(dev.add_sensor("Depth")), color_sensor(dev.add_sensor("Color")), RawConverter(cal) 
 {
+    RealsenseCalibration* rs_cal = static_cast<RealsenseCalibration*>(cal);
+    realsense_in depth_intrinsics = rs_cal->depth_in;
+    realsense_in color_intrinsics = rs_cal->color_in;
     rs2_intrinsics d_int = {
         (int)depth_intrinsics.width, (int)depth_intrinsics.height, depth_intrinsics.ppx, depth_intrinsics.ppy, depth_intrinsics.fx, depth_intrinsics.fy, 
         static_cast<rs2_distortion>(depth_intrinsics.model), 

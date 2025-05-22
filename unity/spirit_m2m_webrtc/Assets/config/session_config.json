@@ -13,17 +13,54 @@
         "scale":{"x": 1.4, "y":0.1, "z": 1.7}
     },
     "pushBack": {"x": 0.229103, "y":0.0, "z": 0},
-    "camClose": 0.0,
-    "camFar": 1.0,
-    "camWidth": 848,
-    "camHeight": 480,
-    "artificialSize": 30,
-    "camFPS": 15,
-    "useCam": true,
+    "camFPS": 5,
     "useMic": false,
-    "alignToDepth": true,
     "frameMode": 0,
     "frameCodec": 0,
+    "capturerName": "prerec_kinect",
+    "artificialSettings": {
+        "artificialSize": 25
+    },
+    "realsenseSettings": {
+        "width": 848,
+        "height": 480,
+        "minDist": 0.0,
+        "maxDist": 1.5,
+        "alignToDepth": false
+    },
+    "prerecKinectSettings": {
+        "alignToDepth": false,
+        "minHeight": 0.02,
+        "maxHeight": 2.2,
+        "radius": 1.25,
+        "trafo": [
+            [
+                -0.050460393857164776,
+                0.9908430991702812,
+                -0.1252345857921381,
+                0.18253431917245674
+            ],
+            [
+                0.9710111636074161,
+                0.0193374525710938,
+                -0.23825067277536155,
+                1.4120928470584455
+            ],
+            [
+                -0.23364731712910958,
+                -0.13362640365890532,
+                -0.9630954861505899,
+                1.7199030536244353
+            ],
+            [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "camFile": "C:\\Users\\matth\\OneDrive\\Documenten\\kinect_test\\cam.mkv"
+    },
     "frameCleanupSettings": {
         "blackoutBlockSize": 1,
         "shouldApplyDepthFilter": true,
@@ -32,7 +69,7 @@
     },
     "rawEncodingSettings": {
         "colorCodecName": "webp",
-        "depthCodecName": "zdepth",
+        "depthCodecName": "vle",
         "jpegSettings": {
             "quality": 75
         },

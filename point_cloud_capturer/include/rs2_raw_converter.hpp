@@ -7,7 +7,7 @@
 
 class RS2RawConverter : public RawConverter {
     public:
-        RS2RawConverter(CapturerIntrinsics depth_intrinsics, CapturerIntrinsics color_intrinsics);
+        RS2RawConverter(void *cal);
         ~RS2RawConverter();
         virtual void convert_raw(uint16_t* depth, uint8_t* color, Vector3* p_out, Color32* c_out);
     private:
@@ -19,4 +19,6 @@ class RS2RawConverter : public RawConverter {
         rs2::syncer sync;
         rs2::pointcloud pc;
         int internal_frame_number = 0;
+        unsigned int width;
+        unsigned int height;
 };
