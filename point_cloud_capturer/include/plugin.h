@@ -3,6 +3,7 @@
 #include "raw_frame.hpp"
 #include "raw_converter.hpp"
 #include "capturer.hpp"
+#include "multi_capturer/multi_capturer.hpp"
 #ifdef WIN32
 #define DLLExport __declspec(dllexport)
 #else
@@ -16,7 +17,7 @@ extern "C"
 	
 	
 	
-	// Capturer functions
+	// Single Capturer functions
 	//	    General functions
 	DLLExport Capturer* create_new_capturer(uint32_t fps, 
 		FrameMode mode, FrameCleanupSettings cleanup_settings, 
@@ -29,6 +30,22 @@ extern "C"
 	DLLExport PointCloud* poll_next_point_cloud(Capturer* capturer);
 	DLLExport Frame* poll_next_frame(Capturer* capturer);
 	DLLExport RawFrame* poll_next_raw_frame(Capturer* capturer);
+
+	// Multi Capturer functions
+	//		General functions
+	DLLExport MultiCapturer* create_new_multi_capturer(uint32_t fps, 
+		FrameMode mode, FrameCleanupSettings cleanup_settings, 
+		CAPTURE_TYPE type, unsigned int n_settings, void* capture_settings);
+	DLLExport void start_capturing_multi(MultiCapturer* capturer);
+	DLLExport void set_cleanup_settings_for_capturer(MultiCapturer* capturer, unsigned int capturerer_index, FrameCleanupSettings _cleanup_settings);
+	DLLExport void* get_calibration_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);
+	
+	DLLExport PointCloud* poll_next_combined_point_cloud(MultiCapturer* capturer);
+	DLLExport Frame* poll_next_frame_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);
+	DLLExport PointCloud* poll_next_point_cloud_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);
+	
+	
+
 
 	// Point cloud functions
 	DLLExport size_t get_point_cloud_size(PointCloud* pc);
@@ -49,6 +66,7 @@ extern "C"
 	DLLExport void free_capturer(Capturer* capturer);
 	DLLExport void free_raw_converter(RawConverter* c);
 	DLLExport void free_capturer_calibration(CAPTURE_TYPE type, void* cal);
+	DLLExport void free_multi_capturer(MultiCapturer* capturer);
 	
 	DLLExport void clean_up();
 }

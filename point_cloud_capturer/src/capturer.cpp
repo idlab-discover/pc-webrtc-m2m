@@ -1,10 +1,11 @@
 #include "capturer.hpp"
-void Capturer::start_capturing() {
+
+void Capturer::start_capturing()
+{
     auto code = init();
     if(code == 0) {
         worker = std::thread(&Capturer::start_capturing_internal, this);
     }
-    
 }
 
 void Capturer::start_capturing_internal() {
@@ -28,4 +29,20 @@ void Capturer::wait_for_capture_done() {
 	cv_capture.wait(lk, [this] { return capture_done; });
     if (worker.joinable())
         worker.join();
+}
+
+PointCloud *Capturer::poll_next_point_cloud()
+{
+    Frame* frame = poll_next_frame();
+	if(frame == nullptr) {
+		return nullptr;
+	}
+	return new PointCloud{
+		frame->get_timestamp(),
+		frame->get_frame_nr(),
+		frame->get_frame_size(),
+		frame->get_vertex_array(),
+		frame->get_color_array(),
+		frame
+	};
 }

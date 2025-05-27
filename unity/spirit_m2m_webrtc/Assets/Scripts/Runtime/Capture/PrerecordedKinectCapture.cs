@@ -58,7 +58,7 @@ public unsafe struct KinectCalibrationEx
     [FieldOffset(1032)]
     public fixed float trafo[16];
     [FieldOffset(1096)]
-    public bool alignToDepth;
+    public byte alignToDepth;
 }
 
 
@@ -94,6 +94,9 @@ public class PrerecordedKinectCapture : SingleCapture
     {
         KinectCalibrationEx kinectCalibrationEx = Marshal.PtrToStructure<KinectCalibrationEx>(cal);
         Debug.Log("art size" + kinectCalibrationEx.colorCalibration.resolutionHeight);
+        bool AlignToDepth = kinectCalibrationEx.alignToDepth!= 0;
+    Debug.Log("align: " + kinectCalibrationEx.alignToDepth + " " + AlignToDepth);
+        Debug.Log("color reso: " + kinectCalibrationEx.colorCalibration.resolutionWidth);
         unsafe
         {
             for (int i = 0; i < 4; i++)

@@ -48,9 +48,8 @@ void set_logging(char* log_directory, int _log_level) {
 	initialize function. No action is required from within Unity.
 */
 void start_capturing(Capturer* capturer) {
-	Log::custom_log("start_capturing: Starting to capture frames from realsense2 camera", Verbose, LogColor::Yellow);
+	Log::custom_log("start_capturing: Starting to capture frames from single camera", Verbose, LogColor::Yellow);
 	capturer->start_capturing();
-	Log::custom_log("start_capturing: Stopped capturing frames from realsense2 camera", Verbose, LogColor::Yellow);
 }
 
 /*
@@ -94,18 +93,7 @@ Capturer* create_new_capturer(uint32_t fps,
 
 
 PointCloud* poll_next_point_cloud(Capturer* capturer) {
-	Frame* frame = capturer->poll_next_frame();
-	if(frame == nullptr) {
-		return nullptr;
-	}
-	return new PointCloud{
-		frame->get_timestamp(),
-		frame->get_frame_nr(),
-		frame->get_frame_size(),
-		frame->get_vertex_array(),
-		frame->get_color_array(),
-		frame
-	};
+	return capturer->poll_next_point_cloud();
 }
 
 Frame* poll_next_frame(Capturer* capturer) {
@@ -231,6 +219,70 @@ void free_capturer_calibration(CAPTURE_TYPE type, void* cal) {
 		}
 	}
 }
+
+MultiCapturer* create_new_multi_capturer(uint32_t fps, 
+	FrameMode mode, FrameCleanupSettings cleanup_settings, 
+	CAPTURE_TYPE type, unsigned int n_settings, void* capture_settings) 
+{
+	return new MultiCapturer(fps, mode, cleanup_settings, type, n_settings, capture_settings);
+}
+
+void start_capturing_multi(MultiCapturer* capturer) {
+	if(capturer == nullptr) {
+		return;
+	}
+	Log::custom_log("start_capturing_multi: Starting to capture frames from multi camera", Verbose, LogColor::Yellow);
+	capturer->start_capturing();
+}
+
+Frame* poll_next_frame_for_capturer(MultiCapturer* capturer, unsigned int capturer_index) {
+	if(capturer == nullptr) {
+		return nullptr;
+	}
+	return capturer->poll_next_frame_for_capturer(capturer_index);
+}
+
+void* get_calibration_for_capturer(MultiCapturer* capturer, unsigned int capturer_index) {
+	if(capturer == nullptr) {
+		return nullptr;
+	}
+	return capturer->get_calibration_for_capturer(capturer_index);
+}
+void set_cleanup_settings_for_capturer(MultiCapturer* capturer, unsigned int capturerer_index, FrameCleanupSettings _cleanup_settings) {
+	if(capturer == nullptr) {
+		return;
+	}
+	capturer->set_cleanup_settings_for_capturer(capturerer_index, _cleanup_settings);
+}
+
+PointCloud* poll_next_point_cloud_for_capturer(MultiCapturer* capturer, unsigned int capturer_index) {
+	if(capturer == nullptr) {
+		return nullptr;
+	}
+	return capturer->poll_next_point_cloud_for_capturer(capturer_index);
+}
+
+PointCloud* poll_next_combined_point_cloud(MultiCapturer* capturer) {
+	if(capturer == nullptr) {
+		return nullptr;
+	}
+	return capturer->poll_next_combined_point_cloud();
+}
+
+void free_multi_capturer(MultiCapturer* capturer) {
+	if (capturer != nullptr) {
+		delete capturer;
+	}
+}
+
+
+
+
+
+
+
+
+
 /*
 	This function is used to clean up threading and reset the required variables. It is called once per session from
 	within Unity.

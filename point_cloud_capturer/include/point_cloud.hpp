@@ -11,6 +11,8 @@ struct PointCloud {
     Frame* frame_pointer = nullptr; // DO NOT USE OR FREE YOURSELF!
 
     ~PointCloud() {
-        delete frame_pointer;
+        if(frame_pointer != nullptr) {
+            delete frame_pointer; // This will free the frame pointer if it was allocated
+        }
     };
 };

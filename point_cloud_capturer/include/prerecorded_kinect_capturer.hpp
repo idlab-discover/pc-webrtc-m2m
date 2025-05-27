@@ -56,8 +56,7 @@ class PrerecordedKinectCapturer : public Capturer {
         Frame* poll_next_frame();
         void* get_depth_intrinsics();
         void* get_color_intrinsics();
-        void create_xy_table();
-
+     
         void* get_calibration();
 
         static void free_calibration(void* cal) {

@@ -87,6 +87,14 @@
 				},
 				{
 					"backtrace" : 5,
+					"path" : "C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/include/kinect"
+				},
+				{
+					"backtrace" : 5,
+					"path" : "C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/include/multi_capturer"
+				},
+				{
+					"backtrace" : 5,
 					"path" : "C:/Program Files/Azure Kinect SDK v1.4.1/sdk/include"
 				},
 				{
@@ -121,7 +129,9 @@
 				13,
 				14,
 				15,
-				16
+				16,
+				17,
+				18
 			]
 		}
 	],
@@ -196,7 +206,9 @@
 				13,
 				14,
 				15,
-				16
+				16,
+				17,
+				18
 			]
 		}
 	],
@@ -247,6 +259,12 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
+			"path" : "src/kinect/kinect_helper.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
 			"path" : "src/kinect_frame.cpp",
 			"sourceGroupIndex" : 0
 		},
@@ -260,6 +278,12 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "src/log.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/multi_capturer/multi_capturer.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{

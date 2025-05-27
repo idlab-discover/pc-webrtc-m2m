@@ -2,13 +2,13 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "bin/Release/spirit_idlab_realsense.dll"
+			"path" : "bin/MinSizeRel/spirit_idlab_realsense.dll"
 		},
 		{
-			"path" : "Release/spirit_idlab_realsense.lib"
+			"path" : "MinSizeRel/spirit_idlab_realsense.lib"
 		},
 		{
-			"path" : "bin/Release/spirit_idlab_realsense.pdb"
+			"path" : "bin/MinSizeRel/spirit_idlab_realsense.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -67,7 +67,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /O2 /Ob2 /DNDEBUG -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /O1 /Ob1 /DNDEBUG -MD"
 				},
 				{
 					"fragment" : "-std:c++20"
@@ -84,6 +84,14 @@
 				{
 					"backtrace" : 5,
 					"path" : "C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/include"
+				},
+				{
+					"backtrace" : 5,
+					"path" : "C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/include/kinect"
+				},
+				{
+					"backtrace" : 5,
+					"path" : "C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/include/multi_capturer"
 				},
 				{
 					"backtrace" : 5,
@@ -121,7 +129,9 @@
 				13,
 				14,
 				15,
-				16
+				16,
+				17,
+				18
 			]
 		}
 	],
@@ -196,7 +206,9 @@
 				13,
 				14,
 				15,
-				16
+				16,
+				17,
+				18
 			]
 		}
 	],
@@ -247,6 +259,12 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
+			"path" : "src/kinect/kinect_helper.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
 			"path" : "src/kinect_frame.cpp",
 			"sourceGroupIndex" : 0
 		},
@@ -260,6 +278,12 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "src/log.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/multi_capturer/multi_capturer.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{

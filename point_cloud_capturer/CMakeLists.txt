@@ -15,7 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 
 # Add the source directory
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # Set the output directory for the DLL
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -42,4 +42,4 @@ target_link_libraries(spirit_idlab_realsense ${k4a_LIBRARY} ${k4arecord_LIBRARY}
 
 target_link_libraries(spirit_idlab_realsense winmm.lib)
 # Include REALSENSE2 directories
-include_directories(${CMAKE_SOURCE_DIR}/include ${k4a_INCLUDE_DIR} ${REALSENSE2_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/kinect ${CMAKE_SOURCE_DIR}/include/multi_capturer ${k4a_INCLUDE_DIR} ${REALSENSE2_INCLUDE_DIRS})

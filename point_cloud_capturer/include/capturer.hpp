@@ -2,6 +2,7 @@
 #include <librealsense2/rs.hpp>
 #include "framework.h"
 #include "framebuffer.hpp"
+#include "point_cloud.hpp"
 #include "frame.hpp"
 #include <mutex>
 #include <thread>
@@ -98,6 +99,7 @@ class Capturer {
         virtual void stop() { frame_buffer.stop_buffer(); keep_working=false; if(worker.joinable()) worker.join(); };
         virtual Frame* poll_next_frame() = 0; 
         virtual void* get_calibration() = 0;
+        PointCloud* poll_next_point_cloud();
         void set_cleanup_settings(FrameCleanupSettings _cleanup_settings) {cleanup_settings=_cleanup_settings;}
         void start_capturing();
         void wait_for_capture_done();

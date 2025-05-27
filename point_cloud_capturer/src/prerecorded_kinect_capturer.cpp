@@ -74,62 +74,6 @@ CAPTURER_SETUP_CODE PrerecordedKinectCapturer::capture_next_frame()
     return CAPTURER_SETUP_CODE::StartedCorrectly;
 }
 
-void PrerecordedKinectCapturer::create_xy_table()
-{
-    int width;
-    int height;
-    
-    if (align_to_depth) {
-        width = depth_width;
-        height = depth_height;
-    } else {
-        width = color_width;
-        height = color_height;
-    }
-
-    k4a_result_t status;
-    status = k4a_image_create(K4A_IMAGE_FORMAT_CUSTOM,
-        width,
-        height,
-        width * (int)sizeof(k4a_float2_t),
-        &xy_table
-    );
-
-    if (status != K4A_RESULT_SUCCEEDED) {
-        Log::custom_log("create_xy_table: could not create xy table image", Default, LogColor::Red);
-    }
-
-    k4a_float2_t* table_data = (k4a_float2_t*)(void*)k4a_image_get_buffer(xy_table);
-
-    k4a_float2_t p;
-    k4a_float3_t ray;
-    int valid;
-
-    for (int y = 0, idx = 0; y < height; y++) {
-        p.xy.y = (float)y;
-
-        for (int x = 0; x < width; x++, idx++) {
-            p.xy.x = (float)x; 
-            if (align_to_depth) {
-                k4a_calibration_2d_to_3d(
-                    &cal, &p, 1.f, K4A_CALIBRATION_TYPE_DEPTH, K4A_CALIBRATION_TYPE_DEPTH, &ray, &valid
-                );
-            } else {
-                k4a_calibration_2d_to_3d(
-                    &cal, &p, 1.f, K4A_CALIBRATION_TYPE_COLOR, K4A_CALIBRATION_TYPE_COLOR, &ray, &valid
-                );
-            }
-            if (valid) {
-                table_data[idx].xy.x = ray.xyz.x;
-                table_data[idx].xy.y = ray.xyz.y;
-            } else {
-                table_data[idx].xy.x = nanf("");
-                table_data[idx].xy.y = nanf("");
-            }
-        }
-    }
-}
-
 void *PrerecordedKinectCapturer::get_calibration()
 {
     KinectCalibration* kin_cal = new KinectCalibration{
@@ -145,7 +89,8 @@ void *PrerecordedKinectCapturer::get_calibration()
             kin_cal->trafo[i][j] = trafo[i][j];
         }
     }
-    return kin_cal;
+    Log::custom_log(std::format("get_calibration: align: {}", kin_cal->align_to_depth), Default, LogColor::Orange);
+    return reinterpret_cast<void*>(kin_cal);
 }
 
 kinect_cam_cal PrerecordedKinectCapturer::create_camera_calibration(bool is_depth)

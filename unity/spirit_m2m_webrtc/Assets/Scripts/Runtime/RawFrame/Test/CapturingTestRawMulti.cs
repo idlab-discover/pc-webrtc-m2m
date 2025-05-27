@@ -82,7 +82,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
     {
       //  if (frameNr % 100 == 0)
       //  {
-            Debug.Log("Color enc: " + frameNr + " " + size + " " + (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - (long)timestamp));
+            Debug.Log("Color enc: " + frameNr + " " + width + " " + height + " " + size + " " + (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - (long)timestamp));
      //   }
         Debug.Log("Color enc: " + fr + " " + " " + (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
         if (frameNr == 100)
@@ -118,14 +118,14 @@ public class CapturingTestMultiRaw : MonoBehaviour
                 GCHandle hColor = GCHandle.Alloc(pcData2.Colors, GCHandleType.Pinned);
                 try
                 {
-                //   Realsense2Invoker.convert_raw_frame(rawConverter, buf_depth, buf_color, hDepth.AddrOfPinnedObject(), hColor.AddrOfPinnedObject());
+                   Realsense2Invoker.convert_raw_frame(rawConverter, buf_depth, buf_color, hDepth.AddrOfPinnedObject(), hColor.AddrOfPinnedObject());
                 }
                 finally
                 {
                     hDepth.Free();
                     hColor.Free();
                 }
-/*
+
                 pcData2.InitRawColors(width*height);
                 unsafe
                 {
@@ -136,7 +136,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
                     }
                 }
                
-                */
+                
                 RawInvoker.free_decoded_color(pcData2.DecodedColor);
                 RawInvoker.free_decoded_depth(pcData2.DecodedDepth);
                 if (frameNr % 100 == 0)
@@ -144,7 +144,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
                     Debug.Log("Frame done2: " + frameNr + " " + ((ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - timestamp));
                 }
                 inProgessFrames2.Remove(frameNr);
-             //   queue2.Enqueue(pcData2);
+               queue2.Enqueue(pcData2);
             }
             mut.ReleaseMutex();
             return;
@@ -244,9 +244,9 @@ public class CapturingTestMultiRaw : MonoBehaviour
         
         if(sessionInfo.capturerName != "artificial")
         {
-            tex = new Texture2D((int)sessionInfo.realsenseSettings.width, (int)sessionInfo.realsenseSettings.height);
-            RawImg.rectTransform.sizeDelta = new Vector2(sessionInfo.realsenseSettings.width, (int)sessionInfo.realsenseSettings.height);
-            RawImg.rectTransform.localScale = new Vector2(0.5f, 0.5f);
+            tex = new Texture2D((int)1280, (int)720);
+            RawImg.rectTransform.sizeDelta = new Vector2(1280/4, 720/4);
+        //    RawImg.rectTransform.localScale = new Vector2(0.5f, 0.5f);
             IntPtr cal = capture.GetCalibration();
             var cCodec = ColorCodecHelper.GetCodecSettings(sessionInfo.rawEncodingSettings);
             var dCodec = DepthCodecHelper.GetCodecSettings(sessionInfo.rawEncodingSettings);

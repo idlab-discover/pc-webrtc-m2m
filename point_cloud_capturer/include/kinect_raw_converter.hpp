@@ -5,10 +5,12 @@
 #include <k4a/k4a.h>
 #include <k4arecord/playback.h>
 #include "capturer.hpp"
+#include "kinect/kinect_helper.hpp"
 class KinectRawConverter : public RawConverter {
     public:
-        KinectRawConverter(void* cal) : RawConverter(cal) {
-            copy_calibration(static_cast<KinectCalibration*>(cal));
+        KinectRawConverter(void* cal_ori) : RawConverter(cal_ori) {
+            copy_calibration(static_cast<KinectCalibration*>(cal_ori));
+            KinectHelper::create_xy_table(cal, align_to_depth, xy_table);
         };
         ~KinectRawConverter() {
            // frame_buffer.stop_buffer();
@@ -18,6 +20,8 @@ class KinectRawConverter : public RawConverter {
         unsigned int side_size;
         float trafo[4][4];
         k4a_image_t xy_table = NULL;
+        unsigned int width;
+        unsigned int height;
         unsigned int depth_width;
         unsigned int depth_height;
         unsigned int color_width;
@@ -29,6 +33,8 @@ class KinectRawConverter : public RawConverter {
         bool align_to_depth;
 
         k4a_calibration_t cal;
+
+        inline void copy_point(Vector3& p, const k4a_float2_t& xy_table_data,  const float (&trafo)[4][4], uint16_t depth);
 
         void copy_calibration(KinectCalibration* cam_cal);
         void fill_extrensics(KinectCalibration* kin_cal);
