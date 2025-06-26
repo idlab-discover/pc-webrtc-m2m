@@ -7,11 +7,11 @@
         },
         {
             "delay": 0,
-            "bitrate": 12500000
+            "bitrate": 20000000
         },
         {
             "delay": 0,
-            "bitrate": 12500000
+            "bitrate": 42000000
         }
     ]
 }
