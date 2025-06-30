@@ -33,10 +33,11 @@ import (
 )
 
 var (
-	addr       = flag.String("addr", ":8080", "http service address")
-	disableGCC = flag.Bool("d", false, "Disables GCC based bandwidth estimation and instead uses the value from the dashboard")
-	disableABR = flag.Bool("b", false, "Disables adaptive bitrate allocation algorithm")
-	upgrader   = websocket.Upgrader{
+	addr          = flag.String("addr", ":8080", "http service address")
+	disableGCC    = flag.Bool("d", false, "Disables GCC based bandwidth estimation and instead uses the value from the dashboard")
+	disableABR    = flag.Bool("b", false, "Disables adaptive bitrate allocation algorithm")
+	selectOptimal = flag.Bool("opt", false, "Will make sure the most optimal quality, in accordance to the available bandwidth, is always selected, even if camera info is not received  (best used together with the debug mode of the peer clients)")
+	upgrader      = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
 	}
 	indexTemplate = &template.Template{}
@@ -296,7 +297,7 @@ func main() {
 			hasChanges := false
 
 			for _, pc := range peerConnections {
-				if pc.camInfo == nil || !pc.camInfo.init {
+				if !*selectOptimal && (pc.camInfo == nil || !pc.camInfo.init) {
 					fmt.Printf("WebRTCSFU: rateCalc: cam info for client %d not inited\n", pc.ID)
 					continue
 				}
@@ -317,11 +318,18 @@ func main() {
 						fmt.Printf("skipping\n")
 						continue
 					}
-					if pc2.camInfo == nil || !pc2.camInfo.init {
+					if !*selectOptimal && (pc2.camInfo == nil || !pc2.camInfo.init) {
 						fmt.Printf("WebRTCSFU: rateCalc: inner cam info for client %d not inited\n", pc.ID)
 						continue
 					}
-					pVisibility := calculatePointVisibility(pc, pc2.camInfo.position, 3)
+					var pVisibility uint
+					if *selectOptimal {
+						// If we select optimal, we don't care about visibility, just use the highest quality
+						pVisibility = 0
+					} else {
+						pVisibility = calculatePointVisibility(pc, pc2.camInfo.position, 3)
+					}
+
 					fmt.Printf("WebRTCSFU: rateCalc: adding base of client %d to %d\n", pc2.ID, pc.ID)
 					bitrateA := &bitrateAssignment{
 						&peerConnections[p],

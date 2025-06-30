@@ -39,13 +39,14 @@ var isDebug bool
 var resultWriter ResultWriter
 
 type DebugConfig struct {
-	Fps          int                      `json:"fps"`
-	Descriptions []DebugDescriptionConfig `json:"descriptions"`
+	Fps           int                      `json:"fps"`
+	LoopFrames    bool                     `json:"loopFrames"`
+	WaitForEncode bool                     `json:"waitForEncode"`
+	Descriptions  []DebugDescriptionConfig `json:"descriptions"`
 }
 
 type DebugDescriptionConfig struct {
-	Delay   int `json:"delay"`
-	Bitrate int `json:"bitrate"`
+	SizesPath string `json:"sizesPath"`
 }
 
 type DebugController struct {

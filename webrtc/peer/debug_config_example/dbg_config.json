@@ -1,17 +1,16 @@
 {
     "fps": 30,
+    "loopFrames": true,
+    "waitForEncode": false,
     "descriptions": [
         {
-            "delay": 0,
-            "bitrate": 12500000
+            "sizesPath": "peer/debug_config_example/high.csv"
         },
         {
-            "delay": 0,
-            "bitrate": 20000000
+            "sizesPath": "peer/debug_config_example/medium.csv"
         },
         {
-            "delay": 0,
-            "bitrate": 42000000
+            "sizesPath": "peer/debug_config_example/low.csv"
         }
     ]
 }
