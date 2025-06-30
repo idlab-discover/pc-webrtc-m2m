@@ -19,6 +19,7 @@ struct PrerecordedKinectCaptureSettings {
 class PrerecordedKinectCapturer : public Capturer {
     public:
         PrerecordedKinectCapturer(
+            unsigned int capture_id,
             unsigned int fps, FrameMode mode,
             FrameCleanupSettings cleanup_settings,
             PrerecordedKinectCaptureSettings* capture_settings
@@ -28,7 +29,7 @@ class PrerecordedKinectCapturer : public Capturer {
             max_height(capture_settings->max_height),
             radius(capture_settings->radius),
             align_to_depth(capture_settings->align_to_depth), 
-            Capturer(mode, fps, cleanup_settings)
+            Capturer(capture_id, mode, fps, cleanup_settings)
         {
             for(int i = 0; i < 4; i++) {
                 for(int j = 0; j < 4; j++) {
@@ -54,6 +55,8 @@ class PrerecordedKinectCapturer : public Capturer {
         CAPTURER_SETUP_CODE init();
         CAPTURER_SETUP_CODE capture_next_frame();
         Frame* poll_next_frame();
+        void fastforward_x_frames(unsigned int x);
+        
         void* get_depth_intrinsics();
         void* get_color_intrinsics();
      
@@ -63,6 +66,7 @@ class PrerecordedKinectCapturer : public Capturer {
             free_calibration_internal<KinectCalibration>(cal);
         };
     private:
+        int64_t prev_timestamp_usec = -1;
         std::string cam_file;
         float trafo[4][4];
         k4a_image_t xy_table = NULL;
@@ -88,5 +92,8 @@ class PrerecordedKinectCapturer : public Capturer {
         void fill_extrensics(KinectCalibration& kin_cal);
         kinect_cam_ex copy_extrensics(k4a_calibration_extrinsics_t ex);
         kinect_cam_in copy_intrinsics(k4a_calibration_intrinsics_t in);
+
+        void wait_for_next_frame();
+        CAPTURER_SETUP_CODE capture_next_frame_internal();
        
 };

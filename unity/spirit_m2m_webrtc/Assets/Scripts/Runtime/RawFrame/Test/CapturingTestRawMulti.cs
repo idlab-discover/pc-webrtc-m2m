@@ -255,22 +255,24 @@ public class CapturingTestMultiRaw : MonoBehaviour
             RawInvoker.initialize(1280, 720, 
                 cCodec.CodecType, cCodec.SettingsPtr, dCodec.CodecType, dCodec.SettingsPtr
             );
-            rawConverter = Realsense2Invoker.create_new_raw_converter(capture.Type, cal);
+            rawConverter = Realsense2Invoker.create_new_raw_converter(capture.CaptureType, cal);
         } else
         {
-            tex = new Texture2D((int)sessionInfo.artificialSettings.artificialSize * (int)sessionInfo.artificialSettings.artificialSize, (int)sessionInfo.artificialSettings.artificialSize);
+            ArtificialCapture cap = (ArtificialCapture)capture;
+            uint sideSize = cap.GetCalibrationStruct().sideSize;
+            tex = new Texture2D((int)sideSize * (int)sideSize, (int)sideSize);
          //   tex.filterMode = FilterMode.Point;
            tex.wrapMode =TextureWrapMode.Clamp;
             var cCodec = ColorCodecHelper.GetCodecSettings(sessionInfo.rawEncodingSettings);
             var dCodec = DepthCodecHelper.GetCodecSettings(sessionInfo.rawEncodingSettings);
-            RawInvoker.initialize(sessionInfo.artificialSettings.artificialSize * sessionInfo.artificialSettings.artificialSize, sessionInfo.artificialSettings.artificialSize, 
+            RawInvoker.initialize(sideSize * sideSize, sideSize, 
                 cCodec.CodecType, cCodec.SettingsPtr,
                 dCodec.CodecType, dCodec.SettingsPtr
             );
            // RawImg.rectTransform.sizeDelta = new Vector2(75, 75);
             RawImg.rectTransform.localScale = new Vector2(2f, 2f);
             IntPtr cal = capture.GetCalibration();
-            rawConverter = Realsense2Invoker.create_new_raw_converter(capture.Type, cal);
+            rawConverter = Realsense2Invoker.create_new_raw_converter(capture.CaptureType, cal);
             colorDecoder = RawInvoker.create_color_decoder(cCodec.CodecType);
             depthDecoder = RawInvoker.create_depth_decoder(dCodec.CodecType);
         }

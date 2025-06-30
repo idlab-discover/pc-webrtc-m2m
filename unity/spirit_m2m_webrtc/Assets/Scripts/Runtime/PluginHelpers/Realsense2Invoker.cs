@@ -25,7 +25,7 @@ public static class Realsense2Invoker
     public static extern CapturerIntrinsics get_color_intrinsics(IntPtr cap);
    
 
-    #region Capturer functions
+    #region Single Capturer functions
     #region General functions
     [DllImport(dllName)]
     public static extern IntPtr create_new_capturer
@@ -47,6 +47,34 @@ public static class Realsense2Invoker
     public static extern IntPtr poll_next_frame(IntPtr cap);
     [DllImport(dllName)]
     public static extern IntPtr poll_next_raw_frame(IntPtr cap);
+    #endregion
+
+    #endregion
+
+    #region Multi Capturer functions
+    #region General functions
+    [DllImport(dllName)]
+    public static extern IntPtr create_new_multi_capturer
+    (
+     UInt32 fps, FrameMode frame_mode, FrameCleanupSettingsEx cleanup_settings, CaptureType capType, uint n_settings, IntPtr[] captureSettings
+    );
+    [DllImport(dllName)]
+    public static extern void start_capturing_multi(IntPtr cap);
+    [DllImport(dllName)]
+    public static extern void set_cleanup_settings_for_capturer(IntPtr multi_cap, uint capturer_index, FrameCleanupSettingsEx cleanup_settings);
+    [DllImport(dllName)]
+    public static extern IntPtr get_calibration_for_capturer(IntPtr multi_cap, uint capturer_index);
+    #endregion
+
+    #region Poll functions
+    [DllImport(dllName)]
+    public static extern IntPtr poll_next_combined_point_cloud(IntPtr multi_cap);
+    [DllImport(dllName)]
+    public static extern IntPtr poll_next_frame_for_capturer(IntPtr multi_cap, uint capturer_index);
+    [DllImport(dllName)]
+    public static extern IntPtr poll_next_point_cloud_for_capturer(IntPtr multi_cap, uint capturer_index);
+    [DllImport(dllName)]
+    public static extern IntPtr poll_next_raw_frame_for_capturer(IntPtr multi_cap, uint capturer_index);
     #endregion
 
     #endregion
@@ -84,6 +112,8 @@ public static class Realsense2Invoker
     public static extern void free_raw_converter(IntPtr c);
     [DllImport(dllName)]
     public static extern void free_capturer(IntPtr cap);
+    [DllImport(dllName)]
+    public static extern void free_multi_capturer(IntPtr cap);
     [DllImport(dllName)]
     public static extern void free_capturer_calibration(CaptureType type, IntPtr cal);
     #endregion

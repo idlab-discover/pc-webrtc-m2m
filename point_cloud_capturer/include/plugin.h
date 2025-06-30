@@ -35,15 +35,16 @@ extern "C"
 	//		General functions
 	DLLExport MultiCapturer* create_new_multi_capturer(uint32_t fps, 
 		FrameMode mode, FrameCleanupSettings cleanup_settings, 
-		CAPTURE_TYPE type, unsigned int n_settings, void* capture_settings);
+		CAPTURE_TYPE type, unsigned int n_settings, void** capture_settings);
 	DLLExport void start_capturing_multi(MultiCapturer* capturer);
 	DLLExport void set_cleanup_settings_for_capturer(MultiCapturer* capturer, unsigned int capturerer_index, FrameCleanupSettings _cleanup_settings);
 	DLLExport void* get_calibration_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);
-	
+
+	//		Poll functions
 	DLLExport PointCloud* poll_next_combined_point_cloud(MultiCapturer* capturer);
 	DLLExport Frame* poll_next_frame_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);
 	DLLExport PointCloud* poll_next_point_cloud_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);
-	
+	DLLExport RawFrame* poll_next_raw_frame_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);
 	
 
 

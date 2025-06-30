@@ -14,22 +14,24 @@ public enum CaptureType
     PrerecordedKinect = 4,
 }
 
-public abstract class SingleCapture : IDisposable
+public abstract class SingleCapture : BaseCapture, ICapturePoll
 {
-    private bool disposedValue;
-    public CaptureType Type { get; }
+   
     protected IntPtr capPtr { get; set; }
-    public IntPtr CalibrationPtr { get { if (calibrationHandle.IsAllocated) return calibrationHandle.AddrOfPinnedObject(); else return IntPtr.Zero; } }
-    private GCHandle calibrationHandle;
-    protected SingleCapture(uint fps, FrameMode frameMode, FrameCleanupSettingsEx frameCleanupSettings, CaptureType capType, GCHandle captureSettings)
+   
+    protected SingleCapture(uint fps, FrameMode frameMode, FrameCleanupSettingsEx frameCleanupSettings, CaptureType capType, CaptureHelper captureHelper) : base(capType, captureHelper)
     {
-        capPtr = Realsense2Invoker.create_new_capturer(fps, frameMode, frameCleanupSettings, capType, captureSettings.AddrOfPinnedObject());
+        capPtr = Realsense2Invoker.create_new_capturer(fps, frameMode, frameCleanupSettings, capType, this.CaptureHelper.SettingsHandle.AddrOfPinnedObject());
         if (capPtr != IntPtr.Zero)
         {
             Realsense2Invoker.start_capturing(capPtr);
         }
-        captureSettings.Free();
-        Type = capType;
+        CaptureHelper.FreeSettingsEx();
+    }
+
+    protected override IntPtr getCalibrationFromCapturer()
+    {
+        return Realsense2Invoker.get_calibration(capPtr);
     }
 
     #region Poll functions
@@ -77,53 +79,26 @@ public abstract class SingleCapture : IDisposable
     {
         return Realsense2Invoker.get_depth_intrinsics(capPtr);
     }
-    public IntPtr GetCalibration()
-    {
-        if(calibrationHandle.IsAllocated)
-        {
-            return calibrationHandle.AddrOfPinnedObject();
-        }
+  
 
-        IntPtr calPtr = Realsense2Invoker.get_calibration(capPtr);
-        if(calPtr == IntPtr.Zero)
-        {
-            return IntPtr.Zero;
-        }
-        calibrationHandle = copyCalibration(calPtr);
-
-
-        Realsense2Invoker.free_capturer_calibration(Type, calPtr); 
-        return calibrationHandle.AddrOfPinnedObject();
-    }
-    protected abstract GCHandle copyCalibration(IntPtr cal);
     #region IDispose code
-    protected virtual void Dispose(bool disposing)
+    protected override void Dispose(bool disposing)
     {
         if (!disposedValue)
         {
             if (disposing)
             {
-                if(capPtr != IntPtr.Zero)
+                if (capPtr != IntPtr.Zero)
                 {
                     Debug.Log("freeing capture");
                     Realsense2Invoker.free_capturer(capPtr);
                     capPtr = IntPtr.Zero;
                 }
-                if(calibrationHandle.IsAllocated)
-                {
-                    calibrationHandle.Free();
-                }
-                
+                base.Dispose(true);
             }
-
             disposedValue = true;
         }
     }
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
+   
     #endregion
 }

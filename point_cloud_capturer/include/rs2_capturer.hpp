@@ -15,6 +15,7 @@ struct RS2CaptureSettings {
 class RS2Capturer : public Capturer {
     public:
         RS2Capturer(
+            unsigned int capture_id,
             unsigned int fps, FrameMode mode,
             FrameCleanupSettings cleanup_settings,
             RS2CaptureSettings* capture_settings
@@ -22,7 +23,7 @@ class RS2Capturer : public Capturer {
             min_dist(capture_settings->min_dist), 
             max_dist(capture_settings->max_dist),
             align_to_depth(capture_settings->align_to_depth), 
-            Capturer(mode, fps, cleanup_settings), 
+            Capturer(capture_id, mode, fps, cleanup_settings), 
             depth_align(rs2::align(RS2_STREAM_DEPTH)), 
             color_align(rs2::align(RS2_STREAM_COLOR)) 
         {

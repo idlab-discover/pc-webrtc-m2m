@@ -22,38 +22,100 @@ CAPTURER_SETUP_CODE PrerecordedKinectCapturer::init()
     depth_height = cal.depth_camera_calibration.resolution_height;
     color_width = cal.color_camera_calibration.resolution_width;
     color_height = cal.color_camera_calibration.resolution_height;
+    Log::custom_log(std::format("init: depth reso: {}x{} color reso: {}x{}", depth_width, depth_height, color_width, color_height), Default, LogColor::White);
     KinectHelper::create_xy_table(cal, align_to_depth, xy_table);
+    s_timestamp_offset_usec = 66 * 1000 * 10;
+   /* if(capture_id == 0) {
+       // s_timestamp_offset_usec = 66 * 1000 * 1;
+    } else {
+        s_timestamp_offset_usec += 66 * 1000 * 2;
+    }*/
+    e_timestamp_usec = k4a_playback_get_last_timestamp_usec(camera_handle);
+    k4a_playback_seek_timestamp(camera_handle, s_timestamp_offset_usec, K4A_PLAYBACK_SEEK_BEGIN);
+
+    k4a_capture_t capture_handle = nullptr;
+    k4a_playback_get_next_capture(camera_handle, &capture_handle);
+    k4a_image_t color_image = k4a_capture_get_color_image(capture_handle); 
+    first_frame_timestamp_usec = k4a_image_get_device_timestamp_usec(color_image);
+    Log::custom_log(std::format("init: Cam {} first frame timestamp: {}", capturer_id, first_frame_timestamp_usec), Default, LogColor::White);
+    k4a_image_release(color_image);
+    k4a_capture_release(capture_handle);
+    initialized = true;
     return CAPTURER_SETUP_CODE::StartedCorrectly;
 }
 
 CAPTURER_SETUP_CODE PrerecordedKinectCapturer::capture_next_frame()
 {
     try {
-        timeBeginPeriod(1);
-        auto current_time = std::chrono::high_resolution_clock::now(); // Get the end time of the loop
-        auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - previous_time); // Calculate the elapsed time in milliseconds
-        
-        if (elapsed_time < interframe_delay) // If the elapsed time is less than the desired frame time, sleep for the remaining time
-        {
-            std::this_thread::sleep_for(interframe_delay - elapsed_time);
+        wait_for_next_frame();
+        CAPTURER_SETUP_CODE c = capture_next_frame_internal();
+		if(c != CAPTURER_SETUP_CODE::StartedCorrectly) {
+            return c;
         }
-        previous_time = std::chrono::high_resolution_clock::now();
-        // Need to call end here for optimisation
-        timeEndPeriod(1);
+        
+    } catch (...) {
+        return CAPTURER_SETUP_CODE::CameraDisconnected;
+    }
+	frame_nr++;
+    return CAPTURER_SETUP_CODE::StartedCorrectly;
+}
+
+void PrerecordedKinectCapturer::wait_for_next_frame()
+{
+    timeBeginPeriod(1);
+    auto current_time = std::chrono::high_resolution_clock::now(); // Get the end time of the loop
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - previous_time); // Calculate the elapsed time in milliseconds
+    
+    if (elapsed_time < interframe_delay) // If the elapsed time is less than the desired frame time, sleep for the remaining time
+    {
+        std::this_thread::sleep_for(interframe_delay - elapsed_time);
+    }
+    previous_time = std::chrono::high_resolution_clock::now();
+    // Need to call end here for optimisation
+    timeEndPeriod(1);
+}
+
+void PrerecordedKinectCapturer::fastforward_x_frames(unsigned int x)
+{
+    Log::custom_log(std::format("fastforward_x_frames: Cam {} fast forwarding {} frames", capturer_id, std::to_string(x)), Default, LogColor::Yellow);
+    s_timestamp_offset_usec += x * 66 * 1000; // 66 ms per frame
+    for (unsigned int i = 0; i < x; i++) {
         k4a_capture_t capture_handle = nullptr;
         k4a_stream_result_t result = k4a_playback_get_next_capture(camera_handle, &capture_handle);
         if (result == K4A_STREAM_RESULT_EOF) {
+            Log::custom_log("fastforward_x_frames: end of playback reached at frame_nr" + std::to_string(frame_nr), Default, LogColor::Red);
+            k4a_playback_seek_timestamp(camera_handle, s_timestamp_offset_usec, K4A_PLAYBACK_SEEK_BEGIN);
+            result = k4a_playback_get_next_capture(camera_handle, &capture_handle);
+        }
+        if (result != K4A_STREAM_RESULT_SUCCEEDED) {
+            Log::custom_log("fastforward_x_frames: could not capture next frame " + std::to_string(result), Default, LogColor::Red);
+            return;
+        }
+        k4a_capture_release(capture_handle);
+    }
+}
+
+CAPTURER_SETUP_CODE PrerecordedKinectCapturer::capture_next_frame_internal()
+{
+    bool found_valid_frame = false;
+
+    while (!found_valid_frame) {
+        k4a_capture_t capture_handle = nullptr;
+        k4a_stream_result_t result = k4a_playback_get_next_capture(camera_handle, &capture_handle);
+        
+        if (result == K4A_STREAM_RESULT_EOF) {
             Log::custom_log("capture_next_frame: end of playback reached at frame_nr" + std::to_string(frame_nr), Default, LogColor::Red);
-            k4a_playback_seek_timestamp(camera_handle, 0, K4A_PLAYBACK_SEEK_BEGIN);
+            k4a_playback_seek_timestamp(camera_handle, s_timestamp_offset_usec, K4A_PLAYBACK_SEEK_BEGIN);
+           
             result = k4a_playback_get_next_capture(camera_handle, &capture_handle);
         }
         if (result != K4A_STREAM_RESULT_SUCCEEDED) {
             Log::custom_log("capture_next_frame: could not capture next frame " + std::to_string(result), Default, LogColor::Red);
             return CAPTURER_SETUP_CODE::CameraDisconnected;
         }
-
-		frame_buffer.add_to_buffer(new KinectFrame(
-			mode,
+        KinectFrame* temp_frame = new KinectFrame(
+            capturer_id,
+            mode,
             capture_handle,
             transformation_handle,
             xy_table,
@@ -63,16 +125,37 @@ CAPTURER_SETUP_CODE PrerecordedKinectCapturer::capture_next_frame()
             color_width,
             color_height,
             align_to_depth,
-			frame_nr,
-			cleanup_settings
-		));
-        
-    } catch (...) {
-        return CAPTURER_SETUP_CODE::CameraDisconnected;
+            frame_nr,
+            e_timestamp_corrected_usec,
+            cleanup_settings
+        );
+        if(temp_frame->is_valid_frame()) {
+            prev_timestamp_usec = temp_frame->get_device_timestamp();
+            if(frame_ready_callback_instance != nullptr) {
+                frame_ready_callback_instance(capturer_id, temp_frame, temp_frame->is_valid_frame());
+            } else {
+                frame_buffer.add_to_buffer(temp_frame);
+            }
+            found_valid_frame = true;
+        } else {
+            if(temp_frame->get_device_timestamp() > e_timestamp_corrected_usec) {
+                k4a_playback_seek_timestamp(camera_handle, s_timestamp_offset_usec, K4A_PLAYBACK_SEEK_BEGIN);
+            } else {
+                if(frame_ready_callback_instance != nullptr) {
+                    frame_ready_callback_instance(capturer_id, temp_frame, temp_frame->is_valid_frame());
+                } else {
+                    frame_buffer.add_to_buffer(temp_frame);
+                }
+                
+                found_valid_frame = true;
+            }
+           // delete temp_frame;
+           // Log::custom_log("capture_next_frame: frame is not valid, skipping", Default, LogColor::Red);
+        }
     }
-	frame_nr++;
-    return CAPTURER_SETUP_CODE::StartedCorrectly;
+    
 }
+
 
 void *PrerecordedKinectCapturer::get_calibration()
 {
@@ -142,6 +225,7 @@ kinect_cam_in PrerecordedKinectCapturer::copy_intrinsics(k4a_calibration_intrins
     }
     return in_out;
 }
+
 
 Frame *PrerecordedKinectCapturer::poll_next_frame()
 {

@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 #region Help struct
 [StructLayout(LayoutKind.Explicit, Size = 48)]
@@ -62,22 +62,25 @@ public unsafe struct KinectCalibrationEx
 }
 
 
-public class PrerecordedKinectCapture : SingleCapture
+public class KinectCaptureHelper : CaptureHelper
 {
-    public PrerecordedKinectCapture(uint fps, FrameMode frameMode, FrameCleanupSettingsEx frameCleanupSettings, PrerecordedKinecteSettings captureSettings) : base(fps, frameMode, frameCleanupSettings, CaptureType.PrerecordedKinect, convertToSetToEx(captureSettings))
+    public KinectCalibrationEx KinectCalibration { get; private set; }
+    
+  
+    public KinectCaptureHelper(PrerecordedKinectSettings set) : base(convertToSetToEx(set))
     {
     }
 
-    private unsafe static GCHandle convertToSetToEx(PrerecordedKinecteSettings set)
+    private unsafe static GCHandle convertToSetToEx(PrerecordedKinectSettings set)
     {
-        PrerecordedKinecteSettingsEx setEx = new PrerecordedKinecteSettingsEx() { alignToDepth = set.alignToDepth, minHeight = set.minHeight, maxHeight = set.maxHeight, radius = set.radius };
+        PrerecordedKinectSettingsEx setEx = new PrerecordedKinectSettingsEx() { alignToDepth = set.alignToDepth, minHeight = set.minHeight, maxHeight = set.maxHeight, radius = set.radius };
         Debug.Log("rad " + set.camFile);
         for (int i = 0; i < 4; i++)
         {
-            for(int j = 0; j < 4; j++)
+            for (int j = 0; j < 4; j++)
             {
                 Debug.Log(i + " " + j + " " + set.trafo[i][j]);
-                setEx.trafo[i*4 + j] = set.trafo[i][j];
+                setEx.trafo[i * 4 + j] = set.trafo[i][j];
             }
         }
 
@@ -85,29 +88,19 @@ public class PrerecordedKinectCapture : SingleCapture
         {
             setEx.camFile[i] = (byte)set.camFile[i];
         }
-      
+
         setEx.camFile[Math.Min(255, set.camFile.Length)] = 0;
         return GCHandle.Alloc(setEx, GCHandleType.Pinned);
     }
 
-    protected override GCHandle copyCalibration(IntPtr cal)
+    public override GCHandle copyCalibration(IntPtr cal)
     {
-        KinectCalibrationEx kinectCalibrationEx = Marshal.PtrToStructure<KinectCalibrationEx>(cal);
-        Debug.Log("art size" + kinectCalibrationEx.colorCalibration.resolutionHeight);
-        bool AlignToDepth = kinectCalibrationEx.alignToDepth!= 0;
-    Debug.Log("align: " + kinectCalibrationEx.alignToDepth + " " + AlignToDepth);
-        Debug.Log("color reso: " + kinectCalibrationEx.colorCalibration.resolutionWidth);
-        unsafe
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    Debug.Log(i + " " + j + " " + kinectCalibrationEx.trafo[i * 4 + j]);
-                }
-            }
-        }
-       
-        return GCHandle.Alloc(kinectCalibrationEx, GCHandleType.Pinned);
+        KinectCalibration = Marshal.PtrToStructure<KinectCalibrationEx>(cal);
+        Debug.Log("art size" + KinectCalibration.colorCalibration.resolutionHeight);
+        bool AlignToDepth = KinectCalibration.alignToDepth != 0;
+        Debug.Log("align: " + KinectCalibration.alignToDepth + " " + AlignToDepth);
+        Debug.Log("color reso: " + KinectCalibration.colorCalibration.resolutionWidth);
+        return GCHandle.Alloc(KinectCalibration, GCHandleType.Pinned);
     }
+
 }

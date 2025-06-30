@@ -31,10 +31,11 @@ CAPTURER_SETUP_CODE RS2Capturer::init()
 			//depth_sensor.set_option(RS2_OPTION_LASER_POWER, 0.f); // Disable laser
 		}
 		
+		
 	} catch (...) {
 		return exception_handler().first;	
 	}
-	
+	initialized = true;
     return CAPTURER_SETUP_CODE::StartedCorrectly;
 }
 
@@ -55,8 +56,8 @@ CAPTURER_SETUP_CODE RS2Capturer::capture_next_frame()
 		auto depth = frames.get_depth_frame();
 		depth = thres_filter.process(depth);
 		auto rgb = frames.get_color_frame();
-	
-		frame_buffer.add_to_buffer(new RS2Frame(
+		auto temp_frame = new RS2Frame(
+			capturer_id,
 			mode,
 			width,
 			height,
@@ -66,7 +67,12 @@ CAPTURER_SETUP_CODE RS2Capturer::capture_next_frame()
 			rgb,
 			frame_nr,
 			cleanup_settings
-		));
+		);
+		if(frame_ready_callback_instance != nullptr) {
+			frame_ready_callback_instance(capturer_id, temp_frame, true);
+		} else {
+			frame_buffer.add_to_buffer(temp_frame);
+		}
         
     } catch (...) {
         return exception_handler().first;

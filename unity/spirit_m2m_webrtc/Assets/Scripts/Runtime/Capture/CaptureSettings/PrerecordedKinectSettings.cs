@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 [System.Serializable]
-public class PrerecordedKinecteSettings
+public class PrerecordedKinectSettings
 {
     public bool alignToDepth = false;
     public float minHeight = 0.02f;
@@ -16,7 +16,7 @@ public class PrerecordedKinecteSettings
 }
 
 [StructLayout(LayoutKind.Explicit, Pack = 1)]
-public unsafe struct PrerecordedKinecteSettingsEx
+public unsafe struct PrerecordedKinectSettingsEx
 {
 
     [FieldOffset(0)]

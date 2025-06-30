@@ -13,6 +13,9 @@
     <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\capturer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\capturer_factory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

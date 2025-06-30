@@ -4,6 +4,7 @@
 
 CAPTURER_SETUP_CODE ArtificalCapturer::init()
 {
+    initialized = true;
     return CAPTURER_SETUP_CODE::StartedCorrectly;
 }
 
@@ -21,11 +22,17 @@ CAPTURER_SETUP_CODE ArtificalCapturer::capture_next_frame()
     previous_time = std::chrono::high_resolution_clock::now();
     // Need to call end here for optimisation
     timeEndPeriod(1);
-    frame_buffer.add_to_buffer(new ArtificalFrame(
+    auto temp_frame = new ArtificalFrame(
+        capturer_id,
         mode,
         side_size,
         frame_nr
-    ));
+    );
+    if(frame_ready_callback_instance != nullptr) {
+        frame_ready_callback_instance(capturer_id, temp_frame, true);
+    } else {
+        frame_buffer.add_to_buffer(temp_frame);
+    }
     frame_nr++;
     return CAPTURER_SETUP_CODE::StartedCorrectly;
 }

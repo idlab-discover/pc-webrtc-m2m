@@ -21,10 +21,15 @@ public class SessionInfo
    
     public FrameMode frameMode;
     public FrameCodec frameCodec;
+    public bool useMultiCam = false;
+    public uint activeCamIndex = 0;
     public string capturerName = "artificial";
-    public ArtificialSettings artificialSettings;
-    public RealsenseSettings realsenseSettings;
-    public PrerecordedKinecteSettings prerecKinectSettings;
+    public string artificalConfigPath = "config/camera/artificial.json";
+    public string realsenseConfigPath = "config/camera/realsense.json";
+    public string prerecordedKinectConfigPath = "config/camera/prerecKinect.json";
+    //public ArtificialSettings artificialSettings;
+    //public RealsenseSettings realsenseSettings;
+    //public PrerecordedKinectSettings prerecKinectSettings;
     public FrameCleanupSettings frameCleanupSettings;
     public RawEncodingSettings rawEncodingSettings;
     public AudioPlaybackParams audioPlayback;

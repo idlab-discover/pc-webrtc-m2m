@@ -9,10 +9,10 @@ struct RS2Bounds {
 
 class RS2Frame : public Frame {
     public:
-        RS2Frame(FrameMode mode, unsigned int width, unsigned height, unsigned int bpp, unsigned int stride, 
+        RS2Frame(unsigned int capturer_id, FrameMode mode, unsigned int width, unsigned height, unsigned int bpp, unsigned int stride, 
             const rs2::depth_frame& depth_frame, const rs2::video_frame& color_frame, unsigned int frame_nr,
             FrameCleanupSettings cleanup_settings) 
-            : width(width), height(height), Frame(frame_nr) {
+            : width(width), height(height), Frame(capturer_id, frame_nr) {
             switch (mode)
             {
                 case FrameMode::RealData: {

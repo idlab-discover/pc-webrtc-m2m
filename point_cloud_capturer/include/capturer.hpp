@@ -3,6 +3,7 @@
 #include "framework.h"
 #include "framebuffer.hpp"
 #include "point_cloud.hpp"
+#include "raw_frame.hpp"
 #include "frame.hpp"
 #include <mutex>
 #include <thread>
@@ -83,12 +84,19 @@ struct KinectCalibration {
 };
 #pragma pack(pop)
 
+class Capturer;
+extern "C" {
+    typedef void(*FrameReadyCallback)(unsigned int capturer_id, Frame* frame_ptr, bool is_frame_valid);
+
+    DLLExport void register_frame_ready_callback(Capturer* cap, FrameReadyCallback cb);
+}
 
 
 class Capturer {
     public:
-        Capturer(FrameMode mode, unsigned int fps, FrameCleanupSettings cleanup_settings) : mode(mode), fps(fps), cleanup_settings(cleanup_settings) {
-           
+        Capturer(unsigned int capturer_id, FrameMode mode, unsigned int fps, FrameCleanupSettings cleanup_settings) 
+        : capturer_id(capturer_id), mode(mode), fps(fps), cleanup_settings(cleanup_settings) {
+        
         };
         virtual ~Capturer() {
           frame_buffer.clear_buffer();
@@ -100,11 +108,30 @@ class Capturer {
         virtual Frame* poll_next_frame() = 0; 
         virtual void* get_calibration() = 0;
         PointCloud* poll_next_point_cloud();
+        RawFrame* poll_next_raw_frame();
         void set_cleanup_settings(FrameCleanupSettings _cleanup_settings) {cleanup_settings=_cleanup_settings;}
         void start_capturing();
         void wait_for_capture_done();
-
+        unsigned int get_capture_id() const { return capturer_id; }
+        int64_t get_start_timestamp_usec() const { return s_timestamp_offset_usec; }
+        int64_t get_end_timestamp_usec() const { return e_timestamp_usec; }
+        int64_t get_end_timestamp_corrected_usec() const { return e_timestamp_corrected_usec; }
+        int64_t get_first_frame_timestamp_usec() const { return first_frame_timestamp_usec; }
+        void set_end_timestamp_corrected_usec(int64_t _e_timestamp_corrected_usec) { e_timestamp_corrected_usec=_e_timestamp_corrected_usec; }
+        bool is_initialized() const { return initialized; }
+        void create_capture_worker();
+        virtual void fastforward_x_frames(unsigned int x) {}; // only use at init to prevent race conditions
+        // TODO reset functio to start playback at 0 / reset frame counter and clear buffer
+        void register_frame_ready_callback(FrameReadyCallback cb) {
+            frame_ready_callback_instance = cb;
+        }
     protected:
+        bool initialized = false;
+        unsigned int capturer_id = 0;
+        int64_t s_timestamp_offset_usec = 0;
+        int64_t e_timestamp_usec = -1;
+        int64_t e_timestamp_corrected_usec = -1;
+        int64_t first_frame_timestamp_usec = -1;
         std::mutex m_capturing;
         std::condition_variable cv_capture;
         bool capture_done = false;
@@ -122,6 +149,7 @@ class Capturer {
         };
         template <typename T>
         static void free_calibration_internal(void* cal) { delete static_cast<T*>(cal); };
+        FrameReadyCallback frame_ready_callback_instance = nullptr;
     private:
         void start_capturing_internal();
 };

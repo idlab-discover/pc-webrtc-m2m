@@ -4,7 +4,8 @@
 #include "frame.hpp"
 class ArtificalFrame : public Frame {
     public:
-        ArtificalFrame(FrameMode mode, unsigned int side_size, unsigned int _frame_nr) : side_size(side_size), Frame(_frame_nr) {
+        ArtificalFrame(unsigned int capturer_id, FrameMode mode, unsigned int side_size, unsigned int _frame_nr) 
+                : side_size(side_size), Frame(capturer_id, _frame_nr) {
             switch (mode)
             {
             case FrameMode::RealData:

@@ -317,6 +317,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\artificical_frame.cpp" />
     <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\artificical_raw_converter.cpp" />
     <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\capturer.cpp" />
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\capturer_factory.cpp" />
     <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\dllmain.cpp" />
     <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\frame.cpp" />
     <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\framebuffer.cpp" />

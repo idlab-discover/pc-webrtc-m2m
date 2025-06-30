@@ -13,7 +13,7 @@
         "scale":{"x": 1.4, "y":0.1, "z": 1.7}
     },
     "pushBack": {"x": 0.229103, "y":0.0, "z": 0},
-    "camFPS": 5,
+    "camFPS": 15,
     "useMic": false,
     "frameMode": 0,
     "frameCodec": 0,

@@ -20,6 +20,7 @@
 #include "rs2_raw_converter.hpp"
 #include "prerecorded_kinect_capturer.hpp"
 #include "kinect_raw_converter.hpp"
+#include "capturer_factory.hpp"
 using namespace std;
 
 uint32_t n_tiles;
@@ -60,35 +61,7 @@ Capturer* create_new_capturer(uint32_t fps,
 	FrameMode mode, FrameCleanupSettings cleanup_settings, 
 	CAPTURE_TYPE type, void* capture_settings
 ) {
-
-	Capturer* capturer = nullptr;
-	try {
-		switch(type) {
-			case CAPTURE_TYPE::Artifical: {
-				Log::custom_log("create_new_capturer: Creating artificial capturer", LOG_LEVEL::Default, LogColor::Orange);
-				capturer = new ArtificalCapturer(fps, mode, cleanup_settings, static_cast<ArtificalCaptureSettings*>(capture_settings));
-				break;
-			}
-			case CAPTURE_TYPE::RealSense: {
-				Log::custom_log("create_new_capturer: Creating realsense2 capturer", LOG_LEVEL::Default, LogColor::Orange);
-				capturer = new RS2Capturer(fps, mode, cleanup_settings, static_cast<RS2CaptureSettings*>(capture_settings));
-				break;
-			}
-			case CAPTURE_TYPE::PrerecordedKinect: {
-				Log::custom_log("create_new_capturer: Creating prerecorded kinect capturer", LOG_LEVEL::Default, LogColor::Orange);
-				capturer = new PrerecordedKinectCapturer(fps, mode, cleanup_settings, static_cast<PrerecordedKinectCaptureSettings*>(capture_settings));
-				break;
-			}
-			default: {
-				Log::custom_log("create_new_capturer: Invalid capture type", LOG_LEVEL::Default, LogColor::Red);
-				capturer =  nullptr;
-			}
-		}
-	
-	} catch (CAPTURER_SETUP_CODE e) {
-		return nullptr;
-	}
-	return capturer;
+	return CapturerFactory::get_instance().create_capturer(0, fps, mode, cleanup_settings, type, capture_settings);
 }
 
 
@@ -102,17 +75,7 @@ Frame* poll_next_frame(Capturer* capturer) {
 }
 
 RawFrame* poll_next_raw_frame(Capturer* capturer) {
-	Frame* frame = capturer->poll_next_frame();
-	return new RawFrame{
-		frame->get_timestamp(),
-		frame->get_frame_nr(),
-		frame->get_capture_width(),
-		frame->get_capture_height(),
-		frame->get_raw_n_points(),
-		frame->get_raw_depth(),
-		frame->get_raw_colors(),
-		frame
-	};
+	return capturer->poll_next_raw_frame();
 }
 
 size_t get_point_cloud_size(PointCloud* frame) {
@@ -222,9 +185,9 @@ void free_capturer_calibration(CAPTURE_TYPE type, void* cal) {
 
 MultiCapturer* create_new_multi_capturer(uint32_t fps, 
 	FrameMode mode, FrameCleanupSettings cleanup_settings, 
-	CAPTURE_TYPE type, unsigned int n_settings, void* capture_settings) 
+	CAPTURE_TYPE type, unsigned int n_settings, void** capture_settings) 
 {
-	return new MultiCapturer(fps, mode, cleanup_settings, type, n_settings, capture_settings);
+	return CapturerFactory::get_instance().create_multi_capturer(fps, mode, cleanup_settings, type, n_settings, capture_settings);
 }
 
 void start_capturing_multi(MultiCapturer* capturer) {
@@ -235,12 +198,6 @@ void start_capturing_multi(MultiCapturer* capturer) {
 	capturer->start_capturing();
 }
 
-Frame* poll_next_frame_for_capturer(MultiCapturer* capturer, unsigned int capturer_index) {
-	if(capturer == nullptr) {
-		return nullptr;
-	}
-	return capturer->poll_next_frame_for_capturer(capturer_index);
-}
 
 void* get_calibration_for_capturer(MultiCapturer* capturer, unsigned int capturer_index) {
 	if(capturer == nullptr) {
@@ -268,6 +225,21 @@ PointCloud* poll_next_combined_point_cloud(MultiCapturer* capturer) {
 	}
 	return capturer->poll_next_combined_point_cloud();
 }
+
+Frame* poll_next_frame_for_capturer(MultiCapturer* capturer, unsigned int capturer_index) {
+	if(capturer == nullptr) {
+		return nullptr;
+	}
+	return capturer->poll_next_frame_for_capturer(capturer_index);
+}
+
+RawFrame* poll_next_raw_frame_for_capturer(MultiCapturer* capturer, unsigned int capturer_index) {
+	if(capturer == nullptr) {
+		return nullptr;
+	}
+	return capturer->poll_next_raw_frame_for_capturer(capturer_index);
+}
+
 
 void free_multi_capturer(MultiCapturer* capturer) {
 	if (capturer != nullptr) {

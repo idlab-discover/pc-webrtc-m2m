@@ -23,7 +23,7 @@ struct FrameCleanupSettings {
 
 class Frame {
     public:
-        Frame(unsigned int frame_nr) : frame_nr(frame_nr) {
+        Frame(unsigned int capturer_id, unsigned int frame_nr) : capturer_id(capturer_id), frame_nr(frame_nr) {
             timestamp = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();
         };
         virtual ~Frame() = default;
@@ -36,15 +36,19 @@ class Frame {
         virtual unsigned int get_capture_height() = 0;
         virtual unsigned int get_raw_n_points() = 0;
 
-        unsigned int get_frame_nr() {return frame_nr;};
-        float get_x_offset() {return x_offset; };
-        float get_y_offset() {return y_offset; };
-        float get_z_offset() {return z_offset; };
-        uint64_t get_timestamp() {return timestamp; };
+        unsigned int get_capturer_id() const { return capturer_id; };
+        unsigned int get_frame_nr() const {return frame_nr;};
+        float get_x_offset() const {return x_offset; };
+        float get_y_offset() const {return y_offset; };
+        float get_z_offset() const {return z_offset; };
+        uint64_t get_timestamp() const {return timestamp; };
+        uint64_t get_device_timestamp() const { return device_timestamp;}
     protected:
+        unsigned int capturer_id; // ID of the capturer that created this frame
         unsigned int frame_nr;
         float x_offset = 0.0; 
         float y_offset = 0.0;
         float z_offset = 0.0;
         uint64_t timestamp;
+        int64_t device_timestamp = -1; // Device timestamp, if applicable
 };

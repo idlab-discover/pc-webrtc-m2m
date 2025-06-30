@@ -2,27 +2,42 @@
 #include "frame.hpp"
 #include <k4a/k4a.h>
 #include <k4arecord/playback.h>
+#include "log.h"
 class KinectFrame : public Frame {
     public:
-        KinectFrame(FrameMode mode, k4a_capture_t capture_handle, k4a_transformation_t& transform_handle, const k4a_image_t& xy_table,
+        KinectFrame(unsigned int capturer_id, FrameMode mode, k4a_capture_t capture_handle, k4a_transformation_t& transform_handle, const k4a_image_t& xy_table,
             const float (&trafo)[4][4],
             unsigned int depth_width, unsigned int depth_height,
             unsigned int color_width, unsigned int color_height,
             bool align_to_depth,
             unsigned int frame_nr,
+            int64_t e_timestamp_corrected_usec,
             FrameCleanupSettings cleanup_settings) 
             :   capture_handle(capture_handle),
                 depth_width(depth_width), depth_height(depth_height),
-                color_width(color_width), color_height(color_height), Frame(frame_nr) 
+                color_width(color_width), color_height(color_height), Frame(capturer_id, frame_nr)
         {
             depth_image = k4a_capture_get_depth_image(capture_handle);
             color_image = k4a_capture_get_color_image(capture_handle); 
+            device_timestamp = k4a_image_get_device_timestamp_usec(color_image);
+            if(e_timestamp_corrected_usec > -1 && device_timestamp > e_timestamp_corrected_usec) {
+                Log::custom_log(std::format("KinectFrame: Device timestamp {} is greater than max timestamp {}, skipping frame", device_timestamp, e_timestamp_corrected_usec), Default, LogColor::Red);
+                return;
+            }
             if(!align_to_depth) {
                 k4a_image_t transformed_depth_image_handle;
                 k4a_image_create(K4A_IMAGE_FORMAT_DEPTH16, color_width, color_height, color_width*2, &transformed_depth_image_handle);
                 k4a_transformation_depth_image_to_color_camera(transform_handle, depth_image, transformed_depth_image_handle);
                 k4a_image_release(depth_image);
                 depth_image = transformed_depth_image_handle;
+            }
+            if(depth_image == nullptr || color_image == nullptr) {
+                Log::custom_log("KinectFrame: Could not get depth or color image from capture", Default, LogColor::Red);
+                return;
+            }
+            
+            if(frame_nr % 100 == 0) {
+                Log::custom_log(std::format("KinectFrame: Cam {} Frame {} timestamp {}", capturer_id, frame_nr, device_timestamp), Default, LogColor::Orange);
             }
             switch (mode)
             {
@@ -41,6 +56,11 @@ class KinectFrame : public Frame {
                 }
                     
             }
+            if(n_points == 0) {
+                Log::custom_log("KinectFrame: No valid points found in frame", Default, LogColor::Red);
+                return;
+            }
+            is_valid = true;
             
         };
         ~KinectFrame() {
@@ -66,7 +86,9 @@ class KinectFrame : public Frame {
         unsigned int get_capture_width() { return color_width;};
         unsigned int get_capture_height() { return color_height;};
         unsigned int get_raw_n_points() {return n_points;};
+        bool is_valid_frame() const { return is_valid; }
     private:
+        bool is_valid = false;
         k4a_image_t depth_image;
         k4a_image_t color_image;
         k4a_capture_t capture_handle;

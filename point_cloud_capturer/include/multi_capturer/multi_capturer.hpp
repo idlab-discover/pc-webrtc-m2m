@@ -8,13 +8,14 @@ class MultiCapturer {
     public:
         MultiCapturer(uint32_t fps, 
             FrameMode mode, FrameCleanupSettings cleanup_settings, 
-            CAPTURE_TYPE type, unsigned int n_settings, void* capture_settings);
+            CAPTURE_TYPE type, std::vector<Capturer*>&& capturers);
         virtual ~MultiCapturer();
         void start_capturing();
 
         // Single capturer functions
         Frame* poll_next_frame_for_capturer(unsigned int capturer_index);
         PointCloud* poll_next_point_cloud_for_capturer(unsigned int capturer_index);
+        RawFrame* poll_next_raw_frame_for_capturer(unsigned int capturer_index);
         void* get_calibration_for_capturer(unsigned int capturer_index);
         void set_cleanup_settings_for_capturer(unsigned int capturerer_index, FrameCleanupSettings _cleanup_settings);
 
@@ -27,11 +28,17 @@ class MultiCapturer {
             unsigned int total_points = 0;
             for (auto& capturer : capturers) {
                 PointCloud* pc = capturer->poll_next_point_cloud();
+                // If nullptr -> keep polling
                 if (pc != nullptr) {
                     total_points += pc->n_points;
                     point_clouds.push_back(pc);
                 }
             }
+            // If all nullptr -> return
+            // Else calculate highest timestamp
+            // Poll other cameras until they get good frame with timestamp close to highest timestamp
+            // Set #frames to drop (without sleep) based on lowest timestamp
+            // If frameNr == 0 calculate s_seek
             if(total_points == 0) {
                 return nullptr; // No point clouds captured
             }

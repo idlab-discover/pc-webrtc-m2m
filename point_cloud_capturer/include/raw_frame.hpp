@@ -3,6 +3,7 @@
 #include "frame.hpp"
 struct RawFrame {
     uint64_t timestamp;
+    unsigned int capturer_id;
     unsigned int frame_nr;
     unsigned int width;
     unsigned int height;

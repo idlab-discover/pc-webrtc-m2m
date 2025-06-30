@@ -159,14 +159,14 @@ public class PCSelf : MonoBehaviour
             if(SessionInfo.capturerName != "artificial")
             {
 
-                RawInvoker.initialize(SessionInfo.realsenseSettings.width, SessionInfo.realsenseSettings.height, 
-                    cCodec.CodecType, cCodec.SettingsPtr, dCodec.CodecType, dCodec.SettingsPtr
-                );
+               // RawInvoker.initialize(SessionInfo.realsenseSettings.width, SessionInfo.realsenseSettings.height, 
+              //      cCodec.CodecType, cCodec.SettingsPtr, dCodec.CodecType, dCodec.SettingsPtr
+              //  );
             } else
             {
-                RawInvoker.initialize(SessionInfo.artificialSettings.artificialSize* SessionInfo.artificialSettings.artificialSize, SessionInfo.artificialSettings.artificialSize, 
-                    cCodec.CodecType, cCodec.SettingsPtr, dCodec.CodecType, dCodec.SettingsPtr
-                );
+               // RawInvoker.initialize(SessionInfo.artificialSettings.artificialSize* SessionInfo.artificialSettings.artificialSize, SessionInfo.artificialSettings.artificialSize, 
+               //     cCodec.CodecType, cCodec.SettingsPtr, dCodec.CodecType, dCodec.SettingsPtr
+              //  );
             }
             if(cCodec != null)
             {
