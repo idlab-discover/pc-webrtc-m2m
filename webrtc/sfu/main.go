@@ -136,7 +136,7 @@ type DashboardSystemResourcesMessage struct {
 //					* pcState pointer
 
 func main() {
-	maxNumberOfTiles = flag.Int("t", 1, "Number of tiles")
+	maxNumberOfTiles = flag.Int("t", 3, "Number of tiles")
 	flag.Parse()
 
 	fmt.Printf("WebRTCSFU: Starting SFU with at most %d tiles per client\n", *maxNumberOfTiles)
