@@ -368,7 +368,7 @@ public class PCReceiver : MonoBehaviour
         while (keep_working)
         {
             Debug.Log("Polling size");
-            int descriptionSize = WebRTCInvoker.get_tile_size(ClientID, descriptionID);
+            int descriptionSize = WebRTCInvoker.get_tile_size(ClientID, 0, descriptionID);
             
             if (descriptionSize == 0)
             {
@@ -384,9 +384,10 @@ public class PCReceiver : MonoBehaviour
             {
                 fixed (byte* ptr = messageBuffer)
                 {
-                    WebRTCInvoker.retrieve_tile(ptr, (uint)descriptionSize, ClientID, descriptionID);
+                    WebRTCInvoker.retrieve_tile(ptr, (uint)descriptionSize, ClientID, 0, descriptionID);
                     UInt64 timestamp = BitConverter.ToUInt64(messageBuffer, 0); ;
                     int descriptionFrameNr = BitConverter.ToInt32(messageBuffer, 8);
+                    continue;
                     if(descriptionFrameNr <= lastCompletedFrameNr)
                     {
                         continue;
@@ -468,14 +469,14 @@ public class PCReceiver : MonoBehaviour
         }
         mut.ReleaseMutex();
     }
-    public void OnIntrisicsUpdated(CapturerIntrinsics dInt, CapturerIntrinsics cInt)
+    public void OnIntrisicsUpdated(UInt32 capturerID, UInt32 capturerType, IntPtr data)
     {
         if (rawConverter != IntPtr.Zero)
         {
             Realsense2Invoker.free_raw_converter(rawConverter);
             rawConverter = IntPtr.Zero;
         }
-        //rawConverter = Realsense2Invoker.create_new_raw_converter(dInt.model != 7777, dInt, cInt); TODO Fix
+        rawConverter = Realsense2Invoker.create_new_raw_converter((CaptureType)capturerType, data);
     }
     private int descToQual(uint dscNr)
     {

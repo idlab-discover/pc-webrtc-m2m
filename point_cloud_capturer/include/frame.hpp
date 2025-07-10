@@ -3,6 +3,7 @@
 #include <chrono>
 #include "point_cloud_data.h"
 class PointCloud;
+class RawFrame; 
 struct Point {
     float x, y, z;
     uint8_t r, g, b;
@@ -42,7 +43,10 @@ class Frame {
         float get_y_offset() const {return y_offset; };
         float get_z_offset() const {return z_offset; };
         uint64_t get_timestamp() const {return timestamp; };
-        uint64_t get_device_timestamp() const { return device_timestamp;}
+        uint64_t get_device_timestamp() const { return device_timestamp; };
+
+        PointCloud* get_point_cloud();
+        RawFrame* get_raw_frame();
     protected:
         unsigned int capturer_id; // ID of the capturer that created this frame
         unsigned int frame_nr;

@@ -61,6 +61,9 @@ class PrerecordedKinectCapturer : public Capturer {
         void* get_color_intrinsics();
      
         void* get_calibration();
+        uint32_t get_calibration_size() {
+            return sizeof(KinectCalibration);
+        }
 
         static void free_calibration(void* cal) {
             free_calibration_internal<KinectCalibration>(cal);

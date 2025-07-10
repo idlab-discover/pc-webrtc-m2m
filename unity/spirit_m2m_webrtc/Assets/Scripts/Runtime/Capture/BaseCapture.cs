@@ -19,6 +19,7 @@ public abstract class BaseCapture : IDisposable
     }
 
     protected abstract IntPtr getCalibrationFromCapturer();
+    public abstract uint GetCalibrationSize();
 
     public IntPtr GetCalibration()
     {

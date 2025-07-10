@@ -61,6 +61,13 @@ void* MultiCapturer::get_calibration_for_capturer(unsigned int capturer_index) {
     return nullptr;
 }
 
+uint32_t MultiCapturer::get_calibration_size_for_capturer(unsigned int capturer_index) {
+    if (capturer_index < capturers.size()) {
+        return capturers[capturer_index]->get_calibration_size();
+    }
+    return 0;
+}
+
 void MultiCapturer::set_cleanup_settings_for_capturer(unsigned int capturerer_index, FrameCleanupSettings _cleanup_settings) {
     if (capturerer_index < capturers.size()) {
         capturers[capturerer_index]->set_cleanup_settings(_cleanup_settings);
@@ -79,4 +86,12 @@ RawFrame *MultiCapturer::poll_next_raw_frame_for_capturer(unsigned int capturer_
         return capturers[capturer_index]->poll_next_raw_frame();
     }
     return nullptr;
+}
+
+bool MultiCapturer::register_frame_ready_callback_for_capturer(unsigned int capturer_index, FrameReadyCallback cb) {
+    if (capturer_index < capturers.size()) {
+        capturers[capturer_index]->register_frame_ready_callback(cb);
+        return true;
+    }
+    return false;
 }

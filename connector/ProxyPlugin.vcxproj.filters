@@ -54,6 +54,9 @@
     <ClInclude Include="capturer_intrinsics.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tile_receiver.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

@@ -17,6 +17,7 @@ class WebPEncoder : public ColorEncoder {
         ~WebPEncoder();
         virtual EncodedColor* compress_frame(uint8_t* raw_color);
     private:
+        const std::string NAME = "WebPEncoder";
         unsigned int quality;
         unsigned int method;
 

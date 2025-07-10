@@ -34,6 +34,12 @@ public abstract class SingleCapture : BaseCapture, ICapturePoll
         return Realsense2Invoker.get_calibration(capPtr);
     }
 
+    public override uint GetCalibrationSize()
+    {
+        return Realsense2Invoker.get_calibration_size(capPtr);
+    }
+
+
     #region Poll functions
     public IntPtr PollNextRawFrame()
     {

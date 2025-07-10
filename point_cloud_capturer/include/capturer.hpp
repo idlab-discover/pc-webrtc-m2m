@@ -107,6 +107,7 @@ class Capturer {
         virtual void stop() { frame_buffer.stop_buffer(); keep_working=false; if(worker.joinable()) worker.join(); };
         virtual Frame* poll_next_frame() = 0; 
         virtual void* get_calibration() = 0;
+        virtual uint32_t get_calibration_size() = 0;
         PointCloud* poll_next_point_cloud();
         RawFrame* poll_next_raw_frame();
         void set_cleanup_settings(FrameCleanupSettings _cleanup_settings) {cleanup_settings=_cleanup_settings;}
@@ -123,6 +124,7 @@ class Capturer {
         virtual void fastforward_x_frames(unsigned int x) {}; // only use at init to prevent race conditions
         // TODO reset functio to start playback at 0 / reset frame counter and clear buffer
         void register_frame_ready_callback(FrameReadyCallback cb) {
+            frame_buffer.clear_buffer(); // Clear the buffer to prevent old frames from being processed
             frame_ready_callback_instance = cb;
         }
     protected:
@@ -149,7 +151,7 @@ class Capturer {
         };
         template <typename T>
         static void free_calibration_internal(void* cal) { delete static_cast<T*>(cal); };
-        FrameReadyCallback frame_ready_callback_instance = nullptr;
+        FrameReadyCallback frame_ready_callback_instance = nullptr; // TODO probably need to wrap this in mutex maybe
     private:
         void start_capturing_internal();
 };

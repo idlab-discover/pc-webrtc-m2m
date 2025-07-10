@@ -15,7 +15,7 @@ class KinectFrame : public Frame {
             FrameCleanupSettings cleanup_settings) 
             :   capture_handle(capture_handle),
                 depth_width(depth_width), depth_height(depth_height),
-                color_width(color_width), color_height(color_height), Frame(capturer_id, frame_nr)
+                color_width(color_width), color_height(color_height), Frame(capturer_id, frame_nr) 
         {
             depth_image = k4a_capture_get_depth_image(capture_handle);
             color_image = k4a_capture_get_color_image(capture_handle); 
@@ -38,7 +38,7 @@ class KinectFrame : public Frame {
             
             if(frame_nr % 100 == 0) {
                 Log::custom_log(std::format("KinectFrame: Cam {} Frame {} timestamp {}", capturer_id, frame_nr, device_timestamp), Default, LogColor::Orange);
-            }
+            } 
             switch (mode)
             {
                 case FrameMode::RealData: {

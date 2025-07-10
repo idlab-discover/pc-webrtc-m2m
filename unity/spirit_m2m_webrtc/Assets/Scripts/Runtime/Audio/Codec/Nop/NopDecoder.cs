@@ -9,6 +9,7 @@ using System.Linq;
 
 public class NopDecoder : AudioDecoder
 {
+    const string NAME = "NopDecoder";
     public NopDecoder() : base()
     {
     }

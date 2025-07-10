@@ -8,6 +8,7 @@ using UnityEngine;
 public static class DLLLogger 
 {
     public delegate void debugCallback(IntPtr request, int color, int size);
+    public delegate void logToFileCallback(IntPtr request, int size, bool writeToWebsocket);
 
     enum Color { red, green, blue, black, white, yellow, orange };
     [MonoPInvokeCallback(typeof(debugCallback))]
@@ -22,5 +23,12 @@ public static class DLLLogger
             ((Color)color).ToString(), ">", debug_string, "</color>");
         // Log the string
         Debug.Log(debug_string);
+    }
+
+    [MonoPInvokeCallback(typeof(logToFileCallback))]
+    public static void OnLogToFileCallback(IntPtr request, int size, bool writeToWebsocket)
+    {
+        string logger_string = Marshal.PtrToStringAnsi(request, size);
+        Logger.Log(logger_string, writeToWebsocket);
     }
 }

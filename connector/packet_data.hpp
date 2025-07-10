@@ -42,6 +42,7 @@ struct PacketHeader {
 	uint32_t file_length;
 	uint32_t file_offset;
 	uint32_t packet_length;
+	uint32_t capturer_id;
 	uint32_t tile_id;
 
 
@@ -50,12 +51,13 @@ struct PacketHeader {
 	}
 
 	PacketHeader(uint32_t client_id, uint32_t frame_number,
-		uint32_t file_length, uint32_t file_offset, uint32_t packet_length, uint32_t tile_id) {
+		uint32_t file_length, uint32_t file_offset, uint32_t packet_length, uint32_t capturer_id, uint32_t tile_id) {
 		this->client_id = client_id;
 		this->frame_number = frame_number;
 		this->file_length = file_length;
 		this->file_offset = file_offset;
 		this->packet_length = packet_length;
+		this->capturer_id = capturer_id;
 		this->tile_id = tile_id;
 	}
 
@@ -135,6 +137,7 @@ protected:
 struct TrackStatusChangedHeader {
 	uint32_t client_id;
 	uint32_t last_frame_nr;
+	uint32_t capturer_id;
 	uint32_t tile_nr;
 	bool is_video;
 	bool is_added;
@@ -156,6 +159,8 @@ struct TrackStatusChangedHeader {
 
 struct CameraIntrinsicsHeader {
 	uint32_t client_id;
+	uint32_t capturer_id;
+	uint32_t capturer_type;
 
 	static constexpr auto size() {
 		return sizeof(struct CameraIntrinsicsHeader);

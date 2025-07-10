@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -78,7 +79,7 @@ type peerConnectionState struct {
 	trackBitrates  map[int]*trackBitrate
 
 	camInfo            *cameraInfo
-	capturerIntrinsics *string
+	capturerIntrinsics map[int]string
 
 	pendingCandidatesString []string
 }
@@ -992,13 +993,16 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	start := int(0)
 	wsLock.Lock()
 	for _, pcT := range peerConnections {
-		if *pcT.capturerIntrinsics != "" {
-			s := fmt.Sprintf("%d@%d@%s", *pcT.clientID, 8, *pcT.capturerIntrinsics)
-			webSocketConnection.WriteMessage(websocket.TextMessage, []byte(s))
+		for _, cpI := range pcT.capturerIntrinsics {
+			if cpI != "" {
+				s := fmt.Sprintf("%d@%d@%s", *pcT.clientID, 8, cpI)
+				webSocketConnection.WriteMessage(websocket.TextMessage, []byte(s))
+			}
 		}
+
 	}
 	wsLock.Unlock()
-	var pcState = peerConnectionState{peerConnection, webSocketConnection, pcID, &start, new(int), bwEstimator, map[int]*trackBitrate{}, &cameraInfo{}, new(string), make([]string, 0)}
+	var pcState = peerConnectionState{peerConnection, webSocketConnection, pcID, &start, new(int), bwEstimator, map[int]*trackBitrate{}, &cameraInfo{}, make(map[int]string), make([]string, 0)}
 	pcID += 1
 	peerConnections = append(peerConnections, pcState)
 	fmt.Printf("WebRTCSFU: webSocketHandler: peerConnection #%d\n", len(peerConnections))
@@ -1022,7 +1026,8 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 		err = webSocketConnection.WriteMessage(websocket.TextMessage, []byte(s))
 		wsLock.Unlock()
 		if err != nil {
-			panic(err)
+			//panic(err)
+			fmt.Println("WebRTCSFU: webSocketHandler: ERROR: ", err)
 		}
 	})
 
@@ -1049,8 +1054,9 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 		//	return
 		//}
 		trackLocal := addTrack(t)
+		fmt.Printf("WebRTCSFU: OnTrack: Adding track %v\n", trackLocal.ID())
 		defer func() {
-			fmt.Printf("WebRTCSFU: OnTrack: removing track %w\n", trackLocal.ID)
+			fmt.Printf("WebRTCSFU: OnTrack: removing track %v\n", trackLocal.ID())
 			removeTrack(trackLocal)
 		}()
 
@@ -1058,7 +1064,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 		tileNr := 99
 		if !*disableABR {
 			if t.Kind() == webrtc.RTPCodecTypeVideo {
-				tileNr, _ = strconv.Atoi(idTokens[2])
+				tileNr, _ = strconv.Atoi(idTokens[3])
 				listLock.Lock()
 				pcState.trackBitrates[tileNr] = &trackBitrate{}
 				pcState.trackBitrates[tileNr].trackID = t.ID()
@@ -1166,8 +1172,9 @@ func updateCapturerIntrinsicsForPeer(pcState peerConnectionState, data string) {
 		listLock.Unlock()
 		wsLock.Unlock()
 	}()
-	*pcState.capturerIntrinsics = data
-	println("INTRSINICS")
+	capturerID := getCapturerIDFromString(data)
+	pcState.capturerIntrinsics[capturerID] = data
+	println("INTRSINICS", capturerID)
 	for _, pc := range peerConnections {
 		if pcState.clientID != pc.clientID {
 			s := fmt.Sprintf("%d@%d@%s", *pcState.clientID, 8, data)
@@ -1253,6 +1260,15 @@ func calculatePointVisibility(pcState peerConnectionState, p [3]float32, nBands 
 	}
 
 	return nBands
+}
+
+// Parse the first 4 bytes of a string as an unsigned int (uint32, big endian)
+func getCapturerIDFromString(s string) int {
+	b := []byte(s)
+	if len(b) < 4 {
+		return 0 // or handle error as needed
+	}
+	return int(binary.LittleEndian.Uint32(b[:4]))
 }
 
 // Helper to make Gorilla Websockets threadsafe

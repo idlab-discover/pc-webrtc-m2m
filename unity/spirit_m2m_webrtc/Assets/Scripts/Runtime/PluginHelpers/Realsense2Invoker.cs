@@ -38,6 +38,13 @@ public static class Realsense2Invoker
     public static extern void set_capturer_frame_cleanup_settings(IntPtr cap, FrameCleanupSettingsEx cleanup_settings);
     [DllImport(dllName)]
     public static extern IntPtr get_calibration(IntPtr cap);
+    [DllImport(dllName)]
+    public static extern UInt32 get_calibration_size(IntPtr cap);
+    // [Warning] Setting this to any non null function will disable polling!
+
+    public delegate void frameReadyCallback(uint capturerID, IntPtr framePtr, bool isFrameValid);
+    [DllImport(dllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern void register_frame_ready_callback(IntPtr cap, frameReadyCallback cb);
     #endregion
 
     #region Poll functions
@@ -64,6 +71,11 @@ public static class Realsense2Invoker
     public static extern void set_cleanup_settings_for_capturer(IntPtr multi_cap, uint capturer_index, FrameCleanupSettingsEx cleanup_settings);
     [DllImport(dllName)]
     public static extern IntPtr get_calibration_for_capturer(IntPtr multi_cap, uint capturer_index);
+    [DllImport(dllName)]
+    public static extern uint get_calibration_size_for_capturer(IntPtr multi_cap, uint capturer_index);
+    [DllImport(dllName)]
+    public static extern bool register_frame_ready_callback_for_capturer(IntPtr multi_cap, uint capturer_index, IntPtr cb);
+
     #endregion
 
     #region Poll functions
@@ -91,6 +103,10 @@ public static class Realsense2Invoker
     public static extern IntPtr get_raw_depth(IntPtr frame);
     [DllImport(dllName)]
     public static extern IntPtr get_raw_color(IntPtr frame);
+    [DllImport(dllName)]
+    public static extern IntPtr convert_frame_to_pc(IntPtr frame);
+    [DllImport(dllName)]
+    public static extern IntPtr convert_frame_to_raw_frame(IntPtr frame);
     #endregion
 
     #region Raw converter functions

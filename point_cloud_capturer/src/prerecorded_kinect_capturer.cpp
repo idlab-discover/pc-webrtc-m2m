@@ -98,7 +98,7 @@ void PrerecordedKinectCapturer::fastforward_x_frames(unsigned int x)
 CAPTURER_SETUP_CODE PrerecordedKinectCapturer::capture_next_frame_internal()
 {
     bool found_valid_frame = false;
-
+    auto frame_ready_callback_copy = frame_ready_callback_instance; // Prevents the use of a potentially invalidated callback during the loop
     while (!found_valid_frame) {
         k4a_capture_t capture_handle = nullptr;
         k4a_stream_result_t result = k4a_playback_get_next_capture(camera_handle, &capture_handle);
@@ -131,8 +131,9 @@ CAPTURER_SETUP_CODE PrerecordedKinectCapturer::capture_next_frame_internal()
         );
         if(temp_frame->is_valid_frame()) {
             prev_timestamp_usec = temp_frame->get_device_timestamp();
-            if(frame_ready_callback_instance != nullptr) {
-                frame_ready_callback_instance(capturer_id, temp_frame, temp_frame->is_valid_frame());
+            if(frame_ready_callback_copy != nullptr) {
+                frame_ready_callback_copy(capturer_id, temp_frame, temp_frame->is_valid_frame());
+                
             } else {
                 frame_buffer.add_to_buffer(temp_frame);
             }
@@ -141,10 +142,10 @@ CAPTURER_SETUP_CODE PrerecordedKinectCapturer::capture_next_frame_internal()
             if(temp_frame->get_device_timestamp() > e_timestamp_corrected_usec) {
                 k4a_playback_seek_timestamp(camera_handle, s_timestamp_offset_usec, K4A_PLAYBACK_SEEK_BEGIN);
             } else {
-                if(frame_ready_callback_instance != nullptr) {
-                    frame_ready_callback_instance(capturer_id, temp_frame, temp_frame->is_valid_frame());
+                if(frame_ready_callback_copy != nullptr) {
+                    frame_ready_callback_copy(capturer_id, temp_frame, temp_frame->is_valid_frame());            
                 } else {
-                    frame_buffer.add_to_buffer(temp_frame);
+                    frame_buffer.add_to_buffer(temp_frame); 
                 }
                 
                 found_valid_frame = true;
@@ -153,7 +154,7 @@ CAPTURER_SETUP_CODE PrerecordedKinectCapturer::capture_next_frame_internal()
            // Log::custom_log("capture_next_frame: frame is not valid, skipping", Default, LogColor::Red);
         }
     }
-    
+    return CAPTURER_SETUP_CODE::StartedCorrectly;
 }
 
 

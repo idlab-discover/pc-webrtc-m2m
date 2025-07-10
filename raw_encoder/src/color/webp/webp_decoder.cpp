@@ -1,7 +1,7 @@
 #include "color/webp/webp_decoder.hpp"
 #include "color/webp/decoded_webp.hpp"
 // Constructor
-WebPDecoder::WebPDecoder() {
+WebPDecoder::WebPDecoder() : ColorDecoder() {
     // Initialization logic if needed
     WebPInitDecoderConfig(&config);
     config.options.use_threads = 1; // Enable multi-threading

@@ -18,7 +18,6 @@ using namespace std;
 
 uint32_t n_tiles;
 
-static thread worker;
 static bool keep_working = true;
 static bool initialized = false;
 
@@ -32,8 +31,6 @@ static int log_level = 0;
 mutex m_logging;
 mutex m_capturing;
 std::condition_variable cv_capture;
-bool capture_done = false;
-EncodingQueue* enc_queue;
 
 
 // TODO make objects
@@ -86,6 +83,7 @@ void custom_log(string message, int _log_level = 0, LogColor color = LogColor::B
 		ofs << get_current_date_time(false) << '\t' << message << '\n';
 		ofs.close();
 	}
+
 	guard.unlock();
 }
 
@@ -100,23 +98,28 @@ void set_logging(char* log_directory, int _log_level) {
 	Log::log("set_logging: Log level set to " + to_string(log_level), LogColor::Orange);
 }
 
-int initialize
+EncodingQueue* create_encoding_queue
 (
 	unsigned int width, unsigned int height, 
+	unsigned int max_queue, unsigned int n_workers, unsigned int n_capturers,
 	ColorCodecType col_codec, void* col_codec_settings,
 	DepthCodecType dep_codec, void* dep_codec_settings
 ) {
 	custom_log("initialize: inting", Default, LogColor::Orange);
-	enc_queue = new EncodingQueue(
-		2, width, height, col_codec, col_codec_settings, dep_codec, dep_codec_settings
+	EncodingQueue* enc_queue = new EncodingQueue(
+		max_queue, n_workers, width, height, n_capturers, col_codec, col_codec_settings, dep_codec, dep_codec_settings
 	);
 	
 	
-	if(enc_queue->is_ready()) {
-		initialized = true;
-		return 0;
+	if(enc_queue != nullptr) {
+		if(!enc_queue->is_ready()) {
+			delete enc_queue;
+			custom_log("create_encoding_queue: Failed to create encoding queue", Default, LogColor::Red);
+			return nullptr;
+		}
+		return enc_queue;
 	} else {
-		return -1;
+		return nullptr;
 	}	
 }
 /*
@@ -136,13 +139,6 @@ void clean_up() {
 		//unique_lock<mutex> guard(m_send_data);
 		
 		//guard.unlock();
-
-		// Join the listening thread
-		if (worker.joinable())
-			worker.join();
-		// TODO Cleanup Realsense2
-		delete enc_queue;
-		enc_queue = nullptr;
 	
 		// Reset the initialized flag
 		initialized = false;
@@ -154,7 +150,11 @@ void clean_up() {
 	}
 }
 
-uint32_t encode_frame(RawFrame* f) {
+uint32_t encode_frame(EncodingQueue* enc_queue, RawFrame* f) {
+	if(enc_queue == nullptr) {
+		custom_log("encode_frame: Encoding queue is null", Default, LogColor::Red);
+		return 1;
+	}
 	enc_queue->enqueue_frame(f);
 	return 0;
 }
@@ -179,6 +179,12 @@ unsigned char* get_decoded_color_data(DecodedColor* ptr) {
 		return ptr->get_buffer();
 	}
 	return nullptr;
+}
+
+void free_encoding_queue(EncodingQueue* ptr) {
+	if(ptr != nullptr) {
+		delete ptr;
+	}
 }
 
 void free_decoded_depth(DecodedDepth* ptr) {

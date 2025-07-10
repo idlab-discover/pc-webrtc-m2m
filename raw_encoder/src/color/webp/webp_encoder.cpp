@@ -1,19 +1,28 @@
 #include "color/webp/webp_encoder.hpp"
 #include "color/webp/encoded_webp.hpp"
+#include "log.h"
+#include "logging/logging_macros.hpp"
 // Constructor
 WebPEncoder::WebPEncoder(unsigned int width, unsigned int height, WebPSettings* settings) 
     : ColorEncoder(width, height), quality(settings->quality), method(settings->method) {
+    LOG_STATUS_TO_FILE(NAME, Log::Status::Creating);
     WebPConfigInit(&config);
     config.quality = quality;
     config.method = method;
     WebPPictureInit(&picture);
     picture.width = width;
     picture.height = height;
+
+    LOG_STATUS_TO_FILE(NAME, Log::Status::Created);
 }
 
 // Destructor
 WebPEncoder::~WebPEncoder() {
+    LOG_STATUS_TO_FILE(NAME, Log::Status::Destroying);
+
     WebPPictureFree(&picture);
+
+    LOG_STATUS_TO_FILE(NAME, Log::Status::Destroyed);
 }
 
 // compress_frame function

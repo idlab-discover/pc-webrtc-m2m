@@ -10,7 +10,8 @@ type FramePacketHeader struct {
 
 type VideoFramePacket struct {
 	FramePacketHeader        // 24
-	TileNr            uint32 // 28
+	CapturerID        uint32 // 28
+	TileNr            uint32 // 32
 	Data              [1148]byte
 }
 

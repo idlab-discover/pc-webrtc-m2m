@@ -26,6 +26,12 @@ public class MultiCaptureSingleCam : BaseCapture, ICapturePoll
         return Realsense2Invoker.get_calibration_for_capturer(multiCamPtr, capturerIndex);
     }
 
+    public override uint GetCalibrationSize()
+    {
+        if (multiCamPtr == IntPtr.Zero) return 0;
+        return Realsense2Invoker.get_calibration_size_for_capturer(multiCamPtr, capturerIndex);
+    }
+
     #region Poll functions
     public IntPtr PollNextRawFrame()
     {

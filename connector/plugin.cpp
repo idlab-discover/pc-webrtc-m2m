@@ -35,6 +35,7 @@ static SOCKET s_recv;
 int slen_recv = sizeof(si_recv);
 
 uint32_t client_id;
+uint32_t n_capturers;
 uint32_t n_tiles;
 
 static thread worker;
@@ -68,11 +69,11 @@ string api_version = "1.0";
 
 extern "C"
 {
-	typedef void(*TrackChangeCallBack)(uint32_t client_id, uint32_t frame_nr, uint32_t tile_nr, bool is_added);
+	typedef void(*TrackChangeCallBack)(uint32_t client_id, uint32_t frame_nr, uint32_t capturer_id, uint32_t tile_nr, bool is_added);
 	static TrackChangeCallBack trackChangeCallbackInstance = nullptr;
 	DLLExport void register_track_change_callback(TrackChangeCallBack cb);
 
-	typedef void(*IntrinsicsUpdatedCallBack)(uint32_t client_id, CapturerIntrinsics d_int, CapturerIntrinsics c_int);
+	typedef void(*IntrinsicsUpdatedCallBack)(uint32_t client_id, uint32_t capturer_id, uint32_t capturer_type, char* intrinsics_buf);
 	static IntrinsicsUpdatedCallBack intrinsicsUpdatedCallBackInstance = nullptr;
 	DLLExport void register_intrisics_updated_callback(IntrinsicsUpdatedCallBack cb);
 }
@@ -163,7 +164,7 @@ ClientReceiver* find_or_add_receiver(uint32_t client_id, bool is_audio = false) 
 			custom_log("find_or_add_receiver: Client ID " + to_string(is_audio) + to_string(client_id) + " not yet registered, inserting now",
 				Default, Color::Orange);
 			//Sleep(5000);
-			c = new ClientReceiver(client_id, n_tiles);
+			c = new ClientReceiver(client_id, n_capturers, n_tiles);
 			//if (!is_audio) {
 			//Sleep(5000);
 			// We need to do it like this because else bad stuff happens when we use both audio + video
@@ -188,7 +189,7 @@ ClientReceiver* find_or_add_receiver(uint32_t client_id, bool is_audio = false) 
 	This function is responsible for initializing the DLL. It should be called once per session from within Unity,
 	specifiying the required IP addresses and ports, the number of tiles that will be transmitted, and the client ID.
 */
-int initialize(char* ip_send, uint32_t port_send, char* ip_recv, uint32_t port_recv, uint32_t _n_tiles,
+int initialize(char* ip_send, uint32_t port_send, char* ip_recv, uint32_t port_recv, uint32_t _n_capturers, uint32_t _n_tiles,
 	uint32_t _client_id, char* api_version) {
 
 	if (string(api_version) != api_version) {
@@ -208,6 +209,7 @@ int initialize(char* ip_send, uint32_t port_send, char* ip_recv, uint32_t port_r
 
 	// Initialize parameters
 	client_id = _client_id;
+	n_capturers = _n_capturers;
 	n_tiles = _n_tiles;
 	frame_numbers = vector<uint32_t>(n_tiles, 0);
 	buf = (char*)malloc(BUFLEN);
@@ -397,11 +399,11 @@ void listen_for_data() {
 
 				// Get the receiver belonging to the connected peer
 				ClientReceiver* c = find_or_add_receiver(p_header.client_id);
-
+				
 				// Retrieve tile iterator, creating a new instance if needed
-				auto tile = c->recv_tiles.find(make_pair(p_header.frame_number, p_header.tile_id));
-				if (tile == c->recv_tiles.end()) {
-					auto e = c->recv_tiles.emplace(make_pair(p_header.frame_number, p_header.tile_id),
+				auto tile = c->tile_receivers[p_header.capturer_id].recv_tiles.find(make_pair(p_header.frame_number, p_header.tile_id));
+				if (tile == c->tile_receivers[p_header.capturer_id].recv_tiles.end()) {
+					auto e = c->tile_receivers[p_header.capturer_id].recv_tiles.emplace(make_pair(p_header.frame_number, p_header.tile_id),
 						ReceivedTile(p_header.file_length, p_header.frame_number, p_header.tile_id));
 					tile = e.first;
 					custom_log("listen_for_data: New tile: " + p_header.string_representation(), Debug, Color::Yellow);
@@ -419,8 +421,8 @@ void listen_for_data() {
 					if (tile->second.get_frame_number() % 10 == 0) {
 						custom_log("listen_for_data: Completed: " + to_string(p_header.frame_number) + " " + to_string(p_header.tile_id), Default, Color::Yellow);
 					}
-					c->tile_buffer.insert_tile(tile->second, p_header.tile_id);
-					c->recv_tiles.erase(make_pair(p_header.frame_number, p_header.tile_id));
+					c->tile_receivers[p_header.capturer_id].tile_buffer.insert_tile(tile->second, p_header.tile_id);
+					c->tile_receivers[p_header.capturer_id].recv_tiles.erase(make_pair(p_header.frame_number, p_header.tile_id));
 					//custom_log("listen_for_data: New buffer size: " +
 					//	to_string(c->tile_buffer.get_buffer_size(p_header.tile_id)), Debug, Color::Yellow);
 				}
@@ -473,7 +475,7 @@ void listen_for_data() {
 				// Extract the packet header
 				if (trackChangeCallbackInstance != nullptr) {
 					struct TrackStatusChangedHeader p_header(&buf, size);
-					trackChangeCallbackInstance(p_header.client_id, p_header.last_frame_nr, p_header.tile_nr, p_header.is_added);
+					trackChangeCallbackInstance(p_header.client_id, p_header.last_frame_nr, p_header.capturer_id, p_header.tile_nr, p_header.is_added);
 				}
 				
 				break;
@@ -481,9 +483,7 @@ void listen_for_data() {
 			case (PacketType::CapturerIntrinsics): {
 				if (intrinsicsUpdatedCallBackInstance != nullptr) {
 					struct CameraIntrinsicsHeader i_head(&buf, size);
-					struct CapturerIntrinsics d_int(&buf, size);
-					struct CapturerIntrinsics c_int(&buf, size);
-					intrinsicsUpdatedCallBackInstance(i_head.client_id, d_int, c_int);
+					intrinsicsUpdatedCallBackInstance(i_head.client_id, i_head.capturer_id, i_head.capturer_type, buf+4);
 				}
 				
 				break;
@@ -580,7 +580,7 @@ int send_packet(char* data, uint32_t size, uint32_t _packet_type) {
 /*
 	This function allows to send out a frame of a tile to the Golang peer. It returns the amount of bytes sent.
 */
-int send_tile(void* data, uint32_t size, uint32_t tile_id) {
+int send_tile(void* data, uint32_t size, uint32_t capturer_id, uint32_t tile_id) {
 	custom_log("send_tile: Tile " + to_string(tile_id) + " with size " + to_string(size), Debug, Color::Green);
 
 	if (!initialized) {
@@ -613,7 +613,7 @@ int send_tile(void* data, uint32_t size, uint32_t tile_id) {
 
 		// Create a new packet header
 		struct PacketHeader p_header {
-			client_id, frame_numbers[tile_id], size, current_offset, next_size, tile_id
+			client_id, frame_numbers[tile_id], size, current_offset, next_size, capturer_id, tile_id
 		};
 
 		// Insert all data into a buffer
@@ -654,14 +654,14 @@ int send_tile(void* data, uint32_t size, uint32_t tile_id) {
 	within the Unity reader every time a new frame is desired. The resulting return value should be used to allocate the
 	required memory and call the retrieve_tile function.
 */
-int get_tile_size(uint32_t client_id, uint32_t tile_id) {
+int get_tile_size(uint32_t client_id, uint32_t capturer_id, uint32_t tile_id) {
 	custom_log("get_tile_size: " + to_string(client_id) + ", " + to_string(tile_id), Debug, Color::Yellow);
 
 	// Get the receiver belonging to the connected peer
 	ClientReceiver* c = find_or_add_receiver(client_id);
 
 	// Wait until a new frame is available
-	while (c->tile_buffer.get_buffer_size(tile_id) == 0) {
+	while (c->tile_receivers[capturer_id].tile_buffer.get_buffer_size(tile_id) == 0) {
 		this_thread::sleep_for(chrono::milliseconds(1));
 		
 		if (!keep_working) {
@@ -670,11 +670,11 @@ int get_tile_size(uint32_t client_id, uint32_t tile_id) {
 	}
 
 	// Retrieve the next frame and forward it to the data parser
-	ReceivedTile t = c->tile_buffer.next(tile_id);
-	c->data_parser.set_current_tile(t, tile_id);
+	ReceivedTile t = c->tile_receivers[capturer_id].tile_buffer.next(tile_id);
+	c->tile_receivers[capturer_id].data_parser.set_current_tile(t, tile_id);
 
 	// Retrieve the tile size
-	int tile_size = c->data_parser.get_current_tile_size(tile_id);
+	int tile_size = c->tile_receivers[capturer_id].data_parser.get_current_tile_size(tile_id);
 	custom_log("get_tile_size: return " + to_string(tile_size), Debug, Color::Yellow);
 
 	// Return the tile size
@@ -687,14 +687,14 @@ int get_tile_size(uint32_t client_id, uint32_t tile_id) {
 	from within the Unity reader once get_tile_size has returned the tile size and the required memory has been
 	allocated.
 */
-void retrieve_tile(void* d, uint32_t size, uint32_t client_id, uint32_t tile_id) {
+void retrieve_tile(void* d, uint32_t size, uint32_t client_id, uint32_t capturer_id, uint32_t tile_id) {
 	custom_log("retrieve_tile: " + to_string(client_id) + ", " + to_string(tile_id), Debug, Color::Yellow);
 
 	// Get the receiver belonging to the connected peer
 	ClientReceiver* c = find_or_add_receiver(client_id);
 
 	// Fill the allocated memory with the requested data, if possible
-	int local_size = c->data_parser.fill_data_array(d, size, tile_id);
+	int local_size = c->tile_receivers[capturer_id].data_parser.fill_data_array(d, size, tile_id);
 	if (local_size == 0) {
 		custom_log("retrieve_tile: ERROR: the tile could not be retrieved", Default, Color::Red);
 	}
@@ -713,13 +713,13 @@ void retrieve_tile(void* d, uint32_t size, uint32_t client_id, uint32_t tile_id)
 	from within the Unity reader once get_tile_size has returned the tile size and the required memory has been
 	allocated.
 */
-int get_tile_frame_number(uint32_t client_id, uint32_t tile_id) {
+int get_tile_frame_number(uint32_t client_id, uint32_t capturer_id, uint32_t tile_id) {
 	custom_log("get_tile_frame_number: " + to_string(client_id) + ", " + to_string(tile_id), Debug, Color::Yellow);
 
 	// Get the receiver belonging to the connected peer
 	ClientReceiver* c = find_or_add_receiver(client_id);
 
-	return c->data_parser.get_current_tile_nr(tile_id);
+	return c->tile_receivers[capturer_id].data_parser.get_current_tile_nr(tile_id);
 }
 
 
@@ -821,10 +821,10 @@ int get_audio_size(uint32_t client_id) {
 	//timeEndPeriod(1);
 	// Retrieve the next frame and forward it to the data parser
 	ReceivedAudio t = c->audio_buffer.next();
-	c->data_parser.set_current_audio(t);
+	c->set_current_audio(t);
 
 	// Retrieve the tile size
-	int audio_size = c->data_parser.get_current_audio_size();
+	int audio_size = c->get_current_audio_size();
 	custom_log("get_audio_size: return " + to_string(audio_size), Debug, Color::Yellow);
 
 	// Return the tile size
@@ -844,7 +844,7 @@ void retrieve_audio(void* d, uint32_t size, uint32_t client_id) {
 	ClientReceiver* c = find_or_add_receiver(client_id);
 
 	// Fill the allocated memory with the requested data, if possible
-	int local_size = c->data_parser.fill_data_array(d, size);
+	int local_size = c->fill_data_array(d, size);
 	if (local_size == 0) {
 		custom_log("retrieve_audio: ERROR: the audio could not be retrieved", Default, Color::Red);
 	}

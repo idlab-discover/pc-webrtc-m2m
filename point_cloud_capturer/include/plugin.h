@@ -26,6 +26,7 @@ extern "C"
 	DLLExport void set_capturer_frame_cleanup_settings(Capturer* capturer, 
 		FrameCleanupSettings cleanup_settings);
 	DLLExport void* get_calibration(Capturer* capturer);
+	DLLExport uint32_t get_calibration_size(Capturer* capturer);
 	//		Poll functions
 	DLLExport PointCloud* poll_next_point_cloud(Capturer* capturer);
 	DLLExport Frame* poll_next_frame(Capturer* capturer);
@@ -39,6 +40,8 @@ extern "C"
 	DLLExport void start_capturing_multi(MultiCapturer* capturer);
 	DLLExport void set_cleanup_settings_for_capturer(MultiCapturer* capturer, unsigned int capturerer_index, FrameCleanupSettings _cleanup_settings);
 	DLLExport void* get_calibration_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);
+	DLLExport uint32_t get_calibration_size_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);
+	DLLExport bool register_frame_ready_callback_for_capturer(MultiCapturer* capturer, unsigned int capturer_index, FrameReadyCallback cb);
 
 	//		Poll functions
 	DLLExport PointCloud* poll_next_combined_point_cloud(MultiCapturer* capturer);
@@ -55,6 +58,8 @@ extern "C"
 	DLLExport size_t get_frame_size(Frame* pc);
 	DLLExport uint16_t* get_raw_depth(Frame* pc);
 	DLLExport uint8_t* get_raw_color(Frame* pc);
+	DLLExport PointCloud* convert_frame_to_pc(Frame* frame);
+	DLLExport RawFrame* convert_frame_to_raw_frame(Frame* frame);
 
 	// Raw converter functions
 	DLLExport RawConverter* create_new_raw_converter(CAPTURE_TYPE type, void* cal);

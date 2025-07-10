@@ -6,7 +6,7 @@ import (
 )
 
 type Transcoder interface {
-	EncodeFrame(uint32) []byte
+	EncodeFrame(uint32, uint32) []byte
 }
 
 type TranscoderRemote struct {
@@ -19,8 +19,8 @@ func NewTranscoderRemote(proxy_con *ProxyConnection) *TranscoderRemote {
 	return &TranscoderRemote{proxy_con, 0, true}
 }
 
-func (t *TranscoderRemote) EncodeFrame(tile uint32) []byte {
-	return proxyConn.NextTile(tile)
+func (t *TranscoderRemote) EncodeFrame(capturerID uint32, tile uint32) []byte {
+	return proxyConn.NextTile(capturerID, tile)
 }
 
 type TranscoderDummy struct {
@@ -33,7 +33,7 @@ func NewTranscoderDummy(proxy_con *ProxyConnection) *TranscoderDummy {
 	return &TranscoderDummy{proxy_con, 0, true}
 }
 
-func (t *TranscoderDummy) EncodeFrame(tile uint32) []byte {
+func (t *TranscoderDummy) EncodeFrame(capturerID uint32, tile uint32) []byte {
 	return nil
 }
 
@@ -60,7 +60,7 @@ func NewTranscoderDebug(dbgConfig DebugConfig) *TranscoderDebug {
 	return t
 }
 
-func (t *TranscoderDebug) EncodeFrame(tile uint32) []byte {
+func (t *TranscoderDebug) EncodeFrame(capturerID uint32, tile uint32) []byte {
 	t.m_video.Lock()
 	if !t.complete_tiles[tile] {
 		t.cond_video[tile].Wait()

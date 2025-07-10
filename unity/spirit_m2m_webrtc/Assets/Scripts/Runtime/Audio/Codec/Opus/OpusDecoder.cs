@@ -10,6 +10,9 @@ using System.Linq;
 
 public class OpusDecoder : AudioDecoder
 {
+    const string NAME = "OpusDecoder";
+
+
     private Decoder audioDecoder;
     public OpusDecoder(int samplingFreq, uint dspSize) : base()
     {

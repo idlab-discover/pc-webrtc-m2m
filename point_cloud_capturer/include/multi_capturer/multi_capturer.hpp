@@ -17,8 +17,9 @@ class MultiCapturer {
         PointCloud* poll_next_point_cloud_for_capturer(unsigned int capturer_index);
         RawFrame* poll_next_raw_frame_for_capturer(unsigned int capturer_index);
         void* get_calibration_for_capturer(unsigned int capturer_index);
+        uint32_t get_calibration_size_for_capturer(unsigned int capturer_index);
         void set_cleanup_settings_for_capturer(unsigned int capturerer_index, FrameCleanupSettings _cleanup_settings);
-
+        bool register_frame_ready_callback_for_capturer(unsigned int capturer_index, FrameReadyCallback cb);
         // Combined functions
         // TODO improve this to remove duplicate points and probably reuse a combined point cloud
         PointCloud* poll_next_combined_point_cloud() {

@@ -96,6 +96,23 @@ uint8_t* get_raw_color(Frame* frame) {
 	return frame->get_raw_colors();
 }
 
+// TODO check if this is optimized or if we should just pass it with the callback automatically
+PointCloud* convert_frame_to_pc(Frame* frame) {
+	if(frame == nullptr) {
+		Log::custom_log("convert_frame_to_pc: Frame is null, cannot convert to point cloud", LOG_LEVEL::Default, LogColor::Red);
+		return nullptr;
+	}
+	return frame->get_point_cloud();
+}
+
+
+RawFrame* convert_frame_to_raw_frame(Frame* frame) {
+	if(frame == nullptr) {
+		Log::custom_log("convert_frame_to_raw_frame: Frame is null, cannot convert to raw frame", LOG_LEVEL::Default, LogColor::Red);
+		return nullptr;
+	}
+	return frame->get_raw_frame();
+}
 
 void free_point_cloud(PointCloud * frame) {
 	if(frame == nullptr) return;
@@ -115,6 +132,11 @@ void free_raw_frame(RawFrame* frame) {
 void* get_calibration(Capturer* capturer) {
 	if(capturer == nullptr) return nullptr;
 	return capturer->get_calibration();
+}
+
+uint32_t get_calibration_size(Capturer* capturer) {
+	if(capturer == nullptr) return 0;
+	return capturer->get_calibration_size();
 }
 
 RawConverter* create_new_raw_converter(CAPTURE_TYPE type, void* cal) {
@@ -205,11 +227,26 @@ void* get_calibration_for_capturer(MultiCapturer* capturer, unsigned int capture
 	}
 	return capturer->get_calibration_for_capturer(capturer_index);
 }
+
+uint32_t get_calibration_size_for_capturer(MultiCapturer* capturer, unsigned int capturer_index) {
+	if(capturer == nullptr) {
+		return 0;
+	}
+	return capturer->get_calibration_size_for_capturer(capturer_index);
+}
+
 void set_cleanup_settings_for_capturer(MultiCapturer* capturer, unsigned int capturerer_index, FrameCleanupSettings _cleanup_settings) {
 	if(capturer == nullptr) {
 		return;
 	}
 	capturer->set_cleanup_settings_for_capturer(capturerer_index, _cleanup_settings);
+}
+
+bool register_frame_ready_callback_for_capturer(MultiCapturer* capturer, unsigned int capturer_index, FrameReadyCallback cb) {
+	if(capturer == nullptr) {
+		return false;
+	}
+	return capturer->register_frame_ready_callback_for_capturer(capturer_index, cb);
 }
 
 PointCloud* poll_next_point_cloud_for_capturer(MultiCapturer* capturer, unsigned int capturer_index) {

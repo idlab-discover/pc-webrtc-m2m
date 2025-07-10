@@ -42,7 +42,7 @@ public class SessionManagerAudioTest : MonoBehaviour
         // Init DLLs for logging
         DLLWrapper.LoggingInit(LoggingLevel);
         // TODO Start peer
-        WebRTCInvoker.initialize("127.0.0.1", (uint)sessionInfo.peerUDPPort, "127.0.0.1", (uint)sessionInfo.peerUDPPort, (uint)NDescriptions, (uint)ClientID, "1.0");
+        WebRTCInvoker.initialize("127.0.0.1", (uint)sessionInfo.peerUDPPort, "127.0.0.1", (uint)sessionInfo.peerUDPPort, 1, (uint)NDescriptions, (uint)ClientID, "1.0");
 
         peerProcess = new Process();
         peerProcess.StartInfo.FileName = Application.dataPath + "/peer/webRTC-peer-win.exe";

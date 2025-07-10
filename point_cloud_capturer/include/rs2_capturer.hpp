@@ -40,7 +40,9 @@ class RS2Capturer : public Capturer {
         CAPTURER_SETUP_CODE capture_next_frame();
         Frame* poll_next_frame();
         void* get_calibration();
-
+        uint32_t get_calibration_size() {
+            return sizeof(RealsenseCalibration);
+        }
         static void free_calibration(void* cal) {
             free_calibration_internal<RealsenseCalibration>(cal);
         };

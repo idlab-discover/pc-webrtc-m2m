@@ -20,7 +20,7 @@ public class PCSelf : MonoBehaviour
   //  public FrameMode FrameMode;
     public SessionInfo SessionInfo;
     private SingleCapture capture;
-
+    private RawEncodingQueue rawEncodingQueue;
     public Camera cam;
     public AudioCapture AudioCapturePrefab;
     public GameObject camOffset;
@@ -59,7 +59,7 @@ public class PCSelf : MonoBehaviour
             {
                 fixed (byte* bufferPointer = messageBuffer)
                 {
-                    nSend = WebRTCInvoker.send_tile(bufferPointer, (uint)messageBuffer.Length, dscNr);
+                    nSend = WebRTCInvoker.send_tile(bufferPointer, (uint)messageBuffer.Length, 0, dscNr);
                 }
             }
            
@@ -80,18 +80,20 @@ public class PCSelf : MonoBehaviour
     #endregion
 
     #region Raw Functions
-    static void SendRawData(IntPtr rawDataPtr, UInt32 size, UInt32 frameNr, UInt32 width, UInt32 height, UInt32 nPoints, UInt64 timestamp, FrameType frameType)
+    static void SendRawData(IntPtr rawDataPtr, UInt32 size, UInt32 capturerID, UInt32 frameNr, UInt32 width, UInt32 height, UInt32 nPoints, UInt64 timestamp, FrameType frameType)
     {
        // return;
         if (keep_working)
         {
-            byte[] frameHeader = new byte[32];
+            byte[] frameHeader = new byte[36];
             var timestampField = BitConverter.GetBytes(timestamp);
             timestampField.CopyTo(frameHeader, 0);
+            var capturerIDField = BitConverter.GetBytes(capturerID);
+            capturerIDField.CopyTo(frameHeader, 8);
             var frameNrField = BitConverter.GetBytes(frameNr);
-            frameNrField.CopyTo(frameHeader, 8);
+            frameNrField.CopyTo(frameHeader, 12);
             var codecType = BitConverter.GetBytes((uint)FrameCodec.Raw);
-            codecType.CopyTo(frameHeader, 12);
+            codecType.CopyTo(frameHeader, 16);
            // var codecType = BitConverter.GetBytes((uint)FrameCodec.Raw);
            // codecType.CopyTo(frameHeader, 12);
             var nPointsFrameField = BitConverter.GetBytes(nPoints);
@@ -111,7 +113,7 @@ public class PCSelf : MonoBehaviour
             {
                 fixed (byte* bufferPointer = messageBuffer)
                 {
-                    nSend = WebRTCInvoker.send_tile(bufferPointer, (uint)messageBuffer.Length, (uint)frameType);
+                    nSend = WebRTCInvoker.send_tile(bufferPointer, (uint)messageBuffer.Length, (uint)capturerID, (uint)frameType);
                 }
             }
 
@@ -123,15 +125,15 @@ public class PCSelf : MonoBehaviour
         }
     }
     [MonoPInvokeCallback(typeof(RawInvoker.colorDoneCallback))]
-    static void OnColorDoneCallback(IntPtr rawDataPtr, UInt32 size, UInt32 frameNr, UInt32 width, UInt32 height, UInt32 nPoints, UInt64 timestamp)
+    static void OnColorDoneCallback(IntPtr rawDataPtr, UInt32 size, UInt32 capturerID, UInt32 frameNr, UInt32 width, UInt32 height, UInt32 nPoints, UInt64 timestamp)
     {
-            SendRawData(rawDataPtr, size, frameNr, width, height, nPoints, timestamp, FrameType.ColorFrame);
+            SendRawData(rawDataPtr, size, capturerID, frameNr, width, height, nPoints, timestamp, FrameType.ColorFrame);
     }
 
     [MonoPInvokeCallback(typeof(RawInvoker.depthDoneCallback))]
-    static void OnDepthDoneCallback(IntPtr rawDataPtr, UInt32 size, UInt32 frameNr, UInt32 width, UInt32 height, UInt32 nPoints, UInt64 timestamp)
+    static void OnDepthDoneCallback(IntPtr rawDataPtr, UInt32 size, UInt32 capturerID, UInt32 frameNr, UInt32 width, UInt32 height, UInt32 nPoints, UInt64 timestamp)
     {
-            SendRawData(rawDataPtr, size, frameNr, width, height, nPoints, timestamp, FrameType.DepthFrame);
+            SendRawData(rawDataPtr, size, capturerID, frameNr, width, height, nPoints, timestamp, FrameType.DepthFrame);
     }
 
 
@@ -151,28 +153,12 @@ public class PCSelf : MonoBehaviour
             DracoInvoker.initialize();
         } else
         {
-            RawInvoker.register_color_done_callback(OnColorDoneCallback);
-            RawInvoker.register_depth_done_callback(OnDepthDoneCallback);
-            RawInvoker.register_free_frame_callback(OnFreeFrameCallback);
-            var cCodec = ColorCodecHelper.GetCodecSettings(SessionInfo.rawEncodingSettings);
-            var dCodec = DepthCodecHelper.GetCodecSettings(SessionInfo.rawEncodingSettings);
-            if(SessionInfo.capturerName != "artificial")
-            {
+            // TODO get width, height, n_capturers from capturing ptr
+            rawEncodingQueue = new RawEncodingQueue(SessionInfo, 1280, 720, 1);
+            rawEncodingQueue.SetColorDoneCallback(OnColorDoneCallback);
+            rawEncodingQueue.SetDepthDoneCallback(OnDepthDoneCallback);
+            rawEncodingQueue.SetFreeFrameCallback(OnFreeFrameCallback);
 
-               // RawInvoker.initialize(SessionInfo.realsenseSettings.width, SessionInfo.realsenseSettings.height, 
-              //      cCodec.CodecType, cCodec.SettingsPtr, dCodec.CodecType, dCodec.SettingsPtr
-              //  );
-            } else
-            {
-               // RawInvoker.initialize(SessionInfo.artificialSettings.artificialSize* SessionInfo.artificialSettings.artificialSize, SessionInfo.artificialSettings.artificialSize, 
-               //     cCodec.CodecType, cCodec.SettingsPtr, dCodec.CodecType, dCodec.SettingsPtr
-              //  );
-            }
-            if(cCodec != null)
-            {
-                cCodec.Dispose();
-            }
-            
         }
         capture = CaptureFactory.CreateNewSingleCapture(SessionInfo);
        
@@ -247,13 +233,22 @@ public class PCSelf : MonoBehaviour
     {
         keep_working = true;
         WebRTCInvoker.wait_for_peer();
-        if(SessionInfo.frameCodec != FrameCodec.Draco)
+        if(SessionInfo.frameMode == FrameMode.RawData)
         {
-            CapturerIntrinsics dInt = capture.GetDepthIntrinsics();
-            CapturerIntrinsics cInt = capture.GetColorIntrinsics();
-            byte[] b = new byte[CapturerIntrinsics.Size() * 2];
-            dInt.ConvertToBuffer().CopyTo(b, 0);
-            cInt.ConvertToBuffer().CopyTo(b, CapturerIntrinsics.Size());
+            // CapturerIntrinsics dInt = capture.GetDepthIntrinsics();
+            // CapturerIntrinsics cInt = capture.GetColorIntrinsics();
+            IntPtr cal = capture.GetCalibration();
+            uint calSize = CapturerIntrinsics.Size();
+            uint capturerID = 65; // TODO Change
+            uint capturerType = (uint)capture.CaptureType;
+            byte[] capturerIDBytes = BitConverter.GetBytes(capturerID);
+            byte[] capturerTypeBytes = BitConverter.GetBytes(capturerType);
+
+            byte[] b = new byte[calSize+8];
+            Buffer.BlockCopy(capturerIDBytes, 0, b, 0, 4);
+            Buffer.BlockCopy(capturerTypeBytes, 0, b, 4, 4);
+            Marshal.Copy(cal, b, 8, (int)calSize);
+           
             unsafe
             {
                 fixed (byte* bufferPointer = b)
@@ -290,7 +285,7 @@ public class PCSelf : MonoBehaviour
                         IntPtr frame = capture.PollNextRawFrame();
                         if (frame != IntPtr.Zero)
                         {
-                            RawInvoker.encode_frame(frame);
+                            rawEncodingQueue.EncodeRawFrame(frame);
                         }
                         else
                         {
@@ -306,6 +301,10 @@ public class PCSelf : MonoBehaviour
         if (capture != null)
         {
             capture.Dispose();
+        }
+        if (rawEncodingQueue != null)
+        {
+            rawEncodingQueue.Dispose();
         }
     }
 

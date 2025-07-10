@@ -59,6 +59,7 @@ func main() {
 	useProxyInput := flag.Bool("i", false, "Receive content from the DLL to forward over WebRTC")
 	useProxyOutput := flag.Bool("o", false, "Forward content received over WebRTC to the DLL")
 	clientID = flag.Int("c", 0, "Client ID")
+	numberOfCapturers := flag.Int("cam", 1, "Number of capturers")
 	numberOfTiles := flag.Int("t", 1, "Number of tiles")
 
 	debugConfigFile := flag.String("dbg", "", "Path to debug config file")
@@ -82,7 +83,7 @@ func main() {
 	if *useProxyInput {
 		proxyConn = NewProxyConnection()
 		proxyConn.SetupConnection(*proxyPort)
-		proxyConn.StartListening()
+		proxyConn.StartListening(uint32(*numberOfCapturers), uint32(*numberOfTiles))
 		transcoder = NewTranscoderRemote(proxyConn)
 	} else {
 
@@ -226,26 +227,30 @@ func main() {
 		RTCPFeedback: nil,
 	}
 
-	videoTracks := map[int]*TrackLocalCloudRTP{}
+	videoTracks := map[int]map[int]*TrackLocalCloudRTP{}
 	// TODO: give audio custom id?
 	audioTrack, err := NewTrackLocalAudioRTP(audioCodecCapability, fmt.Sprintf("audio_%d", *clientID), fmt.Sprintf("%d", 99))
 	if err != nil {
 		panic(err)
 	}
-	for i := 0; i < *numberOfTiles; i++ {
-		videoTrack, err := NewTrackLocalCloudRTP(codecCapability, fmt.Sprintf("video_%d_%d", *clientID, i), fmt.Sprintf("%d", i))
-		if err != nil {
-			panic(err)
+	for i := 0; i < *numberOfCapturers; i++ {
+		videoTracks[i] = make(map[int]*TrackLocalCloudRTP)
+		for j := 0; j < *numberOfTiles; j++ {
+			videoTrack, err := NewTrackLocalCloudRTP(codecCapability, fmt.Sprintf("video_%d_%d_%d", *clientID, i, j), fmt.Sprintf("%d_%d", i, j))
+			if err != nil {
+				panic(err)
+			}
+			videoTracks[i][j] = videoTrack
 		}
-		videoTracks[i] = videoTrack
 	}
-
 	if _, err = peerConnection.AddTrack(audioTrack); err != nil {
 		panic(err)
 	}
-	for i := 0; i < *numberOfTiles; i++ {
-		if _, err = peerConnection.AddTrack(videoTracks[i]); err != nil {
-			panic(err)
+	for i := 0; i < *numberOfCapturers; i++ {
+		for j := 0; j < *numberOfTiles; j++ {
+			if _, err = peerConnection.AddTrack(videoTracks[i][j]); err != nil {
+				panic(err)
+			}
 		}
 	}
 
@@ -312,21 +317,23 @@ func main() {
 
 			}()
 			//targetBitrate := uint32(estimator.GetTargetBitrate())
-			for i := 0; i < *numberOfTiles; i++ {
-				// TODO maybe change writeframe into goroutines?
-
-				go func(tileNr int) {
-					frameNr := 0
-					resultWriter.AddDescription(*clientID, tileNr)
-					for {
-						if err = videoTracks[tileNr].WriteFrame(transcoder, uint32(tileNr), frameNr); err != nil {
-							//panic(err)
+			for i := 0; i < *numberOfCapturers; i++ {
+				for j := 0; j < *numberOfTiles; j++ {
+					// TODO maybe change writeframe into goroutines?
+					go func(capturerNr, tileNr int) {
+						frameNr := 0
+						resultWriter.AddDescription(*clientID, capturerNr, tileNr)
+						for {
+							if err = videoTracks[capturerNr][tileNr].WriteFrame(transcoder, uint32(capturerNr), uint32(tileNr), frameNr); err != nil {
+								//panic(err)
+							}
+							resultWriter.SetFrameComplete(*clientID, capturerNr, tileNr, frameNr)
+							frameNr++
 						}
-						resultWriter.SetFrameComplete(*clientID, tileNr, frameNr)
-						frameNr++
-					}
-				}(i)
+					}(i, j)
+				}
 			}
+
 			//for {
 
 			//}
@@ -345,17 +352,18 @@ func main() {
 		trackIdTokens := strings.Split(track.ID(), "_")
 		isVideo := false
 		clientID, _ := strconv.ParseUint(trackIdTokens[1], 10, 32)
+		capturerID, _ := strconv.ParseUint(trackIdTokens[2], 10, 32)
 		trackID := uint64(0)
 		if trackIdTokens[0] == "video" {
 			isVideo = true
-			trackID, _ = strconv.ParseUint(trackIdTokens[2], 10, 32)
+			trackID, _ = strconv.ParseUint(trackIdTokens[3], 10, 32)
 		} else {
 			trackID = 99
 		}
 		if *useProxyInput {
-			proxyConn.SendTrackStatusPacket(uint32(clientID), 0, uint32(trackID), isVideo, true)
+			proxyConn.SendTrackStatusPacket(uint32(clientID), 0, uint32(capturerID), uint32(trackID), isVideo, true)
 		}
-		resultWriter.AddDescription(int(clientID), int(trackID))
+		resultWriter.AddDescription(int(clientID), int(capturerID), int(trackID))
 		codecName := strings.Split(track.Codec().RTPCodecCapability.MimeType, "/")
 		fmt.Printf("WebRTCPeer: Track of type %d has started: %s\n", track.PayloadType(), codecName)
 
@@ -373,7 +381,7 @@ func main() {
 			if readErr != nil {
 				fmt.Printf("WebRTCPeer: Can no longer read from track %s, terminating %s\n", track.ID(), readErr.Error())
 				if *useProxyInput {
-					proxyConn.SendTrackStatusPacket(uint32(clientID), uint32(lastFrameNr), uint32(trackID), isVideo, false)
+					proxyConn.SendTrackStatusPacket(uint32(clientID), uint32(lastFrameNr), uint32(capturerID), uint32(trackID), isVideo, false)
 				}
 				break
 			}
@@ -396,8 +404,8 @@ func main() {
 					panic(err)
 				}
 				if frames[p.FrameNr] == 0 {
-					resultWriter.CreateRecord(int(clientID), int(trackID), int(p.FrameNr))
-					resultWriter.SetSizeInBytes(int(clientID), int(trackID), int(p.FrameNr), int(p.FrameLen))
+					resultWriter.CreateRecord(int(clientID), int(capturerID), int(trackID), int(p.FrameNr))
+					resultWriter.SetSizeInBytes(int(clientID), int(capturerID), int(trackID), int(p.FrameNr), int(p.FrameLen))
 				}
 				frames[p.FrameNr] += p.SeqLen
 				/*	if prevFrame != int(p.FrameNr) {
@@ -408,12 +416,12 @@ func main() {
 
 				if frames[p.FrameNr] == p.FrameLen {
 					lastFrameNr = int(p.FrameNr)
-					resultWriter.SetFrameComplete(int(clientID), int(trackID), int(p.FrameNr))
+					resultWriter.SetFrameComplete(int(clientID), int(capturerID), int(trackID), int(p.FrameNr))
 				}
 
 				if frames[p.FrameNr] == p.FrameLen && p.FrameNr%100 == 0 {
-					fmt.Printf("WebRTCPeer: [VIDEO] Received video frame %d from client %d and tile %d with length %d\n",
-						p.FrameNr, p.ClientNr, p.TileNr, p.FrameLen)
+					fmt.Printf("WebRTCPeer: [VIDEO] Received video frame %d from client %d for camera %d and tile %d with length %d\n",
+						p.FrameNr, p.ClientNr, p.CapturerID, p.TileNr, p.FrameLen)
 				}
 
 			} else {
@@ -517,7 +525,9 @@ func main() {
 				}
 			}
 		case 8: // Camera intrinsics
-			proxyConn.SendCapturerIntrinsicsPacket(uint32(wsPacket.ClientID), wsPacket.Message)
+			if *useProxyOutput {
+				proxyConn.SendCapturerIntrinsicsPacket(uint32(wsPacket.ClientID), wsPacket.Message)
+			}
 		default:
 			fmt.Printf("WebRTCPeer: Received non-compliant message type %d\n", wsPacket.MessageType)
 		}
@@ -562,16 +572,21 @@ func (s *TrackLocalCloudRTP) Bind(t webrtc.TrackLocalContext) (webrtc.RTPCodecPa
 		return codec, nil
 	}
 	s.sequencer = rtp.NewRandomSequencer()
-	ui64, err := strconv.ParseUint(s.StreamID(), 10, 64)
+	streamIDTokens := strings.Split(s.StreamID(), "_")
+	capturerID, err := strconv.ParseUint(streamIDTokens[0], 10, 64)
 	if err != nil {
 		panic(err)
 	}
-	println("Tile", ui64)
+	tileID, err := strconv.ParseUint(streamIDTokens[1], 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	println("Capturer", capturerID, "Tile", tileID)
 	s.packetizer = rtp.NewPacketizer(
 		1200, // Not MTU but ok
 		0,    // Value is handled when writing
 		0,    // Value is handled when writing
-		NewPointCloudPayloader(uint32(ui64)),
+		NewPointCloudPayloader(uint32(capturerID), uint32(tileID)),
 		s.sequencer,
 		codec.ClockRate,
 	)
@@ -604,15 +619,15 @@ func (s *TrackLocalCloudRTP) Codec() webrtc.RTPCodecCapability {
 	return s.rtpTrack.Codec()
 }
 
-func (s *TrackLocalCloudRTP) WriteFrame(t Transcoder, tile uint32, frameNr int) error {
+func (s *TrackLocalCloudRTP) WriteFrame(t Transcoder, capturerID uint32, tile uint32, frameNr int) error {
 	p := s.packetizer
 	clockRate := s.clockRate
 	if p == nil {
 		return nil
 	}
 	samples := uint32(1 * clockRate)
-	data := t.EncodeFrame(tile)
-	resultWriter.CreateRecord(*clientID, int(tile), frameNr)
+	data := t.EncodeFrame(capturerID, tile)
+	resultWriter.CreateRecord(*clientID, int(capturerID), int(tile), frameNr)
 	if data != nil {
 		packets := p.Packetize(data, samples)
 		counter := 0
@@ -629,6 +644,7 @@ func (s *TrackLocalCloudRTP) WriteFrame(t Transcoder, tile uint32, frameNr int) 
 // AV1Payloader payloads AV1 packets
 type PointCloudPayloader struct {
 	frameCounter uint32
+	capturerID   uint32
 	tile         uint32
 }
 
@@ -643,16 +659,17 @@ func (p *PointCloudPayloader) Payload(mtu uint16, payload []byte) (payloads [][]
 		if payloadRemaining < currentFragmentSize {
 			currentFragmentSize = payloadRemaining
 		}
-		buf := make([]byte, currentFragmentSize+24)
+		buf := make([]byte, currentFragmentSize+28)
 		//	binary.LittleEndian.PutUint32(buf[0:], TilePacketType)
 		binary.LittleEndian.PutUint32(buf[0:], uint32(*clientID))
 		binary.LittleEndian.PutUint32(buf[4:], p.frameCounter)
 		binary.LittleEndian.PutUint32(buf[8:], payloadLen)
 		binary.LittleEndian.PutUint32(buf[12:], payloadDataOffset)
 		binary.LittleEndian.PutUint32(buf[16:], currentFragmentSize)
-		binary.LittleEndian.PutUint32(buf[20:], p.tile)
+		binary.LittleEndian.PutUint32(buf[20:], p.capturerID)
+		binary.LittleEndian.PutUint32(buf[24:], p.tile)
 
-		copy(buf[24:], payload[payloadDataOffset:(payloadDataOffset+currentFragmentSize)])
+		copy(buf[28:], payload[payloadDataOffset:(payloadDataOffset+currentFragmentSize)])
 
 		payloads = append(payloads, buf)
 		payloadDataOffset += currentFragmentSize
@@ -662,8 +679,8 @@ func (p *PointCloudPayloader) Payload(mtu uint16, payload []byte) (payloads [][]
 	return payloads
 }
 
-func NewPointCloudPayloader(tile uint32) *PointCloudPayloader {
-	return &PointCloudPayloader{0, tile}
+func NewPointCloudPayloader(capturerID uint32, tile uint32) *PointCloudPayloader {
+	return &PointCloudPayloader{0, capturerID, tile}
 }
 
 // TrackLocalStaticRTP  is a TrackLocal that has a pre-set codec and accepts RTP Packets.

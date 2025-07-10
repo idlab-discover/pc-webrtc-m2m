@@ -31,6 +31,7 @@ type RemoteInputVideoPacketHeader struct {
 	FrameLen    uint32
 	FrameOffset uint32
 	PacketLen   uint32
+	CapturerID  uint32
 	TileNr      uint32
 }
 
@@ -51,13 +52,43 @@ type RemoteTile struct {
 	fileData   []byte
 }
 
-type ProxyConnection struct {
-	addr             *net.UDPAddr
-	conn             *net.UDPConn
-	m                PriorityLock
-	incomplete_tiles map[uint32]map[uint32]RemoteTile // We probably want to limit the max number of incomplete tiles?
+type RemoteCapturer struct {
+	capturerID uint32
+
+	// Cond gives better performance compared to high priority lock
+	// High prio lock => latency between 3 and 10ms
+	// Condi lock => latency between 0 and 1ms
+	cond_video []*sync.Cond // TODO add one for every tile
+
+	incomplete_tiles []map[uint32]RemoteTile // We probably want to limit the max number of incomplete tiles?
 	//And maybe use something else than a simple map because atm there is technically a max frame limit
-	complete_tiles map[uint32][]RemoteTile
+	complete_tiles [][1]RemoteTile
+	ready_status   []bool
+}
+
+func NewRemoteCapturer(capturerID uint32, nTiles uint32, m *sync.Mutex) *RemoteCapturer {
+	rm := &RemoteCapturer{
+		capturerID:       capturerID,
+		cond_video:       make([]*sync.Cond, nTiles),
+		incomplete_tiles: make([]map[uint32]RemoteTile, nTiles),
+		complete_tiles:   make([][1]RemoteTile, nTiles),
+		ready_status:     make([]bool, nTiles),
+	}
+	for i := uint32(0); i < nTiles; i++ {
+		rm.cond_video[i] = sync.NewCond(m)
+		rm.incomplete_tiles[i] = make(map[uint32]RemoteTile)
+		//rm.complete_tiles[i] = make([]RemoteTile, 1) // We will only save 1 frame for each tile max
+	}
+	println("Creating remote capturer with ID", capturerID, "and", nTiles, "tiles")
+	return rm
+}
+
+type ProxyConnection struct {
+	addr *net.UDPAddr
+	conn *net.UDPConn
+	m    PriorityLock
+
+	remote_capturers map[uint32]*RemoteCapturer // CapturerID -> RemoteCapturer
 
 	incomplete_audio_frames map[uint32]RemoteTile
 	complete_audio_frames   []RemoteTile
@@ -65,11 +96,7 @@ type ProxyConnection struct {
 	frame_counters map[uint32]uint32
 	send_mutex     sync.Mutex
 
-	// Cond gives better performance compared to high priority lock
-	// High prio lock => latency between 3 and 10ms
-	// Condi lock => latency between 0 and 1ms
-	cond_video map[uint32]*sync.Cond // TODO add one for every tile
-	mtx_video  sync.Mutex
+	mtx_video sync.Mutex
 
 	cond_audio *sync.Cond
 	mtx_audio  sync.Mutex
@@ -81,10 +108,10 @@ type SetupCallback func(int)
 
 func NewProxyConnection() *ProxyConnection {
 	return &ProxyConnection{nil, nil, NewPriorityPreferenceLock(),
-		make(map[uint32]map[uint32]RemoteTile), make(map[uint32][]RemoteTile), // Video
+		make(map[uint32]*RemoteCapturer),                   // Video
 		make(map[uint32]RemoteTile), make([]RemoteTile, 0), // Audio
 		make(map[uint32]uint32), sync.Mutex{},
-		make(map[uint32]*sync.Cond), sync.Mutex{}, // Video mutex
+		sync.Mutex{},      // Video mutex
 		nil, sync.Mutex{}, // Audio mutex
 		nil,
 	}
@@ -150,11 +177,12 @@ func (pc *ProxyConnection) SetupConnection(port string) {
 
 }
 
-func (pc *ProxyConnection) StartListening() {
+func (pc *ProxyConnection) StartListening(nCapturers uint32, nTiles uint32) {
 	println("WebRTCPeer: Start listening for incoming data from DLL")
 	pc.cond_audio = sync.NewCond(&pc.mtx_audio)
-	for i := 0; i < 3; i++ {
-		pc.cond_video[uint32(i)] = sync.NewCond(&pc.mtx_video)
+	// TODO make this dynamic
+	for i := 0; i < int(nCapturers); i++ {
+		pc.remote_capturers[uint32(i)] = NewRemoteCapturer(uint32(i), nTiles, &pc.mtx_video)
 	}
 	go func() {
 		for {
@@ -162,7 +190,7 @@ func (pc *ProxyConnection) StartListening() {
 			_, _, _ = pc.conn.ReadFromUDP(buffer)
 			ptype := binary.LittleEndian.Uint32(buffer[:4])
 			if ptype == TilePacketType {
-				bufBinary := bytes.NewBuffer(buffer[4:28])
+				bufBinary := bytes.NewBuffer(buffer[4:32])
 				var p RemoteInputVideoPacketHeader
 				err := binary.Read(bufBinary, binary.LittleEndian, &p) // TODO: make sure we check endianess of system here and use that instead!
 				if err != nil {
@@ -171,12 +199,9 @@ func (pc *ProxyConnection) StartListening() {
 				}
 
 				pc.mtx_video.Lock()
+				incompleteTileBuffer := pc.remote_capturers[p.CapturerID].incomplete_tiles[p.TileNr]
 				//pc.m.Lock()
-				_, exists := pc.incomplete_tiles[p.TileNr]
-				if !exists {
-					pc.incomplete_tiles[p.TileNr] = make(map[uint32]RemoteTile)
-				}
-				_, exists = pc.incomplete_tiles[p.TileNr][p.FrameNr]
+				_, exists := incompleteTileBuffer[p.FrameNr]
 				if !exists {
 					r := RemoteTile{
 						p.FrameNr,
@@ -184,27 +209,24 @@ func (pc *ProxyConnection) StartListening() {
 						p.FrameLen,
 						make([]byte, p.FrameLen),
 					}
-					pc.incomplete_tiles[p.TileNr][p.FrameNr] = r
+					incompleteTileBuffer[p.FrameNr] = r
 					//fmt.Printf("WebRTCPeer: [VIDEO] DLL first packet of frame %d from tile %d with length %d  at %d\n",
 					//	p.FrameNr, p.TileNr, p.FrameLen, time.Now().UnixNano()/int64(time.Millisecond))
 				}
 
-				value := pc.incomplete_tiles[p.TileNr][p.FrameNr]
-				copy(value.fileData[p.FrameOffset:p.FrameOffset+p.PacketLen], buffer[28:28+p.PacketLen])
+				value := incompleteTileBuffer[p.FrameNr]
+				copy(value.fileData[p.FrameOffset:p.FrameOffset+p.PacketLen], buffer[32:32+p.PacketLen])
 				value.currentLen = value.currentLen + p.PacketLen
-				pc.incomplete_tiles[p.TileNr][p.FrameNr] = value
+				pc.remote_capturers[p.CapturerID].incomplete_tiles[p.TileNr][p.FrameNr] = value
 				if value.currentLen == value.fileLen {
 					//fmt.Printf("WebRTCPeer: [VIDEO] DLL sent frame %d from tile %d with length %d  at %d\n",
 					//	p.FrameNr, p.TileNr, p.FrameLen, time.Now().UnixNano()/int64(time.Millisecond))
-					_, exists := pc.complete_tiles[p.TileNr]
-					if !exists {
-						pc.complete_tiles[p.TileNr] = make([]RemoteTile, 1)
-					}
 					// For now we will only save 1 frame for each tile max (do we want to save more?)
 					// TODO use channels instead
-					pc.complete_tiles[p.TileNr][0] = value
-					delete(pc.incomplete_tiles[p.TileNr], p.FrameNr)
-					pc.cond_video[p.TileNr].Broadcast()
+					pc.remote_capturers[p.CapturerID].complete_tiles[p.TileNr][0] = value
+					pc.remote_capturers[p.CapturerID].ready_status[p.TileNr] = true
+					delete(pc.remote_capturers[p.CapturerID].incomplete_tiles[p.TileNr], p.FrameNr)
+					pc.remote_capturers[p.CapturerID].cond_video[p.TileNr].Broadcast()
 				}
 				pc.mtx_video.Unlock()
 				//pc.m.Unlock()
@@ -290,21 +312,22 @@ func (pc *ProxyConnection) SendControlPacket(b []byte) {
 	pc.sendPacket(b, 0, ControlPacketType)
 }
 
-func (pc *ProxyConnection) SendTrackStatusPacket(clientID uint32, lastFrameNr uint32, tileID uint32, isVideo bool, wasAdded bool) {
-	b := make([]byte, 4+4+4+1+1)
+func (pc *ProxyConnection) SendTrackStatusPacket(clientID uint32, lastFrameNr uint32, capturerID uint32, tileID uint32, isVideo bool, wasAdded bool) {
+	b := make([]byte, 4+4+4+4+1+1)
 	binary.LittleEndian.PutUint32(b[0:], clientID)
 	binary.LittleEndian.PutUint32(b[4:], lastFrameNr)
-	binary.LittleEndian.PutUint32(b[8:], tileID)
+	binary.LittleEndian.PutUint32(b[8:], capturerID)
+	binary.LittleEndian.PutUint32(b[12:], tileID)
 	if isVideo {
-		b[12] = 1
+		b[16] = 1
 	} else {
-		b[12] = 0
+		b[16] = 0
 	}
 
 	if wasAdded {
-		b[13] = 1
+		b[17] = 1
 	} else {
-		b[13] = 0
+		b[17] = 0
 	}
 	pc.sendPacket(b, 0, TrackStatusPacketType)
 }
@@ -317,8 +340,9 @@ func (pc *ProxyConnection) SendCapturerIntrinsicsPacket(clientID uint32, cameraI
 	pc.sendPacket(b, 0, CapturerIntrinsicsType)
 }
 
-func (pc *ProxyConnection) NextTile(tile uint32) []byte {
+func (pc *ProxyConnection) NextTile(capturerID uint32, tile uint32) []byte {
 	isNextFrameReady := false
+	remoteCapturer := pc.remote_capturers[capturerID]
 	for !isNextFrameReady {
 		pc.mtx_video.Lock()
 		//pc.m.HighPriorityLock()
@@ -326,23 +350,23 @@ func (pc *ProxyConnection) NextTile(tile uint32) []byte {
 		//if !exists {
 		//	pc.complete_tiles[tile] = make([]RemoteTile, 0, 1)
 		//}
-		if len(pc.complete_tiles[tile]) > 0 {
+		if remoteCapturer.ready_status[tile] {
 			isNextFrameReady = true
 		} else {
-			pc.cond_video[tile].Wait()
+			remoteCapturer.cond_video[tile].Wait()
 			isNextFrameReady = true
 			//pc.m.HighPriorityUnlock()
 			//time.Sleep(time.Millisecond)
 		}
 	}
-	data := pc.complete_tiles[tile][0].fileData
-	frameNr := pc.complete_tiles[tile][0].frameNr
+	data := remoteCapturer.complete_tiles[tile][0].fileData
+	frameNr := remoteCapturer.complete_tiles[tile][0].frameNr
 	if frameNr%10 == 0 {
-		fmt.Printf("WebRTCPeer: [VIDEO] Sending out frame %d from tile %d with size %d at %d\n",
-			frameNr, tile, pc.complete_tiles[tile][0].fileLen, time.Now().UnixNano()/int64(time.Millisecond))
+		fmt.Printf("WebRTCPeer: [VIDEO] Sending out frame %d of capturer %d from tile %d with size %d at %d\n",
+			frameNr, capturerID, tile, remoteCapturer.complete_tiles[tile][0].fileLen, time.Now().UnixNano()/int64(time.Millisecond))
 	}
-
-	delete(pc.complete_tiles, tile)
+	remoteCapturer.ready_status[tile] = false
+	//remoteCapturer.complete_tiles[tile] = remoteCapturer.complete_tiles[tile][:0] // Clear the complete tile buffer for this tile
 	// Do we still need frame counter? Seems more logical to use the actual frame nr
 	pc.frame_counters[tile] += 1
 	pc.mtx_video.Unlock()

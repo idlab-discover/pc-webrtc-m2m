@@ -13,10 +13,22 @@
         "scale":{"x": 1.4, "y":0.1, "z": 1.7}
     },
     "pushBack": {"x": 0.229103, "y":0.0, "z": 0},
+    "loggerSettings": {
+        "logPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-webrtc-m2m\\session_log.txt",
+        "flushInterval": 100,
+        "pointCloud": {
+            "limitLogging": true,
+            "everyNFrames": 10
+        },
+        "audio": {
+            "limitLogging": true,
+            "everyNFrames": 100
+        }
+    },
     "camFPS": 15,
     "useMic": false,
-    "frameMode": 0,
-    "frameCodec": 0,
+    "frameMode": 1,
+    "frameCodec": 1,
     "capturerName": "prerec_kinect",
     "artificialSettings": {
         "artificialSize": 25
@@ -70,6 +82,8 @@
     "rawEncodingSettings": {
         "colorCodecName": "webp",
         "depthCodecName": "vle",
+        "maxQueueSize": 5,
+        "nWorkers": 4,
         "jpegSettings": {
             "quality": 75
         },

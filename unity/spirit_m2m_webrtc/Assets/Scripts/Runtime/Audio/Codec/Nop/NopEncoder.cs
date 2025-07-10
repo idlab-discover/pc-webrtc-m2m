@@ -7,6 +7,8 @@ using System.Text;
 
 public class NopEncoder : AudioEncoder
 {
+    const string NAME = "NopEncoder";
+
     public NopEncoder() : base()
     {
     }

@@ -42,11 +42,11 @@ public class SessionManager : MonoBehaviour
         DLLWrapper.LoggingInit(LoggingLevel);
         PCHelperWrapper.Init();
 
-        WebRTCInvoker.initialize("127.0.0.1", (uint)sessionInfo.peerUDPPort, "127.0.0.1", (uint)sessionInfo.peerUDPPort, (uint)NDescriptions, (uint)ClientID, "1.0");
-        
+        WebRTCInvoker.initialize("127.0.0.1", (uint)sessionInfo.peerUDPPort, "127.0.0.1", (uint)sessionInfo.peerUDPPort, 1, (uint)NDescriptions, (uint)ClientID, "1.0");
+       
         peerProcess = new Process();
         peerProcess.StartInfo.FileName = Application.dataPath + "/peer/webRTC-peer-win.exe";
-        peerProcess.StartInfo.Arguments = $"-p :{sessionInfo.peerUDPPort} -i -o -sfu {sessionInfo.sfuAddress} -c {ClientID} -t {NDescriptions}";
+        peerProcess.StartInfo.Arguments = $"-p :{sessionInfo.peerUDPPort} -i -o -sfu {sessionInfo.sfuAddress} -c {ClientID} -cam {1} -t {NDescriptions}";
         peerProcess.StartInfo.CreateNoWindow = false;
       //  if (peerInWindow && peerWindowDontClose)
      //   {
@@ -65,7 +65,7 @@ public class SessionManager : MonoBehaviour
             return;
         }
        
-        
+
         // Make correct prefabs
         CreateStartPrefabs();
     }
@@ -102,14 +102,14 @@ public class SessionManager : MonoBehaviour
                 
             } else // Other users
             {
-                StartLocations[i].transform.position = new Vector3(sessionInfo.startPositions[i].x, sessionInfo.startPositions[i].y, sessionInfo.startPositions[i].z);
+               /* StartLocations[i].transform.position = new Vector3(sessionInfo.startPositions[i].x, sessionInfo.startPositions[i].y, sessionInfo.startPositions[i].z);
                 PCReceiver pcReceiver = Instantiate(PCReceiverPrefab, StartLocations[i].transform.position, StartLocations[i].transform.rotation);
                 pcReceiver.transform.parent = StartLocations[i].transform;
                 pcReceiver.ClientID = (uint)i;
                 pcReceiver.NDescriptions = NDescriptions;
                 pcReceiver.AudioParams = sessionInfo.audioPlayback;
                 pcReceivers.Add(pcReceiver);
-                PCHelperWrapper.Receivers.Add(pcReceiver.ClientID,  pcReceiver);
+                PCHelperWrapper.Receivers.Add(pcReceiver.ClientID,  pcReceiver);*/
             }
         }
     }

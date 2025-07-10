@@ -9,6 +9,8 @@ using Encoder = Adrenak.UnityOpus.Encoder;
 
 public class OpusEncoder : AudioEncoder
 {
+    const string NAME = "OpusEncoder";
+
     private Encoder audioEncoder;
     public OpusEncoder(int samplingFreq, uint dspSize) : base()
     {

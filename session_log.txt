@@ -1,0 +1,615 @@
+id=RawEncodingQueue ts=1752150462746 status=Creating
+id=WebPEncoder ts=1752150462748 status=0
+id=WebPEncoder ts=1752150462748 status=1
+id=EncodingQueue ts=1752150462748 status=0
+id=EncodingQueue ts=1752150462748 status=1
+id=RawEncodingQueue ts=1752150462748 status=Created
+id=EncodingQueue ts=1752150462976 status=305 capturerID=0 frameNr=0
+id=EncodingQueue ts=1752150462977 status=300 capturerID=0 frameNr=1
+id=EncodingQueue ts=1752150462977 status=303 capturerID=0 frameNr=1
+id=RawEncoder ts=1752150462977 status=101 capturerID=0 frameNr=1
+id=EncodingQueue ts=1752150462977 status=300 capturerID=0 frameNr=2
+id=EncodingQueue ts=1752150462977 status=303 capturerID=0 frameNr=2
+id=RawEncoder ts=1752150462977 status=101 capturerID=0 frameNr=2
+id=EncodingQueue ts=1752150462978 status=300 capturerID=0 frameNr=3
+id=EncodingQueue ts=1752150462978 status=303 capturerID=0 frameNr=3
+id=RawEncoder ts=1752150462978 status=101 capturerID=0 frameNr=3
+id=RawEncoder ts=1752150462985 status=102 capturerID=0 frameNr=1 size=10128
+id=RawEncoder ts=1752150462985 status=103 capturerID=0 frameNr=1
+id=RawEncoder ts=1752150462985 status=104 capturerID=0 frameNr=1 size=34788
+id=RawEncoder ts=1752150462994 status=102 capturerID=0 frameNr=2 size=10294
+id=RawEncoder ts=1752150462994 status=103 capturerID=0 frameNr=2
+id=RawEncoder ts=1752150462994 status=104 capturerID=0 frameNr=2 size=34628
+id=RawEncoder ts=1752150463005 status=102 capturerID=0 frameNr=3 size=10326
+id=RawEncoder ts=1752150463005 status=103 capturerID=0 frameNr=3
+id=RawEncoder ts=1752150463005 status=104 capturerID=0 frameNr=3 size=34788
+id=EncodingQueue ts=1752150463022 status=300 capturerID=0 frameNr=4
+id=EncodingQueue ts=1752150463022 status=303 capturerID=0 frameNr=4
+id=RawEncoder ts=1752150463022 status=101 capturerID=0 frameNr=4
+id=RawEncoder ts=1752150463034 status=102 capturerID=0 frameNr=4 size=10160
+id=RawEncoder ts=1752150463034 status=103 capturerID=0 frameNr=4
+id=RawEncoder ts=1752150463035 status=104 capturerID=0 frameNr=4 size=34672
+id=EncodingQueue ts=1752150463089 status=300 capturerID=0 frameNr=5
+id=EncodingQueue ts=1752150463089 status=303 capturerID=0 frameNr=5
+id=RawEncoder ts=1752150463089 status=101 capturerID=0 frameNr=5
+id=RawEncoder ts=1752150463098 status=102 capturerID=0 frameNr=5 size=10130
+id=RawEncoder ts=1752150463098 status=103 capturerID=0 frameNr=5
+id=RawEncoder ts=1752150463098 status=104 capturerID=0 frameNr=5 size=34752
+id=EncodingQueue ts=1752150463154 status=300 capturerID=0 frameNr=6
+id=EncodingQueue ts=1752150463154 status=303 capturerID=0 frameNr=6
+id=RawEncoder ts=1752150463154 status=101 capturerID=0 frameNr=6
+id=RawEncoder ts=1752150463162 status=102 capturerID=0 frameNr=6 size=10110
+id=RawEncoder ts=1752150463162 status=103 capturerID=0 frameNr=6
+id=RawEncoder ts=1752150463163 status=104 capturerID=0 frameNr=6 size=34676
+id=EncodingQueue ts=1752150463220 status=300 capturerID=0 frameNr=7
+id=EncodingQueue ts=1752150463220 status=303 capturerID=0 frameNr=7
+id=RawEncoder ts=1752150463220 status=101 capturerID=0 frameNr=7
+id=RawEncoder ts=1752150463230 status=102 capturerID=0 frameNr=7 size=10274
+id=RawEncoder ts=1752150463230 status=103 capturerID=0 frameNr=7
+id=RawEncoder ts=1752150463231 status=104 capturerID=0 frameNr=7 size=34648
+id=EncodingQueue ts=1752150463288 status=300 capturerID=0 frameNr=8
+id=EncodingQueue ts=1752150463288 status=303 capturerID=0 frameNr=8
+id=RawEncoder ts=1752150463288 status=101 capturerID=0 frameNr=8
+id=RawEncoder ts=1752150463296 status=102 capturerID=0 frameNr=8 size=10128
+id=RawEncoder ts=1752150463296 status=103 capturerID=0 frameNr=8
+id=RawEncoder ts=1752150463297 status=104 capturerID=0 frameNr=8 size=34572
+id=EncodingQueue ts=1752150463354 status=300 capturerID=0 frameNr=9
+id=EncodingQueue ts=1752150463354 status=303 capturerID=0 frameNr=9
+id=RawEncoder ts=1752150463354 status=101 capturerID=0 frameNr=9
+id=RawEncoder ts=1752150463362 status=102 capturerID=0 frameNr=9 size=10188
+id=RawEncoder ts=1752150463362 status=103 capturerID=0 frameNr=9
+id=RawEncoder ts=1752150463362 status=104 capturerID=0 frameNr=9 size=34724
+id=EncodingQueue ts=1752150463423 status=300 capturerID=0 frameNr=10
+id=EncodingQueue ts=1752150463423 status=303 capturerID=0 frameNr=10
+id=RawEncoder ts=1752150463423 status=101 capturerID=0 frameNr=10
+id=RawEncoder ts=1752150463434 status=102 capturerID=0 frameNr=10 size=10166
+id=RawEncoder ts=1752150463434 status=103 capturerID=0 frameNr=10
+id=RawEncoder ts=1752150463435 status=104 capturerID=0 frameNr=10 size=34612
+id=Test ts=1752150463435 status=203 capturerID=0 frameNr=10
+id=Test ts=1752150463435 status=204 capturerID=0 frameNr=10
+id=Test ts=1752150463436 status=201 capturerID=0 frameNr=10
+id=Test ts=1752150463437 status=202 capturerID=0 frameNr=10
+id=Test ts=1752150463437 status=500 capturerID=0 frameNr=10
+id=Test ts=1752150463439 status=501 capturerID=0 frameNr=10
+id=Test ts=1752150463439 status=9000 capturerID=0 frameNr=10
+id=Test ts=1752150463440 status=9001 capturerID=0 frameNr=10
+id=Test ts=1752150463440 status=401 capturerID=0 frameNr=10
+id=EncodingQueue ts=1752150463488 status=300 capturerID=0 frameNr=11
+id=EncodingQueue ts=1752150463488 status=303 capturerID=0 frameNr=11
+id=RawEncoder ts=1752150463489 status=101 capturerID=0 frameNr=11
+id=RawEncoder ts=1752150463497 status=102 capturerID=0 frameNr=11 size=10338
+id=RawEncoder ts=1752150463497 status=103 capturerID=0 frameNr=11
+id=RawEncoder ts=1752150463497 status=104 capturerID=0 frameNr=11 size=34640
+id=EncodingQueue ts=1752150463556 status=300 capturerID=0 frameNr=12
+id=EncodingQueue ts=1752150463556 status=303 capturerID=0 frameNr=12
+id=RawEncoder ts=1752150463556 status=101 capturerID=0 frameNr=12
+id=RawEncoder ts=1752150463565 status=102 capturerID=0 frameNr=12 size=10070
+id=RawEncoder ts=1752150463565 status=103 capturerID=0 frameNr=12
+id=RawEncoder ts=1752150463566 status=104 capturerID=0 frameNr=12 size=34548
+id=EncodingQueue ts=1752150463626 status=300 capturerID=0 frameNr=13
+id=EncodingQueue ts=1752150463626 status=303 capturerID=0 frameNr=13
+id=RawEncoder ts=1752150463626 status=101 capturerID=0 frameNr=13
+id=RawEncoder ts=1752150463635 status=102 capturerID=0 frameNr=13 size=10072
+id=RawEncoder ts=1752150463635 status=103 capturerID=0 frameNr=13
+id=RawEncoder ts=1752150463635 status=104 capturerID=0 frameNr=13 size=34556
+id=EncodingQueue ts=1752150463690 status=300 capturerID=0 frameNr=14
+id=EncodingQueue ts=1752150463690 status=303 capturerID=0 frameNr=14
+id=RawEncoder ts=1752150463690 status=101 capturerID=0 frameNr=14
+id=RawEncoder ts=1752150463699 status=102 capturerID=0 frameNr=14 size=10108
+id=RawEncoder ts=1752150463699 status=103 capturerID=0 frameNr=14
+id=RawEncoder ts=1752150463699 status=104 capturerID=0 frameNr=14 size=34824
+id=EncodingQueue ts=1752150463757 status=300 capturerID=0 frameNr=15
+id=EncodingQueue ts=1752150463757 status=303 capturerID=0 frameNr=15
+id=RawEncoder ts=1752150463757 status=101 capturerID=0 frameNr=15
+id=RawEncoder ts=1752150463765 status=102 capturerID=0 frameNr=15 size=10000
+id=RawEncoder ts=1752150463765 status=103 capturerID=0 frameNr=15
+id=RawEncoder ts=1752150463765 status=104 capturerID=0 frameNr=15 size=34736
+id=EncodingQueue ts=1752150463829 status=300 capturerID=0 frameNr=16
+id=EncodingQueue ts=1752150463829 status=303 capturerID=0 frameNr=16
+id=RawEncoder ts=1752150463829 status=101 capturerID=0 frameNr=16
+id=RawEncoder ts=1752150463838 status=102 capturerID=0 frameNr=16 size=10028
+id=RawEncoder ts=1752150463838 status=103 capturerID=0 frameNr=16
+id=RawEncoder ts=1752150463839 status=104 capturerID=0 frameNr=16 size=34832
+id=EncodingQueue ts=1752150463897 status=300 capturerID=0 frameNr=17
+id=EncodingQueue ts=1752150463898 status=303 capturerID=0 frameNr=17
+id=RawEncoder ts=1752150463898 status=101 capturerID=0 frameNr=17
+id=RawEncoder ts=1752150463909 status=102 capturerID=0 frameNr=17 size=10072
+id=RawEncoder ts=1752150463909 status=103 capturerID=0 frameNr=17
+id=RawEncoder ts=1752150463910 status=104 capturerID=0 frameNr=17 size=34836
+id=EncodingQueue ts=1752150463970 status=300 capturerID=0 frameNr=18
+id=EncodingQueue ts=1752150463970 status=303 capturerID=0 frameNr=18
+id=RawEncoder ts=1752150463970 status=101 capturerID=0 frameNr=18
+id=RawEncoder ts=1752150463978 status=102 capturerID=0 frameNr=18 size=9962
+id=RawEncoder ts=1752150463978 status=103 capturerID=0 frameNr=18
+id=RawEncoder ts=1752150463978 status=104 capturerID=0 frameNr=18 size=34784
+id=EncodingQueue ts=1752150464026 status=300 capturerID=0 frameNr=19
+id=EncodingQueue ts=1752150464026 status=303 capturerID=0 frameNr=19
+id=RawEncoder ts=1752150464026 status=101 capturerID=0 frameNr=19
+id=RawEncoder ts=1752150464035 status=102 capturerID=0 frameNr=19 size=10000
+id=RawEncoder ts=1752150464035 status=103 capturerID=0 frameNr=19
+id=RawEncoder ts=1752150464035 status=104 capturerID=0 frameNr=19 size=35052
+id=EncodingQueue ts=1752150464096 status=300 capturerID=0 frameNr=20
+id=EncodingQueue ts=1752150464096 status=303 capturerID=0 frameNr=20
+id=RawEncoder ts=1752150464096 status=101 capturerID=0 frameNr=20
+id=RawEncoder ts=1752150464104 status=102 capturerID=0 frameNr=20 size=10032
+id=RawEncoder ts=1752150464104 status=103 capturerID=0 frameNr=20
+id=RawEncoder ts=1752150464104 status=104 capturerID=0 frameNr=20 size=34872
+id=Test ts=1752150464104 status=203 capturerID=0 frameNr=20
+id=Test ts=1752150464104 status=204 capturerID=0 frameNr=20
+id=Test ts=1752150464105 status=201 capturerID=0 frameNr=20
+id=Test ts=1752150464107 status=202 capturerID=0 frameNr=20
+id=Test ts=1752150464107 status=500 capturerID=0 frameNr=20
+id=Test ts=1752150464108 status=501 capturerID=0 frameNr=20
+id=Test ts=1752150464108 status=9000 capturerID=0 frameNr=20
+id=Test ts=1752150464109 status=9001 capturerID=0 frameNr=20
+id=Test ts=1752150464109 status=401 capturerID=0 frameNr=20
+id=EncodingQueue ts=1752150464160 status=300 capturerID=0 frameNr=21
+id=EncodingQueue ts=1752150464160 status=303 capturerID=0 frameNr=21
+id=RawEncoder ts=1752150464160 status=101 capturerID=0 frameNr=21
+id=RawEncoder ts=1752150464168 status=102 capturerID=0 frameNr=21 size=9978
+id=RawEncoder ts=1752150464168 status=103 capturerID=0 frameNr=21
+id=RawEncoder ts=1752150464169 status=104 capturerID=0 frameNr=21 size=34736
+id=EncodingQueue ts=1752150464230 status=300 capturerID=0 frameNr=22
+id=EncodingQueue ts=1752150464230 status=303 capturerID=0 frameNr=22
+id=RawEncoder ts=1752150464230 status=101 capturerID=0 frameNr=22
+id=Test ts=1752150464231 status=402 capturerID=0 frameNr=10
+id=RawEncoder ts=1752150464241 status=102 capturerID=0 frameNr=22 size=9900
+id=RawEncoder ts=1752150464241 status=103 capturerID=0 frameNr=22
+id=RawEncoder ts=1752150464241 status=104 capturerID=0 frameNr=22 size=34744
+id=EncodingQueue ts=1752150464298 status=300 capturerID=0 frameNr=23
+id=EncodingQueue ts=1752150464298 status=303 capturerID=0 frameNr=23
+id=RawEncoder ts=1752150464298 status=101 capturerID=0 frameNr=23
+id=RawEncoder ts=1752150464310 status=102 capturerID=0 frameNr=23 size=9956
+id=RawEncoder ts=1752150464310 status=103 capturerID=0 frameNr=23
+id=RawEncoder ts=1752150464310 status=104 capturerID=0 frameNr=23 size=34932
+id=Test ts=1752150464354 status=402 capturerID=0 frameNr=20
+id=EncodingQueue ts=1752150464364 status=300 capturerID=0 frameNr=24
+id=EncodingQueue ts=1752150464364 status=303 capturerID=0 frameNr=24
+id=RawEncoder ts=1752150464364 status=101 capturerID=0 frameNr=24
+id=RawEncoder ts=1752150464376 status=102 capturerID=0 frameNr=24 size=9952
+id=RawEncoder ts=1752150464376 status=103 capturerID=0 frameNr=24
+id=RawEncoder ts=1752150464376 status=104 capturerID=0 frameNr=24 size=34840
+id=EncodingQueue ts=1752150464431 status=300 capturerID=0 frameNr=25
+id=EncodingQueue ts=1752150464431 status=303 capturerID=0 frameNr=25
+id=RawEncoder ts=1752150464431 status=101 capturerID=0 frameNr=25
+id=RawEncoder ts=1752150464439 status=102 capturerID=0 frameNr=25 size=9774
+id=RawEncoder ts=1752150464439 status=103 capturerID=0 frameNr=25
+id=RawEncoder ts=1752150464439 status=104 capturerID=0 frameNr=25 size=34680
+id=EncodingQueue ts=1752150464498 status=300 capturerID=0 frameNr=26
+id=EncodingQueue ts=1752150464498 status=303 capturerID=0 frameNr=26
+id=RawEncoder ts=1752150464498 status=101 capturerID=0 frameNr=26
+id=RawEncoder ts=1752150464506 status=102 capturerID=0 frameNr=26 size=9586
+id=RawEncoder ts=1752150464506 status=103 capturerID=0 frameNr=26
+id=RawEncoder ts=1752150464507 status=104 capturerID=0 frameNr=26 size=34244
+id=EncodingQueue ts=1752150464564 status=300 capturerID=0 frameNr=27
+id=EncodingQueue ts=1752150464564 status=303 capturerID=0 frameNr=27
+id=RawEncoder ts=1752150464564 status=101 capturerID=0 frameNr=27
+id=RawEncoder ts=1752150464573 status=102 capturerID=0 frameNr=27 size=10152
+id=RawEncoder ts=1752150464573 status=103 capturerID=0 frameNr=27
+id=RawEncoder ts=1752150464574 status=104 capturerID=0 frameNr=27 size=34896
+id=EncodingQueue ts=1752150464634 status=300 capturerID=0 frameNr=28
+id=EncodingQueue ts=1752150464634 status=303 capturerID=0 frameNr=28
+id=RawEncoder ts=1752150464634 status=101 capturerID=0 frameNr=28
+id=RawEncoder ts=1752150464647 status=102 capturerID=0 frameNr=28 size=10300
+id=RawEncoder ts=1752150464647 status=103 capturerID=0 frameNr=28
+id=RawEncoder ts=1752150464647 status=104 capturerID=0 frameNr=28 size=34876
+id=EncodingQueue ts=1752150464697 status=300 capturerID=0 frameNr=29
+id=EncodingQueue ts=1752150464697 status=303 capturerID=0 frameNr=29
+id=RawEncoder ts=1752150464697 status=101 capturerID=0 frameNr=29
+id=RawEncoder ts=1752150464706 status=102 capturerID=0 frameNr=29 size=10224
+id=RawEncoder ts=1752150464706 status=103 capturerID=0 frameNr=29
+id=RawEncoder ts=1752150464707 status=104 capturerID=0 frameNr=29 size=34720
+id=EncodingQueue ts=1752150464766 status=300 capturerID=0 frameNr=30
+id=EncodingQueue ts=1752150464766 status=303 capturerID=0 frameNr=30
+id=RawEncoder ts=1752150464767 status=101 capturerID=0 frameNr=30
+id=RawEncoder ts=1752150464775 status=102 capturerID=0 frameNr=30 size=10072
+id=RawEncoder ts=1752150464775 status=103 capturerID=0 frameNr=30
+id=RawEncoder ts=1752150464775 status=104 capturerID=0 frameNr=30 size=34744
+id=Test ts=1752150464776 status=203 capturerID=0 frameNr=30
+id=Test ts=1752150464776 status=204 capturerID=0 frameNr=30
+id=Test ts=1752150464776 status=201 capturerID=0 frameNr=30
+id=Test ts=1752150464778 status=202 capturerID=0 frameNr=30
+id=Test ts=1752150464778 status=500 capturerID=0 frameNr=30
+id=Test ts=1752150464779 status=501 capturerID=0 frameNr=30
+id=Test ts=1752150464780 status=9000 capturerID=0 frameNr=30
+id=Test ts=1752150464781 status=9001 capturerID=0 frameNr=30
+id=Test ts=1752150464781 status=401 capturerID=0 frameNr=30
+id=Test ts=1752150464788 status=402 capturerID=0 frameNr=30
+id=EncodingQueue ts=1752150464833 status=300 capturerID=0 frameNr=31
+id=EncodingQueue ts=1752150464833 status=303 capturerID=0 frameNr=31
+id=RawEncoder ts=1752150464833 status=101 capturerID=0 frameNr=31
+id=RawEncoder ts=1752150464841 status=102 capturerID=0 frameNr=31 size=9844
+id=RawEncoder ts=1752150464841 status=103 capturerID=0 frameNr=31
+id=RawEncoder ts=1752150464842 status=104 capturerID=0 frameNr=31 size=34160
+id=EncodingQueue ts=1752150464899 status=300 capturerID=0 frameNr=32
+id=EncodingQueue ts=1752150464899 status=303 capturerID=0 frameNr=32
+id=RawEncoder ts=1752150464899 status=101 capturerID=0 frameNr=32
+id=RawEncoder ts=1752150464908 status=102 capturerID=0 frameNr=32 size=9584
+id=RawEncoder ts=1752150464908 status=103 capturerID=0 frameNr=32
+id=RawEncoder ts=1752150464908 status=104 capturerID=0 frameNr=32 size=33232
+id=EncodingQueue ts=1752150464967 status=300 capturerID=0 frameNr=33
+id=EncodingQueue ts=1752150464967 status=303 capturerID=0 frameNr=33
+id=RawEncoder ts=1752150464967 status=101 capturerID=0 frameNr=33
+id=RawEncoder ts=1752150464976 status=102 capturerID=0 frameNr=33 size=9344
+id=RawEncoder ts=1752150464976 status=103 capturerID=0 frameNr=33
+id=RawEncoder ts=1752150464976 status=104 capturerID=0 frameNr=33 size=32600
+id=EncodingQueue ts=1752150465035 status=300 capturerID=0 frameNr=34
+id=EncodingQueue ts=1752150465035 status=303 capturerID=0 frameNr=34
+id=RawEncoder ts=1752150465035 status=101 capturerID=0 frameNr=34
+id=RawEncoder ts=1752150465043 status=102 capturerID=0 frameNr=34 size=9674
+id=RawEncoder ts=1752150465043 status=103 capturerID=0 frameNr=34
+id=RawEncoder ts=1752150465044 status=104 capturerID=0 frameNr=34 size=33796
+id=EncodingQueue ts=1752150465102 status=300 capturerID=0 frameNr=35
+id=EncodingQueue ts=1752150465102 status=303 capturerID=0 frameNr=35
+id=RawEncoder ts=1752150465102 status=101 capturerID=0 frameNr=35
+id=RawEncoder ts=1752150465112 status=102 capturerID=0 frameNr=35 size=9988
+id=RawEncoder ts=1752150465112 status=103 capturerID=0 frameNr=35
+id=RawEncoder ts=1752150465113 status=104 capturerID=0 frameNr=35 size=35096
+id=EncodingQueue ts=1752150465169 status=300 capturerID=0 frameNr=36
+id=EncodingQueue ts=1752150465169 status=303 capturerID=0 frameNr=36
+id=RawEncoder ts=1752150465170 status=101 capturerID=0 frameNr=36
+id=RawEncoder ts=1752150465179 status=102 capturerID=0 frameNr=36 size=10430
+id=RawEncoder ts=1752150465179 status=103 capturerID=0 frameNr=36
+id=RawEncoder ts=1752150465180 status=104 capturerID=0 frameNr=36 size=36032
+id=EncodingQueue ts=1752150465236 status=300 capturerID=0 frameNr=37
+id=EncodingQueue ts=1752150465236 status=303 capturerID=0 frameNr=37
+id=RawEncoder ts=1752150465236 status=101 capturerID=0 frameNr=37
+id=RawEncoder ts=1752150465245 status=102 capturerID=0 frameNr=37 size=10484
+id=RawEncoder ts=1752150465245 status=103 capturerID=0 frameNr=37
+id=RawEncoder ts=1752150465245 status=104 capturerID=0 frameNr=37 size=36648
+id=EncodingQueue ts=1752150465303 status=300 capturerID=0 frameNr=38
+id=EncodingQueue ts=1752150465303 status=303 capturerID=0 frameNr=38
+id=RawEncoder ts=1752150465303 status=101 capturerID=0 frameNr=38
+id=RawEncoder ts=1752150465312 status=102 capturerID=0 frameNr=38 size=11066
+id=RawEncoder ts=1752150465312 status=103 capturerID=0 frameNr=38
+id=RawEncoder ts=1752150465313 status=104 capturerID=0 frameNr=38 size=36772
+id=EncodingQueue ts=1752150465371 status=300 capturerID=0 frameNr=39
+id=EncodingQueue ts=1752150465371 status=303 capturerID=0 frameNr=39
+id=RawEncoder ts=1752150465371 status=101 capturerID=0 frameNr=39
+id=RawEncoder ts=1752150465381 status=102 capturerID=0 frameNr=39 size=10650
+id=RawEncoder ts=1752150465381 status=103 capturerID=0 frameNr=39
+id=RawEncoder ts=1752150465382 status=104 capturerID=0 frameNr=39 size=36984
+id=EncodingQueue ts=1752150465440 status=300 capturerID=0 frameNr=40
+id=EncodingQueue ts=1752150465440 status=303 capturerID=0 frameNr=40
+id=RawEncoder ts=1752150465440 status=101 capturerID=0 frameNr=40
+id=RawEncoder ts=1752150465448 status=102 capturerID=0 frameNr=40 size=10158
+id=RawEncoder ts=1752150465448 status=103 capturerID=0 frameNr=40
+id=RawEncoder ts=1752150465449 status=104 capturerID=0 frameNr=40 size=35976
+id=Test ts=1752150465449 status=203 capturerID=0 frameNr=40
+id=Test ts=1752150465449 status=204 capturerID=0 frameNr=40
+id=Test ts=1752150465449 status=201 capturerID=0 frameNr=40
+id=Test ts=1752150465452 status=202 capturerID=0 frameNr=40
+id=Test ts=1752150465452 status=500 capturerID=0 frameNr=40
+id=Test ts=1752150465454 status=501 capturerID=0 frameNr=40
+id=Test ts=1752150465454 status=9000 capturerID=0 frameNr=40
+id=Test ts=1752150465455 status=9001 capturerID=0 frameNr=40
+id=Test ts=1752150465455 status=401 capturerID=0 frameNr=40
+id=Test ts=1752150465463 status=402 capturerID=0 frameNr=40
+id=EncodingQueue ts=1752150465506 status=300 capturerID=0 frameNr=41
+id=EncodingQueue ts=1752150465506 status=303 capturerID=0 frameNr=41
+id=RawEncoder ts=1752150465506 status=101 capturerID=0 frameNr=41
+id=RawEncoder ts=1752150465514 status=102 capturerID=0 frameNr=41 size=9842
+id=RawEncoder ts=1752150465514 status=103 capturerID=0 frameNr=41
+id=RawEncoder ts=1752150465515 status=104 capturerID=0 frameNr=41 size=35220
+id=EncodingQueue ts=1752150465572 status=300 capturerID=0 frameNr=42
+id=EncodingQueue ts=1752150465572 status=303 capturerID=0 frameNr=42
+id=RawEncoder ts=1752150465572 status=101 capturerID=0 frameNr=42
+id=RawEncoder ts=1752150465583 status=102 capturerID=0 frameNr=42 size=9334
+id=RawEncoder ts=1752150465583 status=103 capturerID=0 frameNr=42
+id=RawEncoder ts=1752150465583 status=104 capturerID=0 frameNr=42 size=33200
+id=EncodingQueue ts=1752150465638 status=300 capturerID=0 frameNr=43
+id=EncodingQueue ts=1752150465638 status=303 capturerID=0 frameNr=43
+id=RawEncoder ts=1752150465638 status=101 capturerID=0 frameNr=43
+id=RawEncoder ts=1752150465646 status=102 capturerID=0 frameNr=43 size=8914
+id=RawEncoder ts=1752150465646 status=103 capturerID=0 frameNr=43
+id=RawEncoder ts=1752150465646 status=104 capturerID=0 frameNr=43 size=32084
+id=EncodingQueue ts=1752150465705 status=300 capturerID=0 frameNr=44
+id=EncodingQueue ts=1752150465705 status=303 capturerID=0 frameNr=44
+id=RawEncoder ts=1752150465705 status=101 capturerID=0 frameNr=44
+id=RawEncoder ts=1752150465714 status=102 capturerID=0 frameNr=44 size=9240
+id=RawEncoder ts=1752150465714 status=103 capturerID=0 frameNr=44
+id=RawEncoder ts=1752150465714 status=104 capturerID=0 frameNr=44 size=33352
+id=EncodingQueue ts=1752150465773 status=300 capturerID=0 frameNr=45
+id=EncodingQueue ts=1752150465773 status=303 capturerID=0 frameNr=45
+id=RawEncoder ts=1752150465773 status=101 capturerID=0 frameNr=45
+id=RawEncoder ts=1752150465781 status=102 capturerID=0 frameNr=45 size=9536
+id=RawEncoder ts=1752150465781 status=103 capturerID=0 frameNr=45
+id=RawEncoder ts=1752150465781 status=104 capturerID=0 frameNr=45 size=34780
+id=EncodingQueue ts=1752150465841 status=300 capturerID=0 frameNr=46
+id=EncodingQueue ts=1752150465841 status=303 capturerID=0 frameNr=46
+id=RawEncoder ts=1752150465841 status=101 capturerID=0 frameNr=46
+id=RawEncoder ts=1752150465849 status=102 capturerID=0 frameNr=46 size=9562
+id=RawEncoder ts=1752150465849 status=103 capturerID=0 frameNr=46
+id=RawEncoder ts=1752150465850 status=104 capturerID=0 frameNr=46 size=34992
+id=EncodingQueue ts=1752150465906 status=300 capturerID=0 frameNr=47
+id=EncodingQueue ts=1752150465906 status=303 capturerID=0 frameNr=47
+id=RawEncoder ts=1752150465906 status=101 capturerID=0 frameNr=47
+id=RawEncoder ts=1752150465918 status=102 capturerID=0 frameNr=47 size=9436
+id=RawEncoder ts=1752150465918 status=103 capturerID=0 frameNr=47
+id=RawEncoder ts=1752150465919 status=104 capturerID=0 frameNr=47 size=34860
+id=EncodingQueue ts=1752150465973 status=300 capturerID=0 frameNr=48
+id=EncodingQueue ts=1752150465973 status=303 capturerID=0 frameNr=48
+id=RawEncoder ts=1752150465973 status=101 capturerID=0 frameNr=48
+id=RawEncoder ts=1752150465981 status=102 capturerID=0 frameNr=48 size=9676
+id=RawEncoder ts=1752150465981 status=103 capturerID=0 frameNr=48
+id=RawEncoder ts=1752150465982 status=104 capturerID=0 frameNr=48 size=35048
+id=EncodingQueue ts=1752150466041 status=300 capturerID=0 frameNr=49
+id=EncodingQueue ts=1752150466041 status=303 capturerID=0 frameNr=49
+id=RawEncoder ts=1752150466041 status=101 capturerID=0 frameNr=49
+id=RawEncoder ts=1752150466051 status=102 capturerID=0 frameNr=49 size=9458
+id=RawEncoder ts=1752150466052 status=103 capturerID=0 frameNr=49
+id=RawEncoder ts=1752150466053 status=104 capturerID=0 frameNr=49 size=34916
+id=EncodingQueue ts=1752150466108 status=300 capturerID=0 frameNr=50
+id=EncodingQueue ts=1752150466108 status=303 capturerID=0 frameNr=50
+id=RawEncoder ts=1752150466108 status=101 capturerID=0 frameNr=50
+id=RawEncoder ts=1752150466117 status=102 capturerID=0 frameNr=50 size=9538
+id=RawEncoder ts=1752150466117 status=103 capturerID=0 frameNr=50
+id=RawEncoder ts=1752150466118 status=104 capturerID=0 frameNr=50 size=34712
+id=Test ts=1752150466118 status=203 capturerID=0 frameNr=50
+id=Test ts=1752150466118 status=204 capturerID=0 frameNr=50
+id=Test ts=1752150466124 status=201 capturerID=0 frameNr=50
+id=Test ts=1752150466127 status=202 capturerID=0 frameNr=50
+id=Test ts=1752150466127 status=500 capturerID=0 frameNr=50
+id=Test ts=1752150466128 status=501 capturerID=0 frameNr=50
+id=Test ts=1752150466155 status=9000 capturerID=0 frameNr=50
+id=Test ts=1752150466156 status=9001 capturerID=0 frameNr=50
+id=Test ts=1752150466156 status=401 capturerID=0 frameNr=50
+id=Test ts=1752150466164 status=402 capturerID=0 frameNr=50
+id=EncodingQueue ts=1752150466177 status=300 capturerID=0 frameNr=51
+id=EncodingQueue ts=1752150466177 status=303 capturerID=0 frameNr=51
+id=RawEncoder ts=1752150466177 status=101 capturerID=0 frameNr=51
+id=RawEncoder ts=1752150466185 status=102 capturerID=0 frameNr=51 size=9572
+id=RawEncoder ts=1752150466185 status=103 capturerID=0 frameNr=51
+id=RawEncoder ts=1752150466186 status=104 capturerID=0 frameNr=51 size=34664
+id=EncodingQueue ts=1752150466249 status=300 capturerID=0 frameNr=52
+id=EncodingQueue ts=1752150466249 status=303 capturerID=0 frameNr=52
+id=RawEncoder ts=1752150466249 status=101 capturerID=0 frameNr=52
+id=RawEncoder ts=1752150466258 status=102 capturerID=0 frameNr=52 size=9550
+id=RawEncoder ts=1752150466258 status=103 capturerID=0 frameNr=52
+id=RawEncoder ts=1752150466258 status=104 capturerID=0 frameNr=52 size=34752
+id=EncodingQueue ts=1752150466311 status=300 capturerID=0 frameNr=53
+id=EncodingQueue ts=1752150466311 status=303 capturerID=0 frameNr=53
+id=RawEncoder ts=1752150466311 status=101 capturerID=0 frameNr=53
+id=RawEncoder ts=1752150466320 status=102 capturerID=0 frameNr=53 size=9644
+id=RawEncoder ts=1752150466320 status=103 capturerID=0 frameNr=53
+id=RawEncoder ts=1752150466320 status=104 capturerID=0 frameNr=53 size=34892
+id=EncodingQueue ts=1752150466379 status=300 capturerID=0 frameNr=54
+id=EncodingQueue ts=1752150466379 status=303 capturerID=0 frameNr=54
+id=RawEncoder ts=1752150466379 status=101 capturerID=0 frameNr=54
+id=RawEncoder ts=1752150466388 status=102 capturerID=0 frameNr=54 size=9718
+id=RawEncoder ts=1752150466388 status=103 capturerID=0 frameNr=54
+id=RawEncoder ts=1752150466388 status=104 capturerID=0 frameNr=54 size=34720
+id=EncodingQueue ts=1752150466442 status=300 capturerID=0 frameNr=55
+id=EncodingQueue ts=1752150466442 status=303 capturerID=0 frameNr=55
+id=RawEncoder ts=1752150466442 status=101 capturerID=0 frameNr=55
+id=RawEncoder ts=1752150466452 status=102 capturerID=0 frameNr=55 size=9722
+id=RawEncoder ts=1752150466452 status=103 capturerID=0 frameNr=55
+id=RawEncoder ts=1752150466452 status=104 capturerID=0 frameNr=55 size=34664
+id=EncodingQueue ts=1752150466509 status=300 capturerID=0 frameNr=56
+id=EncodingQueue ts=1752150466509 status=303 capturerID=0 frameNr=56
+id=RawEncoder ts=1752150466509 status=101 capturerID=0 frameNr=56
+id=RawEncoder ts=1752150466518 status=102 capturerID=0 frameNr=56 size=9914
+id=RawEncoder ts=1752150466518 status=103 capturerID=0 frameNr=56
+id=RawEncoder ts=1752150466518 status=104 capturerID=0 frameNr=56 size=34924
+id=EncodingQueue ts=1752150466578 status=300 capturerID=0 frameNr=57
+id=EncodingQueue ts=1752150466578 status=303 capturerID=0 frameNr=57
+id=RawEncoder ts=1752150466578 status=101 capturerID=0 frameNr=57
+id=RawEncoder ts=1752150466586 status=102 capturerID=0 frameNr=57 size=9900
+id=RawEncoder ts=1752150466586 status=103 capturerID=0 frameNr=57
+id=RawEncoder ts=1752150466587 status=104 capturerID=0 frameNr=57 size=35068
+id=EncodingQueue ts=1752150466643 status=300 capturerID=0 frameNr=58
+id=EncodingQueue ts=1752150466643 status=303 capturerID=0 frameNr=58
+id=RawEncoder ts=1752150466643 status=101 capturerID=0 frameNr=58
+id=RawEncoder ts=1752150466651 status=102 capturerID=0 frameNr=58 size=10060
+id=RawEncoder ts=1752150466651 status=103 capturerID=0 frameNr=58
+id=RawEncoder ts=1752150466651 status=104 capturerID=0 frameNr=58 size=35092
+id=EncodingQueue ts=1752150466711 status=300 capturerID=0 frameNr=59
+id=EncodingQueue ts=1752150466711 status=303 capturerID=0 frameNr=59
+id=RawEncoder ts=1752150466711 status=101 capturerID=0 frameNr=59
+id=RawEncoder ts=1752150466720 status=102 capturerID=0 frameNr=59 size=10012
+id=RawEncoder ts=1752150466720 status=103 capturerID=0 frameNr=59
+id=RawEncoder ts=1752150466720 status=104 capturerID=0 frameNr=59 size=34828
+id=EncodingQueue ts=1752150466777 status=300 capturerID=0 frameNr=60
+id=EncodingQueue ts=1752150466777 status=303 capturerID=0 frameNr=60
+id=RawEncoder ts=1752150466777 status=101 capturerID=0 frameNr=60
+id=RawEncoder ts=1752150466786 status=102 capturerID=0 frameNr=60 size=10014
+id=RawEncoder ts=1752150466786 status=103 capturerID=0 frameNr=60
+id=RawEncoder ts=1752150466786 status=104 capturerID=0 frameNr=60 size=34852
+id=Test ts=1752150466786 status=203 capturerID=0 frameNr=60
+id=Test ts=1752150466786 status=204 capturerID=0 frameNr=60
+id=Test ts=1752150466786 status=201 capturerID=0 frameNr=60
+id=Test ts=1752150466789 status=202 capturerID=0 frameNr=60
+id=Test ts=1752150466789 status=500 capturerID=0 frameNr=60
+id=Test ts=1752150466790 status=501 capturerID=0 frameNr=60
+id=Test ts=1752150466790 status=9000 capturerID=0 frameNr=60
+id=Test ts=1752150466791 status=9001 capturerID=0 frameNr=60
+id=Test ts=1752150466791 status=401 capturerID=0 frameNr=60
+id=Test ts=1752150466798 status=402 capturerID=0 frameNr=60
+id=EncodingQueue ts=1752150466845 status=300 capturerID=0 frameNr=61
+id=EncodingQueue ts=1752150466845 status=303 capturerID=0 frameNr=61
+id=RawEncoder ts=1752150466845 status=101 capturerID=0 frameNr=61
+id=RawEncoder ts=1752150466855 status=102 capturerID=0 frameNr=61 size=10228
+id=RawEncoder ts=1752150466855 status=103 capturerID=0 frameNr=61
+id=RawEncoder ts=1752150466855 status=104 capturerID=0 frameNr=61 size=34836
+id=EncodingQueue ts=1752150466911 status=300 capturerID=0 frameNr=62
+id=EncodingQueue ts=1752150466911 status=303 capturerID=0 frameNr=62
+id=RawEncoder ts=1752150466911 status=101 capturerID=0 frameNr=62
+id=RawEncoder ts=1752150466919 status=102 capturerID=0 frameNr=62 size=10204
+id=RawEncoder ts=1752150466919 status=103 capturerID=0 frameNr=62
+id=RawEncoder ts=1752150466920 status=104 capturerID=0 frameNr=62 size=34768
+id=EncodingQueue ts=1752150466980 status=300 capturerID=0 frameNr=63
+id=EncodingQueue ts=1752150466980 status=303 capturerID=0 frameNr=63
+id=RawEncoder ts=1752150466980 status=101 capturerID=0 frameNr=63
+id=RawEncoder ts=1752150466988 status=102 capturerID=0 frameNr=63 size=9962
+id=RawEncoder ts=1752150466988 status=103 capturerID=0 frameNr=63
+id=RawEncoder ts=1752150466989 status=104 capturerID=0 frameNr=63 size=34908
+id=EncodingQueue ts=1752150467047 status=300 capturerID=0 frameNr=64
+id=EncodingQueue ts=1752150467047 status=303 capturerID=0 frameNr=64
+id=RawEncoder ts=1752150467047 status=101 capturerID=0 frameNr=64
+id=RawEncoder ts=1752150467055 status=102 capturerID=0 frameNr=64 size=10140
+id=RawEncoder ts=1752150467055 status=103 capturerID=0 frameNr=64
+id=RawEncoder ts=1752150467055 status=104 capturerID=0 frameNr=64 size=35016
+id=EncodingQueue ts=1752150467114 status=300 capturerID=0 frameNr=65
+id=EncodingQueue ts=1752150467114 status=303 capturerID=0 frameNr=65
+id=RawEncoder ts=1752150467114 status=101 capturerID=0 frameNr=65
+id=RawEncoder ts=1752150467122 status=102 capturerID=0 frameNr=65 size=10156
+id=RawEncoder ts=1752150467122 status=103 capturerID=0 frameNr=65
+id=RawEncoder ts=1752150467123 status=104 capturerID=0 frameNr=65 size=35036
+id=EncodingQueue ts=1752150467182 status=300 capturerID=0 frameNr=66
+id=EncodingQueue ts=1752150467182 status=303 capturerID=0 frameNr=66
+id=RawEncoder ts=1752150467182 status=101 capturerID=0 frameNr=66
+id=RawEncoder ts=1752150467190 status=102 capturerID=0 frameNr=66 size=10290
+id=RawEncoder ts=1752150467190 status=103 capturerID=0 frameNr=66
+id=RawEncoder ts=1752150467191 status=104 capturerID=0 frameNr=66 size=34964
+id=EncodingQueue ts=1752150467249 status=300 capturerID=0 frameNr=67
+id=EncodingQueue ts=1752150467249 status=303 capturerID=0 frameNr=67
+id=RawEncoder ts=1752150467249 status=101 capturerID=0 frameNr=67
+id=RawEncoder ts=1752150467258 status=102 capturerID=0 frameNr=67 size=10110
+id=RawEncoder ts=1752150467258 status=103 capturerID=0 frameNr=67
+id=RawEncoder ts=1752150467259 status=104 capturerID=0 frameNr=67 size=35264
+id=EncodingQueue ts=1752150467317 status=300 capturerID=0 frameNr=68
+id=EncodingQueue ts=1752150467317 status=303 capturerID=0 frameNr=68
+id=RawEncoder ts=1752150467317 status=101 capturerID=0 frameNr=68
+id=RawEncoder ts=1752150467327 status=102 capturerID=0 frameNr=68 size=10268
+id=RawEncoder ts=1752150467327 status=103 capturerID=0 frameNr=68
+id=RawEncoder ts=1752150467327 status=104 capturerID=0 frameNr=68 size=34932
+id=EncodingQueue ts=1752150467383 status=300 capturerID=0 frameNr=69
+id=EncodingQueue ts=1752150467383 status=303 capturerID=0 frameNr=69
+id=RawEncoder ts=1752150467383 status=101 capturerID=0 frameNr=69
+id=RawEncoder ts=1752150467391 status=102 capturerID=0 frameNr=69 size=10102
+id=RawEncoder ts=1752150467391 status=103 capturerID=0 frameNr=69
+id=RawEncoder ts=1752150467391 status=104 capturerID=0 frameNr=69 size=35100
+id=EncodingQueue ts=1752150467451 status=300 capturerID=0 frameNr=70
+id=EncodingQueue ts=1752150467451 status=303 capturerID=0 frameNr=70
+id=RawEncoder ts=1752150467451 status=101 capturerID=0 frameNr=70
+id=RawEncoder ts=1752150467460 status=102 capturerID=0 frameNr=70 size=10120
+id=RawEncoder ts=1752150467460 status=103 capturerID=0 frameNr=70
+id=RawEncoder ts=1752150467461 status=104 capturerID=0 frameNr=70 size=34880
+id=Test ts=1752150467460 status=203 capturerID=0 frameNr=70
+id=Test ts=1752150467461 status=204 capturerID=0 frameNr=70
+id=Test ts=1752150467461 status=201 capturerID=0 frameNr=70
+id=Test ts=1752150467462 status=202 capturerID=0 frameNr=70
+id=Test ts=1752150467462 status=500 capturerID=0 frameNr=70
+id=Test ts=1752150467465 status=501 capturerID=0 frameNr=70
+id=Test ts=1752150467465 status=9000 capturerID=0 frameNr=70
+id=Test ts=1752150467466 status=9001 capturerID=0 frameNr=70
+id=Test ts=1752150467466 status=401 capturerID=0 frameNr=70
+id=Test ts=1752150467473 status=402 capturerID=0 frameNr=70
+id=EncodingQueue ts=1752150467518 status=300 capturerID=0 frameNr=71
+id=EncodingQueue ts=1752150467518 status=303 capturerID=0 frameNr=71
+id=RawEncoder ts=1752150467518 status=101 capturerID=0 frameNr=71
+id=RawEncoder ts=1752150467527 status=102 capturerID=0 frameNr=71 size=10188
+id=RawEncoder ts=1752150467527 status=103 capturerID=0 frameNr=71
+id=RawEncoder ts=1752150467528 status=104 capturerID=0 frameNr=71 size=35148
+id=EncodingQueue ts=1752150467584 status=300 capturerID=0 frameNr=72
+id=EncodingQueue ts=1752150467585 status=303 capturerID=0 frameNr=72
+id=RawEncoder ts=1752150467585 status=101 capturerID=0 frameNr=72
+id=RawEncoder ts=1752150467593 status=102 capturerID=0 frameNr=72 size=10122
+id=RawEncoder ts=1752150467593 status=103 capturerID=0 frameNr=72
+id=RawEncoder ts=1752150467593 status=104 capturerID=0 frameNr=72 size=35080
+id=EncodingQueue ts=1752150467652 status=300 capturerID=0 frameNr=73
+id=EncodingQueue ts=1752150467652 status=303 capturerID=0 frameNr=73
+id=RawEncoder ts=1752150467652 status=101 capturerID=0 frameNr=73
+id=RawEncoder ts=1752150467662 status=102 capturerID=0 frameNr=73 size=10072
+id=RawEncoder ts=1752150467662 status=103 capturerID=0 frameNr=73
+id=RawEncoder ts=1752150467663 status=104 capturerID=0 frameNr=73 size=34872
+id=EncodingQueue ts=1752150467722 status=300 capturerID=0 frameNr=74
+id=EncodingQueue ts=1752150467722 status=303 capturerID=0 frameNr=74
+id=RawEncoder ts=1752150467722 status=101 capturerID=0 frameNr=74
+id=RawEncoder ts=1752150467733 status=102 capturerID=0 frameNr=74 size=10064
+id=RawEncoder ts=1752150467733 status=103 capturerID=0 frameNr=74
+id=RawEncoder ts=1752150467734 status=104 capturerID=0 frameNr=74 size=34836
+id=EncodingQueue ts=1752150467787 status=300 capturerID=0 frameNr=75
+id=EncodingQueue ts=1752150467787 status=303 capturerID=0 frameNr=75
+id=RawEncoder ts=1752150467787 status=101 capturerID=0 frameNr=75
+id=RawEncoder ts=1752150467795 status=102 capturerID=0 frameNr=75 size=9964
+id=RawEncoder ts=1752150467796 status=103 capturerID=0 frameNr=75
+id=RawEncoder ts=1752150467796 status=104 capturerID=0 frameNr=75 size=34964
+id=EncodingQueue ts=1752150467853 status=300 capturerID=0 frameNr=76
+id=EncodingQueue ts=1752150467853 status=303 capturerID=0 frameNr=76
+id=RawEncoder ts=1752150467853 status=101 capturerID=0 frameNr=76
+id=RawEncoder ts=1752150467863 status=102 capturerID=0 frameNr=76 size=10096
+id=RawEncoder ts=1752150467863 status=103 capturerID=0 frameNr=76
+id=RawEncoder ts=1752150467863 status=104 capturerID=0 frameNr=76 size=35152
+id=EncodingQueue ts=1752150467921 status=300 capturerID=0 frameNr=77
+id=EncodingQueue ts=1752150467922 status=303 capturerID=0 frameNr=77
+id=RawEncoder ts=1752150467922 status=101 capturerID=0 frameNr=77
+id=RawEncoder ts=1752150467930 status=102 capturerID=0 frameNr=77 size=9996
+id=RawEncoder ts=1752150467930 status=103 capturerID=0 frameNr=77
+id=RawEncoder ts=1752150467931 status=104 capturerID=0 frameNr=77 size=35016
+id=EncodingQueue ts=1752150467988 status=300 capturerID=0 frameNr=78
+id=EncodingQueue ts=1752150467988 status=303 capturerID=0 frameNr=78
+id=RawEncoder ts=1752150467988 status=101 capturerID=0 frameNr=78
+id=RawEncoder ts=1752150467996 status=102 capturerID=0 frameNr=78 size=10030
+id=RawEncoder ts=1752150467996 status=103 capturerID=0 frameNr=78
+id=RawEncoder ts=1752150467997 status=104 capturerID=0 frameNr=78 size=35008
+id=EncodingQueue ts=1752150468055 status=300 capturerID=0 frameNr=79
+id=EncodingQueue ts=1752150468055 status=303 capturerID=0 frameNr=79
+id=RawEncoder ts=1752150468055 status=101 capturerID=0 frameNr=79
+id=RawEncoder ts=1752150468064 status=102 capturerID=0 frameNr=79 size=10066
+id=RawEncoder ts=1752150468064 status=103 capturerID=0 frameNr=79
+id=RawEncoder ts=1752150468065 status=104 capturerID=0 frameNr=79 size=35096
+id=EncodingQueue ts=1752150468121 status=300 capturerID=0 frameNr=80
+id=EncodingQueue ts=1752150468121 status=303 capturerID=0 frameNr=80
+id=RawEncoder ts=1752150468121 status=101 capturerID=0 frameNr=80
+id=RawEncoder ts=1752150468130 status=102 capturerID=0 frameNr=80 size=10054
+id=RawEncoder ts=1752150468130 status=103 capturerID=0 frameNr=80
+id=RawEncoder ts=1752150468130 status=104 capturerID=0 frameNr=80 size=35100
+id=Test ts=1752150468130 status=203 capturerID=0 frameNr=80
+id=Test ts=1752150468130 status=204 capturerID=0 frameNr=80
+id=Test ts=1752150468130 status=201 capturerID=0 frameNr=80
+id=Test ts=1752150468133 status=202 capturerID=0 frameNr=80
+id=Test ts=1752150468133 status=500 capturerID=0 frameNr=80
+id=Test ts=1752150468134 status=501 capturerID=0 frameNr=80
+id=Test ts=1752150468134 status=9000 capturerID=0 frameNr=80
+id=Test ts=1752150468135 status=9001 capturerID=0 frameNr=80
+id=Test ts=1752150468135 status=401 capturerID=0 frameNr=80
+id=Test ts=1752150468139 status=402 capturerID=0 frameNr=80
+id=EncodingQueue ts=1752150468188 status=300 capturerID=0 frameNr=81
+id=EncodingQueue ts=1752150468188 status=303 capturerID=0 frameNr=81
+id=RawEncoder ts=1752150468188 status=101 capturerID=0 frameNr=81
+id=RawEncoder ts=1752150468196 status=102 capturerID=0 frameNr=81 size=10086
+id=RawEncoder ts=1752150468196 status=103 capturerID=0 frameNr=81
+id=RawEncoder ts=1752150468196 status=104 capturerID=0 frameNr=81 size=34968
+id=EncodingQueue ts=1752150468256 status=300 capturerID=0 frameNr=82
+id=EncodingQueue ts=1752150468256 status=303 capturerID=0 frameNr=82
+id=RawEncoder ts=1752150468256 status=101 capturerID=0 frameNr=82
+id=RawEncoder ts=1752150468265 status=102 capturerID=0 frameNr=82 size=10064
+id=RawEncoder ts=1752150468265 status=103 capturerID=0 frameNr=82
+id=RawEncoder ts=1752150468266 status=104 capturerID=0 frameNr=82 size=34816
+id=EncodingQueue ts=1752150468323 status=300 capturerID=0 frameNr=83
+id=EncodingQueue ts=1752150468323 status=303 capturerID=0 frameNr=83
+id=RawEncoder ts=1752150468323 status=101 capturerID=0 frameNr=83
+id=RawEncoder ts=1752150468332 status=102 capturerID=0 frameNr=83 size=9744
+id=RawEncoder ts=1752150468332 status=103 capturerID=0 frameNr=83
+id=RawEncoder ts=1752150468333 status=104 capturerID=0 frameNr=83 size=34952
+id=EncodingQueue ts=1752150468390 status=300 capturerID=0 frameNr=84
+id=EncodingQueue ts=1752150468390 status=303 capturerID=0 frameNr=84
+id=RawEncoder ts=1752150468390 status=101 capturerID=0 frameNr=84
+id=RawEncoder ts=1752150468399 status=102 capturerID=0 frameNr=84 size=9856
+id=RawEncoder ts=1752150468399 status=103 capturerID=0 frameNr=84
+id=RawEncoder ts=1752150468400 status=104 capturerID=0 frameNr=84 size=35004
+id=EncodingQueue ts=1752150468456 status=300 capturerID=0 frameNr=85
+id=EncodingQueue ts=1752150468456 status=303 capturerID=0 frameNr=85
+id=RawEncoder ts=1752150468456 status=101 capturerID=0 frameNr=85
+id=RawEncoder ts=1752150468467 status=102 capturerID=0 frameNr=85 size=9628
+id=RawEncoder ts=1752150468467 status=103 capturerID=0 frameNr=85
+id=RawEncoder ts=1752150468467 status=104 capturerID=0 frameNr=85 size=34948
+id=EncodingQueue ts=1752150468521 status=300 capturerID=0 frameNr=86
+id=EncodingQueue ts=1752150468521 status=303 capturerID=0 frameNr=86
+id=RawEncoder ts=1752150468521 status=101 capturerID=0 frameNr=86
+id=RawEncoder ts=1752150468529 status=102 capturerID=0 frameNr=86 size=9534
+id=RawEncoder ts=1752150468529 status=103 capturerID=0 frameNr=86
+id=RawEncoder ts=1752150468530 status=104 capturerID=0 frameNr=86 size=35100
+id=EncodingQueue ts=1752150468588 status=300 capturerID=0 frameNr=87
+id=EncodingQueue ts=1752150468588 status=303 capturerID=0 frameNr=87
+id=RawEncoder ts=1752150468588 status=101 capturerID=0 frameNr=87
+id=RawEncoder ts=1752150468596 status=102 capturerID=0 frameNr=87 size=9732
+id=RawEncoder ts=1752150468596 status=103 capturerID=0 frameNr=87
+id=RawEncoder ts=1752150468597 status=104 capturerID=0 frameNr=87 size=35128
+id=RawEncodingQueue ts=1752150468678 status=Disposing
+id=EncodingQueue ts=1752150468679 status=2
+id=EncodingQueue ts=1752150468679 status=3
+id=WebPEncoder ts=1752150468679 status=2
+id=WebPEncoder ts=1752150468679 status=3
+id=RawEncodingQueue ts=1752150468678 status=Disposed

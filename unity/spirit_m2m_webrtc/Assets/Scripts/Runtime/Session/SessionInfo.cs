@@ -18,7 +18,8 @@ public class SessionInfo
     public uint camFPS;
     public bool useMic;
 
-   
+    public LoggerSettings loggerSettings;
+
     public FrameMode frameMode;
     public FrameCodec frameCodec;
     public bool useMultiCam = false;
@@ -80,6 +81,8 @@ public class RawEncodingSettings
 {
     public string colorCodecName = "jpeg";
     public string depthCodecName = "vle";
+    public uint maxQueueSize = 2; // In number of frames
+    public uint nWorkers = 3; // In number of threads
     public JPEGSettings jpegSettings;
     public WebPSettings webPSettings;
 }
@@ -109,4 +112,27 @@ public class WebPSettings
     public uint quality = 75;
     public uint method = 0; // From 0 (fastest / worst compression) to 6 (slow / best compression)
 
+}
+
+[System.Serializable]
+public class LoggerSettings
+{
+    public string logPath = "";
+    public uint flushInterval = 100; // in ms
+    public LoggerSettingsPointCloud pointCloud;
+    public LoggerSettingsAudio audio;
+}
+
+[System.Serializable]
+public class LoggerSettingsPointCloud
+{
+    public bool limitLogging = true; // Limits it to everyNFrames
+    public uint everyNFrames = 10;
+}
+
+[System.Serializable]
+public class LoggerSettingsAudio
+{
+    public bool limitLogging = true; // Limits it to everyNFrames
+    public uint everyNFrames = 100;
 }

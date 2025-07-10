@@ -16,6 +16,7 @@ class JpegEncoder : public ColorEncoder {
         ~JpegEncoder();
         virtual EncodedColor* compress_frame(uint8_t* raw_color);
     private:
+        const std::string NAME = "JpegEncoder";
         unsigned int jpeg_quality;
         tjhandle compressor = nullptr;
         std::mutex m_enqueue;

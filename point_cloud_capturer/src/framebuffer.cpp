@@ -37,6 +37,8 @@ void FrameBuffer::clear_buffer()
         delete frames.front();
         frames.pop();
     }
+    lk.unlock();
+    cv.notify_one();
     
 }
 

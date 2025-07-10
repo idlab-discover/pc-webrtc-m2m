@@ -1,16 +1,25 @@
 #include "color/jpeg/jpeg_encoder.hpp"
-
+#include "log.h"
+#include "logging/logging_macros.hpp"
 // Constructor
 JpegEncoder::JpegEncoder(unsigned int width, unsigned int height, JpegSettings* settings) 
     : ColorEncoder(width, height), jpeg_quality(settings->quality) {
+    LOG_STATUS_TO_FILE(NAME, Log::Status::Creating);
+
     compressor = tjInitCompress();
+
+    LOG_STATUS_TO_FILE(NAME, Log::Status::Created);
 }
 
 // Destructor
 JpegEncoder::~JpegEncoder() {
+    LOG_STATUS_TO_FILE(NAME, Log::Status::Destroying);
+
     if (compressor != nullptr) {
         tjDestroy(compressor);
     }
+
+    LOG_STATUS_TO_FILE(NAME, Log::Status::Destroyed);
 }
 
 // compress_frame function

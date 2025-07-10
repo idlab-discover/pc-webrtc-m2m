@@ -9,23 +9,23 @@ public static class PCHelperWrapper
     public static Dictionary<uint, PCReceiver> Receivers;
 
     [MonoPInvokeCallback(typeof(WebRTCInvoker.trackChangeCb))]
-    static void OnTrackChangeCallback(UInt32 clientID, UInt32 lastFrameNr, UInt32 tileNr, bool isAdded)
+    static void OnTrackChangeCallback(UInt32 clientID, UInt32 lastFrameNr, UInt32 capturerID, UInt32 tileNr, bool isAdded)
     {
         PCReceiver receiver;
-        Debug.Log($"Track {tileNr} from {clientID} was added {isAdded} after frame {lastFrameNr}");
+        Debug.Log($"Track Capturer: {capturerID} Description: {tileNr} from {clientID} was added {isAdded} after frame {lastFrameNr}");
         if(Receivers.TryGetValue(clientID, out receiver)) {
             receiver.OnTrackChange(lastFrameNr, (int)tileNr, isAdded);
         }
     }
 
     [MonoPInvokeCallback(typeof(WebRTCInvoker.intrinsicsUpdatedCb))]
-    static void OnIntrinsicsUpdatedCallback(UInt32 clientID, CapturerIntrinsics dInt, CapturerIntrinsics cInt)
+    static void OnIntrinsicsUpdatedCallback(UInt32 clientID, UInt32 capturerID, UInt32 capturerType, IntPtr data)
     {
         PCReceiver receiver;
-        Debug.Log($"Intrinsics Updated from {clientID} DINT: {dInt.ToString()} CINT: {cInt.ToString()}");
+        Debug.Log($"Intrinsics Updated from {clientID} and capturer: {capturerID}");
         if (Receivers.TryGetValue(clientID, out receiver))
         {
-            receiver.OnIntrisicsUpdated(dInt, cInt);
+            receiver.OnIntrisicsUpdated(capturerID, capturerType, data);
         }
     }
 
