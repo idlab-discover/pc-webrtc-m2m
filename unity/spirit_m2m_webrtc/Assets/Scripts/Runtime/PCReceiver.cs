@@ -24,7 +24,7 @@ public class PCReceiver : MonoBehaviour
     private System.Threading.Thread audioThread;
     //  private List<ConcurrentQueue<DecodedPointCloudData>> queues = new List<ConcurrentQueue<DecodedPointCloudData>>();
 
-    private Dictionary<int, DecodedPointCloudData> inProgessFrames;
+    private Dictionary<uint, DecodedPointCloudData> inProgessFrames;
     private ConcurrentQueue<DecodedPointCloudData> queue;
 
     private IntPtr rawConverter;
@@ -200,7 +200,7 @@ public class PCReceiver : MonoBehaviour
        //     workerThreads[i].Join();
         }    
     }
-    private unsafe void decodeDracoFrame(byte* ptr, byte[] messageBuffer, uint clientID, uint descriptionID, UInt64 timestamp, int descriptionFrameNr, int descriptionSize)
+    private unsafe void decodeDracoFrame(byte* ptr, byte[] messageBuffer, uint clientID, uint descriptionID, UInt64 timestamp, uint descriptionFrameNr, int descriptionSize)
     {
         IntPtr decoderPtr = IntPtr.Zero;
         Debug.Log($"Start decoding");
@@ -251,7 +251,7 @@ public class PCReceiver : MonoBehaviour
             inProgessFrames.Remove(descriptionFrameNr);
             if (descriptionFrameNr >= lastCompletedFrameNr)
             {
-                lastCompletedFrameNr = pcData.FrameNr;
+                lastCompletedFrameNr = (int)pcData.FrameNr;
                 queue.Enqueue(pcData);
             }
 
@@ -259,7 +259,7 @@ public class PCReceiver : MonoBehaviour
         mut.ReleaseMutex();
     }
 
-    private unsafe void decodeDepthFrame(byte* ptr, byte[] messageBuffer, UInt64 timestamp, int frameNr)
+    private unsafe void decodeDepthFrame(byte* ptr, byte[] messageBuffer, UInt64 timestamp, uint frameNr)
     {
         
         if (rawConverter != IntPtr.Zero)
@@ -280,11 +280,11 @@ public class PCReceiver : MonoBehaviour
             DecodedRawFrame rawData;
             if (!inProgessFramesRaw.TryGetValue((uint)frameNr, out rawData))
             {
-                rawData = new DecodedRawFrame(frameNr, (int)nPoints, timestamp);
+                rawData = new DecodedRawFrame(frameNr, nPoints, timestamp);
                 inProgessFramesRaw.Add((uint)frameNr, rawData);
             }
             rawData.DecodedDepth = decoded_depth;
-            rawData.PointsCompleted = true;
+            rawData.DepthCompleted = true;
        
           
             if (rawData.IsCompleted)
@@ -295,7 +295,7 @@ public class PCReceiver : MonoBehaviour
         }
     }
 
-    private unsafe void decodeColorFrame(byte* ptr, byte[] messageBuffer, UInt64 timestamp, int frameNr)
+    private unsafe void decodeColorFrame(byte* ptr, byte[] messageBuffer, UInt64 timestamp, uint frameNr)
     {
         
         if (rawConverter != IntPtr.Zero)
@@ -386,7 +386,7 @@ public class PCReceiver : MonoBehaviour
                 {
                     WebRTCInvoker.retrieve_tile(ptr, (uint)descriptionSize, ClientID, 0, descriptionID);
                     UInt64 timestamp = BitConverter.ToUInt64(messageBuffer, 0); ;
-                    int descriptionFrameNr = BitConverter.ToInt32(messageBuffer, 8);
+                    uint descriptionFrameNr = BitConverter.ToUInt32(messageBuffer, 8);
                     continue;
                     if(descriptionFrameNr <= lastCompletedFrameNr)
                     {
@@ -401,12 +401,12 @@ public class PCReceiver : MonoBehaviour
                         switch(descriptionID)
                         {
                             case 0: {
-                                    decodeDepthFrame(ptr, messageBuffer, timestamp, (int)descriptionFrameNr);
+                                    decodeDepthFrame(ptr, messageBuffer, timestamp, descriptionFrameNr);
                                     break;
                             };
                             case 1:
                             {
-                                    decodeColorFrame(ptr, messageBuffer, timestamp, (int)descriptionFrameNr);
+                                    decodeColorFrame(ptr, messageBuffer, timestamp, descriptionFrameNr);
                                     break;
                             }
                         }
@@ -444,7 +444,7 @@ public class PCReceiver : MonoBehaviour
 
         } else
         {
-            List<int> toRemove = new();
+            List<uint> toRemove = new();
             foreach (var fr in inProgessFrames)
             {
                 if(fr.Key > frameNr)
@@ -455,7 +455,7 @@ public class PCReceiver : MonoBehaviour
                         toRemove.Add(fr.Key);
                         if(fr.Key > lastCompletedFrameNr)
                         {
-                            lastCompletedFrameNr = fr.Value.FrameNr;
+                            lastCompletedFrameNr = (int)fr.Value.FrameNr;
                             queue.Enqueue(fr.Value);
                         }
                         

@@ -12,8 +12,11 @@ public static class RawInvoker
    
     [DllImport(dllName)]
     public static extern void set_logging(string log_directory, int logLevel);
+    [DllImport(dllName)]
+    public static extern void set_logging_settings(bool limit_logging, uint every_n_frames);
 
-    
+
+
     [DllImport(dllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern void RegisterDebugCallback(DLLLogger.debugCallback cb);
     [DllImport(dllName, CallingConvention = CallingConvention.Cdecl)]

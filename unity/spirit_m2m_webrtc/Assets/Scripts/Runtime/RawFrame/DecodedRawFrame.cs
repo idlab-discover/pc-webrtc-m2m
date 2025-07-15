@@ -5,33 +5,19 @@ using System.Linq;
 using System.Threading;
 using UnityEngine;
 
-public class DecodedRawFrame : MonoBehaviour
+public class DecodedRawFrame : DecodedRawFrameBase
 {
-    public int FrameNr;
-    public int NPoints;
-    public ulong Timestamp;
+
     public Vector3[] Points;
     public Color32[] Colors;
-    public Color32[] DecodedColors;
-    public bool PointsCompleted;
-    public bool ColorsCompleted;
-    public IntPtr DecodedDepth;
-    public IntPtr DecodedColor;
-    public bool IsCompleted { get { return PointsCompleted && ColorsCompleted; } }
+
     private Mutex mut = new Mutex();
-    public DecodedRawFrame(int frameNr, int nPoints, ulong timestamp)
+    public DecodedRawFrame(uint frameNr, uint nPoints, ulong timestamp) : base(frameNr, nPoints)
     {
-        FrameNr = frameNr;
-        NPoints = nPoints;
         Points = new Vector3[nPoints];
         Colors = new Color32[nPoints];
-        Timestamp = timestamp;
+    }
 
-    }
-    public void InitRawColors(uint size)
-    {
-        DecodedColors = new Color32[size];
-    }
     public void LockClass()
     {
         mut.WaitOne();

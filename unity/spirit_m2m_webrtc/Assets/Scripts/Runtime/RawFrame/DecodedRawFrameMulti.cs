@@ -7,29 +7,16 @@ using UnityEngine;
 
 // Used for multi camera setups with raw encoding
 
-public class DecodedRawFrameSingle
+public class DecodedRawFrameSingle : DecodedRawFrameBase
 {
+    public uint CapturerID;
     public uint PointOffset;
-    public uint NPoints;
-    public ulong Timestamp;
-    public IntPtr DecodedDepth;
-    public IntPtr DecodedColor;
 
-    public bool PointsCompleted;
-    public bool ColorsCompleted;
-
-    public bool IsCompleted { get { return PointsCompleted && ColorsCompleted; } }
-    public Color32[] DecodedColors;
-    public DecodedRawFrameSingle(uint nPoints, uint pointOffset)
+    public DecodedRawFrameSingle(uint capturerID, uint frameNr, uint nPoints) : base(frameNr, nPoints)
     {
-        NPoints = nPoints;
-        PointOffset = pointOffset;
+        CapturerID = capturerID;
     }
 
-    public void InitRawColors(uint size)
-    {
-        DecodedColors = new Color32[size];
-    }
 }
 
 public class DecodedRawFrameMulti
@@ -64,10 +51,19 @@ public class DecodedRawFrameMulti
     }
     public DecodedRawFrameSingle AddSingle(uint capturerID, uint size) // Call when receiving either the decoded depth or decoded color frame for the first time for this full frame
     {
-        DecodedRawFrameSingle single = new DecodedRawFrameSingle(size, TotalPoints);
+        DecodedRawFrameSingle single = new DecodedRawFrameSingle(capturerID, size, TotalPoints);
         Singles[(int)capturerID] = single;
         IncreaseBuffers(size);
         return single;
+    }
+    public void AddAndConvertSingle(DecodedRawFrameSingle single, RawConverter converter)
+    {
+        mut.WaitOne();
+        Singles[(int)single.CapturerID] = single;
+        single.PointOffset = TotalPoints;
+        IncreaseBuffers(single.NPoints);
+        mut.ReleaseMutex();
+        converter.ConvertRawSingleFrame(this, single);
     }
     public DecodedRawFrameSingle GetSingle(uint capturerID)
     {

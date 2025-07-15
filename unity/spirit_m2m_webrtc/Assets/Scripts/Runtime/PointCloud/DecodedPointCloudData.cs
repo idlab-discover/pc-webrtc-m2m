@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class DecodedPointCloudData
 {
-    public int FrameNr;
+    public uint FrameNr;
     public int NPoints;
     public int MaxDescriptions;
     public int CurrentNDescriptions;
@@ -16,7 +16,7 @@ public class DecodedPointCloudData
     public List<Color32> Colors;
     public List<bool> CompletionStatus;
     private Mutex mut = new Mutex();
-    public DecodedPointCloudData(int frameNr, int nPoints, int maxDescriptions, List<bool> activeDescriptions, ulong timestamp)
+    public DecodedPointCloudData(uint frameNr, int nPoints, int maxDescriptions, List<bool> activeDescriptions, ulong timestamp)
     {
         FrameNr = frameNr;
         NPoints = nPoints;

@@ -1,0 +1,17 @@
+{
+    "loopbackUsers": [
+        {
+            "clientID": 1,
+            "loopbackTracks": [
+                {
+                    "capturerID": 0,
+                    "trackID": 0
+                },
+                {
+                    "capturerID": 0,
+                    "trackID": 1
+                }
+            ]
+        }
+    ]
+}

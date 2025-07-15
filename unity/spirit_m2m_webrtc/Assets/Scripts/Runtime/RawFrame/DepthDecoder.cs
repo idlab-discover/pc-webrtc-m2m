@@ -10,34 +10,39 @@ public class DepthDecoder : IDisposable
     private IntPtr ptr;
     private bool disposedValue;
 
-    public readonly uint ClientID;
-    public DepthDecoder(DepthCodecType codecType, uint clientID)
+    private readonly uint clientID;
+    private readonly uint capturerID;
+    public DepthDecoder(DepthCodecType codecType, uint _clientID, uint _capturerID)
     {
-        ClientID = clientID;
-        Logger.LogStatusClient(NAME, Logger.Status.Creating, ClientID);
+        clientID = _clientID;
+        capturerID = _capturerID;
+        Logger.LogStatusClientAndCapturer(NAME, Logger.Status.Creating, clientID, capturerID);
 
         ptr = RawInvoker.create_depth_decoder(codecType);
 
         if (ptr == IntPtr.Zero)
         {
-            Logger.LogStatusClient(NAME, Logger.Status.Failed, ClientID);
+            Logger.LogStatusClientAndCapturer(NAME, Logger.Status.Failed, clientID, capturerID);
             IsValid = false;
         }
         else
         {
-            Logger.LogStatusClient(NAME, Logger.Status.Created, ClientID);
+            Logger.LogStatusClientAndCapturer(NAME, Logger.Status.Created, clientID, capturerID);
             IsValid = true;
         }
 
     }
 
-    public IntPtr DecodeDepth(IntPtr data, uint width, uint height)
+    public IntPtr DecodeDepth(IntPtr data, uint width, uint height, uint frameNr)
     {
+        Logger.LogPCFrameStatusLimited(NAME, Logger.Status.StartDecodingDepth, clientID, capturerID, frameNr);
         if (!IsValid)
         {
             return IntPtr.Zero;
         }
-        return RawInvoker.decode_depth(ptr, data, width, height);
+        IntPtr d = RawInvoker.decode_depth(ptr, data, width, height);
+        Logger.LogPCFrameStatusLimited(NAME, Logger.Status.EndDecodingDepth, clientID, capturerID, frameNr);
+        return d;
     }
 
     protected virtual void Dispose(bool disposing)

@@ -158,7 +158,7 @@ public class MultiCapturingTestRaw : MonoBehaviour
             }
             DecodedRawFrameSingle s = pcData2.GetSingle(capturerID) ?? pcData2.AddSingle(capturerID, nPoints);
             s.DecodedDepth = decoded_depth;
-            s.PointsCompleted = true;
+            s.DepthCompleted = true;
             if (s.IsCompleted)
             {
 

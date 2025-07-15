@@ -19,7 +19,7 @@ using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
 using System.Drawing;
 
-public class CapturingTestMultiRaw : MonoBehaviour
+public class CapturingTestMultiRawWithBuffer : MonoBehaviour
 {
     public List<GameObject> renderers = new List<GameObject>();
     private List<MeshFilter> filters = new List<MeshFilter>();
@@ -27,6 +27,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
     public GameObject VRCam;
     public GameObject Table;
     public int ClientID = 0;
+    private RawFrameBuffer rawFrameBuffer;
     System.Threading.Thread myThread;
  //   static Dictionary<UInt32, DecodedRawFrame> inProgessFrames;
     //static ConcurrentQueue<DecodedRawFrame> queue;
@@ -111,7 +112,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
             DecodedRawFrame pcData2;
             if (!inProgessFrames2.TryGetValue(frameNr, out pcData2))
             {
-                pcData2 = new DecodedRawFrame(frameNr, (int)nPoints, timestamp);
+                pcData2 = new DecodedRawFrame(frameNr, nPoints, timestamp);
                 inProgessFrames2.Add(frameNr, pcData2);
             }
             pcData2.DecodedColor = decoded_color;
@@ -191,8 +192,10 @@ public class CapturingTestMultiRaw : MonoBehaviour
     void Start()
     {
         LogTest();
+        
         Application.targetFrameRate = 120;
         var sessionInfo = SessionInfo.CreateFromJSON(Application.dataPath + "/config/session_config.json");
+        rawFrameBuffer = new RawFrameBuffer(sessionInfo.playbackBufferSettings, 0, 15, 2);
         Debug.Log(sessionInfo.sfuAddress + " " + sessionInfo.peerUDPPort);
         ClientID = sessionInfo.clientID;
         frameMode = FrameMode.RawData;

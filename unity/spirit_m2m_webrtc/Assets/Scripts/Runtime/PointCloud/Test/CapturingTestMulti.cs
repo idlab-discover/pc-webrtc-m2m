@@ -75,7 +75,7 @@ public class CapturingTestMulti : MonoBehaviour
         DecodedPointCloudData pcData;
         if (!inProgessFrames.TryGetValue(frameNr, out pcData))
         {
-            pcData = new DecodedPointCloudData((int)frameNr, 125000, 3, new List<bool> { true, true, true }, timestamp)  ;
+            pcData = new DecodedPointCloudData(frameNr, 125000, 3, new List<bool> { true, true, true }, timestamp)  ;
             inProgessFrames.Add(frameNr, pcData);
         }
         unsafe

@@ -4,6 +4,8 @@ using UnityEngine;
 using System.IO;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
+using JetBrains.Annotations;
+
 [System.Serializable]
 public class SessionInfo
 {
@@ -31,6 +33,8 @@ public class SessionInfo
     //public ArtificialSettings artificialSettings;
     //public RealsenseSettings realsenseSettings;
     //public PrerecordedKinectSettings prerecKinectSettings;
+    public PlaybackBufferSettings playbackBufferSettings;
+    public SessionManagerSettings sessionManagerSettings;
     public FrameCleanupSettings frameCleanupSettings;
     public RawEncodingSettings rawEncodingSettings;
     public AudioPlaybackParams audioPlayback;
@@ -112,6 +116,23 @@ public class WebPSettings
     public uint quality = 75;
     public uint method = 0; // From 0 (fastest / worst compression) to 6 (slow / best compression)
 
+}
+
+[System.Serializable]
+public class PlaybackBufferSettings
+{
+    public uint holdFramePreviousFor = 100;
+    public bool usePreviousFrameData = false;
+    public uint maxTimeBeforeIncompleteRender = 20;
+    public bool enqueueImmediately = true;
+}
+
+[System.Serializable]
+public class SessionManagerSettings
+{
+    public string type = "loopback";
+    public string defaultName = "TestSession";
+    public string configPath = "/config/session/loopback_0.json";
 }
 
 [System.Serializable]

@@ -13,6 +13,11 @@
         "scale":{"x": 1.4, "y":0.1, "z": 1.7}
     },
     "pushBack": {"x": 0.229103, "y":0.0, "z": 0},
+    "sessionManagerSettings": {
+        "type": "loopback",
+        "defaultName": "Loopback Session",
+        "configPath": "/config/session/loopback_0.json"
+    },
     "loggerSettings": {
         "logPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-webrtc-m2m\\session_log.txt",
         "flushInterval": 100,

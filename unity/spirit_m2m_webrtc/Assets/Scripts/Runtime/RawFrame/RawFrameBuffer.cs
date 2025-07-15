@@ -3,30 +3,79 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Xml.Linq;
 using UnityEngine;
 
 public class RawFrameBuffer 
 {
-    private DecodedRawFrameMulti previousFrame; // Used to potentially repair next frames
-    public uint holdPreviousFor;
+    private DecodedRawFrameMulti previousFrame = null; // Used to potentially repair next frames
+    public uint HoldPreviousFor;
 
-    private Dictionary<UInt32, DecodedRawFrameMulti> inProgessFrames;
+    private Dictionary<UInt32, DecodedRawFrameMulti> inProgessFrames = new();
     public ulong TimestampNextDeadline;
-    public ConcurrentQueue<DecodedRawFrameMulti> queue;
+    public ConcurrentQueue<DecodedRawFrameMulti> queue = new();
     public bool UsePreviousFrameData;
     public uint FPS;
     public uint MaxTimeBeforeIncompleteRender;
     public uint NActiveCapturers;
+    public bool EnqueueImmediately;
+    private Mutex mut = new Mutex();
+    public RawFrameBuffer(PlaybackBufferSettings settings, ulong timestampNextDeadline, uint fps, uint nActiveCapturers)
+    {
+        HoldPreviousFor = settings.holdFramePreviousFor;
+        UsePreviousFrameData = settings.usePreviousFrameData;
+        FPS = fps;
+        MaxTimeBeforeIncompleteRender = settings.maxTimeBeforeIncompleteRender;
+        NActiveCapturers = nActiveCapturers;
+        EnqueueImmediately = settings.enqueueImmediately;
+    }
+
+    /*public void AddDecodedColors(IntPtr decodedColor, uint captureID, uint frameNr, uint nPoints, ulong targetTimestamp)
+    {
+        DecodedRawFrameSingle dS = AddSingleToRawFrame(captureID, frameNr, nPoints, targetTimestamp);
+        dS.DecodedColor = decodedColor;
+        dS.ColorsCompleted = true;
+    }
+
+    public void AddDecodedDepth(IntPtr decodedDepth, uint captureID, uint frameNr, uint nPoints, ulong targetTimestamp)
+    {
+        DecodedRawFrameSingle dS = AddSingleToRawFrame(captureID, frameNr, nPoints, targetTimestamp);
+        dS.DecodedDepth = decodedDepth;
+        dS.DepthCompleted = true;
+    }*/
+    public void AddSingleAndConvert(DecodedRawFrameSingle s, RawConverter c)
+    {
+        mut.WaitOne();
+        bool succes = inProgessFrames.TryGetValue(s.FrameNr, out DecodedRawFrameMulti d);
+        if (!succes)
+        {
+            d = new DecodedRawFrameMulti(NActiveCapturers, s.FrameNr, 0);
+            inProgessFrames.Add(s.FrameNr, d);
+        }
+        d.AddAndConvertSingle(s, c);
+        mut.ReleaseMutex();
+
+    }
+    private DecodedRawFrameSingle AddSingleToRawFrame(uint captureID, uint frameNr, uint nPoints, ulong targetTimestamp)
+    {
+        bool succes = inProgessFrames.TryGetValue(frameNr, out DecodedRawFrameMulti d);
+        if (!succes)
+        {
+            d = new DecodedRawFrameMulti(NActiveCapturers, frameNr, targetTimestamp);
+            inProgessFrames.Add(frameNr, d);
+        }
+        return d.AddSingle(captureID, nPoints);
+    }
 
     public DecodedRawFrameMulti CheckForCompletedFrames()
     {
         if(!queue.IsEmpty)
         {
-            DecodedRawFrameMulti dec;
-            bool succes = queue.TryDequeue(out dec);
-            if(succes)
+            bool succes = queue.TryDequeue(out DecodedRawFrameMulti dec);
+            if (succes)
             {
-                if(dec.TargetTimestamp >= TimestampNextDeadline)
+                if(EnqueueImmediately || (dec.TargetTimestamp >= TimestampNextDeadline))
                 {
                     SetNextDeadline();
                     return dec;
@@ -63,7 +112,7 @@ public class RawFrameBuffer
         {
             return;
         }
-        if(newestFrame.TargetTimestamp - previousFrame.TargetTimestamp > holdPreviousFor)
+        if(newestFrame.TargetTimestamp - previousFrame.TargetTimestamp > HoldPreviousFor)
         {
             previousFrame = null; // TODO Check if needed
             return;

@@ -84,7 +84,10 @@ public class Logger
         writer.AutoFlush = false;
         nextFlush = DateTime.Now;
         isInited = true;
-        
+
+        RawInvoker.set_logging_settings(loggerSettings.pointCloud.limitLogging, loggerSettings.pointCloud.everyNFrames);
+
+
     }
     public static void Log(string message, bool writeToSocket=false)
     {
@@ -117,7 +120,9 @@ public class Logger
 
     #region Conditional Logging
     private static string LogCommon(string name, Logger.Status status) => $"id={name} ts={Time} status={((int)status)}";
+    private static string LogCommonClientEnc(string name, Logger.Status status, uint clientID, uint capturerID, uint frameNr) => $"{LogCommonClient(name, status, clientID)} capturerID={capturerID} frameNr={frameNr}";
     private static string LogCommonEnc(string name, Logger.Status status, uint capturerID, uint frameNr) => $"{LogCommon(name, status)} capturerID={capturerID} frameNr={frameNr}";
+    private static string LogCommonClient(string name, Logger.Status status, uint clientID) => $"{LogCommon(name, status)} clientID={clientID}";
 
     [Conditional("ENABLE_LOGGING")]
     public static void LogStatus(string name, Logger.Status status)
@@ -128,7 +133,12 @@ public class Logger
     [Conditional("ENABLE_LOGGING")]
     public static void LogStatusClient(string name, Logger.Status status, uint clientID)
     {
-        Log($"{LogCommon(name, status)} client={clientID}");
+        Log(LogCommonClient(name, status, clientID));
+    }
+    [Conditional("ENABLE_LOGGING")]
+    public static void LogStatusClientAndCapturer(string name, Logger.Status status, uint clientID, uint capturerID)
+    {
+        Log($"{LogCommonClient(name, status, clientID)} capturerID={capturerID}");
     }
 
     [Conditional("ENABLE_LOGGING")]
@@ -136,6 +146,12 @@ public class Logger
     {
         
         Log(LogCommonEnc(name, status, capturerID, frameNr));
+    }
+    [Conditional("ENABLE_LOGGING")]
+    public static void LogPCFrameStatus(string name, Logger.Status status, uint clientID, uint capturerID, uint frameNr)
+    {
+
+        Log(LogCommonClientEnc(name, status, clientID, capturerID, frameNr));
     }
 
     [Conditional("ENABLE_LOGGING")]
@@ -146,6 +162,16 @@ public class Logger
             LogPCFrameStatus(name, status, capturerID, frameNr);
         }
     }
+
+    [Conditional("ENABLE_LOGGING")]
+    public static void LogPCFrameStatusLimited(string name, Logger.Status status, uint clientID, uint capturerID, uint frameNr)
+    {
+        if (!loggerSettings.pointCloud.limitLogging || (frameNr % loggerSettings.pointCloud.everyNFrames == 0))
+        {
+            LogPCFrameStatus(name, status, clientID, capturerID, frameNr);
+        }
+    }
+
     [Conditional("ENABLE_LOGGING")]
     public static void LogPCFrameStatusSizeLimited(string name, Logger.Status status, uint capturerID, uint frameNr, uint size)
     {
