@@ -7,6 +7,7 @@ public class ColorDecoder : IDisposable
 {
     const string NAME = "ColorDecoderUnity";
     public bool IsValid { get; private set; }
+    public readonly ColorCodecType CodecType;
     private IntPtr ptr;
     private bool disposedValue;
 
@@ -14,6 +15,7 @@ public class ColorDecoder : IDisposable
     private readonly uint capturerID;
     public ColorDecoder(ColorCodecType codecType, uint _clientID, uint _capturerID)
     {
+        CodecType = codecType;
         clientID = _clientID;
         capturerID = _capturerID;
         Logger.LogStatusClientAndCapturer(NAME, Logger.Status.Creating, clientID, capturerID);

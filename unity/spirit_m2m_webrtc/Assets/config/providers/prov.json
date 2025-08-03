@@ -1,0 +1,19 @@
+{
+    "defaultProvider": "loopback",
+    "selectedCodecMode": "mdc",
+    "providers": [
+        {
+            "key": "loopback",
+            "type": "loopback",
+            "providerSettings": {
+                "name": "Loopback Provider",
+                "description": "A loopback provider for testing purposes"
+            },
+            "sendingTracks": [
+               {
+                    "trackID": "video_0_1"
+               } 
+            ]
+        }
+    ]
+}

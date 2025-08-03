@@ -7,6 +7,7 @@ using UnityEngine;
 [System.Serializable]
 public class LoopbackSessionManagerInfo 
 {
+    public string selectedCodecMode;
     public LoopbackUserInfo[] loopbackUsers;
     public static LoopbackSessionManagerInfo CreateFromJSON(string path)
     {
@@ -24,7 +25,6 @@ public class LoopbackUserInfo
 [System.Serializable]
 public class LoopbackTrackInfo
 {
-    public uint capturerID;
-    public uint trackID;
+    public string trackID;
 
 }

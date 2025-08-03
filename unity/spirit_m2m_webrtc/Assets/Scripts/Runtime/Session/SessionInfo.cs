@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using JetBrains.Annotations;
+using Newtonsoft.Json.Linq;
 
 [System.Serializable]
 public class SessionInfo
@@ -24,12 +25,16 @@ public class SessionInfo
 
     public FrameMode frameMode;
     public FrameCodec frameCodec;
+    public List<ModeCodecPair> supportedModes; // Currently mdc or raw. In future maybe just point cloud aswell
+    public List<string> supportedCapturers;
+    public List<CapturerConfigPair> capturerConfigs;
     public bool useMultiCam = false;
     public uint activeCamIndex = 0;
     public string capturerName = "artificial";
     public string artificalConfigPath = "config/camera/artificial.json";
     public string realsenseConfigPath = "config/camera/realsense.json";
     public string prerecordedKinectConfigPath = "config/camera/prerecKinect.json";
+    public string providersConfigPath = "config/providers/prov.json";
     //public ArtificialSettings artificialSettings;
     //public RealsenseSettings realsenseSettings;
     //public PrerecordedKinectSettings prerecKinectSettings;
@@ -44,6 +49,23 @@ public class SessionInfo
     }
 
 }
+
+
+[System.Serializable]
+public class CapturerConfigPair
+{
+    public string capturerName;
+    public string configPath;
+}
+
+[System.Serializable]
+public class ModeCodecPair
+{
+    public string modeName; 
+    public List<string> supportedCodecs;
+    public JObject modeSettings; // e.g. mdc sampling percentages which are then used as track settings. Also limit PC to X points maybe
+}
+
 
 [System.Serializable]
 public class StartPosition
@@ -139,6 +161,7 @@ public class SessionManagerSettings
 public class LoggerSettings
 {
     public string logPath = "";
+    public bool appendTimestampToPath = true;
     public uint flushInterval = 100; // in ms
     public LoggerSettingsPointCloud pointCloud;
     public LoggerSettingsAudio audio;

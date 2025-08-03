@@ -151,11 +151,11 @@ public class CapturingTestMultiRawWithBuffer : MonoBehaviour
             DecodedRawFrame pcData2;
             if (!inProgessFrames2.TryGetValue(frameNr, out pcData2))
             {
-                pcData2 = new DecodedRawFrame(frameNr, (int)nPoints, timestamp);
+             //   pcData2 = new DecodedRawFrame(frameNr, (int)nPoints, timestamp);
                 inProgessFrames2.Add(frameNr, pcData2);
             }
             pcData2.DecodedDepth = decoded_depth;
-            pcData2.PointsCompleted = true;
+            pcData2.DepthCompleted = true;
             if (pcData2.IsCompleted)
             {
 
@@ -195,7 +195,7 @@ public class CapturingTestMultiRawWithBuffer : MonoBehaviour
         
         Application.targetFrameRate = 120;
         var sessionInfo = SessionInfo.CreateFromJSON(Application.dataPath + "/config/session_config.json");
-        rawFrameBuffer = new RawFrameBuffer(sessionInfo.playbackBufferSettings, 0, 15, 2);
+       // rawFrameBuffer = new RawFrameBuffer(sessionInfo.playbackBufferSettings, 0, 15, 2);
         Debug.Log(sessionInfo.sfuAddress + " " + sessionInfo.peerUDPPort);
         ClientID = sessionInfo.clientID;
         frameMode = FrameMode.RawData;

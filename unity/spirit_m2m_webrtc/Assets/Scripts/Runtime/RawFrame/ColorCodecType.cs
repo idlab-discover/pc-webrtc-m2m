@@ -8,6 +8,7 @@ public enum ColorCodecType
 {
     Jpeg = 0,
     WebP = 1,
+    Invalid = 9999,
 }
 
 public class ColorCodecSettings : IDisposable
@@ -52,17 +53,35 @@ public class ColorCodecHelper
 {
     public static ColorCodecSettings GetCodecSettings(RawEncodingSettings settings)
     {
-        switch (settings.colorCodecName.ToLower())
+        ColorCodecType cType = GetTypeForString(settings.colorCodecName);
+        switch (cType)
         {
-            case "jpeg": {
+            case ColorCodecType.Jpeg: {
                     JPEGSettingsEx jpegSettings = new() { quality = settings.jpegSettings.quality };
-                    return new ColorCodecSettings(ColorCodecType.Jpeg, GCHandle.Alloc(jpegSettings, GCHandleType.Pinned));
+                    return new ColorCodecSettings(cType, GCHandle.Alloc(jpegSettings, GCHandleType.Pinned));
                 }
-            case "webp": {
+            case ColorCodecType.WebP: {
                     WebPSettingsEx webPSettings = new() { quality = settings.webPSettings.quality,  method = settings.webPSettings.method};
-                    return new ColorCodecSettings(ColorCodecType.WebP, GCHandle.Alloc(webPSettings, GCHandleType.Pinned));
+                    return new ColorCodecSettings(cType, GCHandle.Alloc(webPSettings, GCHandleType.Pinned));
+                }
+            default: {
+                    return null;
                 }
         }
-        return null;
+    }
+    public static ColorCodecType GetTypeForString(string type)
+    {
+        switch(type.ToLower())
+        {
+            case "jpeg": {
+                    return ColorCodecType.Jpeg;
+                }
+            case "webp": {
+                    return ColorCodecType.WebP;
+                }
+            default: {
+                    return ColorCodecType.Invalid;
+                }
+        }
     }
 }

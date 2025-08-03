@@ -2,6 +2,7 @@
     "clientID": 0,
     "sfuAddress": "127.0.0.1:8080",
     "peerUDPPort": 9000,
+    "providersConfigPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-webrtc-m2m\\unity\\spirit_m2m_webrtc\\Assets\\config\\providers\\prov.json",
     "startPositions": [
         {"x": 19.295, "y":0.974, "z": -0.35},
         {"x": 19.0, "y":0.974, "z": -0.931},
@@ -15,11 +16,24 @@
     "pushBack": {"x": 0.229103, "y":0.0, "z": 0},
     "sessionManagerSettings": {
         "type": "loopback",
-        "defaultName": "Loopback Session",
+        "defaultName": "Loopback_Session",
         "configPath": "/config/session/loopback_0.json"
     },
+    "supportedModes": [
+        {
+            "modeName": "mdc",
+            "supportedCodecs": [
+                "draco"
+            ],
+            "modeSettings": {
+                "samplingPercentages": [60, 25, 15],
+                "maxCompletePointCount": 1000000
+            }
+        }
+    ],
     "loggerSettings": {
-        "logPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-webrtc-m2m\\session_log.txt",
+        "logPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-webrtc-m2m\\logs\\session_log",
+        "appendTimestampToPath": false,
         "flushInterval": 100,
         "pointCloud": {
             "limitLogging": true,

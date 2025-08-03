@@ -8,6 +8,7 @@ public enum DepthCodecType
 {
     VLE = 0,
     ZDepth = 1,
+    Invalid = 9999,
 }
 
 public class DepthCodecSettings : IDisposable
@@ -47,17 +48,39 @@ public class DepthCodecHelper
 {
     public static DepthCodecSettings GetCodecSettings(RawEncodingSettings settings)
     {
-        switch (settings.depthCodecName.ToLower())
+        DepthCodecType cType = GetTypeForString(settings.depthCodecName);
+        switch (cType)
+        {
+            case DepthCodecType.VLE:
+                {
+                    return new DepthCodecSettings(cType);
+                }
+            case DepthCodecType.ZDepth:
+                {
+                    return new DepthCodecSettings(cType);
+                }
+            default:
+                {
+                    return null;
+                }
+        }
+    }
+    public static DepthCodecType GetTypeForString(string type)
+    {
+        switch (type.ToLower())
         {
             case "vle":
                 {
-                    return new DepthCodecSettings(DepthCodecType.VLE);
+                    return DepthCodecType.VLE;
                 }
             case "zdepth":
                 {
-                    return new DepthCodecSettings(DepthCodecType.ZDepth);
+                    return DepthCodecType.ZDepth;
+                }
+            default:
+                {
+                    return DepthCodecType.Invalid;
                 }
         }
-        return null;
     }
 }

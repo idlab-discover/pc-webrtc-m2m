@@ -1,0 +1,22 @@
+id=SessionManagerRepository ts=1753991991933 status=FactoryCreate type=loopback configPath=/config/session/loopback_0.json
+id=SessionManagerRepository ts=1753991991943 status=FactoryCreateSucces type=loopback configPath=/config/session/loopback_0.json
+id=LoopbackSessionManager ts=1753991991946 status=ManagerConnectionStart
+id=LoopbackSessionManager ts=1753991991946 status=ManagerConnectionSuccess
+id=CodecModeRepository ts=1753991992065 status=FactoryCreate type=mdc
+id=CodecModeRepository ts=1753991992065 status=FactoryCreateSucces type=mdc
+id=MDCCodecMode ts=1753991992077 status=GatheringTrackInfo samplingPercantages=[60|25|15] maxCompletePointCount=1000000
+id=MDCCodecMode ts=1753991992086 status=NewTrackDiscovered trackID=video_0_0 supportedCodecs=[draco] samplingPercentage=60
+id=MDCCodecMode ts=1753991992086 status=NewTrackDiscovered trackID=video_0_1 supportedCodecs=[draco] samplingPercentage=25
+id=MDCCodecMode ts=1753991992086 status=NewTrackDiscovered trackID=video_0_2 supportedCodecs=[draco] samplingPercentage=15
+id=LoopbackSessionManager ts=1753991992090 status=ManagerSessionCreating sessionName=Loopback_Session
+id=LoopbackSessionManager ts=1753991992109 status=ManagerSessionCreated
+id=LoopbackSessionManager ts=1753991992110 status=ManagerSessionJoined
+id=LoopbackSessionManager ts=1753991992114 status=ManagerProviderRequested
+id=ConnectionProviderRepository ts=1753991992221 status=FactoryCreate type=loopback key=loopback
+id=ConnectionProviderRepository ts=1753991992222 status=FactoryCreateSucces type=loopback key=loopback
+id=ConnectedClient ts=1753991992224 status=ClientAddVideoTrack clientID=0 trackID=video_0_1 provider=loopback
+id=ConnectedClient ts=1753991992224 status=ClientAddVideoTrack clientID=0 trackID=video_0_0 provider=loopback
+id=ConnectedClient ts=1753991992225 status=ClientAddVideoTrack clientID=0 trackID=video_0_2 provider=loopback
+id=LoopbackSessionManager ts=1753991992227 status=ManagerClientConnected clientID=1
+id=ConnectedClient ts=1753991992229 status=ClientAddVideoTrack clientID=1 trackID=video_0_1 provider=loopback
+id=ConnectedClient ts=1753991992230 status=ClientAddVideoTrack clientID=1 trackID=video_0_2 provider=loopback

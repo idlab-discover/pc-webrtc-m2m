@@ -11,7 +11,7 @@ public abstract class NetworkStreamerBase : IDisposable
         private NetworkStreamerBase parent;
         private List<Thread> videoWorkerThreads = new();
         private Thread audioWorkerThread;
-        private Mutex mut = new Mutex();
+        private readonly object _lock = new();
 
         public uint ClientID;
 
@@ -22,13 +22,15 @@ public abstract class NetworkStreamerBase : IDisposable
 
         public void StartPollVideoTrack(uint clientID, uint capturerID, uint descriptionID, OnStreamDataReceivedCb cb)
         {
-            mut.WaitOne();
-            Thread worker = new Thread(() =>
+            Thread worker;
+            lock (_lock)
             {
-                pollVideoTrackInternal(clientID, capturerID, descriptionID, cb);
-            });
-            videoWorkerThreads.Add(worker);
-            mut.ReleaseMutex();
+                worker = new Thread(() =>
+                {
+                    pollVideoTrackInternal(clientID, capturerID, descriptionID, cb);
+                });
+                videoWorkerThreads.Add(worker);
+            }
             worker.Start();
         }
         
@@ -38,11 +40,12 @@ public abstract class NetworkStreamerBase : IDisposable
             {
                 pollAudioTrackInternal(clientID, cb);
             });
+            audioWorkerThread.Start();
         }
         protected abstract void pollVideoTrackInternal(uint clientID, uint capturerID, uint descriptionID, OnStreamDataReceivedCb cb);
         protected abstract void pollAudioTrackInternal(uint clientID, OnStreamDataReceivedCb cb);
     }
-    private List<System.Threading.Thread> videoWorkerThreads;
+
     protected Dictionary<uint, NetworkStreamerClientBase> clients;
     private bool disposedValue;
     protected readonly object _lock = new();
@@ -109,6 +112,7 @@ public abstract class NetworkStreamerBase : IDisposable
             if (!disposedValue)
             {
                 disposeInternal();
+                
                 disposedValue = true;
             }
         }

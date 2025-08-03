@@ -7,8 +7,9 @@ using UnityEngine;
 
 public static class SessionManagerRepository 
 {
+    private const string NAME = "SessionManagerRepository";
     private static readonly Dictionary<string, ConstructorInfo> constructors = new();
-    public static Dictionary<string, SessionManagerBase> Managers;
+    public static SessionManagerBase ActiveManager;
     static SessionManagerRepository()
     {
         registerAll();
@@ -23,25 +24,22 @@ public static class SessionManagerRepository
         {
             var attr = type.GetCustomAttribute<SessionManagerRegisterAttribute>();
             var ctor = type.GetConstructor(new[] { typeof(string) });
-            constructors[attr.Key] = ctor;
+            constructors[attr.Key.ToLower()] = ctor;
         }
     }
 
 
-    public static SessionManagerBase CreateAndGetStreamer(string type, string key, string configPath)
+    public static SessionManagerBase CreateAndGetManager(string type, string configPath)
     {
-        if(Managers.ContainsKey(key))
-        {
-            return null; // TODO maybe just return the manager?
-        }
-
-        bool succes = constructors.TryGetValue(type, out var constructor);
+        Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreate, $"type={type} configPath={configPath}");
+        bool succes = constructors.TryGetValue(type.ToLower(), out var constructor);
         if(!succes)
         {
+            Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreateFailed, $"type={type} configPath={configPath}");
             return null;
         }
-        SessionManagerBase manager = (SessionManagerBase)constructor.Invoke(new object[] { configPath });
-        Managers.Add(key, manager);
-        return manager;
+        ActiveManager = (SessionManagerBase)constructor.Invoke(new object[] { configPath });
+        Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreateSucces, $"type={type} configPath={configPath}");
+        return ActiveManager;
     }
 }

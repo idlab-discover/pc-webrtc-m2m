@@ -7,28 +7,21 @@ using System.Threading;
 using System.Xml.Linq;
 using UnityEngine;
 
-public class RawFrameBuffer 
+public class RawFrameBuffer : RenderablePointCloudBuffer
 {
     private DecodedRawFrameMulti previousFrame = null; // Used to potentially repair next frames
-    public uint HoldPreviousFor;
 
     private Dictionary<UInt32, DecodedRawFrameMulti> inProgessFrames = new();
-    public ulong TimestampNextDeadline;
+    
     public ConcurrentQueue<DecodedRawFrameMulti> queue = new();
-    public bool UsePreviousFrameData;
-    public uint FPS;
-    public uint MaxTimeBeforeIncompleteRender;
+    
+    
     public uint NActiveCapturers;
-    public bool EnqueueImmediately;
+    
     private Mutex mut = new Mutex();
-    public RawFrameBuffer(PlaybackBufferSettings settings, ulong timestampNextDeadline, uint fps, uint nActiveCapturers)
+    public RawFrameBuffer(PlaybackBufferSettings settings, ulong timestampNextDeadline, uint fps) : base(settings, timestampNextDeadline, fps)
     {
-        HoldPreviousFor = settings.holdFramePreviousFor;
-        UsePreviousFrameData = settings.usePreviousFrameData;
-        FPS = fps;
-        MaxTimeBeforeIncompleteRender = settings.maxTimeBeforeIncompleteRender;
-        NActiveCapturers = nActiveCapturers;
-        EnqueueImmediately = settings.enqueueImmediately;
+            
     }
 
     /*public void AddDecodedColors(IntPtr decodedColor, uint captureID, uint frameNr, uint nPoints, ulong targetTimestamp)
@@ -68,7 +61,7 @@ public class RawFrameBuffer
         return d.AddSingle(captureID, nPoints);
     }
 
-    public DecodedRawFrameMulti CheckForCompletedFrames()
+    public override RenderablePointCloud CheckForCompletedFrames()
     {
         if(!queue.IsEmpty)
         {

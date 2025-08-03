@@ -111,7 +111,7 @@ public class CapturingTestMultiRaw : MonoBehaviour
             DecodedRawFrame pcData2;
             if (!inProgessFrames2.TryGetValue(frameNr, out pcData2))
             {
-                pcData2 = new DecodedRawFrame(frameNr, (int)nPoints, timestamp);
+              //  pcData2 = new DecodedRawFrame(frameNr, (int)nPoints, timestamp);
                 inProgessFrames2.Add(frameNr, pcData2);
             }
             pcData2.DecodedColor = decoded_color;
@@ -150,11 +150,11 @@ public class CapturingTestMultiRaw : MonoBehaviour
             DecodedRawFrame pcData2;
             if (!inProgessFrames2.TryGetValue(frameNr, out pcData2))
             {
-                pcData2 = new DecodedRawFrame(frameNr, (int)nPoints, timestamp);
+         //       pcData2 = new DecodedRawFrame(frameNr, (int)nPoints, timestamp);
                 inProgessFrames2.Add(frameNr, pcData2);
             }
             pcData2.DecodedDepth = decoded_depth;
-            pcData2.PointsCompleted = true;
+            pcData2.DepthCompleted = true;
             if (pcData2.IsCompleted)
             {
 

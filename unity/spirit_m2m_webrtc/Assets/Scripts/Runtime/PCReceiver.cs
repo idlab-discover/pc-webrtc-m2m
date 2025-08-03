@@ -19,6 +19,7 @@ public class PCReceiver : MonoBehaviour
     public uint ClientID;
     public int NDescriptions;
     public bool useAudio;
+    private RenderablePointCloudPipeline pipeline;
     private List<bool> activeDescriptions = new List<bool> { false, false, false };
     private List<System.Threading.Thread> workerThreads = new List<System.Threading.Thread>();
     private System.Threading.Thread audioThread;
@@ -46,6 +47,7 @@ public class PCReceiver : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+       
         meshFilters = new(PCRenderers.Count);
         foreach(var p in PCRenderers)
         {
@@ -319,7 +321,7 @@ public class PCReceiver : MonoBehaviour
              DecodedRawFrame rawData;
              if (!inProgessFramesRaw.TryGetValue((uint)frameNr, out rawData))
              {
-                 rawData = new DecodedRawFrame(frameNr, (int)nPoints, timestamp);
+                // rawData = new DecodedRawFrame(frameNr, (int)nPoints, timestamp);
                  inProgessFramesRaw.Add((uint)frameNr, rawData);
              }
           

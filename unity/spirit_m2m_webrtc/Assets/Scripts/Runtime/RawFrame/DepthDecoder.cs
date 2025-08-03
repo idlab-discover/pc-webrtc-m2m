@@ -1,3 +1,4 @@
+using FMODUnity;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ public class DepthDecoder : IDisposable
 {
     const string NAME = "DepthDecoderUnity";
     public bool IsValid { get; private set; }
+    public readonly DepthCodecType CodecType;
     private IntPtr ptr;
     private bool disposedValue;
 
@@ -14,6 +16,7 @@ public class DepthDecoder : IDisposable
     private readonly uint capturerID;
     public DepthDecoder(DepthCodecType codecType, uint _clientID, uint _capturerID)
     {
+        CodecType = codecType;
         clientID = _clientID;
         capturerID = _capturerID;
         Logger.LogStatusClientAndCapturer(NAME, Logger.Status.Creating, clientID, capturerID);

@@ -60,12 +60,53 @@ public class Logger
         StartRawConversion = 500,
         EndRawConversion = 501,
 
+        // SessionManager Status
+        ManagerConnectionStart = 1000,
+        ManagerConnectionSuccess = 1001,
+        ManagerConnectionFailed = 1002,
+        ManagerConnectionClose = 1003,
+        ManagerProviderRequested = 1010,
+        ManagerProviderRemoved = 1011,
+        ManagerProviderChange = 1012,
+        ManagerClientConnected = 1020,
+        ManagerClientDisconnected = 1021,
+        ManagerSessionCreating = 1030,
+        ManagerSessionCreated = 1031,
+        ManagerSessionJoining = 1032,
+        ManagerSessionJoined =  1033,
+        ManagerSessionLeft = 1034,
+        ManagerSessionRejoined = 1035,
+        ManagerSessionClosed = 1036,
+
+        // ConnectionProvider Status
+        ProviderConnectionStart = 2000,
+        ProviderConnectionSuccess = 2001,
+        ProviderConnectionFailed = 2002,
+        ProviderConnectionClose = 2003,
+
+        // Client Status
+        ClientAddVideoTrack = 3000,
+        ClientRemoveVideoTrack = 3001,
+        ClientAddAudioTrack = 3002,
+        ClientRemoveAudioTrack = 3003,
+        ClientTrackAlreadyExists = 3004,
+        ClientTrackNotFound = 3005,
+
+        // TrackInfo Status
+        GatheringTrackInfo = 4000,
+        NewTrackDiscovered = 4001,
+
+        // Misc Status
+        FactoryCreate = 8000,
+        FactoryCreateSucces = 8001,
+        FactoryCreateFailed = 8002,
         // Debugging Status
         StartRawColorCopy = 9000,
         EndRawColorCopy = 9001,
     }
     public static long Time => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
+    public static string FilePath { get; private set; }
     private static readonly object lockObj = new object();
     private static StreamWriter writer;
     private static LoggerSettings loggerSettings;
@@ -80,7 +121,13 @@ public class Logger
             return;
         }
         loggerSettings = _loggerSettings;
-        writer = new StreamWriter(loggerSettings.logPath, false);
+        FilePath = loggerSettings.logPath;
+        if (loggerSettings.appendTimestampToPath)
+        {
+            FilePath += "_" + DateTime.Now.ToString("yyyyMMdd_HH-mm-ss");
+        }
+        FilePath += ".txt";
+        writer = new StreamWriter(FilePath, false);
         writer.AutoFlush = false;
         nextFlush = DateTime.Now;
         isInited = true;
@@ -119,15 +166,28 @@ public class Logger
     }
 
     #region Conditional Logging
-    private static string LogCommon(string name, Logger.Status status) => $"id={name} ts={Time} status={((int)status)}";
+    private static string LogCommon(string name, Logger.Status status)
+    {
+#if LOGGER_OUT_STRING
+        return $"id={name} ts={Time} status={status}";
+#else
+        return $"id={name} ts={Time} status={((int)status)}";
+#endif 
+    } 
     private static string LogCommonClientEnc(string name, Logger.Status status, uint clientID, uint capturerID, uint frameNr) => $"{LogCommonClient(name, status, clientID)} capturerID={capturerID} frameNr={frameNr}";
     private static string LogCommonEnc(string name, Logger.Status status, uint capturerID, uint frameNr) => $"{LogCommon(name, status)} capturerID={capturerID} frameNr={frameNr}";
     private static string LogCommonClient(string name, Logger.Status status, uint clientID) => $"{LogCommon(name, status)} clientID={clientID}";
 
+    private static string LogCommonTrackStatus(string name, Logger.Status status, uint clientID, string trackID) => $"{LogCommon(name, status)} clientID={clientID} trackID={trackID}";
     [Conditional("ENABLE_LOGGING")]
     public static void LogStatus(string name, Logger.Status status)
     {
         Log(LogCommon(name, status));
+    }
+    [Conditional("ENABLE_LOGGING")]
+    public static void LogStatusWithMessage(string name, Logger.Status status, string message)
+    {
+        Log($"{LogCommon(name, status)} {message}");
     }
 
     [Conditional("ENABLE_LOGGING")]
@@ -179,6 +239,17 @@ public class Logger
         {
             Log($"{LogCommonEnc(name, status, capturerID, frameNr)} size={size}");
         }
+    }
+
+    [Conditional("ENABLE_LOGGING")]
+    public static void LogTrackStatus(string name, Logger.Status status, uint clientID, string trackID)
+    {
+        Log(LogCommonTrackStatus(name, status, clientID, trackID));
+    }
+    [Conditional("ENABLE_LOGGING")]
+    public static void LogTrackStatusWithProvider(string name, Logger.Status status, uint clientID, string trackID, string provider)
+    {
+        Log($"{LogCommonTrackStatus(name, status, clientID, trackID)} provider={provider}");
     }
     #endregion
 }

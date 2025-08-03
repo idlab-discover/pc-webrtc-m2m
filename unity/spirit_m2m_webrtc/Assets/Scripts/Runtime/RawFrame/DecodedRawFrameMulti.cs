@@ -19,14 +19,9 @@ public class DecodedRawFrameSingle : DecodedRawFrameBase
 
 }
 
-public class DecodedRawFrameMulti
+public class DecodedRawFrameMulti : RenderablePointCloud
 {
-    public ulong TargetTimestamp;
-    public uint FrameNr;
     public uint NCapturers;
-    public uint TotalPoints;
-    public Vector3[] Points;
-    public Color32[] Colors;
     public DecodedRawFrameSingle[] Singles;
    
     public bool IsCompleted { get {
@@ -40,14 +35,10 @@ public class DecodedRawFrameMulti
             return c1; 
     } }
     private Mutex mut = new Mutex();
-    public DecodedRawFrameMulti(uint nCapturers, uint frameNr, ulong targetTimestamp)
+    public DecodedRawFrameMulti(uint nCapturers, uint frameNr, ulong targetTimestamp) : base(targetTimestamp, frameNr, 0)
     {
-        FrameNr = frameNr;
-        Points = new Vector3[0];
-        Colors = new Color32[0];
         NCapturers = nCapturers;
         Singles = new DecodedRawFrameSingle[NCapturers];
-        TargetTimestamp = targetTimestamp;
     }
     public DecodedRawFrameSingle AddSingle(uint capturerID, uint size) // Call when receiving either the decoded depth or decoded color frame for the first time for this full frame
     {
