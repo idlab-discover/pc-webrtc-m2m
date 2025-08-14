@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class LoopbackSender : NetworkSenderBase
@@ -25,9 +24,9 @@ public class LoopbackSender : NetworkSenderBase
         return (int)size;
     }
 
-    public override int SendVideoData(IntPtr data, uint size, uint capturerID, uint descriptionID)
+    public override int SendVideoData(string trackID, IntPtr data, uint size)
     {
-        provider.SendVideoToAllClients(data, size, capturerID, descriptionID);
+        provider.SendVideoToAllClients(trackID, data, size);
         return (int)size;
     }
 

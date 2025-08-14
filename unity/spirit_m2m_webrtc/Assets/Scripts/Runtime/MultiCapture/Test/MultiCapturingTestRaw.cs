@@ -374,7 +374,7 @@ public class MultiCapturingTestRaw : MonoBehaviour
                             Debug.Log($"Get size");
                             uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
                             Debug.Log($"Number of points: {nPoints}");
-                            int returnCode = DracoInvoker.encode_pc(frame);
+                        //    int returnCode = DracoInvoker.encode_pc(frame);
                         }
                         else
                         {

@@ -3,14 +3,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using UnityEditor.PackageManager;
-using UnityEngine;
-using UnityEngine.Rendering.Universal;
+
 
 
 [ConnectionProviderRegister("Loopback")]
-public class LoopbackProvider : ConnectionProviderBase
+public class LoopbackProvider : ConnectionProviderBase, ISenderSupported, IReceiverSupported
 {
+    protected override string NAME => "LoopbackProvider";
+   
     public struct LoopbackFrame
     {
         public IntPtr NextPtr;
@@ -37,9 +37,10 @@ public class LoopbackProvider : ConnectionProviderBase
     }
     
     private readonly object _lock = new object();
-    private Dictionary<uint, LoopbackReceiver> receivers; // In general you dont want to do this but we need it to implement the loopback mechanism
+    private LoopbackSender sender;
+    private Dictionary<uint, LoopbackReceiver> receivers = new(); // In general you dont want to do this but we need it to implement the loopback mechanism
 
-    protected override string NAME => throw new NotImplementedException();
+
 
     public LoopbackProvider(string ID, JObject jsonSettings) : base(ID, jsonSettings) { 
         
@@ -61,13 +62,13 @@ public class LoopbackProvider : ConnectionProviderBase
             receivers.Remove(clientID);
         }
     }
-    public void SendVideoToAllClients(IntPtr data, uint size, uint capturerID, uint descriptionID)
+    public void SendVideoToAllClients(string trackID, IntPtr data, uint size)
     {
         lock (_lock)
         {
             foreach (var r in receivers.Values)
             {
-                r.SetVideoTrackData(data, size, capturerID, descriptionID);
+                r.SetVideoTrackData(trackID, data, size);
             }
         }
     }
@@ -92,5 +93,31 @@ public class LoopbackProvider : ConnectionProviderBase
     protected override void disconnectInternal()
     {
         IsConnected= false;
+    }
+
+    public NetworkSenderBase GetSender(ReceivingTrackInfo track)
+    {
+        if(sender == null)
+        {
+            sender = new LoopbackSender(this.ID);
+        }
+        return sender;
+    }
+
+    public NetworkReceiverBase GetReceiver(ReceivingTrackInfo track, uint clientID)
+    {
+        if(receivers.TryGetValue(clientID, out var receiver))
+        {
+            return receiver;
+        }
+        else
+        {
+            receiver = new LoopbackReceiver(this.ID, clientID);
+            lock(_lock)
+            {
+                receivers[clientID] = receiver;
+            }
+            return receiver;
+        }
     }
 }

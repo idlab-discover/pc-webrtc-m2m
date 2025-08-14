@@ -41,7 +41,7 @@ void EncodingQueue::complete_encoding(Description* dsc)
     }
     lk.unlock();
     // TODO do description finished callback
-    description_done_callback_instance(dsc, dsc->enc->get_raw_data(), dsc->n_points_in_total, dsc->enc->get_encoded_size(), dsc->frame_nr, dsc->description_nr, dsc->timestamp);
+    description_done_callback_instance(dsc, dsc->enc->get_raw_data(), dsc->n_points_in_total, dsc->enc->get_encoded_size(), dsc->capturer_id, dsc->frame_nr, dsc->description_nr, dsc->timestamp);
 }
 
 void EncodingQueue::internal_enqueue_pc(PointCloud *pc)
@@ -56,6 +56,7 @@ void EncodingQueue::internal_enqueue_pc(PointCloud *pc)
     q_enqueued.push(true);
     free_pc_callback_instance(current_in_wait);
     current_in_wait = nullptr;
+
     for(auto dsc : descs) {
         Description* dsc_copy = dsc;
         pool.queue_job([this, dsc_copy] {
@@ -67,12 +68,19 @@ void EncodingQueue::internal_enqueue_pc(PointCloud *pc)
 }
 
 
-void register_description_done_callback(DescriptionDoneCallback cb)
+void register_description_done_callback(EncodingQueue* enc_queue, DescriptionDoneCallback cb)
 {
-    description_done_callback_instance = cb;
+    if(enc_queue == nullptr) {
+        return;
+    }
+    enc_queue->register_description_done_callback(cb);
 }
 
-void register_free_pc_callback(FreePointCloudCallback cb)
+void register_free_pc_callback(EncodingQueue* enc_queue, FreePointCloudCallback cb)
 {
-    free_pc_callback_instance = cb;
+    if(enc_queue == nullptr) {
+        return;
+    }
+    enc_queue->register_free_pc_callback(cb);
 }
+

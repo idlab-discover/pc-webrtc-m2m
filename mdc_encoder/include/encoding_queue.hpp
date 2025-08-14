@@ -10,14 +10,14 @@
 #include "description.h"
 #include "threadpool.h"
 #include "framework.h"
-extern "C" {
-    typedef void(*DescriptionDoneCallback)(Description* dsc, char* raw_data_ptr, uint32_t n_points_in_total, uint32_t dsc_size, uint32_t frame_nr, uint32_t dsc_nr, uint64_t timestamp);
-    static DescriptionDoneCallback description_done_callback_instance = nullptr;
-    typedef void(*FreePointCloudCallback)(PointCloud* pc);
-    static FreePointCloudCallback free_pc_callback_instance = nullptr;
 
-    DLLExport void register_description_done_callback(DescriptionDoneCallback cb);
-	DLLExport void register_free_pc_callback(FreePointCloudCallback cb);
+class EncodingQueue;
+extern "C" {
+    typedef void(*DescriptionDoneCallback)(Description* dsc, char* raw_data_ptr, uint32_t n_points_in_total, uint32_t dsc_size, uint32_t capturer_id, uint32_t frame_nr, uint32_t dsc_nr, uint64_t timestamp);
+    typedef void(*FreePointCloudCallback)(PointCloud* pc);
+
+    DLLExport void register_description_done_callback(EncodingQueue* enc_queue, DescriptionDoneCallback cb);
+	DLLExport void register_free_pc_callback(EncodingQueue* enc_queue, FreePointCloudCallback cb);
 }
 
 
@@ -27,13 +27,21 @@ class EncodingQueue {
             pool.start(3);
         };
         ~EncodingQueue() {
+           
+        };
+        void stop() {
             pool.stop();
-        }
+        };
         // TODO stop threads
         int enqueue_pc(PointCloud* pc);
         
         // ###### Callbacks #########
-        
+         void register_description_done_callback(DescriptionDoneCallback cb) {
+            description_done_callback_instance = cb;
+        }
+        void register_free_pc_callback(FreePointCloudCallback cb) {
+            free_pc_callback_instance = cb;
+        }
         
     private:
         std::mutex m_enqueue;
@@ -41,6 +49,8 @@ class EncodingQueue {
         PointCloud* current_in_wait = nullptr;
         std::queue<bool> q_enqueued;
         unsigned int max_queue;
+        DescriptionDoneCallback description_done_callback_instance = nullptr;
+        FreePointCloudCallback free_pc_callback_instance = nullptr;
         std::map<unsigned int, unsigned int> coding_status;
         void complete_encoding(Description* dsc);
         ThreadPool pool;

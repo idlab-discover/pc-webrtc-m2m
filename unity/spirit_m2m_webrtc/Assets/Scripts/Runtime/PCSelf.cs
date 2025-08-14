@@ -148,8 +148,8 @@ public class PCSelf : MonoBehaviour
     {
         if(SessionInfo.frameCodec == FrameCodec.Draco)
         {
-            DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
-            DracoInvoker.register_free_pc_callback(OnFreePCCallback);
+        //    DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
+        //    DracoInvoker.register_free_pc_callback(OnFreePCCallback);
             DracoInvoker.initialize();
         } else
         {
@@ -272,7 +272,7 @@ public class PCSelf : MonoBehaviour
                         {
                             uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
                             Debug.Log($"Number of points: {nPoints}");
-                            int returnCode = DracoInvoker.encode_pc(frame);
+                      //      int returnCode = DracoInvoker.encode_pc(frame);
                         }
                         else
                         {

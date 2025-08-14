@@ -1,4 +1,4 @@
-#include "draco_mdc_decoder.hpp"
+#include "codec/draco/draco_mdc_decoder.hpp"
 
 DecodedPointCloud* DracoMDCDecoder::decode_pc(char *encoded_data, uint64_t size)
 {

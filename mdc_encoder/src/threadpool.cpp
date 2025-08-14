@@ -6,7 +6,7 @@ void ThreadPool::start(int num_threads) {
     }
 }
 void ThreadPool::ThreadLoop() {
-    while (true) {
+    while (!should_terminate) {
         std::function<void()> job;
         {
             std::unique_lock<std::mutex> lock(queue_mutex);

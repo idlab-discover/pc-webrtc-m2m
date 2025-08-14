@@ -12,6 +12,7 @@ std::vector<Description*> UniformSampler::create_descriptions(PointCloud* pc) {
     for(int i = 0; i < number_of_layers; i++) {
         Description* desc = new Description();
         desc->timestamp=pc->timestamp;
+        desc->capturer_id = pc->capturer_id;
         desc->frame_nr = pc->frame_nr;
         desc->description_nr = i;
         desc->n_points_in_total = pc->n_points;

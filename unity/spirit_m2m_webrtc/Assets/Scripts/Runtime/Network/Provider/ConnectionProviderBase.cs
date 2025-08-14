@@ -53,6 +53,7 @@ public class SafeCallback
         connectInternal();
         if (IsConnected)
         {
+            Logger.LogStatus(NAME, Logger.Status.ProviderConnectionSuccess);
             onConnectionSucces();
         }
         else
@@ -62,6 +63,8 @@ public class SafeCallback
     }
     public async Task ConnectAsync()
     {
+        //Debug.Log($"Connecting to {NAME} with ID {ID}");
+        Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderConnectionStart, $"mode=async");
         await Task.Run(() =>
         {
             Connect();

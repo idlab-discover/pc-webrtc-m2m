@@ -3,6 +3,7 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include "log.h"
 
 class MultiCapturer {
     public:
@@ -31,10 +32,12 @@ class MultiCapturer {
                 PointCloud* pc = capturer->poll_next_point_cloud();
                 // If nullptr -> keep polling
                 if (pc != nullptr) {
+                    //Log::log("Captured point cloud from capturer " + std::to_string(pc->n_points), LogColor::Green);
                     total_points += pc->n_points;
                     point_clouds.push_back(pc);
                 }
             }
+            
             // If all nullptr -> return
             // Else calculate highest timestamp
             // Poll other cameras until they get good frame with timestamp close to highest timestamp
@@ -43,9 +46,10 @@ class MultiCapturer {
             if(total_points == 0) {
                 return nullptr; // No point clouds captured
             }
-
+         
             PointCloud* combined_pc = new PointCloud();
             combined_pc->n_points = total_points;
+            combined_pc->capturer_id = 0; // Set to 0 or any other identifier if needed
             combined_pc->timestamp = point_clouds.empty() ? 0 : point_clouds[0]->timestamp;
             combined_pc->coords = new Vertex[combined_pc->n_points];
             combined_pc->colors = new Color[combined_pc->n_points];

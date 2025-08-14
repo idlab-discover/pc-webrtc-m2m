@@ -31,12 +31,16 @@ public class MultiCaptureSetup : IDisposable
         if (multiCapPtr != IntPtr.Zero)
         {
             Realsense2Invoker.start_capturing_multi(multiCapPtr);
-        }
-        for (int i = 0; i < capturers.Count; i++)
+        } else
         {
-            capturers[i].Init(multiCapPtr, (uint)i);
-            capturers[i].FreeHelperSettingsHandle();
+            Debug.LogError("Failed to create MultiCaptureSetup");
+            throw new Exception("Failed to create MultiCaptureSetup");
         }
+            for (int i = 0; i < capturers.Count; i++)
+            {
+                capturers[i].Init(multiCapPtr, (uint)i);
+                capturers[i].FreeHelperSettingsHandle();
+            }
         settingPtrsHandle.Free();
     }
 

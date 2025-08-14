@@ -152,8 +152,8 @@ public class MultiCapturingTest : MonoBehaviour
         DracoInvoker.RegisterDebugCallback(OnDebugCallbackDraco);
         DracoInvoker.set_logging("", debug);
         capture = CaptureFactory.CreateNewMultiCapture(sessionInfo);
-        DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
-        DracoInvoker.register_free_pc_callback(OnFreePCCallback);
+      //  DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
+      //  DracoInvoker.register_free_pc_callback(OnFreePCCallback);
         DracoInvoker.initialize();
        
         if(capture != null)
@@ -253,7 +253,7 @@ public class MultiCapturingTest : MonoBehaviour
                             Debug.Log($"Get size");
                             uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
                             Debug.Log($"Number of points: {nPoints}");
-                            int returnCode = DracoInvoker.encode_pc(frame);
+                      //      int returnCode = DracoInvoker.encode_pc(frame);
                         }
                         else
                         {

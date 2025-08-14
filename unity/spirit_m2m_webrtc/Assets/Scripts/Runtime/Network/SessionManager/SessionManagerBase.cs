@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Bson;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -42,9 +43,13 @@ using UnityEngine;
  * }
  */
 
-public class ConnectedClient
+public abstract class ConnectedClient<TTrackInfo> where TTrackInfo : ReceivingTrackInfo
 {
-    private const string NAME = "ConnectedClient";
+    // Replace this line:
+    // private abstract readonly string NAME;
+
+    // With this property:
+    protected abstract string NAME { get; }
     private readonly object _lock = new();
     //public delegate void ClientConnectedCallback();
 
@@ -61,7 +66,7 @@ public class ConnectedClient
 
     public readonly uint ClientID;
     public readonly string CodecMode;
-    private Dictionary<string, ReceivingTrackInfo> receivingTracks; // TODO maybe change into dictionary
+    protected Dictionary<string, TTrackInfo> receivingTracks;
     public ConnectedClient(uint clientID, string codecMode)
     {
         ClientID = clientID;
@@ -69,7 +74,7 @@ public class ConnectedClient
         receivingTracks = new();
     }
     // TODO maybe keep track of active tracks here
-    public void AddVideoTrack(ReceivingTrackInfo track)
+    public void AddVideoTrack(TTrackInfo track)
     {
         Logger.LogTrackStatusWithProvider(NAME, Logger.Status.ClientAddVideoTrack, ClientID, track.trackID, track.providerKey);
         lock (_lock)
@@ -83,7 +88,7 @@ public class ConnectedClient
             Debug.Log($"Adding track {track.trackID} with provider {track.providerKey} to client {ClientID}");
             receivingTracks[track.trackID] = track;
         }
-        
+
         OnUserVideoTrackAdded?.Invoke(track.providerKey, track.trackID);
     }
     public void RemoveVideoTrack(string provider, string trackID)
@@ -119,16 +124,62 @@ public class ConnectedClient
     }
 }
 
+public class LocalConnectedClient : ConnectedClient<LocalTrackInfo>
+{
+    protected override string NAME => "LocalConnectedClient";
+    public LocalConnectedClient(uint clientID, string codecMode) : base(clientID, codecMode)
+    {
+    }
+
+    public int SendVideoData(string trackID, IntPtr data, uint size)
+    {
+        // TODDO probably do need to lock this tbh
+        if (receivingTracks.TryGetValue(trackID, out var track))
+        {
+            if (track.Sender == null)
+            {
+                Logger.LogTrackStatus(NAME, Logger.Status.ClientTrackSenderNull, ClientID, trackID);
+                return -1;
+
+            }
+            if (track.Sender.IsValid == false)
+            {
+                Logger.LogTrackStatus(NAME, Logger.Status.ClientTrackSenderInvalid, ClientID, trackID);
+                return -1;
+            }
+            return track.Sender.SendVideoData(trackID, data, size);
+        }
+        else
+        {
+            Logger.LogTrackStatus(NAME, Logger.Status.ClientTrackNotFound, ClientID, trackID);
+            return -1;
+        }
+    }
+
+    public void SendAudioData(IntPtr data, uint size)
+    {
+        // TODO Implement audio sending
+    }
+}
+
+public class RemoteConnectedClient : ConnectedClient<RemoteTrackInfo>
+{
+    protected override string NAME => "RemoteConnectedClient";
+    public RemoteConnectedClient(uint clientID, string codecMode) : base(clientID, codecMode)
+    {
+    }
+}
+
 public abstract class SessionManagerBase
 {
     protected abstract string NAME { get; }
 
     public delegate void ConnectionToSessionManagerCallback();
     public delegate void SessionCreatedCallback();
-    public delegate void ConnectedToSessionCallback(ConnectedClient client, string sessionInfo);
+    public delegate void ConnectedToSessionCallback(LocalConnectedClient client, string sessionInfo);
     public delegate void DisconnectedFromSessionCallback();
-    public delegate void NewClientConnectedCallback(ConnectedClient client, string clientSettings);
-    public delegate void ClientDisconnectedCallback(ConnectedClient client);
+    public delegate void NewClientConnectedCallback(RemoteConnectedClient client, string clientSettings);
+    public delegate void ClientDisconnectedCallback(RemoteConnectedClient client);
 
     public event ConnectionToSessionManagerCallback OnConnectedToSessionManager;
     public event SessionCreatedCallback OnSessionCreated;
@@ -138,8 +189,8 @@ public abstract class SessionManagerBase
     public event ClientDisconnectedCallback OnClientDisconnected;
 
     protected readonly object _lock = new object();
-    public ConnectedClient LocalClient;
-    public Dictionary<uint, ConnectedClient> ConnectedClients = new();
+    public LocalConnectedClient LocalClient;
+    public Dictionary<uint, RemoteConnectedClient> ConnectedClients = new();
     public bool IsConnected { get; protected set; }
 
     public string SessionID { get; protected set; }
@@ -152,7 +203,8 @@ public abstract class SessionManagerBase
         if (IsConnected)
         {
             onConnectedToSessionManager();
-        } else
+        }
+        else
         {
             Logger.LogStatus(NAME, Logger.Status.ManagerConnectionFailed);
         }
@@ -164,20 +216,22 @@ public abstract class SessionManagerBase
         {
             ConnectToSessionManager();
         });
-        
-        
+
+
     }
     protected void onConnectionProviderRequested(string type, string key, JObject jsonSettings)
     {
-        Logger.LogStatus(NAME, Logger.Status.ManagerProviderRequested);
+        Logger.LogStatusWithMessage(NAME, Logger.Status.ManagerProviderRequested, $"provider={key}");
         ConnectionProviderBase prov = ConnectionProviderRepository.CreateProvider(type, key, jsonSettings);
         if (prov == null)
         {
+            Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderNotFound, $"provider={key}");
             return;
         }
-        _ = prov.ConnectAsync();
+         _ = prov.ConnectAsync();
+
     }
-    protected void onConnectionProvidedRemoved(string key)
+    protected void onConnectionProviderRemoved(string key)
     {
         Logger.LogStatus(NAME, Logger.Status.ManagerProviderRemoved);
         ConnectionProviderRepository.RemoveProvider(key);
@@ -186,7 +240,8 @@ public abstract class SessionManagerBase
     protected void onNewClientConnected(ConnectedClientMessage c)
     {
         Logger.LogStatusClient(NAME, Logger.Status.ManagerClientConnected, c.clientID);
-        ConnectedClient client;
+        RemoteConnectedClient client;
+        
         lock (_lock)
         {
             if (ConnectedClients.TryGetValue(c.clientID, out client))
@@ -195,13 +250,37 @@ public abstract class SessionManagerBase
                 ConnectedClients.Remove(c.clientID);
             }
 
-            client = new ConnectedClient(c.clientID, c.codecMode);
+            client = new RemoteConnectedClient(c.clientID, c.codecMode);
             ConnectedClients[c.clientID] = client;
         }
-        foreach(var t in c.receivingTracks)
+        
+        foreach (var t in c.receivingTracks)
         {
-            client.AddVideoTrack(t);
+            // TODO Check if provider already exists
+            // Request receiver from provider
+            ConnectionProviderBase provider = ConnectionProviderRepository.GetProvider(t.providerKey);
+            if (provider == null)
+            {
+                // TODO Logger.LogStatus();
+                continue;
+            }
+            // Check if provider supports receiving
+            if (provider is not IReceiverSupported receiverSupported)
+            {
+                Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderReceiverNotSupported, $"provider={t.providerKey}");
+                continue; // Provider does not support receiving
+            }
+            client.AddVideoTrack(new RemoteTrackInfo
+            {
+                providerKey = t.providerKey,
+                trackID = t.trackID,
+                capturerType = t.capturerType,
+                trackType = t.trackType,
+                trackSettings = t.trackSettings,
+                Receiver = (provider as IReceiverSupported).GetReceiver(t, c.clientID)
+            });
         }
+        
         OnNewClientConnected?.Invoke(client, c.clientSettings);
     }
     protected void onClientDisconnected(uint clientID)
@@ -209,7 +288,7 @@ public abstract class SessionManagerBase
         Logger.LogStatus(NAME, Logger.Status.ManagerClientDisconnected);
         lock (_lock)
         {
-            if(ConnectedClients.TryGetValue(clientID, out var client))
+            if (ConnectedClients.TryGetValue(clientID, out var client))
             {
                 OnClientDisconnected?.Invoke(client);
                 ConnectedClients.Remove(clientID);
@@ -218,14 +297,14 @@ public abstract class SessionManagerBase
     }
     protected void clearAllClients()
     {
-        lock(_lock)
+        lock (_lock)
         {
-            foreach(var client in ConnectedClients.Values)
+            foreach (var client in ConnectedClients.Values)
             {
                 OnClientDisconnected?.Invoke(client);
             }
             ConnectedClients.Clear();
-        } 
+        }
     }
     public abstract void CreateNewSession(string name, JoinSessionMessage joinMessage, string sessionConfig);
     public abstract void ConnectToSession(string name, JoinSessionMessage joinMessage);
@@ -242,14 +321,37 @@ public abstract class SessionManagerBase
     {
         Logger.LogStatus(NAME, Logger.Status.ManagerSessionJoined);
         SessionConnectionMessage connectionMessage = SessionConnectionMessage.CreateFromJSON(connectMessageJSON);
-        LocalClient = new ConnectedClient(assignedClientID, connectionMessage.codecMode);
-        
+        LocalClient = new LocalConnectedClient(assignedClientID, connectionMessage.codecMode);
+
         foreach (var p in connectionMessage.providers)
         {
             onConnectionProviderRequested(p.type, p.key, p.providerSettings);
-            foreach(var t in p.sendingTracks)
+            ConnectionProviderBase provider = ConnectionProviderRepository.GetProvider(p.key);
+            if (provider == null)
             {
-                LocalClient.AddVideoTrack(t);
+                Debug.LogWarning($"Provider {p.key} not found");
+                continue; // Provider not found, skip
+            }
+            if (p.sendingTracks.Count > 0)
+            {
+                // Check if provider supports sending
+                if (provider is not ISenderSupported senderSupported)
+                {
+                    Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderSenderNotSupported, $"provider={p.key}");
+                    continue; // Provider does not support sending
+                }
+            }
+            foreach (var t in p.sendingTracks)
+            {
+                LocalClient.AddVideoTrack(new LocalTrackInfo
+                {
+                    providerKey = p.key,
+                    trackID = t.trackID,
+                    capturerType = t.capturerType,
+                    trackType = t.trackType,
+                    trackSettings = t.trackSettings,
+                    Sender = (provider as ISenderSupported).GetSender(t)
+                });
             }
         }
 

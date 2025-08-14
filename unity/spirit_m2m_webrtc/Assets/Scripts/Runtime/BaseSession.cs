@@ -1,13 +1,32 @@
+using AOT;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 public class BaseSession : MonoBehaviour
 {
+
+    enum Color { red, green, blue, black, white, yellow, orange };
+    [MonoPInvokeCallback(typeof(DLLLogger.debugCallback))]
+    static void OnDebugCallback(IntPtr request, int color, int size)
+    {
+        // Ptr to string
+        string debug_string = Marshal.PtrToStringAnsi(request, size);
+        // Add specified color
+        debug_string =
+            String.Format("Realsense Capturing: {0}{1}{2}{3}{4}",
+            "<color=",
+            ((Color)color).ToString(), ">", debug_string, "</color>");
+        // Log the string
+        Debug.Log(debug_string);
+    }
     // ################## Session Variables ####################
     private SessionInfo sessionInfo;
     private SessionManagerBase sessionManager;
@@ -17,16 +36,17 @@ public class BaseSession : MonoBehaviour
     public PCSelf PCSelfPrefab;
     public PCReceiver PCReceiverPrefab;
     public GameObject Table;
+    public PrefabFactory PipelineLocalPrefabFactory;
 
     // ################# Private Variables ###############
     private readonly object _lock = new();
-    private int clientID;
-    private PCSelf pcSelf;
-    private Dictionary<uint, PCReceiver> pcReceivers = new();
-    private SelfProviderManager selfProviderManager = new();
+    private readonly ConcurrentQueue<Action> mainThreadActions = new();
+    private PipelineLocalBase localPipeline;
+    private Dictionary<uint, PipelineRemoteBase> remotePipelines = new();
 
     void Start()
     {
+        
         sessionInfo = SessionInfo.CreateFromJSON(Application.dataPath + "/config/session_config.json");
         Logger.Init(sessionInfo.loggerSettings);
         sessionManager = SessionManagerRepository.CreateAndGetManager(sessionInfo.sessionManagerSettings.type, sessionInfo.sessionManagerSettings.configPath);
@@ -35,8 +55,6 @@ public class BaseSession : MonoBehaviour
             Debug.LogError("SessionManager creation failed");
             return;
         }
-        clientID = sessionInfo.clientID;
-        
         sessionManager.OnNewClientConnected += newClientConnectedCallback;
         sessionManager.OnClientDisconnected += clientDisconnectedCallback;
         sessionManager.OnConnectedToSessionManager += connectedToSessionManagerCallback;
@@ -47,7 +65,10 @@ public class BaseSession : MonoBehaviour
 
     void Update()
     {
-        
+        while (mainThreadActions.TryDequeue(out var action))
+        {
+            action();
+        }
     }
     private void connectedToSessionManagerCallback()
     {
@@ -142,24 +163,56 @@ public class BaseSession : MonoBehaviour
             Debug.LogException(ex);
         }
     }
-    private void connectedToSessionCallback(ConnectedClient client, string sessionInfo)
+    private void connectedToSessionCallback(LocalConnectedClient client, string additionalSessionInfo)
     {
         // Potentially change trackInfo in selfProviderManager
         // Loop over tracks in client and print info
         Debug.Log("Connected to session");
         Debug.Log($"Client {client.ClientID} connected with codec mode {client.CodecMode}");
-        
 
+        // TODO If factory is null => load from path maybe
+        Debug.Log($"Registered prefabs count: {PipelineLocalPrefabFactory.registeredPrefabs.Count}");
+        if (PipelineLocalPrefabFactory == null)
+        {
+            Debug.LogError("PipelineLocalPrefabFactory is null, please assign it in the inspector");
+            return;
+        }
+        mainThreadActions.Enqueue(() =>
+        {
+            PipelineLocalPrefabFactory.registeredPrefabs.TryGetValue(client.CodecMode, out var prefab);
+            if (prefab == null)
+            {
+                Debug.LogError($"No prefab found for codec mode {client.CodecMode}");
+                return;
+            }
+            if (prefab.GetComponent<PipelineLocalBase>() == null)
+            {
+                Debug.LogError($"Prefab for coded mode {client.CodecMode} does not have a PipelineLocalBase component.");
+                return;
+            }
+            Debug.Log($"Using prefab for codec mode {client.CodecMode}");
+            GameObject temp = Instantiate(prefab, Vector3.zero, Quaternion.identity);
+            if (temp == null)
+            {
+                Debug.LogError("Failed to instantiate prefab for codec mode " + client.CodecMode);
+                return;
+            }
+
+            localPipeline = temp.GetComponent<PipelineLocalBase>();
+            localPipeline.Init(sessionInfo, client);
+        });
+        
         // Generate pipeline based on codecMode
 
+
     }
-    private void sessionCreatedCallback()
+    private void sessionCreatedCallback() 
     {
         Debug.Log("Session created");
     }
     private void createSelfPrefab()
     {
-        StartLocations[clientID].transform.position = new Vector3(sessionInfo.startPositions[clientID].x, sessionInfo.startPositions[clientID].y - 1, sessionInfo.startPositions[clientID].z);
+        /*StartLocations[clientID].transform.position = new Vector3(sessionInfo.startPositions[clientID].x, sessionInfo.startPositions[clientID].y - 1, sessionInfo.startPositions[clientID].z);
         pcSelf = Instantiate(PCSelfPrefab, StartLocations[clientID].transform.position, StartLocations[clientID].transform.rotation);
         pcSelf.transform.parent = StartLocations[clientID].transform;
         pcSelf.SessionInfo = sessionInfo;
@@ -167,10 +220,10 @@ public class BaseSession : MonoBehaviour
         if (sessionInfo.useMic)
         {
             pcSelf.InitAudioCapture();
-        }
+        }*/
     }
 
-    private void newClientConnectedCallback(ConnectedClient client, string clientSettings)
+    private void newClientConnectedCallback(RemoteConnectedClient client, string clientSettings)
     {
         Debug.Log("New client connected");
         /*clientDisconnectedCallback(clientID);
@@ -182,14 +235,14 @@ public class BaseSession : MonoBehaviour
         pcReceiver.AudioParams = sessionInfo.audioPlayback;
         pcReceivers[clientID] = pcReceiver);*/
     }
-    private void clientDisconnectedCallback(ConnectedClient client)
+    private void clientDisconnectedCallback(RemoteConnectedClient client)
     {
         lock(_lock)
         {
-            bool succes = pcReceivers.Remove(client.ClientID, out var receiver);
+            bool succes = remotePipelines.Remove(client.ClientID, out var remotePipeline);
             if(succes)
             {
-                Destroy(receiver);
+                //TODO remotePipeline.Dispose();
             }
             
         }

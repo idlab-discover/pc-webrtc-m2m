@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using UnityEditor.PackageManager;
+
 using UnityEngine;
 
 public abstract class NetworkReceiverBase : IDisposable
@@ -14,14 +14,14 @@ public abstract class NetworkReceiverBase : IDisposable
     private Thread audioWorkerThread;
     public delegate void OnStreamDataReceivedCb(IntPtr data, uint size);
 
-    public void StartPollVideoTrack(uint clientID, uint capturerID, uint descriptionID, OnStreamDataReceivedCb cb)
+    public void StartPollVideoTrack(uint clientID, string trackID, OnStreamDataReceivedCb cb)
     {
         Thread worker;
         lock (_lock)
         {
             worker = new Thread(() =>
             {
-                pollVideoTrackInternal(clientID, capturerID, descriptionID, cb);
+                pollVideoTrackInternal(clientID, trackID, cb);
             });
             videoWorkerThreads.Add(worker); // TODO Change this into map or something to make it easier to enable/disable poll of specific tracks
         }
@@ -37,7 +37,7 @@ public abstract class NetworkReceiverBase : IDisposable
         audioWorkerThread.Start();
     }
 
-    protected abstract void pollVideoTrackInternal(uint clientID, uint capturerID, uint descriptionID, OnStreamDataReceivedCb cb);
+    protected abstract void pollVideoTrackInternal(uint clientID, string trackID, OnStreamDataReceivedCb cb);
     protected abstract void pollAudioTrackInternal(uint clientID, OnStreamDataReceivedCb cb);
 
     protected abstract void disposeInternal();

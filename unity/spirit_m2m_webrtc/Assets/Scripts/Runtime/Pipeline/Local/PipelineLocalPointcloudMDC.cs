@@ -1,0 +1,79 @@
+using AOT;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using UnityEngine;
+
+[PipelineLocalRegister("mdc")]
+public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
+{
+    private MDCEncodingQueue encodingQueue; // TODO move this to video caputre
+    // TODO Add audio capture 
+    private readonly object _lock = new();
+
+    protected override FrameMode FrameMode => FrameMode.RealData;
+
+    public override void Init(SessionInfo sessionInfo, LocalConnectedClient localClient)
+    {   
+
+        sessionInfo.frameMode = FrameMode.RealData; // TODO fix this in the future
+        base.Init(sessionInfo, localClient);
+        encodingQueue = new MDCEncodingQueue(sessionInfo);
+        encodingQueue.SetDescriptionDoneCallback(OnDescriptionDoneCallback);
+        startPollThread();
+    }
+
+    protected override void pollFramesInternal()
+    {
+        IntPtr frame = capture.PollNextPointCloud();
+        if (frame != IntPtr.Zero)
+        {
+            uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
+            //Debug.Log($"Number of points: {nPoints}");
+            encodingQueue.EncodePointCloud(frame);
+        } 
+        else
+        {
+            keepWorking = false;
+            encodingQueue.Dispose(); // TODO make cleanup cleaner
+        }
+    }
+
+    // TODO move this to mdc encoder queue class
+    private void OnDescriptionDoneCallback(MDCDescription desc)
+    {
+        string trackID = $"video_0_{desc.DescriptionNr}";
+        
+        if (keepWorking)
+        {
+            
+            int nSend = 0;
+            if (desc.FrameNr % 100 == 0)
+            {
+                Debug.Log($"{desc.FrameNr} {desc.DescriptionNr} {desc.DataBufferSize}");
+            }
+            
+            unsafe
+            {
+                fixed (byte* bufferPointer = desc.Bytes)
+                {
+                    nSend = LocalClient.SendVideoData(trackID, new IntPtr(bufferPointer), (uint)desc.Bytes.Length);
+                }
+            }
+
+            if (nSend == -1)
+            {
+                keepWorking = false;
+                Debug.Log("Stop capturing");
+            }
+        }
+        desc.Dispose();
+    }
+    protected override void cleanup()
+    {
+        base.cleanup();
+        //encodingQueue.Dispose();
+    }
+
+}

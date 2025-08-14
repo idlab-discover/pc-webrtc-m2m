@@ -1,5 +1,5 @@
-#include "draco_mdc_encoder.hpp"
-#include "draco_mdc_decoder.hpp"
+#include "codec/draco/draco_mdc_encoder.hpp"
+#include "codec/draco/draco_mdc_decoder.hpp"
 #include "encoding_queue.hpp"
 #include "pch.h"
 #include "framework.h"
@@ -18,7 +18,6 @@ using namespace std;
 
 uint32_t n_tiles;
 
-static thread worker;
 static bool keep_working = true;
 static bool initialized = false;
 
@@ -30,11 +29,8 @@ uint32_t frame_number;
 static string log_file = "";
 static int log_level = 0;
 mutex m_logging;
-mutex m_capturing;
 std::condition_variable cv_capture;
 bool capture_done = false;
-EncodingQueue* enc_queue;
-
 // TODO make objects
 // Realsense2 stuff
 
@@ -101,8 +97,13 @@ void set_logging(char* log_directory, int _log_level) {
 
 int initialize() {
 	custom_log("initialize: inting", Default, LogColor::Orange);
-	enc_queue = new EncodingQueue(2);
 	initialized = true;
+}
+
+EncodingQueue* create_encoding_queue(unsigned int max_queue) {
+	custom_log("create_encoding_queue: Creating encoding queue with max size " + to_string(max_queue), Default, LogColor::Orange);
+	EncodingQueue* enc_queue = new EncodingQueue(max_queue);
+	return enc_queue;
 }
 /*
 	This function is used to clean up threading and reset the required variables. It is called once per session from
@@ -123,11 +124,6 @@ void clean_up() {
 		//guard.unlock();
 
 		// Join the listening thread
-		if (worker.joinable())
-			worker.join();
-		// TODO Cleanup Realsense2
-		delete enc_queue;
-		enc_queue = nullptr;
 
 		// Reset the initialized flag
 		initialized = false;
@@ -139,7 +135,7 @@ void clean_up() {
 	}
 }
 
-uint32_t encode_pc(PointCloud* pc) {
+uint32_t encode_pc(EncodingQueue* enc, PointCloud* pc) {
 	// TODO
 	//  Check number of active frames in queue
 	//	If more than X = dont enter in queue and wait for place to become frame 
@@ -153,9 +149,21 @@ uint32_t encode_pc(PointCloud* pc) {
 	//  If job ready => callback to send to SFU
 	//  All jobs ready => remove frame from queue and signal
 
-	enc_queue->enqueue_pc(pc);
+	enc->enqueue_pc(pc);
 	return 0;
 }
+
+void free_encoding_queue(EncodingQueue* enc) {
+	if (enc != nullptr) {
+		// TODO first stop queue, and wait for tasks to finish
+		custom_log("free_encoding_queue: Stopping encoding queue", Default, LogColor::Orange);
+		enc->stop();
+		custom_log("free_encoding_queue: Deleting encoding queue", Default, LogColor::Orange);
+		delete enc;
+		custom_log("free_encoding_queue: Encoding queue freed", Default, LogColor::Orange);
+	}
+}
+
 uint32_t get_encoded_size(DracoMDCEncoder* enc) {
 	return enc != nullptr ? enc->get_encoded_size() : 0;
 }

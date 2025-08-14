@@ -19,24 +19,12 @@ public class LoopbackSessionManager : SessionManagerBase
 
     public override void AddAudioTrack()
     {
-        lock (_lock)
-        {
-            foreach (var c in ConnectedClients.Values)
-            {
-                c.AddAudioTrack("loopback");
-            }
-        }
+        throw new NotImplementedException();
     }
 
     public override void AddVideoTrack(ReceivingTrackInfo track)
     {
-        lock (_lock)
-        {
-            foreach (var c in ConnectedClients.Values)
-            {
-                c.AddVideoTrack(track);
-            }
-        }
+        throw new NotImplementedException();
 
     }
 
@@ -99,11 +87,11 @@ public class LoopbackSessionManager : SessionManagerBase
     {
         throw new NotImplementedException();
     }
-    private void parseSessionJoined(ConnectedClient client, string json)
+    private void parseSessionJoined(LocalConnectedClient client, string json)
     {
       
-        Debug.Log(json);
-        SessionConnectionMessage message = SessionConnectionMessage.CreateFromJSON(json);
+       // Debug.Log(json);
+        //SessionConnectionMessage message = SessionConnectionMessage.CreateFromJSON(json);
         // Add providers
 
     }

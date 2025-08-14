@@ -83,6 +83,9 @@ public class Logger
         ProviderConnectionSuccess = 2001,
         ProviderConnectionFailed = 2002,
         ProviderConnectionClose = 2003,
+        ProviderNotFound = 2004,
+        ProviderSenderNotSupported = 2005,
+        ProviderReceiverNotSupported = 2006,
 
         // Client Status
         ClientAddVideoTrack = 3000,
@@ -91,6 +94,12 @@ public class Logger
         ClientRemoveAudioTrack = 3003,
         ClientTrackAlreadyExists = 3004,
         ClientTrackNotFound = 3005,
+        ClientTrackSenderNull = 3006,
+        ClientTrackSenderInvalid = 3007,
+        ClientTrackSenderNotReady = 3008,
+        ClientTrackReceiverNull = 3009,
+        ClientTrackReceiverInvalid = 3010,
+        ClientTrackReceiverNotReady = 3011,
 
         // TrackInfo Status
         GatheringTrackInfo = 4000,
@@ -103,6 +112,8 @@ public class Logger
         // Debugging Status
         StartRawColorCopy = 9000,
         EndRawColorCopy = 9001,
+        EnterLock = 9002,
+        ExitLock = 9003,
     }
     public static long Time => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 

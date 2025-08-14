@@ -39,5 +39,22 @@ public class ReceivingTrackInfo
     public string capturerType;
     public string trackType; // Raw, PointCloud etc...
     public JObject trackSettings;
+
+}
+
+[System.Serializable]
+public class LocalTrackInfo : ReceivingTrackInfo 
+{
+    [NonSerialized]
+    public NetworkSenderBase Sender;
+
+}
+
+[Serializable]
+public class  RemoteTrackInfo : ReceivingTrackInfo
+{
+    [NonSerialized]
+    public NetworkReceiverBase Receiver;
+
 }
 

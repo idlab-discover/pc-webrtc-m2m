@@ -46,7 +46,7 @@
     },
     "camFPS": 15,
     "useMic": false,
-    "frameMode": 1,
+    "frameMode": 0,
     "frameCodec": 1,
     "capturerName": "prerec_kinect",
     "artificialSettings": {

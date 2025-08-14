@@ -10,7 +10,7 @@ public class LoopbackReceiver : NetworkReceiverBase
     private readonly LoopbackProvider provider;
     private bool keepWorking = true;
     private readonly LoopbackProvider.LoopbackTrack audioTrack = new();
-    private readonly Dictionary<(uint, uint), LoopbackProvider.LoopbackTrack> videoTracks = new();
+    private readonly Dictionary<string, LoopbackProvider.LoopbackTrack> videoTracks = new();
     public LoopbackReceiver(string providerID, uint clientID)
     {
         ConnectionProviderBase c = ConnectionProviderRepository.GetProvider(providerID);
@@ -35,11 +35,11 @@ public class LoopbackReceiver : NetworkReceiverBase
             audioTrack.SetFrame(data, size);
         }
     }
-    public void SetVideoTrackData(IntPtr data, uint size, uint capturerID, uint descriptionID)
+    public void SetVideoTrackData(string trackID, IntPtr data, uint size)
     {
         lock (_lock)
         {
-            bool succes = videoTracks.TryGetValue((capturerID, descriptionID), out var t);
+            bool succes = videoTracks.TryGetValue(trackID, out var t);
             if (!succes)
             {
                 return;
@@ -78,17 +78,17 @@ public class LoopbackReceiver : NetworkReceiverBase
         }
     }
 
-    protected override void pollVideoTrackInternal(uint clientID, uint capturerID, uint descriptionID, OnStreamDataReceivedCb cb)
+    protected override void pollVideoTrackInternal(uint clientID, string trackID, OnStreamDataReceivedCb cb)
     {
         LoopbackProvider.LoopbackTrack t;
         lock (_lock)
         {
-            if (videoTracks.ContainsKey((capturerID, descriptionID)))
+            if (videoTracks.ContainsKey(trackID))
             {
                 return;
             }
             t = new();
-            videoTracks.Add((capturerID, descriptionID), t);
+            videoTracks.Add(trackID, t);
         }
         while (keepWorking)
         {

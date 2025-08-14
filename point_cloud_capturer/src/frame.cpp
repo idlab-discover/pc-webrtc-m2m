@@ -5,6 +5,7 @@
 PointCloud* Frame::get_point_cloud() {
     return new PointCloud{
         get_timestamp(),
+        get_capturer_id(),
         get_frame_nr(),
         get_frame_size(),
         get_vertex_array(),

@@ -19,9 +19,11 @@ public static class DracoInvoker
     public static extern int initialize();
     [DllImport(dllName)]
     public static extern void clean_up();
+    [DllImport(dllName)]
+    public static extern IntPtr create_encoding_queue(uint max_queue_size);
 
     [DllImport(dllName)]
-    public static extern int encode_pc(IntPtr pc);
+    public static extern int encode_pc(IntPtr enc, IntPtr pc);
     [DllImport(dllName)]
     public static extern UInt32 get_encoded_size(IntPtr enc);
     [DllImport(dllName)]
@@ -38,6 +40,8 @@ public static class DracoInvoker
     public static extern IntPtr get_color_array(IntPtr dec);
 
     [DllImport(dllName)]
+    public static extern void free_encoding_queue(IntPtr enc);
+    [DllImport(dllName)]
     public static extern void free_encoder(IntPtr enc);
     [DllImport(dllName)]
     public static extern void free_decoder(IntPtr enc);
@@ -45,12 +49,12 @@ public static class DracoInvoker
     public static extern void free_description(IntPtr dsc);
 
 
-    public delegate void descriptionDoneCallback(IntPtr dsc, IntPtr rawDataPtr, UInt32 totalPointsInCloud, UInt32 dscSize, UInt32 frameNr, UInt32 dscNr, UInt64 timestamp);
+    public delegate void descriptionDoneCallback(IntPtr dsc, IntPtr rawDataPtr, UInt32 totalPointsInCloud, UInt32 dscSize, UInt32 capturerID,  UInt32 frameNr, UInt32 dscNr, UInt64 timestamp);
     public delegate void freePCCallback(IntPtr cb);
 
     [DllImport(dllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern void register_description_done_callback(descriptionDoneCallback cb);
+    public static extern void register_description_done_callback(IntPtr enc, descriptionDoneCallback cb);
     [DllImport(dllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern void register_free_pc_callback(freePCCallback cb);
+    public static extern void register_free_pc_callback(IntPtr enc, freePCCallback cb);
 
 }

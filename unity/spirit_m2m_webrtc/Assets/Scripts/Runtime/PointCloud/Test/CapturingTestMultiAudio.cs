@@ -156,8 +156,8 @@ public class CapturingTestMultiAudio : MonoBehaviour
         DracoInvoker.RegisterDebugCallback(OnDebugCallbackDraco);
         DracoInvoker.set_logging("", debug);
         capture = CaptureFactory.CreateNewSingleCapture(sessionInfo);
-        DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
-        DracoInvoker.register_free_pc_callback(OnFreePCCallback);
+       // DracoInvoker.register_description_done_callback(OnDescriptionDoneCallback);
+      //  DracoInvoker.register_free_pc_callback(OnFreePCCallback);
         DracoInvoker.initialize();
    
         Capture.CB = CopyDataToPlayback;
@@ -279,7 +279,7 @@ public class CapturingTestMultiAudio : MonoBehaviour
                             Debug.Log($"Get size");
                             uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
                             Debug.Log($"Number of points: {nPoints}");
-                            int returnCode = DracoInvoker.encode_pc(frame);
+                      //      int returnCode = DracoInvoker.encode_pc(frame);
                         }
                         else
                         {
