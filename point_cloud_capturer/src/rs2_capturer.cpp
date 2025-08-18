@@ -40,11 +40,17 @@ CAPTURER_SETUP_CODE RS2Capturer::init()
 CAPTURER_SETUP_CODE RS2Capturer::capture_next_frame()
 {
     try {
-        auto frames = pipe.wait_for_frames();
-        frames = depth_align.process(frames);
+		size_t n_frames = 0;
+        rs2::frameset frames;
+        while(n_frames != 2) {
+			frames = pipe.wait_for_frames();
+			n_frames = frames.size();
+		}
+		frames = depth_align.process(frames);
         auto depth = frames.get_depth_frame();
     	depth = thres_filter.process(depth);
         auto rgb = frames.get_color_frame();
+		rs2::pointcloud pc;	
         pc.map_to(rgb);
         frame_buffer.add_to_buffer(new RS2Frame(
 			rgb.get_width(),

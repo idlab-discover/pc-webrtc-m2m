@@ -22,7 +22,7 @@ class RS2Capturer : public Capturer {
         Frame* poll_next_frame();
     private:
         rs2::pipeline pipe;
-        rs2::pointcloud pc;
+        
         rs2::align depth_align; // Do this only once because its expensive
         rs2::threshold_filter thres_filter;
         unsigned int width;

@@ -17,7 +17,7 @@
     "camWidth": 848,
     "camHeight": 480,
     "camFPS": 15,
-    "useCam": false,
+    "useCam": true,
     "useMic": false,
     "audioPlayback": {
         "maxQueueSize": 5,
