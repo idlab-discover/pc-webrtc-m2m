@@ -10,7 +10,8 @@ PointCloud* Frame::get_point_cloud() {
         get_frame_size(),
         get_vertex_array(),
         get_color_array(),
-        this
+        this,
+        false,
     };
 }
 

@@ -2,7 +2,10 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
+using UnityEditor.PackageManager;
+using UnityEngine;
 
 
 
@@ -11,10 +14,18 @@ public class LoopbackProvider : ConnectionProviderBase, ISenderSupported, IRecei
 {
     protected override string NAME => "LoopbackProvider";
    
-    public struct LoopbackFrame
+    public class LoopbackFrame : NetworkFrame
     {
-        public IntPtr NextPtr;
-        public uint NextSize;
+        public LoopbackFrame(IntPtr dataPtr, uint size)
+        {
+            DataPtr = dataPtr;
+            Size = size;
+        }
+
+        protected override void disposeInternal()
+        {
+            
+        }
     }
     public class LoopbackTrack
     {
@@ -24,7 +35,9 @@ public class LoopbackProvider : ConnectionProviderBase, ISenderSupported, IRecei
         public void SetFrame(IntPtr data, uint size)
         {
             lock(_lock) { 
-                NextFrame = new LoopbackFrame{ NextPtr = data, NextSize = size };
+                NextFrame = new LoopbackFrame(data, size);
+                NextFrameReady = true;
+                Monitor.Pulse(_lock);
             }
         }
         public void StopTrack()

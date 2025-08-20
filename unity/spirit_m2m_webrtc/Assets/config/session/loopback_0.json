@@ -6,11 +6,20 @@
             "loopbackTracks": [
                 {
                     "capturerID": 0,
-                    "trackID": "video_0_1"
+                    "trackID": "mdc_0_1"
                 },
                 {
                     "capturerID": 0,
-                    "trackID": "video_0_2"
+                    "trackID": "mdc_0_2"
+                }
+            ]
+        },
+        {
+            "clientID": 2,
+            "loopbackTracks": [
+                {
+                    "capturerID": 0,
+                    "trackID": "mdc_0_1"
                 }
             ]
         }

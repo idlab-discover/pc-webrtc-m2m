@@ -43,16 +43,26 @@ class MultiCapturer {
             // Poll other cameras until they get good frame with timestamp close to highest timestamp
             // Set #frames to drop (without sleep) based on lowest timestamp
             // If frameNr == 0 calculate s_seek
+            unsigned int frame_nr = current_frame_nr;
+            current_frame_nr++;
             if(total_points == 0) {
+                for(auto& pc : point_clouds) {
+                    if(pc != nullptr) {
+                        delete pc; // Free the individual point cloud
+                    }
+                }
                 return nullptr; // No point clouds captured
             }
          
             PointCloud* combined_pc = new PointCloud();
             combined_pc->n_points = total_points;
             combined_pc->capturer_id = 0; // Set to 0 or any other identifier if needed
+            combined_pc->frame_nr = frame_nr;
             combined_pc->timestamp = point_clouds.empty() ? 0 : point_clouds[0]->timestamp;
             combined_pc->coords = new Vertex[combined_pc->n_points];
             combined_pc->colors = new Color[combined_pc->n_points];
+            combined_pc->frame_pointer = nullptr; // Set to nullptr, as we don't want to free the frame pointer
+            combined_pc->delete_arrays = true; // Set to true, so we can free the arrays in the destructor
             unsigned int current_index = 0;
             for(auto& pc : point_clouds) {
                 if(pc != nullptr) {
@@ -68,4 +78,5 @@ class MultiCapturer {
 
     protected:
         std::vector<Capturer*> capturers;
+        unsigned int current_frame_nr = 0; // TODO calculate this based on timestamp from cameras
 };

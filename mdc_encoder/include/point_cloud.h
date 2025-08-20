@@ -14,6 +14,6 @@ struct PointCloud {
     Vertex* coords;
     Color* colors;
     void* frame_pointer; // DO NOT USE OR FREE!
-
+    bool delete_arrays;
   
 };

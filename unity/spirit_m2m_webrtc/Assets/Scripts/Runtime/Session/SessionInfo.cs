@@ -38,7 +38,7 @@ public class SessionInfo
     //public ArtificialSettings artificialSettings;
     //public RealsenseSettings realsenseSettings;
     //public PrerecordedKinectSettings prerecKinectSettings;
-    public PlaybackBufferSettings playbackBufferSettings;
+    public PlaybackBufferSettings playbackBufferSettings = new();
     public SessionManagerSettings sessionManagerSettings;
     public FrameCleanupSettings frameCleanupSettings;
     public RawEncodingSettings rawEncodingSettings;

@@ -31,6 +31,8 @@ public static class DracoInvoker
 
     [DllImport(dllName)]
     unsafe public static extern IntPtr decode_pc(byte* data, UInt32 size);
+    [DllImport(dllName)]
+    unsafe public static extern IntPtr decode_pc(IntPtr data, UInt32 size);
 
     [DllImport(dllName)]
     public static extern UInt32 get_n_points(IntPtr dec);

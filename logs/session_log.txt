@@ -1,27 +1,373 @@
-id=SessionManagerRepository ts=1755200018884 status=FactoryCreate type=loopback configPath=/config/session/loopback_0.json
-id=SessionManagerRepository ts=1755200018891 status=FactoryCreateSucces type=loopback configPath=/config/session/loopback_0.json
-id=LoopbackSessionManager ts=1755200018895 status=ManagerConnectionStart
-id=LoopbackSessionManager ts=1755200018895 status=ManagerConnectionSuccess
-id=CodecModeRepository ts=1755200019009 status=FactoryCreate type=mdc
-id=CodecModeRepository ts=1755200019009 status=FactoryCreateSucces type=mdc
-id=MDCCodecMode ts=1755200019020 status=GatheringTrackInfo samplingPercantages=[60|25|15] maxCompletePointCount=1000000
-id=MDCCodecMode ts=1755200019029 status=NewTrackDiscovered trackID=video_0_0 supportedCodecs=[draco] samplingPercentage=60
-id=MDCCodecMode ts=1755200019029 status=NewTrackDiscovered trackID=video_0_1 supportedCodecs=[draco] samplingPercentage=25
-id=MDCCodecMode ts=1755200019029 status=NewTrackDiscovered trackID=video_0_2 supportedCodecs=[draco] samplingPercentage=15
-id=LoopbackSessionManager ts=1755200019033 status=ManagerSessionCreating sessionName=Loopback_Session
-id=LoopbackSessionManager ts=1755200019051 status=ManagerSessionCreated
-id=LoopbackSessionManager ts=1755200019052 status=ManagerSessionJoined
-id=LoopbackSessionManager ts=1755200019056 status=ManagerProviderRequested provider=loopback
-id=ConnectionProviderRepository ts=1755200019176 status=FactoryCreate type=loopback key=loopback
-id=ConnectionProviderRepository ts=1755200019177 status=FactoryCreateSucces type=loopback key=loopback
-id=LoopbackProvider ts=1755200019178 status=ProviderConnectionStart mode=async
-id=LoopbackProvider ts=1755200019178 status=ProviderConnectionStart
-id=LoopbackProvider ts=1755200019179 status=ProviderConnectionSuccess
-id=LocalConnectedClient ts=1755200019182 status=ClientAddVideoTrack clientID=0 trackID=video_0_1 provider=loopback
-id=LocalConnectedClient ts=1755200019183 status=ClientAddVideoTrack clientID=0 trackID=video_0_0 provider=loopback
-id=LocalConnectedClient ts=1755200019184 status=ClientAddVideoTrack clientID=0 trackID=video_0_2 provider=loopback
-id=LoopbackSessionManager ts=1755200019188 status=ManagerClientConnected clientID=1
-id=RemoteConnectedClient ts=1755200019194 status=ClientAddVideoTrack clientID=1 trackID=video_0_1 provider=loopback
-id=RemoteConnectedClient ts=1755200019194 status=ClientAddVideoTrack clientID=1 trackID=video_0_2 provider=loopback
-id=MDCEncodingQueue ts=1755200021519 status=Creating
-id=MDCEncodingQueue ts=1755200021520 status=Created
+id=SessionManagerRepository ts=1755700718640 status=FactoryCreate type=loopback configPath=/config/session/loopback_0.json
+id=SessionManagerRepository ts=1755700718647 status=FactoryCreateSucces type=loopback configPath=/config/session/loopback_0.json
+id=LoopbackSessionManager ts=1755700718649 status=ManagerConnectionStart
+id=LoopbackSessionManager ts=1755700718649 status=ManagerConnectionSuccess
+id=CodecModeRepository ts=1755700718714 status=FactoryCreate type=mdc
+id=CodecModeRepository ts=1755700718714 status=FactoryCreateSucces type=mdc
+id=MDCCodecMode ts=1755700718721 status=GatheringTrackInfo samplingPercantages=[60|25|15] maxCompletePointCount=1000000
+id=MDCCodecMode ts=1755700718727 status=NewTrackDiscovered trackID=mdc_0_0 supportedCodecs=[draco] samplingPercentage=60
+id=MDCCodecMode ts=1755700718727 status=NewTrackDiscovered trackID=mdc_0_1 supportedCodecs=[draco] samplingPercentage=25
+id=MDCCodecMode ts=1755700718727 status=NewTrackDiscovered trackID=mdc_0_2 supportedCodecs=[draco] samplingPercentage=15
+id=LoopbackSessionManager ts=1755700718730 status=ManagerSessionCreating sessionName=Loopback_Session
+id=LoopbackSessionManager ts=1755700718739 status=ManagerSessionCreated
+id=LoopbackSessionManager ts=1755700718740 status=ManagerSessionJoined
+id=LoopbackSessionManager ts=1755700718743 status=ManagerProviderRequested provider=loopback
+id=ConnectionProviderRepository ts=1755700718804 status=FactoryCreate type=loopback key=loopback
+id=ConnectionProviderRepository ts=1755700718804 status=FactoryCreateSucces type=loopback key=loopback
+id=LoopbackProvider ts=1755700718806 status=ProviderConnectionStart mode=async
+id=LoopbackProvider ts=1755700718806 status=ProviderConnectionStart
+id=LoopbackProvider ts=1755700718806 status=ProviderConnectionSuccess
+id=LocalConnectedClient ts=1755700718807 status=ClientAddVideoTrack clientID=0 trackID=mdc_0_1 provider=loopback
+id=LocalConnectedClient ts=1755700718807 status=ClientAddVideoTrack clientID=0 trackID=mdc_0_0 provider=loopback
+id=LocalConnectedClient ts=1755700718807 status=ClientAddVideoTrack clientID=0 trackID=mdc_0_2 provider=loopback
+id=LoopbackSessionManager ts=1755700718809 status=ManagerClientConnected clientID=1
+id=RemoteConnectedClient ts=1755700718812 status=ClientAddVideoTrack clientID=1 trackID=mdc_0_1 provider=loopback
+id=RemoteConnectedClient ts=1755700718812 status=ClientAddVideoTrack clientID=1 trackID=mdc_0_2 provider=loopback
+id=LoopbackSessionManager ts=1755700718813 status=ManagerClientConnected clientID=2
+id=RemoteConnectedClient ts=1755700718813 status=ClientAddVideoTrack clientID=2 trackID=mdc_0_1 provider=loopback
+id=MDCEncodingQueue ts=1755700720812 status=Creating
+id=MDCEncodingQueue ts=1755700720813 status=Created
+id=PointCloudRenderer ts=1755700720875 status=FrameStartRendering capturerID=0 frameNr=0
+id=PointCloudRenderer ts=1755700720879 status=FrameRendered capturerID=0 frameNr=0
+id=PointCloudRenderer ts=1755700720880 status=FrameStartRendering capturerID=0 frameNr=0
+id=PointCloudRenderer ts=1755700720883 status=FrameRendered capturerID=0 frameNr=0
+id=PointCloudRenderer ts=1755700721501 status=FrameStartRendering capturerID=0 frameNr=10
+id=PointCloudRenderer ts=1755700721502 status=FrameRendered capturerID=0 frameNr=10
+id=PointCloudRenderer ts=1755700721502 status=FrameStartRendering capturerID=0 frameNr=10
+id=PointCloudRenderer ts=1755700721503 status=FrameRendered capturerID=0 frameNr=10
+id=PointCloudRenderer ts=1755700722168 status=FrameStartRendering capturerID=0 frameNr=20
+id=PointCloudRenderer ts=1755700722170 status=FrameRendered capturerID=0 frameNr=20
+id=PointCloudRenderer ts=1755700722170 status=FrameStartRendering capturerID=0 frameNr=20
+id=PointCloudRenderer ts=1755700722171 status=FrameRendered capturerID=0 frameNr=20
+id=PointCloudRenderer ts=1755700722840 status=FrameStartRendering capturerID=0 frameNr=30
+id=PointCloudRenderer ts=1755700722843 status=FrameRendered capturerID=0 frameNr=30
+id=PointCloudRenderer ts=1755700722843 status=FrameStartRendering capturerID=0 frameNr=30
+id=PointCloudRenderer ts=1755700722844 status=FrameRendered capturerID=0 frameNr=30
+id=PointCloudRenderer ts=1755700723512 status=FrameStartRendering capturerID=0 frameNr=40
+id=PointCloudRenderer ts=1755700723514 status=FrameRendered capturerID=0 frameNr=40
+id=PointCloudRenderer ts=1755700723516 status=FrameStartRendering capturerID=0 frameNr=40
+id=PointCloudRenderer ts=1755700723517 status=FrameRendered capturerID=0 frameNr=40
+id=PointCloudRenderer ts=1755700724183 status=FrameStartRendering capturerID=0 frameNr=50
+id=PointCloudRenderer ts=1755700724184 status=FrameRendered capturerID=0 frameNr=50
+id=PointCloudRenderer ts=1755700724184 status=FrameStartRendering capturerID=0 frameNr=50
+id=PointCloudRenderer ts=1755700724185 status=FrameRendered capturerID=0 frameNr=50
+id=PointCloudRenderer ts=1755700724853 status=FrameStartRendering capturerID=0 frameNr=60
+id=PointCloudRenderer ts=1755700724854 status=FrameRendered capturerID=0 frameNr=60
+id=PointCloudRenderer ts=1755700724857 status=FrameStartRendering capturerID=0 frameNr=60
+id=PointCloudRenderer ts=1755700724858 status=FrameRendered capturerID=0 frameNr=60
+id=PointCloudRenderer ts=1755700725562 status=FrameStartRendering capturerID=0 frameNr=70
+id=PointCloudRenderer ts=1755700725566 status=FrameRendered capturerID=0 frameNr=70
+id=PointCloudRenderer ts=1755700725566 status=FrameStartRendering capturerID=0 frameNr=70
+id=PointCloudRenderer ts=1755700725571 status=FrameRendered capturerID=0 frameNr=70
+id=PointCloudRenderer ts=1755700726198 status=FrameStartRendering capturerID=0 frameNr=80
+id=PointCloudRenderer ts=1755700726199 status=FrameRendered capturerID=0 frameNr=80
+id=PointCloudRenderer ts=1755700726202 status=FrameStartRendering capturerID=0 frameNr=80
+id=PointCloudRenderer ts=1755700726204 status=FrameRendered capturerID=0 frameNr=80
+id=PointCloudRenderer ts=1755700726869 status=FrameStartRendering capturerID=0 frameNr=90
+id=PointCloudRenderer ts=1755700726870 status=FrameRendered capturerID=0 frameNr=90
+id=PointCloudRenderer ts=1755700726872 status=FrameStartRendering capturerID=0 frameNr=90
+id=PointCloudRenderer ts=1755700726873 status=FrameRendered capturerID=0 frameNr=90
+id=PointCloudRenderer ts=1755700727543 status=FrameStartRendering capturerID=0 frameNr=100
+id=PointCloudRenderer ts=1755700727544 status=FrameRendered capturerID=0 frameNr=100
+id=PointCloudRenderer ts=1755700727547 status=FrameStartRendering capturerID=0 frameNr=100
+id=PointCloudRenderer ts=1755700727548 status=FrameRendered capturerID=0 frameNr=100
+id=PointCloudRenderer ts=1755700728212 status=FrameStartRendering capturerID=0 frameNr=110
+id=PointCloudRenderer ts=1755700728214 status=FrameRendered capturerID=0 frameNr=110
+id=PointCloudRenderer ts=1755700728216 status=FrameStartRendering capturerID=0 frameNr=110
+id=PointCloudRenderer ts=1755700728217 status=FrameRendered capturerID=0 frameNr=110
+id=PointCloudRenderer ts=1755700728887 status=FrameStartRendering capturerID=0 frameNr=120
+id=PointCloudRenderer ts=1755700728889 status=FrameRendered capturerID=0 frameNr=120
+id=PointCloudRenderer ts=1755700728890 status=FrameStartRendering capturerID=0 frameNr=120
+id=PointCloudRenderer ts=1755700728890 status=FrameRendered capturerID=0 frameNr=120
+id=PointCloudRenderer ts=1755700729560 status=FrameStartRendering capturerID=0 frameNr=130
+id=PointCloudRenderer ts=1755700729561 status=FrameRendered capturerID=0 frameNr=130
+id=PointCloudRenderer ts=1755700729563 status=FrameStartRendering capturerID=0 frameNr=130
+id=PointCloudRenderer ts=1755700729565 status=FrameRendered capturerID=0 frameNr=130
+id=PointCloudRenderer ts=1755700730263 status=FrameStartRendering capturerID=0 frameNr=140
+id=PointCloudRenderer ts=1755700730267 status=FrameRendered capturerID=0 frameNr=140
+id=PointCloudRenderer ts=1755700730268 status=FrameStartRendering capturerID=0 frameNr=140
+id=PointCloudRenderer ts=1755700730272 status=FrameRendered capturerID=0 frameNr=140
+id=PointCloudRenderer ts=1755700730904 status=FrameStartRendering capturerID=0 frameNr=150
+id=PointCloudRenderer ts=1755700730906 status=FrameRendered capturerID=0 frameNr=150
+id=PointCloudRenderer ts=1755700730908 status=FrameStartRendering capturerID=0 frameNr=150
+id=PointCloudRenderer ts=1755700730909 status=FrameRendered capturerID=0 frameNr=150
+id=PointCloudRenderer ts=1755700731578 status=FrameStartRendering capturerID=0 frameNr=160
+id=PointCloudRenderer ts=1755700731580 status=FrameRendered capturerID=0 frameNr=160
+id=PointCloudRenderer ts=1755700731582 status=FrameStartRendering capturerID=0 frameNr=160
+id=PointCloudRenderer ts=1755700731583 status=FrameRendered capturerID=0 frameNr=160
+id=PointCloudRenderer ts=1755700732252 status=FrameStartRendering capturerID=0 frameNr=170
+id=PointCloudRenderer ts=1755700732253 status=FrameRendered capturerID=0 frameNr=170
+id=PointCloudRenderer ts=1755700732255 status=FrameStartRendering capturerID=0 frameNr=170
+id=PointCloudRenderer ts=1755700732256 status=FrameRendered capturerID=0 frameNr=170
+id=PointCloudRenderer ts=1755700732917 status=FrameStartRendering capturerID=0 frameNr=180
+id=PointCloudRenderer ts=1755700732918 status=FrameRendered capturerID=0 frameNr=180
+id=PointCloudRenderer ts=1755700732920 status=FrameStartRendering capturerID=0 frameNr=180
+id=PointCloudRenderer ts=1755700732921 status=FrameRendered capturerID=0 frameNr=180
+id=PointCloudRenderer ts=1755700733587 status=FrameStartRendering capturerID=0 frameNr=190
+id=PointCloudRenderer ts=1755700733587 status=FrameRendered capturerID=0 frameNr=190
+id=PointCloudRenderer ts=1755700733589 status=FrameStartRendering capturerID=0 frameNr=190
+id=PointCloudRenderer ts=1755700733590 status=FrameRendered capturerID=0 frameNr=190
+id=PointCloudRenderer ts=1755700734260 status=FrameStartRendering capturerID=0 frameNr=200
+id=PointCloudRenderer ts=1755700734261 status=FrameRendered capturerID=0 frameNr=200
+id=PointCloudRenderer ts=1755700734263 status=FrameStartRendering capturerID=0 frameNr=200
+id=PointCloudRenderer ts=1755700734264 status=FrameRendered capturerID=0 frameNr=200
+id=PointCloudRenderer ts=1755700734926 status=FrameStartRendering capturerID=0 frameNr=210
+id=PointCloudRenderer ts=1755700734926 status=FrameRendered capturerID=0 frameNr=210
+id=PointCloudRenderer ts=1755700734931 status=FrameStartRendering capturerID=0 frameNr=210
+id=PointCloudRenderer ts=1755700734933 status=FrameRendered capturerID=0 frameNr=210
+id=PointCloudRenderer ts=1755700735598 status=FrameStartRendering capturerID=0 frameNr=220
+id=PointCloudRenderer ts=1755700735600 status=FrameRendered capturerID=0 frameNr=220
+id=PointCloudRenderer ts=1755700735600 status=FrameStartRendering capturerID=0 frameNr=220
+id=PointCloudRenderer ts=1755700735601 status=FrameRendered capturerID=0 frameNr=220
+id=PointCloudRenderer ts=1755700736272 status=FrameStartRendering capturerID=0 frameNr=230
+id=PointCloudRenderer ts=1755700736273 status=FrameRendered capturerID=0 frameNr=230
+id=PointCloudRenderer ts=1755700736279 status=FrameStartRendering capturerID=0 frameNr=230
+id=PointCloudRenderer ts=1755700736279 status=FrameRendered capturerID=0 frameNr=230
+id=PointCloudRenderer ts=1755700736954 status=FrameStartRendering capturerID=0 frameNr=240
+id=PointCloudRenderer ts=1755700736956 status=FrameRendered capturerID=0 frameNr=240
+id=PointCloudRenderer ts=1755700736956 status=FrameStartRendering capturerID=0 frameNr=240
+id=PointCloudRenderer ts=1755700736958 status=FrameRendered capturerID=0 frameNr=240
+id=PointCloudRenderer ts=1755700737618 status=FrameStartRendering capturerID=0 frameNr=250
+id=PointCloudRenderer ts=1755700737621 status=FrameRendered capturerID=0 frameNr=250
+id=PointCloudRenderer ts=1755700737621 status=FrameStartRendering capturerID=0 frameNr=250
+id=PointCloudRenderer ts=1755700737623 status=FrameRendered capturerID=0 frameNr=250
+id=PointCloudRenderer ts=1755700738288 status=FrameStartRendering capturerID=0 frameNr=260
+id=PointCloudRenderer ts=1755700738290 status=FrameRendered capturerID=0 frameNr=260
+id=PointCloudRenderer ts=1755700738293 status=FrameStartRendering capturerID=0 frameNr=260
+id=PointCloudRenderer ts=1755700738295 status=FrameRendered capturerID=0 frameNr=260
+id=PointCloudRenderer ts=1755700738959 status=FrameStartRendering capturerID=0 frameNr=270
+id=PointCloudRenderer ts=1755700738960 status=FrameRendered capturerID=0 frameNr=270
+id=PointCloudRenderer ts=1755700738964 status=FrameStartRendering capturerID=0 frameNr=270
+id=PointCloudRenderer ts=1755700738965 status=FrameRendered capturerID=0 frameNr=270
+id=PointCloudRenderer ts=1755700739628 status=FrameStartRendering capturerID=0 frameNr=280
+id=PointCloudRenderer ts=1755700739630 status=FrameRendered capturerID=0 frameNr=280
+id=PointCloudRenderer ts=1755700739633 status=FrameStartRendering capturerID=0 frameNr=280
+id=PointCloudRenderer ts=1755700739634 status=FrameRendered capturerID=0 frameNr=280
+id=PointCloudRenderer ts=1755700740298 status=FrameStartRendering capturerID=0 frameNr=290
+id=PointCloudRenderer ts=1755700740299 status=FrameRendered capturerID=0 frameNr=290
+id=PointCloudRenderer ts=1755700740301 status=FrameStartRendering capturerID=0 frameNr=290
+id=PointCloudRenderer ts=1755700740303 status=FrameRendered capturerID=0 frameNr=290
+id=PointCloudRenderer ts=1755700740970 status=FrameStartRendering capturerID=0 frameNr=300
+id=PointCloudRenderer ts=1755700740972 status=FrameRendered capturerID=0 frameNr=300
+id=PointCloudRenderer ts=1755700740972 status=FrameStartRendering capturerID=0 frameNr=300
+id=PointCloudRenderer ts=1755700740974 status=FrameRendered capturerID=0 frameNr=300
+id=PointCloudRenderer ts=1755700741668 status=FrameStartRendering capturerID=0 frameNr=310
+id=PointCloudRenderer ts=1755700741675 status=FrameRendered capturerID=0 frameNr=310
+id=PointCloudRenderer ts=1755700741675 status=FrameStartRendering capturerID=0 frameNr=310
+id=PointCloudRenderer ts=1755700741681 status=FrameRendered capturerID=0 frameNr=310
+id=PointCloudRenderer ts=1755700742313 status=FrameStartRendering capturerID=0 frameNr=320
+id=PointCloudRenderer ts=1755700742314 status=FrameRendered capturerID=0 frameNr=320
+id=PointCloudRenderer ts=1755700742316 status=FrameStartRendering capturerID=0 frameNr=320
+id=PointCloudRenderer ts=1755700742317 status=FrameRendered capturerID=0 frameNr=320
+id=PointCloudRenderer ts=1755700742986 status=FrameStartRendering capturerID=0 frameNr=330
+id=PointCloudRenderer ts=1755700742988 status=FrameRendered capturerID=0 frameNr=330
+id=PointCloudRenderer ts=1755700742990 status=FrameStartRendering capturerID=0 frameNr=330
+id=PointCloudRenderer ts=1755700742991 status=FrameRendered capturerID=0 frameNr=330
+id=PointCloudRenderer ts=1755700743659 status=FrameStartRendering capturerID=0 frameNr=340
+id=PointCloudRenderer ts=1755700743660 status=FrameRendered capturerID=0 frameNr=340
+id=PointCloudRenderer ts=1755700743663 status=FrameStartRendering capturerID=0 frameNr=340
+id=PointCloudRenderer ts=1755700743664 status=FrameRendered capturerID=0 frameNr=340
+id=PointCloudRenderer ts=1755700744332 status=FrameStartRendering capturerID=0 frameNr=350
+id=PointCloudRenderer ts=1755700744333 status=FrameRendered capturerID=0 frameNr=350
+id=PointCloudRenderer ts=1755700744336 status=FrameStartRendering capturerID=0 frameNr=350
+id=PointCloudRenderer ts=1755700744338 status=FrameRendered capturerID=0 frameNr=350
+id=PointCloudRenderer ts=1755700745006 status=FrameStartRendering capturerID=0 frameNr=360
+id=PointCloudRenderer ts=1755700745007 status=FrameRendered capturerID=0 frameNr=360
+id=PointCloudRenderer ts=1755700745007 status=FrameStartRendering capturerID=0 frameNr=360
+id=PointCloudRenderer ts=1755700745008 status=FrameRendered capturerID=0 frameNr=360
+id=PointCloudRenderer ts=1755700745671 status=FrameStartRendering capturerID=0 frameNr=370
+id=PointCloudRenderer ts=1755700745674 status=FrameRendered capturerID=0 frameNr=370
+id=PointCloudRenderer ts=1755700745678 status=FrameStartRendering capturerID=0 frameNr=370
+id=PointCloudRenderer ts=1755700745679 status=FrameRendered capturerID=0 frameNr=370
+id=PointCloudRenderer ts=1755700746343 status=FrameStartRendering capturerID=0 frameNr=380
+id=PointCloudRenderer ts=1755700746344 status=FrameRendered capturerID=0 frameNr=380
+id=PointCloudRenderer ts=1755700746347 status=FrameStartRendering capturerID=0 frameNr=380
+id=PointCloudRenderer ts=1755700746347 status=FrameRendered capturerID=0 frameNr=380
+id=PointCloudRenderer ts=1755700747017 status=FrameStartRendering capturerID=0 frameNr=390
+id=PointCloudRenderer ts=1755700747018 status=FrameRendered capturerID=0 frameNr=390
+id=PointCloudRenderer ts=1755700747021 status=FrameStartRendering capturerID=0 frameNr=390
+id=PointCloudRenderer ts=1755700747022 status=FrameRendered capturerID=0 frameNr=390
+id=PointCloudRenderer ts=1755700747684 status=FrameStartRendering capturerID=0 frameNr=400
+id=PointCloudRenderer ts=1755700747686 status=FrameRendered capturerID=0 frameNr=400
+id=PointCloudRenderer ts=1755700747689 status=FrameStartRendering capturerID=0 frameNr=400
+id=PointCloudRenderer ts=1755700747690 status=FrameRendered capturerID=0 frameNr=400
+id=PointCloudRenderer ts=1755700748365 status=FrameStartRendering capturerID=0 frameNr=410
+id=PointCloudRenderer ts=1755700748365 status=FrameRendered capturerID=0 frameNr=410
+id=PointCloudRenderer ts=1755700748369 status=FrameStartRendering capturerID=0 frameNr=410
+id=PointCloudRenderer ts=1755700748370 status=FrameRendered capturerID=0 frameNr=410
+id=PointCloudRenderer ts=1755700749029 status=FrameStartRendering capturerID=0 frameNr=420
+id=PointCloudRenderer ts=1755700749030 status=FrameRendered capturerID=0 frameNr=420
+id=PointCloudRenderer ts=1755700749032 status=FrameStartRendering capturerID=0 frameNr=420
+id=PointCloudRenderer ts=1755700749033 status=FrameRendered capturerID=0 frameNr=420
+id=PointCloudRenderer ts=1755700749699 status=FrameStartRendering capturerID=0 frameNr=430
+id=PointCloudRenderer ts=1755700749700 status=FrameRendered capturerID=0 frameNr=430
+id=PointCloudRenderer ts=1755700749701 status=FrameStartRendering capturerID=0 frameNr=430
+id=PointCloudRenderer ts=1755700749702 status=FrameRendered capturerID=0 frameNr=430
+id=PointCloudRenderer ts=1755700750373 status=FrameStartRendering capturerID=0 frameNr=440
+id=PointCloudRenderer ts=1755700750375 status=FrameRendered capturerID=0 frameNr=440
+id=PointCloudRenderer ts=1755700750375 status=FrameStartRendering capturerID=0 frameNr=440
+id=PointCloudRenderer ts=1755700750377 status=FrameRendered capturerID=0 frameNr=440
+id=PointCloudRenderer ts=1755700751044 status=FrameStartRendering capturerID=0 frameNr=450
+id=PointCloudRenderer ts=1755700751046 status=FrameRendered capturerID=0 frameNr=450
+id=PointCloudRenderer ts=1755700751046 status=FrameStartRendering capturerID=0 frameNr=450
+id=PointCloudRenderer ts=1755700751048 status=FrameRendered capturerID=0 frameNr=450
+id=PointCloudRenderer ts=1755700751710 status=FrameStartRendering capturerID=0 frameNr=460
+id=PointCloudRenderer ts=1755700751713 status=FrameRendered capturerID=0 frameNr=460
+id=PointCloudRenderer ts=1755700751713 status=FrameStartRendering capturerID=0 frameNr=460
+id=PointCloudRenderer ts=1755700751714 status=FrameRendered capturerID=0 frameNr=460
+id=PointCloudRenderer ts=1755700752382 status=FrameStartRendering capturerID=0 frameNr=470
+id=PointCloudRenderer ts=1755700752383 status=FrameRendered capturerID=0 frameNr=470
+id=PointCloudRenderer ts=1755700752388 status=FrameStartRendering capturerID=0 frameNr=470
+id=PointCloudRenderer ts=1755700752389 status=FrameRendered capturerID=0 frameNr=470
+id=PointCloudRenderer ts=1755700753054 status=FrameStartRendering capturerID=0 frameNr=480
+id=PointCloudRenderer ts=1755700753055 status=FrameRendered capturerID=0 frameNr=480
+id=PointCloudRenderer ts=1755700753057 status=FrameStartRendering capturerID=0 frameNr=480
+id=PointCloudRenderer ts=1755700753059 status=FrameRendered capturerID=0 frameNr=480
+id=PointCloudRenderer ts=1755700753726 status=FrameStartRendering capturerID=0 frameNr=490
+id=PointCloudRenderer ts=1755700753728 status=FrameRendered capturerID=0 frameNr=490
+id=PointCloudRenderer ts=1755700753728 status=FrameStartRendering capturerID=0 frameNr=490
+id=PointCloudRenderer ts=1755700753730 status=FrameRendered capturerID=0 frameNr=490
+id=PointCloudRenderer ts=1755700754446 status=FrameStartRendering capturerID=0 frameNr=500
+id=PointCloudRenderer ts=1755700754453 status=FrameRendered capturerID=0 frameNr=500
+id=PointCloudRenderer ts=1755700754453 status=FrameStartRendering capturerID=0 frameNr=500
+id=PointCloudRenderer ts=1755700754458 status=FrameRendered capturerID=0 frameNr=500
+id=PointCloudRenderer ts=1755700755070 status=FrameStartRendering capturerID=0 frameNr=510
+id=PointCloudRenderer ts=1755700755071 status=FrameRendered capturerID=0 frameNr=510
+id=PointCloudRenderer ts=1755700755072 status=FrameStartRendering capturerID=0 frameNr=510
+id=PointCloudRenderer ts=1755700755074 status=FrameRendered capturerID=0 frameNr=510
+id=PointCloudRenderer ts=1755700755737 status=FrameStartRendering capturerID=0 frameNr=520
+id=PointCloudRenderer ts=1755700755739 status=FrameRendered capturerID=0 frameNr=520
+id=PointCloudRenderer ts=1755700755739 status=FrameStartRendering capturerID=0 frameNr=520
+id=PointCloudRenderer ts=1755700755742 status=FrameRendered capturerID=0 frameNr=520
+id=PointCloudRenderer ts=1755700756411 status=FrameStartRendering capturerID=0 frameNr=530
+id=PointCloudRenderer ts=1755700756414 status=FrameRendered capturerID=0 frameNr=530
+id=PointCloudRenderer ts=1755700756414 status=FrameStartRendering capturerID=0 frameNr=530
+id=PointCloudRenderer ts=1755700756417 status=FrameRendered capturerID=0 frameNr=530
+id=PointCloudRenderer ts=1755700757081 status=FrameStartRendering capturerID=0 frameNr=540
+id=PointCloudRenderer ts=1755700757083 status=FrameRendered capturerID=0 frameNr=540
+id=PointCloudRenderer ts=1755700757083 status=FrameStartRendering capturerID=0 frameNr=540
+id=PointCloudRenderer ts=1755700757085 status=FrameRendered capturerID=0 frameNr=540
+id=PointCloudRenderer ts=1755700757749 status=FrameStartRendering capturerID=0 frameNr=550
+id=PointCloudRenderer ts=1755700757751 status=FrameRendered capturerID=0 frameNr=550
+id=PointCloudRenderer ts=1755700757751 status=FrameStartRendering capturerID=0 frameNr=550
+id=PointCloudRenderer ts=1755700757752 status=FrameRendered capturerID=0 frameNr=550
+id=PointCloudRenderer ts=1755700758423 status=FrameStartRendering capturerID=0 frameNr=560
+id=PointCloudRenderer ts=1755700758425 status=FrameRendered capturerID=0 frameNr=560
+id=PointCloudRenderer ts=1755700758425 status=FrameStartRendering capturerID=0 frameNr=560
+id=PointCloudRenderer ts=1755700758426 status=FrameRendered capturerID=0 frameNr=560
+id=PointCloudRenderer ts=1755700759108 status=FrameStartRendering capturerID=0 frameNr=570
+id=PointCloudRenderer ts=1755700759109 status=FrameRendered capturerID=0 frameNr=570
+id=PointCloudRenderer ts=1755700759109 status=FrameStartRendering capturerID=0 frameNr=570
+id=PointCloudRenderer ts=1755700759112 status=FrameRendered capturerID=0 frameNr=570
+id=PointCloudRenderer ts=1755700759769 status=FrameStartRendering capturerID=0 frameNr=580
+id=PointCloudRenderer ts=1755700759772 status=FrameRendered capturerID=0 frameNr=580
+id=PointCloudRenderer ts=1755700759772 status=FrameStartRendering capturerID=0 frameNr=580
+id=PointCloudRenderer ts=1755700759776 status=FrameRendered capturerID=0 frameNr=580
+id=PointCloudRenderer ts=1755700760483 status=FrameStartRendering capturerID=0 frameNr=590
+id=PointCloudRenderer ts=1755700760493 status=FrameRendered capturerID=0 frameNr=590
+id=PointCloudRenderer ts=1755700760493 status=FrameStartRendering capturerID=0 frameNr=590
+id=PointCloudRenderer ts=1755700760502 status=FrameRendered capturerID=0 frameNr=590
+id=PointCloudRenderer ts=1755700761099 status=FrameStartRendering capturerID=0 frameNr=600
+id=PointCloudRenderer ts=1755700761099 status=FrameRendered capturerID=0 frameNr=600
+id=PointCloudRenderer ts=1755700761102 status=FrameStartRendering capturerID=0 frameNr=600
+id=PointCloudRenderer ts=1755700761104 status=FrameRendered capturerID=0 frameNr=600
+id=PointCloudRenderer ts=1755700761777 status=FrameStartRendering capturerID=0 frameNr=610
+id=PointCloudRenderer ts=1755700761778 status=FrameRendered capturerID=0 frameNr=610
+id=PointCloudRenderer ts=1755700761778 status=FrameStartRendering capturerID=0 frameNr=610
+id=PointCloudRenderer ts=1755700761780 status=FrameRendered capturerID=0 frameNr=610
+id=PointCloudRenderer ts=1755700762446 status=FrameStartRendering capturerID=0 frameNr=620
+id=PointCloudRenderer ts=1755700762448 status=FrameRendered capturerID=0 frameNr=620
+id=PointCloudRenderer ts=1755700762448 status=FrameStartRendering capturerID=0 frameNr=620
+id=PointCloudRenderer ts=1755700762450 status=FrameRendered capturerID=0 frameNr=620
+id=PointCloudRenderer ts=1755700763110 status=FrameStartRendering capturerID=0 frameNr=630
+id=PointCloudRenderer ts=1755700763111 status=FrameRendered capturerID=0 frameNr=630
+id=PointCloudRenderer ts=1755700763112 status=FrameStartRendering capturerID=0 frameNr=630
+id=PointCloudRenderer ts=1755700763113 status=FrameRendered capturerID=0 frameNr=630
+id=PointCloudRenderer ts=1755700763788 status=FrameStartRendering capturerID=0 frameNr=640
+id=PointCloudRenderer ts=1755700763790 status=FrameRendered capturerID=0 frameNr=640
+id=PointCloudRenderer ts=1755700763790 status=FrameStartRendering capturerID=0 frameNr=640
+id=PointCloudRenderer ts=1755700763792 status=FrameRendered capturerID=0 frameNr=640
+id=PointCloudRenderer ts=1755700764458 status=FrameStartRendering capturerID=0 frameNr=650
+id=PointCloudRenderer ts=1755700764461 status=FrameRendered capturerID=0 frameNr=650
+id=PointCloudRenderer ts=1755700764461 status=FrameStartRendering capturerID=0 frameNr=650
+id=PointCloudRenderer ts=1755700764464 status=FrameRendered capturerID=0 frameNr=650
+id=PointCloudRenderer ts=1755700765133 status=FrameStartRendering capturerID=0 frameNr=660
+id=PointCloudRenderer ts=1755700765135 status=FrameRendered capturerID=0 frameNr=660
+id=PointCloudRenderer ts=1755700765135 status=FrameStartRendering capturerID=0 frameNr=660
+id=PointCloudRenderer ts=1755700765139 status=FrameRendered capturerID=0 frameNr=660
+id=PointCloudRenderer ts=1755700765803 status=FrameStartRendering capturerID=0 frameNr=670
+id=PointCloudRenderer ts=1755700765805 status=FrameRendered capturerID=0 frameNr=670
+id=PointCloudRenderer ts=1755700765805 status=FrameStartRendering capturerID=0 frameNr=670
+id=PointCloudRenderer ts=1755700765807 status=FrameRendered capturerID=0 frameNr=670
+id=PointCloudRenderer ts=1755700766477 status=FrameStartRendering capturerID=0 frameNr=680
+id=PointCloudRenderer ts=1755700766479 status=FrameRendered capturerID=0 frameNr=680
+id=PointCloudRenderer ts=1755700766480 status=FrameStartRendering capturerID=0 frameNr=680
+id=PointCloudRenderer ts=1755700766482 status=FrameRendered capturerID=0 frameNr=680
+id=PointCloudRenderer ts=1755700767273 status=FrameStartRendering capturerID=0 frameNr=690
+id=PointCloudRenderer ts=1755700767280 status=FrameRendered capturerID=0 frameNr=690
+id=PointCloudRenderer ts=1755700767281 status=FrameStartRendering capturerID=0 frameNr=690
+id=PointCloudRenderer ts=1755700767307 status=FrameRendered capturerID=0 frameNr=690
+id=PointCloudRenderer ts=1755700767807 status=FrameStartRendering capturerID=0 frameNr=700
+id=PointCloudRenderer ts=1755700767808 status=FrameRendered capturerID=0 frameNr=700
+id=PointCloudRenderer ts=1755700767810 status=FrameStartRendering capturerID=0 frameNr=700
+id=PointCloudRenderer ts=1755700767811 status=FrameRendered capturerID=0 frameNr=700
+id=PointCloudRenderer ts=1755700768474 status=FrameStartRendering capturerID=0 frameNr=710
+id=PointCloudRenderer ts=1755700768474 status=FrameRendered capturerID=0 frameNr=710
+id=PointCloudRenderer ts=1755700768474 status=FrameStartRendering capturerID=0 frameNr=710
+id=PointCloudRenderer ts=1755700768475 status=FrameRendered capturerID=0 frameNr=710
+id=PointCloudRenderer ts=1755700769144 status=FrameStartRendering capturerID=0 frameNr=720
+id=PointCloudRenderer ts=1755700769144 status=FrameRendered capturerID=0 frameNr=720
+id=PointCloudRenderer ts=1755700769144 status=FrameStartRendering capturerID=0 frameNr=720
+id=PointCloudRenderer ts=1755700769144 status=FrameRendered capturerID=0 frameNr=720
+id=PointCloudRenderer ts=1755700769818 status=FrameStartRendering capturerID=0 frameNr=730
+id=PointCloudRenderer ts=1755700769818 status=FrameRendered capturerID=0 frameNr=730
+id=PointCloudRenderer ts=1755700769818 status=FrameStartRendering capturerID=0 frameNr=730
+id=PointCloudRenderer ts=1755700769819 status=FrameRendered capturerID=0 frameNr=730
+id=PointCloudRenderer ts=1755700770490 status=FrameStartRendering capturerID=0 frameNr=740
+id=PointCloudRenderer ts=1755700770493 status=FrameRendered capturerID=0 frameNr=740
+id=PointCloudRenderer ts=1755700770493 status=FrameStartRendering capturerID=0 frameNr=740
+id=PointCloudRenderer ts=1755700770494 status=FrameRendered capturerID=0 frameNr=740
+id=PointCloudRenderer ts=1755700771157 status=FrameStartRendering capturerID=0 frameNr=750
+id=PointCloudRenderer ts=1755700771157 status=FrameRendered capturerID=0 frameNr=750
+id=PointCloudRenderer ts=1755700771157 status=FrameStartRendering capturerID=0 frameNr=750
+id=PointCloudRenderer ts=1755700771157 status=FrameRendered capturerID=0 frameNr=750
+id=PointCloudRenderer ts=1755700771834 status=FrameStartRendering capturerID=0 frameNr=760
+id=PointCloudRenderer ts=1755700771835 status=FrameRendered capturerID=0 frameNr=760
+id=PointCloudRenderer ts=1755700771835 status=FrameStartRendering capturerID=0 frameNr=760
+id=PointCloudRenderer ts=1755700771835 status=FrameRendered capturerID=0 frameNr=760
+id=PointCloudRenderer ts=1755700772502 status=FrameStartRendering capturerID=0 frameNr=770
+id=PointCloudRenderer ts=1755700772504 status=FrameRendered capturerID=0 frameNr=770
+id=PointCloudRenderer ts=1755700772504 status=FrameStartRendering capturerID=0 frameNr=770
+id=PointCloudRenderer ts=1755700772505 status=FrameRendered capturerID=0 frameNr=770
+id=PointCloudRenderer ts=1755700773168 status=FrameStartRendering capturerID=0 frameNr=780
+id=PointCloudRenderer ts=1755700773170 status=FrameRendered capturerID=0 frameNr=780
+id=PointCloudRenderer ts=1755700773172 status=FrameStartRendering capturerID=0 frameNr=780
+id=PointCloudRenderer ts=1755700773172 status=FrameRendered capturerID=0 frameNr=780
+id=PointCloudRenderer ts=1755700773841 status=FrameStartRendering capturerID=0 frameNr=790
+id=PointCloudRenderer ts=1755700773842 status=FrameRendered capturerID=0 frameNr=790
+id=PointCloudRenderer ts=1755700773842 status=FrameStartRendering capturerID=0 frameNr=790
+id=PointCloudRenderer ts=1755700773844 status=FrameRendered capturerID=0 frameNr=790
+id=PointCloudRenderer ts=1755700774512 status=FrameStartRendering capturerID=0 frameNr=800
+id=PointCloudRenderer ts=1755700774513 status=FrameRendered capturerID=0 frameNr=800
+id=PointCloudRenderer ts=1755700774514 status=FrameStartRendering capturerID=0 frameNr=800
+id=PointCloudRenderer ts=1755700774514 status=FrameRendered capturerID=0 frameNr=800
+id=PointCloudRenderer ts=1755700775193 status=FrameStartRendering capturerID=0 frameNr=810
+id=PointCloudRenderer ts=1755700775195 status=FrameRendered capturerID=0 frameNr=810
+id=PointCloudRenderer ts=1755700775195 status=FrameStartRendering capturerID=0 frameNr=810
+id=PointCloudRenderer ts=1755700775196 status=FrameRendered capturerID=0 frameNr=810
+id=PointCloudRenderer ts=1755700775853 status=FrameStartRendering capturerID=0 frameNr=820
+id=PointCloudRenderer ts=1755700775854 status=FrameRendered capturerID=0 frameNr=820
+id=PointCloudRenderer ts=1755700775854 status=FrameStartRendering capturerID=0 frameNr=820
+id=PointCloudRenderer ts=1755700775856 status=FrameRendered capturerID=0 frameNr=820
+id=PointCloudRenderer ts=1755700776522 status=FrameStartRendering capturerID=0 frameNr=830
+id=PointCloudRenderer ts=1755700776523 status=FrameRendered capturerID=0 frameNr=830
+id=PointCloudRenderer ts=1755700776526 status=FrameStartRendering capturerID=0 frameNr=830
+id=PointCloudRenderer ts=1755700776527 status=FrameRendered capturerID=0 frameNr=830
+id=PointCloudRenderer ts=1755700777196 status=FrameStartRendering capturerID=0 frameNr=840
+id=PointCloudRenderer ts=1755700777198 status=FrameRendered capturerID=0 frameNr=840
+id=PointCloudRenderer ts=1755700777200 status=FrameStartRendering capturerID=0 frameNr=840
+id=PointCloudRenderer ts=1755700777201 status=FrameRendered capturerID=0 frameNr=840
+id=PointCloudRenderer ts=1755700777868 status=FrameStartRendering capturerID=0 frameNr=850
+id=PointCloudRenderer ts=1755700777869 status=FrameRendered capturerID=0 frameNr=850
+id=PointCloudRenderer ts=1755700777872 status=FrameStartRendering capturerID=0 frameNr=850
+id=PointCloudRenderer ts=1755700777873 status=FrameRendered capturerID=0 frameNr=850

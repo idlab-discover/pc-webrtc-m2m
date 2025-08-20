@@ -53,6 +53,7 @@ public abstract class ConnectedClient<TTrackInfo> where TTrackInfo : ReceivingTr
     private readonly object _lock = new();
     //public delegate void ClientConnectedCallback();
 
+    // TODO Add on provider change
     public delegate void UserVideoTrackAddedCallback(string provider, string trackID);
     public delegate void UserVideoTrackRemovedCallback(string provider, string trackID);
     public delegate void UserAudioTrackAddedCallback(string provider);
@@ -114,12 +115,19 @@ public abstract class ConnectedClient<TTrackInfo> where TTrackInfo : ReceivingTr
         Logger.LogTrackStatusWithProvider(NAME, Logger.Status.ClientRemoveAudioTrack, ClientID, "audio", provider);
         OnUserAudioTrackRemoved?.Invoke(provider);
     }
-    public List<ReceivingTrackInfo> GetReceivingTracks()
+    public List<TTrackInfo> GetReceivingTracks()
     {
         lock (_lock)
         {
             Debug.Log(receivingTracks.Values.Count);
-            return new List<ReceivingTrackInfo>(receivingTracks.Values);
+            return new List<TTrackInfo>(receivingTracks.Values);
+        }
+    }
+    public Dictionary<string, TTrackInfo> GetReceivingTracksDict()
+    {
+        lock (_lock)
+        {
+            return new Dictionary<string, TTrackInfo>(receivingTracks);
         }
     }
 }
@@ -131,8 +139,10 @@ public class LocalConnectedClient : ConnectedClient<LocalTrackInfo>
     {
     }
 
+    // TODO Also make it so you can send via track itself
     public int SendVideoData(string trackID, IntPtr data, uint size)
     {
+  
         // TODDO probably do need to lock this tbh
         if (receivingTracks.TryGetValue(trackID, out var track))
         {
@@ -272,6 +282,7 @@ public abstract class SessionManagerBase
             }
             client.AddVideoTrack(new RemoteTrackInfo
             {
+                clientID = c.clientID,
                 providerKey = t.providerKey,
                 trackID = t.trackID,
                 capturerType = t.capturerType,

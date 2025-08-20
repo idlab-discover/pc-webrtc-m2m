@@ -10,7 +10,7 @@ using UnityEngine;
 public class MDCEncodingQueue : IDisposable
 {
     const string NAME = "MDCEncodingQueue";
-    public delegate void mdcDescriptionDoneCallback(MDCDescription desc);
+    public delegate void mdcDescriptionDoneCallback(EncodedMDCDescription desc);
     private mdcDescriptionDoneCallback descriptionDoneCallback;
     public bool IsValid { get; private set; }
     private IntPtr ptr;
@@ -84,7 +84,7 @@ public class MDCEncodingQueue : IDisposable
 
     private void OnDescriptionDoneCallback(IntPtr dsc, IntPtr rawDataPtr, UInt32 totalPointsInCloud, UInt32 dscSize, UInt32 capturerID, UInt32 frameNr, UInt32 dscNr, UInt64 timestamp)
     {
-        MDCDescription desc = new(
+        EncodedMDCDescription desc = new(
             dsc,
             rawDataPtr,
             dscSize,
@@ -100,7 +100,6 @@ public class MDCEncodingQueue : IDisposable
 
     private void OnFreePCCallback(IntPtr pc)
     {
-        // TODO move this to capture free callback
         Realsense2Invoker.free_point_cloud(pc);
     }
 

@@ -41,24 +41,24 @@ public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
     }
 
     // TODO move this to mdc encoder queue class
-    private void OnDescriptionDoneCallback(MDCDescription desc)
+    private void OnDescriptionDoneCallback(EncodedMDCDescription desc)
     {
-        string trackID = $"video_0_{desc.DescriptionNr}";
+        string trackID = $"mdc_0_{desc.Header.DescriptionNr}";
         
         if (keepWorking)
         {
             
             int nSend = 0;
-            if (desc.FrameNr % 100 == 0)
+            if (desc.Header.FrameNr % 100 == 0)
             {
-                Debug.Log($"{desc.FrameNr} {desc.DescriptionNr} {desc.DataBufferSize}");
+                Debug.Log($"{desc.Header.FrameNr} {desc.Header.DescriptionNr} {desc.Header.DataBufferSize}");
             }
             
             unsafe
             {
                 fixed (byte* bufferPointer = desc.Bytes)
                 {
-                    nSend = LocalClient.SendVideoData(trackID, new IntPtr(bufferPointer), (uint)desc.Bytes.Length);
+                   nSend = LocalClient.SendVideoData(trackID, new IntPtr(bufferPointer), (uint)desc.Bytes.Length);
                 }
             }
 

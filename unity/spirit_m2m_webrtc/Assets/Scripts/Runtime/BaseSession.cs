@@ -37,6 +37,7 @@ public class BaseSession : MonoBehaviour
     public PCReceiver PCReceiverPrefab;
     public GameObject Table;
     public PrefabFactory PipelineLocalPrefabFactory;
+    public PrefabFactory PipelineRemotePrefabFactory;
 
     // ################# Private Variables ###############
     private readonly object _lock = new();
@@ -226,14 +227,44 @@ public class BaseSession : MonoBehaviour
     private void newClientConnectedCallback(RemoteConnectedClient client, string clientSettings)
     {
         Debug.Log("New client connected");
-        /*clientDisconnectedCallback(clientID);
-        StartLocations[(int)clientID].transform.position = new Vector3(sessionInfo.startPositions[clientID].x, sessionInfo.startPositions[clientID].y, sessionInfo.startPositions[clientID].z);
-        PCReceiver pcReceiver = Instantiate(PCReceiverPrefab, StartLocations[(int)clientID].transform.position, StartLocations[(int)clientID].transform.rotation);
-        pcReceiver.transform.parent = StartLocations[(int)clientID].transform;
-        pcReceiver.ClientID = clientID;
-        pcReceiver.NDescriptions = NDescriptions;
-        pcReceiver.AudioParams = sessionInfo.audioPlayback;
-        pcReceivers[clientID] = pcReceiver);*/
+        if (PipelineLocalPrefabFactory == null)
+        {
+            Debug.LogError("PipelineLocalPrefabFactory is null, please assign it in the inspector");
+            return;
+        }
+        mainThreadActions.Enqueue(() =>
+        {
+            PipelineRemotePrefabFactory.registeredPrefabs.TryGetValue(client.CodecMode, out var prefab);
+            if (prefab == null)
+            {
+                Debug.LogError($"No prefab found for codec mode {client.CodecMode}");
+                return;
+            }
+            if (prefab.GetComponent<PipelineRemoteBase>() == null)
+            {
+                Debug.LogError($"Prefab for coded mode {client.CodecMode} does not have a PipelineRemoteBase component.");
+                return;
+            }
+            Debug.Log($"Using prefab for codec mode {client.CodecMode}");
+            GameObject temp = Instantiate(prefab, Vector3.zero, Quaternion.identity);
+            if (temp == null)
+            {
+                Debug.LogError("Failed to instantiate prefab for codec mode " + client.CodecMode);
+                return;
+            }
+            lock(_lock)
+            {
+                //  TODO Handle this
+                if (remotePipelines.ContainsKey(client.ClientID))
+                {
+                    Debug.LogError($"Remote pipeline for client {client.ClientID} already exists, skipping creation");
+                    return;
+                }
+                PipelineRemoteBase remoteipeline = temp.GetComponent<PipelineRemoteBase>();
+                remoteipeline.Init(sessionInfo, client);
+                remotePipelines[client.ClientID] = remoteipeline;
+            }
+        });
     }
     private void clientDisconnectedCallback(RemoteConnectedClient client)
     {

@@ -1,6 +1,5 @@
 {
     "defaultProvider": "loopback",
-    "selectedCodecMode": "mdc",
     "providers": [
         {
             "key": "loopback",
@@ -11,7 +10,7 @@
             },
             "sendingTracks": [
                {
-                    "trackID": "video_0_1"
+                    "trackID": "mdc_0_1"
                } 
             ]
         }

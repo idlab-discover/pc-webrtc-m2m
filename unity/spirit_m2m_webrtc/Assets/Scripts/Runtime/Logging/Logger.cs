@@ -52,9 +52,11 @@ public class Logger
         // General Frame Status
         FrameCreated = 400,
         FrameCompleted = 401,
-        FrameRendered = 402,
-        FrameDropped = 403,
-        FrameDestroyed = 404,
+        FrameEnqueued = 402,
+        FrameStartRendering = 403,
+        FrameRendered = 404,
+        FrameDropped = 405,
+        FrameDestroyed = 406,
 
         // RawConverter Status
         StartRawConversion = 500,

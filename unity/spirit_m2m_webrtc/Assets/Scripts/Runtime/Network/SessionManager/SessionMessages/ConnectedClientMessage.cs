@@ -2,6 +2,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /*
@@ -31,14 +32,27 @@ public class ConnectedClientMessage
     public List<ReceivingTrackInfo> receivingTracks = new();
 }
 
+public enum TrackStatus
+{
+    NotStarted = 0,
+    Started = 1,
+    Paused = 2,
+    Stopped = 3,
+    Error = 4
+}
+
 [System.Serializable]
 public class ReceivingTrackInfo
 {
+    public uint clientID;
     public string providerKey;
     public string trackID;
     public string capturerType;
     public string trackType; // Raw, PointCloud etc...
     public JObject trackSettings;
+
+    [NonSerialized]
+    public TrackStatus status = TrackStatus.NotStarted;
 
 }
 
@@ -56,5 +70,19 @@ public class  RemoteTrackInfo : ReceivingTrackInfo
     [NonSerialized]
     public NetworkReceiverBase Receiver;
 
+    public void StartPollingTrack(NetworkReceiverBase.OnStreamDataReceivedCb cb)
+    {
+        if (Receiver == null)
+        {
+            // DO something 
+            return;
+        }
+        if(!Receiver.IsValid)
+        {
+            // DO Something
+        }
+    
+        Receiver.StartPollVideoTrack(clientID, trackID, cb);
+    }
 }
 

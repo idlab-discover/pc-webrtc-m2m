@@ -15,8 +15,15 @@ public class LoopbackSessionManager : SessionManagerBase
         config = LoopbackSessionManagerInfo.CreateFromJSON(Application.dataPath + configPath);
         //OnSessionCreated += createLoopbackUsers;
         OnConnectedToSession += parseSessionJoined;
+        OnNewClientConnected += startTracksForRemote;
     }
-
+    private void startTracksForRemote(RemoteConnectedClient client, string settings)
+    {
+        client.GetReceivingTracks().ForEach(track =>
+        {
+            track.status = TrackStatus.Started;
+        });
+    }
     public override void AddAudioTrack()
     {
         throw new NotImplementedException();

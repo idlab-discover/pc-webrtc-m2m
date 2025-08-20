@@ -5,6 +5,37 @@ using System.Threading;
 
 using UnityEngine;
 
+public abstract class NetworkFrame : IDisposable
+{
+    private bool disposedValue;
+    public IntPtr DataPtr { get; protected set; }
+    public uint Size { get; protected set; }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                disposeInternal();
+            }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // TODO: set large fields to null
+            disposedValue = true;
+        }
+    }
+
+    protected abstract void disposeInternal();
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+}
+
 public abstract class NetworkReceiverBase : IDisposable
 {
     public bool IsValid { get; protected set; }
@@ -12,7 +43,7 @@ public abstract class NetworkReceiverBase : IDisposable
     protected readonly object _lock = new();
     private List<Thread> videoWorkerThreads = new();
     private Thread audioWorkerThread;
-    public delegate void OnStreamDataReceivedCb(IntPtr data, uint size);
+    public delegate void OnStreamDataReceivedCb(NetworkFrame receivedFrame);
 
     public void StartPollVideoTrack(uint clientID, string trackID, OnStreamDataReceivedCb cb)
     {

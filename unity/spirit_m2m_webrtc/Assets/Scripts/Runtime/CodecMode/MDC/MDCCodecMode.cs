@@ -43,7 +43,7 @@ public class MDCCodecMode : CodecModeBase
             var track = new CodecModeTrack
             {
                 mode=  MODE_NAME,
-                trackID = $"video_0_{i}",
+                trackID = $"{MODE_NAME}_0_{i}",
                 supportedCodecs = new List<string>(modeCodec.supportedCodecs),
                 trackSettings = JObject.FromObject(new MDCTrackSettings { samplingPercentage = rates[i] })
             };

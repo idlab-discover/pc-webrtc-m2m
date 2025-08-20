@@ -72,7 +72,7 @@ public class LoopbackReceiver : NetworkReceiverBase
                 }
                 if (keepWorking)
                 {
-                    cb(audioTrack.NextFrame.NextPtr, audioTrack.NextFrame.NextSize);
+                    cb(audioTrack.NextFrame);
                 }
             }
         }
@@ -98,9 +98,10 @@ public class LoopbackReceiver : NetworkReceiverBase
                 {
                     Monitor.Wait(t._lock);
                 }
+                t.NextFrameReady = false; // Reset the flag
                 if (keepWorking)
                 {
-                    cb(t.NextFrame.NextPtr, t.NextFrame.NextSize);
+                    cb(t.NextFrame);
                 }
             }
         }

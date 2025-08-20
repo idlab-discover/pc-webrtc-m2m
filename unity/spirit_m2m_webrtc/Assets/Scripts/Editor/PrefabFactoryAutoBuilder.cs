@@ -20,6 +20,7 @@ public static class PrefabFactoryInitializer
     {
         EditorApplication.update -= OnEditorLoaded;
         PipelineLocalPrefabBuilder.Rebuild("Editor load rebuild");
+        PipelineRemotePrefabBuilder.Rebuild("Editor load rebuild");
     }
 }
 
@@ -45,7 +46,11 @@ public class PrefabFactoryAssetWatcher: AssetPostprocessor
             if (path.EndsWith(".prefab")) prefabChanged = true;
 
         if (prefabChanged)
+        {
             PipelineLocalPrefabBuilder.Rebuild("Asset watcher rebuild");
+            PipelineRemotePrefabBuilder.Rebuild("Asset watcher rebuild");
+        }
+            
     }
 }
 
@@ -77,12 +82,18 @@ public class PrefabFactoryAutoBuilder<TBaseComponent, TAttribute>
         Dictionary<string, string> prefabGuidsByKey = typesWithAttribute
             .ToDictionary(
                 pair => pair.Key,
-                pair => AssetDatabase.FindAssets($"t:Prefab {pair.Value}Prefab").First()
+                pair => AssetDatabase.FindAssets($"t:Prefab {pair.Value}Prefab").FirstOrDefault()
             );
+
 
         Dictionary<string, GameObject> foundPrefabs = new();
         foreach (var guid in prefabGuidsByKey)
         {
+            if (guid.Value == null)
+            {
+                Debug.LogWarning($"[PrefabFactory] No prefab found for type {guid.Key} ({guid.Value})");
+                continue;
+            }
             string path = AssetDatabase.GUIDToAssetPath(guid.Value);
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
 
@@ -138,6 +149,24 @@ public static class PipelineLocalPrefabBuilder
     public static void Rebuild(string reason)
     {
         PrefabFactoryAutoBuilder<PipelineLocalPointcloudBase, PipelineLocalRegisterAttribute>.RebuildFactory(
+            FactoryPath,
+            reason
+        );
+    }
+}
+
+public static class PipelineRemotePrefabBuilder
+{
+    public readonly static string FactoryPath = "Assets/PipelineRemotePrefabFactory.asset"; // TODO Write this to a path scriptable object
+
+    [MenuItem("Tools/Prefab Factory/Rebuild Pipeline Remote Factory")]
+    public static void RebuildMenu()
+    {
+        Rebuild("Manual rebuild from menu");
+    }
+    public static void Rebuild(string reason)
+    {
+        PrefabFactoryAutoBuilder<PipelineRemotePointcloudBase, PipelineRemoteRegisterAttribute>.RebuildFactory(
             FactoryPath,
             reason
         );

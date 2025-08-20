@@ -10,10 +10,14 @@ struct PointCloud {
     Vertex* coords;
     Color* colors;
     Frame* frame_pointer = nullptr; // DO NOT USE OR FREE YOURSELF!
-
+    bool delete_arrays = false;
     ~PointCloud() {
         if(frame_pointer != nullptr) {
             delete frame_pointer; // This will free the frame pointer if it was allocated
+        }
+        if(delete_arrays) {
+            delete[] coords;
+            delete[] colors;
         }
     };
 };
