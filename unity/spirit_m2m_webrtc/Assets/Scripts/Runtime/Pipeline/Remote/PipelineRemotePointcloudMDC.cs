@@ -34,7 +34,7 @@ public class PipelineRemotePointcloudMDC : PipelineRemotePointcloudBase
         }
         foreach(var capturer in capturersToDescNumbers)
         {
-            MDCPointCloudReceiverSingle receiver = new(capturer.Value, playbackBuffer);
+            MDCPointCloudReceiverSingle receiver = new(capturer.Value, playbackBuffer, RemoteClient.ClientID);
             receivers.Add(receiver);
         }
     }

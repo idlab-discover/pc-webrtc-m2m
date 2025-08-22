@@ -17,6 +17,7 @@ public class PointCloudRenderer : MonoBehaviour
     private uint currentQualityIndex = 0;
     private uint currentQuality = 0;
     private Mesh currentMesh;
+    private uint clientID;
     void Start()
     {
         meshFilters = new(renderers.Count);
@@ -36,10 +37,14 @@ public class PointCloudRenderer : MonoBehaviour
     {
         
     }
+
+    public void Init(uint clientID)
+    {
+        this.clientID = clientID;
+    }
     public void SetPointCloud(RenderablePointCloud dec)
     {
-        Logger.LogPCFrameStatusLimited(NAME, Logger.Status.FrameStartRendering, 0, dec.FrameNr);
-       // setQuality(dec.Quality);
+        setQuality(dec.Quality);
         Destroy(currentMesh);
         currentMesh = new Mesh();
         currentMesh.indexFormat = dec.TotalPoints > 65535 ?
@@ -53,7 +58,7 @@ public class PointCloudRenderer : MonoBehaviour
       
         currentMesh.UploadMeshData(true);
         meshFilters[(int)currentQualityIndex].mesh = currentMesh;
-        Logger.LogPCFrameStatusLimited(NAME, Logger.Status.FrameRendered, 0, dec.FrameNr);
+        Logger.LogPCFrameStatusLimited(NAME, Logger.Status.FrameRendered, clientID, 0, dec.FrameNr);
     }
     public void ClearRenderer()
     {

@@ -7,25 +7,30 @@ using UnityEngine;
 
 public class MDCPointCloudReceiverSingle
 {
+    private const string NAME = "MDCPointCloudReceiverSingle";
 
     private readonly object _lock = new();
     private readonly List<RemoteTrackInfo> tracksForCapturer;
     private readonly PointCloudBuffer playbackBuffer;
     private Dictionary<UInt32, MDCDecodedPointCloudSingle> inProgessFrames = new();
+    private readonly uint clientID;
 
 
-
-    public MDCPointCloudReceiverSingle(List<RemoteTrackInfo> tracksForCapturer, PointCloudBuffer playbackBuffer)
+    public MDCPointCloudReceiverSingle(List<RemoteTrackInfo> tracksForCapturer, PointCloudBuffer playbackBuffer, uint clientID)
     {
         this.tracksForCapturer = tracksForCapturer;
         this.playbackBuffer = playbackBuffer;
         this.playbackBuffer.NActiveCapturers = 1; // TODO Make this changeable
+        this.clientID = clientID;   
         foreach (var track in tracksForCapturer)
         {
            track.StartPollingTrack((frame) => {
                uint nDescriptions = 0;
                MDCFrameHeader header = new(frame);
-               Debug.Log("received frame with header:" + header.ToString());
+               Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.StartDecodingPC, clientID, header.FrameNr, header.ToStringSmall());
+               DecodedMDCDescription description = new(header, true);
+               frame.Dispose(); // TODO Make it so it can also not be disposed
+               Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.EndDecodingPC, clientID, header.FrameNr, header.ToStringSmall());
                lock (_lock)
                {
                    foreach (var track in tracksForCapturer)
@@ -42,11 +47,14 @@ public class MDCPointCloudReceiverSingle
                        m.AddSingle(singleFrame);
                        inProgessFrames.Add(header.FrameNr, singleFrame);
                    }
-                   DecodedMDCDescription description = new(header, true);
-                   frame.Dispose(); // TODO Make it so it can also not be disposed
+                  
                    singleFrame.AddDescription(description);
-
                    description.Dispose();
+                   if(singleFrame.IsCompleted && singleFrame.IsParentCompleted)
+                   {
+                       playbackBuffer.CompleteFrame(singleFrame.Parent, true);
+                       Logger.LogPCFrameStatusLimited(NAME, Logger.Status.FrameEnqueued, clientID, header.FrameNr);
+                   }
 
                }
            });

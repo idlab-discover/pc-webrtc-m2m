@@ -13,6 +13,7 @@ public abstract class PipelineRemotePointcloudBase : PipelineRemoteBase
     {
         base.Init(sessionInfo, client);
         this.playbackBuffer = new PointCloudBuffer(sessionInfo.playbackBufferSettings, 0, 30);
+        pointCloudRendererPrefab.Init(client.ClientID);
     }
 
     private void Update()

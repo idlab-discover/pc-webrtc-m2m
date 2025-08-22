@@ -1,0 +1,14 @@
+{
+    "selectedCodecMode": "mdc",
+    "loopbackUsers": [
+        {
+            "clientID": 2,
+            "loopbackTracks": [
+                {
+                    "capturerID": 0,
+                    "trackID": "mdc_0_1"
+                }
+            ]
+        }
+    ]
+}

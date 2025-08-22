@@ -47,7 +47,7 @@ public class BaseSession : MonoBehaviour
 
     void Start()
     {
-        
+
         sessionInfo = SessionInfo.CreateFromJSON(Application.dataPath + "/config/session_config.json");
         Logger.Init(sessionInfo.loggerSettings);
         sessionManager = SessionManagerRepository.CreateAndGetManager(sessionInfo.sessionManagerSettings.type, sessionInfo.sessionManagerSettings.configPath);

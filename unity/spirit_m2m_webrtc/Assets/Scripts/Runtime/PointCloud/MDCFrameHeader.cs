@@ -80,4 +80,8 @@ public class MDCFrameHeader
     {
         return $"ts_frame={Timestamp} capturer_id={CapturerID} frameNr={FrameNr} descriptionNr={DescriptionNr} codecType={CodecType} totalNumberOfPoints={TotalNumberOfPoints}";
     }
+    public string ToStringSmall()
+    {
+        return $"capturerID={CapturerID} frameNr={FrameNr} descriptionID={DescriptionNr}";
+    }
 }

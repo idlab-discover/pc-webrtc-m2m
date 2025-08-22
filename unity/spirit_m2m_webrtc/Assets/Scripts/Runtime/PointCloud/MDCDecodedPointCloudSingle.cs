@@ -16,7 +16,7 @@ public class MDCDecodedPointCloudSingle : DecodedPointCloudSingle
     {
         lock (_lock)
         {
-            parent.AddPoints(desc.PointPtr, desc.ColorPtr, desc.NumberOfPoints);
+            Parent.AddPoints(desc.PointPtr, desc.ColorPtr, desc.NumberOfPoints);
             currentNDescriptions++;
             if(currentNDescriptions == nDescriptions)
             {
@@ -25,4 +25,5 @@ public class MDCDecodedPointCloudSingle : DecodedPointCloudSingle
            
         }
     }
+ 
 }

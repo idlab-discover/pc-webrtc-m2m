@@ -10,6 +10,7 @@ public abstract class RenderablePointCloudBuffer
     public uint FPS;
     public uint MaxTimeBeforeIncompleteRender;
     public bool EnqueueImmediately;
+    public bool RenderIncompleteFrames;
 
     public RenderablePointCloudBuffer(PlaybackBufferSettings settings, ulong timestampNextDeadline, uint fps)
     {
@@ -18,6 +19,7 @@ public abstract class RenderablePointCloudBuffer
         FPS = fps;
         MaxTimeBeforeIncompleteRender = settings.maxTimeBeforeIncompleteRender;
         EnqueueImmediately = settings.enqueueImmediately;
+        RenderIncompleteFrames = settings.renderIncompleteFrames;
     }
 
     public abstract RenderablePointCloud CheckForCompletedFrames();

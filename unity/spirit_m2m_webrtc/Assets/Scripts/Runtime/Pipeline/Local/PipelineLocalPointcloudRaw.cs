@@ -6,11 +6,13 @@ using UnityEngine;
 
 [PipelineLocalRegister("raw")]
 public class PipelineLocalPointcloudRaw : PipelineLocalPointcloudBase
-
 {
+    protected override string NAME => "PipelineLocalPointcloudRaw";
     private MDCEncodingQueue encodingQueue;
 
     protected override FrameMode FrameMode => FrameMode.RealData;
+
+    
 
     protected override void pollFramesInternal()
     {

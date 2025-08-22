@@ -8,11 +8,14 @@ using UnityEngine;
 [PipelineLocalRegister("mdc")]
 public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
 {
+    protected override string NAME => "PipelineLocalPointcloudMDC";
     private MDCEncodingQueue encodingQueue; // TODO move this to video caputre
     // TODO Add audio capture 
     private readonly object _lock = new();
 
     protected override FrameMode FrameMode => FrameMode.RealData;
+
+    
 
     public override void Init(SessionInfo sessionInfo, LocalConnectedClient localClient)
     {   
@@ -47,7 +50,7 @@ public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
         
         if (keepWorking)
         {
-            
+            Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.EndEncodingPC, LocalClient.ClientID, desc.Header.FrameNr, desc.Header.ToString());
             int nSend = 0;
             if (desc.Header.FrameNr % 100 == 0)
             {
@@ -67,6 +70,7 @@ public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
                 keepWorking = false;
                 Debug.Log("Stop capturing");
             }
+            Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.FrameAddedToSender, LocalClient.ClientID, desc.Header.FrameNr, desc.Header.ToStringSmall());
         }
         desc.Dispose();
     }

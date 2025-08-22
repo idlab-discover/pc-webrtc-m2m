@@ -9,24 +9,19 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"text/template"
 	"time"
-	"unsafe"
 
 	"golang.org/x/exp/slices"
 
 	"github.com/gorilla/websocket"
-	"github.com/pion/interceptor"
-	"github.com/pion/sdp/v3"
 	"github.com/pion/webrtc/v3"
 
 	"github.com/pion/interceptor/pkg/cc"
-	"github.com/pion/interceptor/pkg/gcc"
 
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/v4/cpu"
@@ -839,332 +834,6 @@ func websocketHandlerDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Handle incoming websockets
-func websocketHandler(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Println("WebRTCSFU: webSocketHandler: Websocket handler started")
-
-	// Upgrade HTTP request to Websocket
-	unsafeWebSocketConn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		fmt.Printf("WebRTCSFU: webSocketHandler: ERROR: %s\n", err)
-		return
-	}
-
-	fmt.Println("WebRTCSFU: webSocketHandler: Websocket handler upgraded")
-
-	webSocketConnection := &threadSafeWriter{unsafeWebSocketConn, sync.Mutex{}}
-
-	// When this frame returns close the Websocket
-	defer func() {
-		fmt.Println("WebRTCSFU: webSocketHandler: Closing a ThreadSafeWriter")
-		webSocketConnection.Close()
-	}()
-
-	fmt.Println("WebRTCSFU: webSocketHandler: Creating a new peer connection")
-
-	mediaEngine := &webrtc.MediaEngine{}
-	interceptorRegistry := &interceptor.Registry{}
-
-	if err := mediaEngine.RegisterDefaultCodecs(); err != nil {
-		panic(err)
-	}
-
-	videoRTCPFeedback := []webrtc.RTCPFeedback{
-		{Type: "goog-remb", Parameter: ""},
-		{Type: "ccm", Parameter: "fir"},
-		{Type: "nack", Parameter: ""},
-		{Type: "nack", Parameter: "pli"},
-	}
-	// TODO Audio RTP
-	videoCodecCapability := webrtc.RTPCodecCapability{
-		MimeType:     "video/pcm",
-		ClockRate:    90000,
-		Channels:     0,
-		SDPFmtpLine:  "",
-		RTCPFeedback: videoRTCPFeedback,
-	}
-
-	audioCodecCapability := webrtc.RTPCodecCapability{
-		MimeType:     "audio/pcm",
-		ClockRate:    90000,
-		Channels:     0,
-		SDPFmtpLine:  "",
-		RTCPFeedback: nil,
-	}
-
-	if err := mediaEngine.RegisterCodec(webrtc.RTPCodecParameters{
-		RTPCodecCapability: videoCodecCapability,
-		PayloadType:        5,
-	}, webrtc.RTPCodecTypeVideo); err != nil {
-		panic(err)
-	}
-
-	if err := mediaEngine.RegisterCodec(webrtc.RTPCodecParameters{
-		RTPCodecCapability: audioCodecCapability,
-		PayloadType:        6,
-	}, webrtc.RTPCodecTypeAudio); err != nil {
-		panic(err)
-	}
-
-	mediaEngine.RegisterFeedback(webrtc.RTCPFeedback{Type: "nack"}, webrtc.RTPCodecTypeVideo)
-	mediaEngine.RegisterFeedback(webrtc.RTCPFeedback{Type: "nack", Parameter: "pli"}, webrtc.RTPCodecTypeVideo)
-	mediaEngine.RegisterFeedback(webrtc.RTCPFeedback{Type: webrtc.TypeRTCPFBTransportCC}, webrtc.RTPCodecTypeVideo)
-	if err := mediaEngine.RegisterHeaderExtension(webrtc.RTPHeaderExtensionCapability{URI: sdp.TransportCCURI}, webrtc.RTPCodecTypeVideo); err != nil {
-		panic(err)
-	}
-
-	bwEstimator := &bwEstimator{}
-	if !*disableGCC {
-
-		congestionController, err := cc.NewInterceptor(func() (cc.BandwidthEstimator, error) {
-			return gcc.NewSendSideBWE(gcc.SendSideBWEMinBitrate(55000*30*8), gcc.SendSideBWEInitialBitrate(55000*30*8), gcc.SendSideBWEMaxBitrate(262_744_320))
-		})
-		if err != nil {
-			panic(err)
-		}
-		congestionController.OnNewPeerConnection(func(id string, estimator cc.BandwidthEstimator) {
-			pointerVal := reflect.ValueOf(estimator)
-			val := reflect.Indirect(pointerVal)
-
-			lossControllerFieldPtr := val.FieldByName("lossController")
-			lossControllerField := reflect.Indirect((lossControllerFieldPtr))
-
-			minBitrateField := lossControllerField.FieldByName("minBitrate")
-			ptrToMin := unsafe.Pointer(minBitrateField.UnsafeAddr())
-			actualMinPtr := (*int)(ptrToMin)
-			*actualMinPtr = 55000 * 30 * 8
-
-			maxBitrateField := lossControllerField.FieldByName("maxBitrate")
-			ptrToMax := unsafe.Pointer(maxBitrateField.UnsafeAddr())
-			actualMaxPtr := (*int)(ptrToMax)
-			*actualMaxPtr = 262_744_320
-
-			bwEstimator.estimator = estimator
-		})
-		interceptorRegistry.Add(congestionController)
-	}
-
-	if err = webrtc.ConfigureTWCCHeaderExtensionSender(mediaEngine, interceptorRegistry); err != nil {
-		panic(err)
-	}
-	if err = webrtc.RegisterDefaultInterceptors(mediaEngine, interceptorRegistry); err != nil {
-		panic(err)
-	}
-
-	peerConnection, err := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine), webrtc.WithMediaEngine(mediaEngine), webrtc.WithInterceptorRegistry(interceptorRegistry)).NewPeerConnection(webrtc.Configuration{})
-	// peerConnection, err := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine), webrtc.WithInterceptorRegistry(interceptorRegistry), webrtc.WithMediaEngine(mediaEngine)).NewPeerConnection(webrtc.Configuration{})
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("WebRTCSFU: webSocketHandler: Peer connection created")
-
-	// When this frame returns close the PeerConnection
-	defer func() {
-		fmt.Println("WebRTCSFU: webSocketHandler: Closing a peer connection")
-		peerConnection.Close()
-	}()
-
-	fmt.Println("WebRTCSFU: webSocketHandler: Iterating over video tracks")
-
-	for i := 0; i < *maxNumberOfTiles; i++ {
-		if _, err := peerConnection.AddTransceiverFromKind(webrtc.RTPCodecTypeVideo, webrtc.RTPTransceiverInit{
-			Direction: webrtc.RTPTransceiverDirectionRecvonly,
-		}); err != nil {
-			fmt.Printf("WebRTCSFU: webSocketHandler: ERROR: %s\n", err)
-			return
-		}
-	}
-
-	fmt.Println("WebRTCSFU: webSocketHandler: Adding audio track")
-
-	if _, err := peerConnection.AddTransceiverFromKind(webrtc.RTPCodecTypeAudio, webrtc.RTPTransceiverInit{
-		Direction: webrtc.RTPTransceiverDirectionRecvonly,
-	}); err != nil {
-		fmt.Printf("WebRTCSFU: webSocketHandler: ERROR: %s\n", err)
-		return
-	}
-
-	fmt.Println("WebRTCSFU: webSocketHandler: Waiting for lock")
-
-	// Add our new PeerConnection to global list
-	listLock.Lock()
-	start := int(0)
-	wsLock.Lock()
-	for _, pcT := range peerConnections {
-		for _, cpI := range pcT.capturerIntrinsics {
-			if cpI != "" {
-				s := fmt.Sprintf("%d@%d@%s", *pcT.clientID, 8, cpI)
-				webSocketConnection.WriteMessage(websocket.TextMessage, []byte(s))
-			}
-		}
-
-	}
-	wsLock.Unlock()
-	var pcState = peerConnectionState{peerConnection, webSocketConnection, pcID, &start, new(int), bwEstimator, map[int]*trackBitrate{}, &cameraInfo{}, make(map[int]string), make([]string, 0)}
-	pcID += 1
-	peerConnections = append(peerConnections, pcState)
-	fmt.Printf("WebRTCSFU: webSocketHandler: peerConnection #%d\n", len(peerConnections))
-	undesireableTracks[pcID] = []string{}
-	listLock.Unlock()
-
-	fmt.Println("WebRTCSFU: webSocketHandler: Will now call signalpeerconnections again")
-
-	// Signal for the new PeerConnection
-	signalPeerConnections()
-
-	// Trickle ICE and emit server candidate to client
-	peerConnection.OnICECandidate(func(i *webrtc.ICECandidate) {
-		if i == nil {
-			return
-		}
-		fmt.Println("WebRTCSFU: webSocketHandler: OnICECandidate: Found a candidate")
-		payload := []byte(i.ToJSON().Candidate)
-		s := fmt.Sprintf("%d@%d@%s", 0, 4, string(payload))
-		wsLock.Lock()
-		err = webSocketConnection.WriteMessage(websocket.TextMessage, []byte(s))
-		wsLock.Unlock()
-		if err != nil {
-			//panic(err)
-			fmt.Println("WebRTCSFU: webSocketHandler: ERROR: ", err)
-		}
-	})
-
-	// If PeerConnection is closed remove it from global list
-	peerConnection.OnConnectionStateChange(func(p webrtc.PeerConnectionState) {
-		fmt.Printf("WebRTCSFU: webSocketHandler: OnConnectionStateChange: Peer connection state has changed to %s\n", p.String())
-		switch p {
-		case webrtc.PeerConnectionStateFailed:
-			if err := peerConnection.Close(); err != nil {
-				fmt.Printf("WebRTCSFU: webSocketHandler: ERROR: %s\n", err)
-			}
-		case webrtc.PeerConnectionStateClosed:
-			fmt.Println("WebRTCSFU: webSocketHandler: OnConnectionStateChange: Closed")
-			signalPeerConnections()
-		case webrtc.PeerConnectionStateConnected:
-			fmt.Println("WebRTCSFU: webSocketHandler: OnConnectionStateChange: Connected")
-
-		}
-	})
-
-	peerConnection.OnTrack(func(t *webrtc.TrackRemote, _ *webrtc.RTPReceiver) {
-		// Create a track to fan out our incoming video to all peers
-		//if t.Kind() == webrtc.RTPCodecTypeAudio {
-		//	return
-		//}
-		trackLocal := addTrack(t)
-		fmt.Printf("WebRTCSFU: OnTrack: Adding track %v\n", trackLocal.ID())
-		defer func() {
-			fmt.Printf("WebRTCSFU: OnTrack: removing track %v\n", trackLocal.ID())
-			removeTrack(trackLocal)
-		}()
-
-		idTokens := strings.Split(t.ID(), "_")
-		tileNr := 99
-		if !*disableABR {
-			if t.Kind() == webrtc.RTPCodecTypeVideo {
-				tileNr, _ = strconv.Atoi(idTokens[3])
-				listLock.Lock()
-				pcState.trackBitrates[tileNr] = &trackBitrate{}
-				pcState.trackBitrates[tileNr].trackID = t.ID()
-				pcState.trackBitrates[tileNr].trackNR = tileNr
-				pcState.trackBitrates[tileNr].counters = make([]uint32, 20)
-				*pcState.nActiveTracks++
-				listLock.Unlock()
-			}
-		}
-
-		startTime := time.Now().UnixNano() // / int64(time.Millisecond)
-		prevBucket := int64(0)
-		for {
-			buf := make([]byte, 1500)
-			i, _, err := t.Read(buf)
-			if err != nil {
-				fmt.Printf("WebRTCSFU: OnTrack: error during read: %s\n", err)
-				break
-			}
-			if !*disableABR && t.Kind() == webrtc.RTPCodecTypeVideo {
-				nextTime := time.Now().UnixNano() //
-				nsDiff := nextTime - startTime
-				msBucket := nsDiff / int64(50*time.Millisecond)
-				// Todo implement concurrency safety => get pointer to trackbitrates once!
-				if msBucket != int64(prevBucket) {
-					pcState.trackBitrates[tileNr].currentCounterCompleted = pcState.trackBitrates[tileNr].currentCounter
-					pcState.trackBitrates[tileNr].counters[pcState.trackBitrates[tileNr].currentCounter] = pcState.trackBitrates[tileNr].tempCounter
-					pcState.trackBitrates[tileNr].currentCounter = (pcState.trackBitrates[tileNr].currentCounter + 1) % 20
-					pcState.trackBitrates[tileNr].currentCounterMax++
-					pcState.trackBitrates[tileNr].tempCounter = 0
-				}
-				pcState.trackBitrates[tileNr].tempCounter += uint32(i)
-				prevBucket = msBucket
-			}
-			go func() {
-				if _, err = trackLocal.Write(buf[:i]); err != nil {
-					fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)
-					//	break
-				}
-			}()
-
-		}
-	})
-
-	for {
-		_, raw, err := webSocketConnection.ReadMessage()
-		if err != nil {
-			fmt.Printf("WebRTCSFU: webSocketHandler: ReadMessage: error %w\n", err)
-			break
-		}
-		v := strings.Split(string(raw), "@")
-		clientID, _ := strconv.ParseUint(v[0], 10, 64)
-		*pcState.clientID = int(clientID)
-		//fmt.Printf("WebRTCSFU: webSocketHandler: Message fro;: %d\n", *pcState.clientID)
-		messageType, _ := strconv.ParseUint(v[1], 10, 64)
-		message := v[2]
-		if messageType != 7 {
-			fmt.Printf("WebRTCSFU: webSocketHandler: Message type: %d\n", messageType)
-		}
-
-		switch messageType {
-		// answer
-		case 3:
-			answer := webrtc.SessionDescription{}
-			if err := json.Unmarshal([]byte(message), &answer); err != nil {
-				panic(err)
-			}
-			if err := peerConnection.SetRemoteDescription(answer); err != nil {
-				panic(err)
-			}
-
-			for _, c := range pcState.pendingCandidatesString {
-				if candidateErr := peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: c}); candidateErr != nil {
-					panic(candidateErr)
-				}
-			}
-		// candidate
-		case 4:
-			desc := peerConnection.RemoteDescription()
-			if desc == nil {
-				pcState.pendingCandidatesString = append(pcState.pendingCandidatesString, message)
-			} else {
-				if candidateErr := peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: message}); candidateErr != nil {
-					panic(candidateErr)
-				}
-			}
-		// remove track
-		case 5:
-			removeTrackforPeer(pcState, message)
-		// add track
-		case 6:
-			addTrackforPeer(pcState, message)
-		case 7:
-			updateCamInfoforPeer(pcState, message)
-		case 8:
-			updateCapturerIntrinsicsForPeer(pcState, message)
-		}
-	}
-}
-
 func updateCapturerIntrinsicsForPeer(pcState peerConnectionState, data string) {
 	listLock.Lock()
 	wsLock.Lock()
@@ -1275,6 +944,18 @@ func getCapturerIDFromString(s string) int {
 type threadSafeWriter struct {
 	*websocket.Conn
 	sync.Mutex
+}
+
+func (t *threadSafeWriter) WriteJSONSafe(v interface{}) error {
+	t.Lock()
+	defer t.Unlock()
+	return t.WriteJSON(v)
+}
+
+func (t *threadSafeWriter) WriteMessageSafe(messageType int, data []byte) error {
+	t.Lock()
+	defer t.Unlock()
+	return t.WriteMessage(messageType, data)
 }
 
 /*

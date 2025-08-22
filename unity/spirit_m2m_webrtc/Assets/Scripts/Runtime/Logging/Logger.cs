@@ -57,10 +57,14 @@ public class Logger
         FrameRendered = 404,
         FrameDropped = 405,
         FrameDestroyed = 406,
+        FrameReceived = 407,
+        FrameAddedToSender = 408,
 
         // RawConverter Status
         StartRawConversion = 500,
         EndRawConversion = 501,
+
+
 
         // SessionManager Status
         ManagerConnectionStart = 1000,
@@ -188,7 +192,7 @@ public class Logger
 #endif 
     } 
     private static string LogCommonClientEnc(string name, Logger.Status status, uint clientID, uint capturerID, uint frameNr) => $"{LogCommonClient(name, status, clientID)} capturerID={capturerID} frameNr={frameNr}";
-    private static string LogCommonEnc(string name, Logger.Status status, uint capturerID, uint frameNr) => $"{LogCommon(name, status)} capturerID={capturerID} frameNr={frameNr}";
+    private static string LogCommonEnc(string name, Logger.Status status, uint clientID, uint frameNr) => $"{LogCommon(name, status)} clientID={clientID} frameNr={frameNr}";
     private static string LogCommonClient(string name, Logger.Status status, uint clientID) => $"{LogCommon(name, status)} clientID={clientID}";
 
     private static string LogCommonTrackStatus(string name, Logger.Status status, uint clientID, string trackID) => $"{LogCommon(name, status)} clientID={clientID} trackID={trackID}";
@@ -215,11 +219,12 @@ public class Logger
     }
 
     [Conditional("ENABLE_LOGGING")]
-    public static void LogPCFrameStatus(string name, Logger.Status status, uint capturerID, uint frameNr)
+    public static void LogPCFrameStatus(string name, Logger.Status status, uint clientID, uint frameNr)
     {
         
-        Log(LogCommonEnc(name, status, capturerID, frameNr));
+        Log(LogCommonEnc(name, status, clientID, frameNr));
     }
+
     [Conditional("ENABLE_LOGGING")]
     public static void LogPCFrameStatus(string name, Logger.Status status, uint clientID, uint capturerID, uint frameNr)
     {
@@ -228,11 +233,30 @@ public class Logger
     }
 
     [Conditional("ENABLE_LOGGING")]
-    public static void LogPCFrameStatusLimited(string name, Logger.Status status, uint capturerID, uint frameNr)
+    public static void LogPCFrameStatusWithMessageLimited(string name, Logger.Status status, uint clientID, uint frameNr, string message)
     {
         if (!loggerSettings.pointCloud.limitLogging || (frameNr % loggerSettings.pointCloud.everyNFrames == 0))
         {
-            LogPCFrameStatus(name, status, capturerID, frameNr);
+            LogStatusWithMessage(name, status, $"clientID={clientID} {message}");
+        }
+    }
+
+    [Conditional("ENABLE_LOGGING")]
+    public static void LogPCFrameStatusWithMessageLimited(string name, Logger.Status status, uint frameNr, string message)
+    {
+        if (!loggerSettings.pointCloud.limitLogging || (frameNr % loggerSettings.pointCloud.everyNFrames == 0))
+        {
+            LogStatusWithMessage(name, status, message);
+        }
+    }
+
+
+    [Conditional("ENABLE_LOGGING")]
+    public static void LogPCFrameStatusLimited(string name, Logger.Status status, uint clientID, uint frameNr)
+    {
+        if (!loggerSettings.pointCloud.limitLogging || (frameNr % loggerSettings.pointCloud.everyNFrames == 0))
+        {
+            LogPCFrameStatus(name, status, clientID, frameNr);
         }
     }
 

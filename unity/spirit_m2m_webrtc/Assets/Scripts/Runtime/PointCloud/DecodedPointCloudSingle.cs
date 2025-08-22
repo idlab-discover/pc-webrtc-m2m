@@ -5,7 +5,7 @@ using UnityEngine;
 public class DecodedPointCloudSingle 
 {
     protected readonly object _lock = new ();
-    protected readonly DecodedPointCloudMulti parent;
+    public readonly DecodedPointCloudMulti Parent;
     public uint CapturerID;
     public uint FrameNr;
     public uint NPoints;
@@ -13,11 +13,12 @@ public class DecodedPointCloudSingle
 
     public DecodedPointCloudSingle(DecodedPointCloudMulti parent, uint capturerID, uint frameNr, uint nPoints)
     {
-        this.parent = parent;
+        this.Parent = parent;
         CapturerID = capturerID;
         FrameNr = frameNr;
         NPoints = nPoints;
     }
-
+    public bool IsParentCompleted { get { return Parent.IsCompleted; } }
+    
 
 }

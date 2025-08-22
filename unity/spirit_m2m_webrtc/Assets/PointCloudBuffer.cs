@@ -46,7 +46,7 @@ public class PointCloudBuffer : RenderablePointCloudBuffer
 
     public override RenderablePointCloud CheckForCompletedFrames()
     {
-      
+
         if (!queue.IsEmpty)
         {
             bool succes = queue.TryDequeue(out DecodedPointCloudMulti dec);
@@ -60,26 +60,31 @@ public class PointCloudBuffer : RenderablePointCloudBuffer
             }
             return null;
         }
-        // If a frame is fully received it will already be put in the queue so check for frames beyond the deadline
-        DecodedPointCloudMulti foundFrame = null;
-        lock (_lock)
+        
+        // TODO Rework this without lock so other threads can still add frames
+        if (RenderIncompleteFrames)
         {
-           
-            foreach (var kvp in inProgessFrames.OrderByDescending(kvp => kvp.Key))
+            // If a frame is fully received it will already be put in the queue so check for frames beyond the deadline
+            DecodedPointCloudMulti foundFrame = null;
+            lock (_lock)
             {
-                if (EnqueueImmediately || (kvp.Value.TargetTimestamp >= (TimestampNextDeadline + MaxTimeBeforeIncompleteRender)))
+
+                // Check if there is an incomplete frame that we can still render
+                foreach (var kvp in inProgessFrames.OrderByDescending(kvp => kvp.Key))
                 {
-                    foundFrame = kvp.Value;
+                    if ((kvp.Value.TargetTimestamp >= (TimestampNextDeadline + MaxTimeBeforeIncompleteRender)))
+                    {
+                        foundFrame = kvp.Value;
+                    }
                 }
             }
-        }
-        
-        if (foundFrame != null)
-        {
-            Debug.Log("FOUND A FRAME");
-            completeFrame(foundFrame, false);
-            SetNextDeadline();
-            return foundFrame;
+            if (foundFrame != null)
+            {
+                Debug.Log("FOUND A FRAME");
+                CompleteFrame(foundFrame, false);
+                SetNextDeadline();
+                return foundFrame;
+            }
         }
     
         return null;
@@ -92,7 +97,7 @@ public class PointCloudBuffer : RenderablePointCloudBuffer
 
     
 
-    private void completeFrame(DecodedPointCloudMulti newestFrame, bool addToQueue)
+    public void CompleteFrame(DecodedPointCloudMulti newestFrame, bool addToQueue)
     {
         lock(_lock)
         {
