@@ -1,0 +1,13 @@
+{
+    "address": ":8080",
+    "verifyAuthKey": false,
+    "defaultProviderConfigPath": "config/providers/general.json",
+    "provisionerType": "",
+    "provisionerConfigPath": "config/provisioner/local.json",
+    "providersToCreate": [
+        {
+            "type": "sfu",
+            "key": "sfu_mdc"
+        }
+    ]
+}

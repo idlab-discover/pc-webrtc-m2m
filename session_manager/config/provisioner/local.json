@@ -1,0 +1,19 @@
+{
+        "assignPort": true,
+        "providerPaths": [
+            {
+                "providerType": "sfu",
+                "path": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-webrtc-m2m\\webrtc\\sfu.exe"
+            }
+        ],
+        "portRanges": [
+            {
+                "start": 8000,
+                "end": 8100
+            },
+            {
+                "start": 9000,
+                "end": 9100
+            }
+        ]
+}

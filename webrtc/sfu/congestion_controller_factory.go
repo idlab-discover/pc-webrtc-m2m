@@ -21,7 +21,9 @@ func CreateBandwidthEstimator(clc *ClientConnection, sfuSettings *SFUSettings) (
 		return nil, err
 	}
 	congestionController, err := cc.NewInterceptor(func() (cc.BandwidthEstimator, error) {
-		return gcc.NewSendSideBWE(gcc.SendSideBWEMinBitrate(gccSettings.MinBitrate), gcc.SendSideBWEInitialBitrate(gccSettings.InitialBitrate), gcc.SendSideBWEMaxBitrate(gccSettings.MaxBitrate))
+		bwEst, err := gcc.NewSendSideBWE(gcc.SendSideBWEMinBitrate(gccSettings.MinBitrate), gcc.SendSideBWEInitialBitrate(gccSettings.InitialBitrate), gcc.SendSideBWEMaxBitrate(gccSettings.MaxBitrate))
+		clc.BandwidthEstimator = bwEst
+		return bwEst, err
 	})
 	if err != nil {
 		panic(err)

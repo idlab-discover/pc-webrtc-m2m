@@ -15,23 +15,45 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+const NameSFU = "SFU"
+
 type SFU struct {
-	settings SFUSettings
-	clients  map[uint]*ClientConnection
-	mut      sync.Mutex
+	settings  SFUSettings
+	clients   map[uint]*ClientConnection
+	websocket *threadSafeWriter
+	mut       sync.Mutex
 }
 
 func NewSFU() *SFU {
-	return &SFU{
+	Log(NameSFU, Creating, true, true)
+	sfu := &SFU{
 		clients: make(map[uint]*ClientConnection),
 		mut:     sync.Mutex{},
 	}
+	Log(NameSFU, Created, true, true)
+	return sfu
 }
 
 func (sfu *SFU) AddClient(msg NewClientMessage) {
 	sfu.mut.Lock()
 	defer sfu.mut.Unlock()
-	sfu.clients[msg.ClientID] = NewClientConnection(msg.ClientID, msg.AuthKey)
+	client := NewClientConnection(msg.ClientID, msg.AuthKey, msg.SenderVideoTracks, msg.SenderAudioTracks)
+	for _, otherC := range sfu.clients {
+		hasChanged := false
+		for _, t := range client.SenderVideoTracks {
+			otherC.AddTrackFromOther("client", client.clientID, t.TrackID, t.WebRTCTrack)
+			hasChanged = true
+		}
+		for _, t := range client.SenderAudioTracks {
+			otherC.AddTrackFromOther("client", client.clientID, t.TrackID, t.WebRTCTrack)
+			hasChanged = true
+		}
+		if hasChanged {
+			otherC.SignalRenegotiation()
+		}
+	}
+	sfu.clients[msg.ClientID] = client
+	client.SignalRenegotiation()
 }
 
 func (sfu *SFU) SetupSFU(settings SFUSettings) {
@@ -119,24 +141,25 @@ func (sfu *SFU) websocketHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	sfu.mut.Lock()
+	// Add all tracks from other clients to client
+	// If quality adaptation is enabled => unpause if needed
+	// For the first time tracks need to be added with AddTrack to get the RTPSender
+
 	for _, clOther := range sfu.clients {
 		if clOther.clientID == client.clientID {
 			continue
 		}
 		for _, rt := range clOther.SenderVideoTracks {
-			client.AddTrack(rt.TrackID, rt.WebRTCTrack)
+			client.AddTrackFromOther("client", clOther.clientID, rt.TrackID, rt.WebRTCTrack)
 		}
 	}
 	sfu.clients[client.clientID] = client
-
-	// Add all tracks from other clients to client
-	// If quality adaptation is enabled => unpause if needed
-	// For the first time tracks need to be added with AddTrack to get the RTPSender
 
 	sfu.mut.Unlock()
 	fmt.Println("WebRTCSFU: webSocketHandler: Will now call signalpeerconnections again")
 
 	// Signal for the new PeerConnection
+	// Probably only need to signal the one client
 	signalPeerConnections()
 }
 

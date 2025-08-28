@@ -9,6 +9,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const NameManagerConnection = "SessionManagerConnection"
+
 const (
 	FullyConnected     uint32 = 0
 	ClientConnected    uint32 = 1
@@ -18,11 +20,11 @@ const (
 )
 
 type SessionManagerConnection struct {
-	managerIP  string
-	providerID string
-	authKey    string
-	conn       *websocket.Conn
-	sfu        *SFU
+	managerIP   string
+	providerKey string
+	authKey     string
+	conn        *websocket.Conn
+	sfu         *SFU
 }
 
 type SessionManagerMessage struct {
@@ -35,16 +37,19 @@ type NewClientMessage struct {
 	AuthKey             string          `json:"authKey"`
 	SenderVideoTracks   []SenderTrack   `json:"senderVideoTracks"`
 	ReceiverVideoTracks []ReceiverTrack `json:"receiverVideoTracks"`
+	SenderAudioTracks   []SenderTrack   `json:"senderAudioTracks"`
+	ReceiverAudioTracks []ReceiverTrack `json:"receiverAudioTracks"`
 }
 
-func NewSessionManagerConnection(managerIP, providerID, authKey string, sfu *SFU) (*SessionManagerConnection, error) {
+func NewSessionManagerConnection(managerIP string, providerKey string, authKey string, sfu *SFU) (*SessionManagerConnection, error) {
+	LogWithMessage(NameManagerConnection, Creating, true, true, fmt.Sprintf("managerIP=%s providerKey=%s authKey=%s", managerIP, providerKey, authKey))
 	u := url.URL{
 		Scheme: "ws",
 		Host:   managerIP,
 		Path:   "/ws",
 	}
 	query := url.Values{}
-	query.Set("providerID", providerID)
+	query.Set("providerKey", providerKey)
 	if strings.TrimSpace(authKey) != "" {
 		query.Set("authKey", authKey)
 	}
@@ -52,16 +57,17 @@ func NewSessionManagerConnection(managerIP, providerID, authKey string, sfu *SFU
 
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
+		Log(NameManagerConnection, Failed, true, true)
 		return nil, fmt.Errorf("failed to connect to manager: %w", err)
 	}
 	smc := &SessionManagerConnection{
-		managerIP:  managerIP,
-		providerID: providerID,
-		authKey:    authKey,
-		conn:       conn,
-		sfu:        sfu,
+		managerIP:   managerIP,
+		providerKey: providerKey,
+		authKey:     authKey,
+		conn:        conn,
+		sfu:         sfu,
 	}
-
+	Log(NameManagerConnection, Created, true, true)
 	return smc, nil
 }
 
@@ -125,7 +131,7 @@ func (smc *SessionManagerConnection) handleClientConnected(payload json.RawMessa
 		return
 	}
 	fmt.Printf("Received FullyConnected: %+v\n", msg)
-	smc.sfu.SetupSFU(fcPayload)
+	smc.sfu.AddClient(msg)
 }
 func (smc *SessionManagerConnection) handleClientDisconnected(payload json.RawMessage) {
 

@@ -21,6 +21,8 @@ type SenderTrack struct {
 
 type ReceiverTrack struct {
 	TrackID                  string `json:"trackID"`
+	OriginType               string `json:"originType"` // User, SFU etc...
+	OriginID                 uint   `json:"originID"`   // userID, SFU_ID etc...
 	SenderTrackID            string `json:"senderTrackID"`
 	CorrespondingSenderTrack webrtc.TrackLocal
 	RTPSender                *webrtc.RTPSender
@@ -81,12 +83,64 @@ type ClientCandidate struct {
 	Message string `json:"candidate"`
 }
 
-func NewClientConnection(clientID uint, authKey string) *ClientConnection {
+func NewClientConnection(clientID uint, authKey string,
+	senderVideoTracks []SenderTrack,
+	senderAudioTracks []SenderTrack,
+) *ClientConnection {
+	videoTracksMap := make(map[string]*SenderTrack)
+	audioTracksMap := make(map[string]*SenderTrack)
+
+	videoRTCPFeedback := []webrtc.RTCPFeedback{
+		{Type: "goog-remb", Parameter: ""},
+		{Type: "ccm", Parameter: "fir"},
+		{Type: "nack", Parameter: ""},
+		{Type: "nack", Parameter: "pli"},
+	}
+
+	codecCapability := webrtc.RTPCodecCapability{
+		MimeType:     "video/pcm",
+		ClockRate:    90000,
+		Channels:     0,
+		SDPFmtpLine:  "",
+		RTCPFeedback: videoRTCPFeedback,
+	}
+	audioCodecCapability := webrtc.RTPCodecCapability{
+		MimeType:     "audio/pcm",
+		ClockRate:    90000,
+		Channels:     0,
+		SDPFmtpLine:  "",
+		RTCPFeedback: nil,
+	}
+
+	for i := range senderVideoTracks {
+		tempTrack := senderVideoTracks[i]
+		trackLocal, err := webrtc.NewTrackLocalStaticRTP(codecCapability, tempTrack.TrackID, tempTrack.TrackID)
+		if err != nil {
+			panic(err)
+		}
+		videoTracksMap[tempTrack.TrackID] = &SenderTrack{
+			TrackID:      tempTrack.TrackID,
+			trackBitrate: &TrackBitrate{}, /*TODO Make constructor*/
+			WebRTCTrack:  trackLocal,
+		}
+	}
+	for i := range senderAudioTracks {
+		tempTrack := senderAudioTracks[i]
+		trackLocal, err := webrtc.NewTrackLocalStaticRTP(audioCodecCapability, tempTrack.TrackID, tempTrack.TrackID)
+		if err != nil {
+			panic(err)
+		}
+		audioTracksMap[tempTrack.TrackID] = &SenderTrack{
+			TrackID:      tempTrack.TrackID,
+			trackBitrate: &TrackBitrate{}, /*TODO Make constructor*/
+			WebRTCTrack:  trackLocal,
+		}
+	}
 	return &ClientConnection{
 		clientID:            clientID,
 		authKey:             authKey,
-		SenderVideoTracks:   make(map[string]*SenderTrack),
-		SenderAudioTracks:   make(map[string]*SenderTrack),
+		SenderVideoTracks:   videoTracksMap,
+		SenderAudioTracks:   audioTracksMap,
 		ReceiverVideoTracks: make(map[string]*ReceiverTrack),
 		ReceiverAudioTracks: make(map[string]*ReceiverTrack),
 		mut:                 sync.Mutex{},
@@ -96,7 +150,8 @@ func NewClientConnection(clientID uint, authKey string) *ClientConnection {
 func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings, ws *threadSafeWriter) {
 	mediaEngine := SetupDefaultMediaEngine()
 	interceptorRegistry := &interceptor.Registry{}
-
+	clc.websocket = ws
+	clc.startListening()
 	clc.gatherTrackStats = sfuSettings.UseABR || sfuSettings.GatherTrackStats
 
 	if sfuSettings.UseCC {
@@ -248,25 +303,33 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 	})
 }
 
-func (clc *ClientConnection) AddTrack(trackID string, track webrtc.TrackLocal) {
+func (clc *ClientConnection) AddTrackFromOther(originType string, originID uint, trackID string, track webrtc.TrackLocal) {
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
 	// TODO Check if trackID appears from session manager track
-	receiverTrack := &ReceiverTrack{
-		TrackID:                  trackID,
-		CorrespondingSenderTrack: track, // TODO Maybe change this to SenderTrack type
-	}
+	var recvTrack *ReceiverTrack
+	var exists bool
 	if track.Kind() == webrtc.RTPCodecTypeVideo {
-		clc.ReceiverVideoTracks[trackID] = receiverTrack
+		recvTrack, exists = clc.ReceiverVideoTracks[trackID]
 	} else if track.Kind() == webrtc.RTPCodecTypeAudio {
-		clc.ReceiverAudioTracks[trackID] = receiverTrack
+		recvTrack, exists = clc.ReceiverAudioTracks[trackID]
 	}
-	rtpSender, err := clc.peerConnection.AddTrack(trackLocals[trackID])
+	if !exists {
+		// TODO Error logging
+		return
+	}
+	if recvTrack.OriginType != originType || recvTrack.OriginID != originID {
+		// TODO Error logging
+		return
+	}
+
+	rtpSender, err := clc.peerConnection.AddTrack(track)
 	if err != nil {
 		// TODO error handling
 		return
 	}
-	receiverTrack.RTPSender = rtpSender
+	recvTrack.CorrespondingSenderTrack = track
+	recvTrack.RTPSender = rtpSender
 	go func() {
 		rtcpBuf := make([]byte, 1500)
 		for {
@@ -277,6 +340,22 @@ func (clc *ClientConnection) AddTrack(trackID string, track webrtc.TrackLocal) {
 		// TODO Handle track closure?
 	}()
 
+}
+
+func (clc *ClientConnection) SignalRenegotiation() {
+	clc.mut.Lock()
+	defer clc.mut.Unlock()
+	offer, err := clc.peerConnection.CreateOffer(nil)
+	if err != nil {
+		panic(err)
+	}
+
+	if err = clc.peerConnection.SetLocalDescription(offer); err != nil {
+		panic(err)
+	}
+	if err = clc.websocket.WriteJSONSafe(offer); err != nil {
+		panic(err)
+	}
 }
 
 func (clc *ClientConnection) startListening() {

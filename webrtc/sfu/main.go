@@ -5,11 +5,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -22,10 +19,6 @@ import (
 	"github.com/pion/webrtc/v3"
 
 	"github.com/pion/interceptor/pkg/cc"
-
-	"github.com/shirou/gopsutil/host"
-	"github.com/shirou/gopsutil/v4/cpu"
-	"github.com/shirou/gopsutil/v4/process"
 )
 
 var (
@@ -132,11 +125,15 @@ type DashboardSystemResourcesMessage struct {
 //					* pcState pointer
 
 func main() {
-	maxNumberOfTiles = flag.Int("t", 1, "Number of tiles")
+	LogInit()
+	managerIP := flag.String("m", "", "IP address of the session manager instance")
+	providerKey := flag.String("p", "", "ID of this provider, assigned by the session manager")
+	authKey := flag.String("a", "", "Optional authentication key provider by the session manager")
 	flag.Parse()
-
-	fmt.Printf("WebRTCSFU: Starting SFU with at most %d tiles per client\n", *maxNumberOfTiles)
-
+	if *managerIP == "" {
+		Log("General", CriticalFail, true, true)
+		return
+	}
 	settingEngine := webrtc.SettingEngine{}
 	settingEngine.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
 
@@ -145,10 +142,16 @@ func main() {
 	trackLocals = map[string]*webrtc.TrackLocalStaticRTP{}
 	undesireableTracks = map[int][]string{}
 
+	sfu := NewSFU()
+	sm, err := NewSessionManagerConnection(*managerIP, *providerKey, *authKey, sfu)
+	if err != nil {
+		panic(err)
+	}
+	sm.StartListening()
 	//ticker := time.NewTicker(1 * time.Second)
 	//quit := make(chan struct{})
 	// System metrics loop:
-	go func() {
+	/*go func() {
 		nCPUs, _ := cpu.Counts(true)
 		proc, _ := process.NewProcess(int32(os.Getpid()))
 		pattern := `coretemp_core(\d+)_input: (\d+(\.\d+)?)°C`
@@ -587,7 +590,7 @@ func main() {
 	})
 
 	// start HTTP server
-	log.Fatal(http.ListenAndServe(*addr, nil))
+	log.Fatal(http.ListenAndServe(*addr, nil))*/
 }
 
 // Add to list of tracks and fire renegotation for all PeerConnections

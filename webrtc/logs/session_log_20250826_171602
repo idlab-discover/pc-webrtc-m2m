@@ -1,0 +1,4 @@
+id=SFU status=0
+id=SFU status=1
+id=SessionManagerConnection status=0 managerIP=%!s(MISSING) providerKey=%!d(MISSING) authKey=%!s(MISSING)
+id=SessionManagerConnection status=6

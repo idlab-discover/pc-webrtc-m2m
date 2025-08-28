@@ -1,0 +1,14 @@
+[
+    {
+        "providerType": "sfu",
+        "providerKey": "sfu_mdc",
+        "isDefaultForType": true,
+        "defaultConfigPath": "config/providers/webrtc/sfu/config_mdc.json"
+    },
+    {
+        "providerType": "sfu",
+        "providerKey": "sfu_raw",
+        "isDefaultForType": false,
+        "defaultConfigPath": "config/providers/webrtc/sfu/config_raw.json"
+    }
+]
