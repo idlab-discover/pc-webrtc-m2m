@@ -84,7 +84,7 @@ func (sm *SessionManager) CreateProvider(providerType string, providerKey string
 	if config == nil {
 		return
 	}
-	pc := NewProviderConnection(providerKey, address, port, authKey, config.Settings)
+	pc := NewProviderConnection(sm, providerKey, address, port, authKey, config.Settings)
 	sm.providers[providerKey] = pc
 	sm.mut.Unlock()
 	sm.provisioner.CreateProvider(providerType, sm.config.Address, pc, config.ExtraCmdArgs)
@@ -149,4 +149,12 @@ func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.
 
 func (sm *SessionManager) generateAuthKey() string {
 	return "TODO" // TODO
+}
+
+func (sm *SessionManager) onProviderClose(pc *ProviderConnection) {
+	sm.mut.Lock()
+	defer sm.mut.Lock()
+	LogWithMessage(NameManager, ProviderClosed, true, true, fmt.Sprintf("providerKey=%s", pc.ProviderKey))
+	sm.provisioner.OnProviderClose(pc)
+	delete(sm.providers, pc.ProviderKey)
 }

@@ -8,7 +8,7 @@ import (
 )
 
 type ClientMessage struct {
-	MessageType uint32          `json:"messageType"`
+	MessageType string          `json:"messageType"`
 	Message     json.RawMessage `json:"message"`
 }
 

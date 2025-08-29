@@ -16,7 +16,7 @@ type GCCSettings struct {
 }
 
 func CreateBandwidthEstimator(clc *ClientConnection, sfuSettings *SFUSettings) (*cc.InterceptorFactory, error) {
-	var gccSettings GCCSettings
+	var gccSettings GCCSettings // This marshalling should probably only happen once!
 	if err := json.Unmarshal(sfuSettings.CCSettings, &gccSettings); err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 )
@@ -8,6 +9,7 @@ import (
 const NameProvider = "ProviderConnection"
 
 type ProviderConnection struct {
+	parent      *SessionManager
 	ProviderKey string
 	Address     string
 	Port        uint
@@ -18,9 +20,10 @@ type ProviderConnection struct {
 	mut         sync.Mutex
 }
 
-func NewProviderConnection(providerKey string, address string, port uint, authKey string, config map[string]interface{}) *ProviderConnection {
+func NewProviderConnection(parent *SessionManager, providerKey string, address string, port uint, authKey string, config map[string]interface{}) *ProviderConnection {
 	Log(NameProvider, Creating, true, true)
 	pro := &ProviderConnection{
+		parent:      parent,
 		ProviderKey: providerKey,
 		Address:     address,
 		Port:        port,
@@ -35,6 +38,16 @@ func NewProviderConnection(providerKey string, address string, port uint, authKe
 func (pc *ProviderConnection) SetupProvider(ws *ThreadSafeWebsocket) {
 	pc.websocket = ws
 	pc.startListening()
+	msgBytes, err := json.Marshal(pc.config)
+	if err != nil {
+		fmt.Printf("WebRTCSFU: webSocketHandler: OnICECandidate: ERROR: %s\n", err)
+		return
+	}
+	m := ClientMessage{
+		MessageType: "FullyConnected",
+		Message:     json.RawMessage(msgBytes),
+	}
+	pc.websocket.WriteJSONSafe(m)
 }
 
 func (clc *ProviderConnection) startListening() {
@@ -42,14 +55,17 @@ func (clc *ProviderConnection) startListening() {
 		for {
 			var msg ClientMessage
 			if err := clc.websocket.ReadJSON(&msg); err != nil {
-				fmt.Printf("WebRTCSFU: webSocketHandler: ReadMessage: error %w\n", err)
+				fmt.Printf("SessionManager: webSocketHandler: ReadMessage: error %s\n", err.Error())
+				clc.onClose()
 				break
 			}
-
 			switch msg.MessageType {
-			case 3:
 
 			}
 		}
 	}()
+}
+
+func (clc *ProviderConnection) onClose() {
+	clc.parent.onProviderClose(clc)
 }

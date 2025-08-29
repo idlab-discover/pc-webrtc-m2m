@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"sync"
 
 	"github.com/gorilla/websocket"
 )
@@ -23,7 +24,7 @@ type SessionManagerConnection struct {
 	managerIP   string
 	providerKey string
 	authKey     string
-	conn        *websocket.Conn
+	conn        *ThreadSafeWebsocket
 	sfu         *SFU
 }
 
@@ -46,7 +47,7 @@ func NewSessionManagerConnection(managerIP string, providerKey string, authKey s
 	u := url.URL{
 		Scheme: "ws",
 		Host:   managerIP,
-		Path:   "/ws",
+		Path:   "/websocket_provider",
 	}
 	query := url.Values{}
 	query.Set("providerKey", providerKey)
@@ -64,8 +65,10 @@ func NewSessionManagerConnection(managerIP string, providerKey string, authKey s
 		managerIP:   managerIP,
 		providerKey: providerKey,
 		authKey:     authKey,
-		conn:        conn,
-		sfu:         sfu,
+		conn: &ThreadSafeWebsocket{
+			conn, sync.Mutex{},
+		},
+		sfu: sfu,
 	}
 	Log(NameManagerConnection, Created, true, true)
 	return smc, nil
@@ -79,7 +82,9 @@ func (smc *SessionManagerConnection) StartListening() {
 				// fmt.Errorf("error reading message: %w", err)
 				continue // TODO Handle errors
 			}
-
+			LogWithMessage(NameManagerConnection, ReceivedWSMessage, true, true,
+				fmt.Sprintf("origin=manager type=%s", msg.MessageType),
+			)
 			switch msg.MessageType {
 			case "FullyConnected":
 				smc.handleFullyConnected(msg.Message)
@@ -121,6 +126,7 @@ func (smc *SessionManagerConnection) handleFullyConnected(payload json.RawMessag
 		return
 	}
 	fmt.Printf("Received FullyConnected: %+v\n", msg)
+
 	smc.sfu.SetupSFU(msg)
 }
 

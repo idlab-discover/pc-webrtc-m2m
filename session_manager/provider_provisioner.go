@@ -16,6 +16,7 @@ type ProviderConfig struct {
 
 type ProviderProvisioner interface {
 	CreateProvider(configType string, managerIP string, pConn *ProviderConnection, extraCmdArgs string)
+	OnProviderClose(pc *ProviderConnection)
 }
 
 type BaseProviderProvisioner struct {

@@ -74,11 +74,6 @@ type ClientConnection struct {
 	mut sync.Mutex
 }
 
-type ClientMessage struct {
-	MessageType uint32          `json:"messageType"`
-	Message     json.RawMessage `json:"message"`
-}
-
 type ClientCandidate struct {
 	Message string `json:"candidate"`
 }

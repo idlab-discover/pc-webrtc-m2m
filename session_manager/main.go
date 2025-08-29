@@ -14,7 +14,7 @@ var (
 )
 
 func main() {
-	LogInit()
+	LogInit("MANAGER", "mgr", LogYellow)
 	managerConfig := flag.String("c", "", "Path to the config file that will be used")
 	flag.Parse()
 	if *managerConfig == "" {

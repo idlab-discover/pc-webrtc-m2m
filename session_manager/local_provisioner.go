@@ -50,6 +50,7 @@ func NewLocalProviderProvisioner(configPath string) *LocalProviderProvisioner {
 	p := &LocalProviderProvisioner{
 		portsInUse: make(map[uint]bool),
 		Paths:      make(map[string]string),
+		AssignPort: config.AssignPort,
 	}
 	for i := range config.ProviderPaths {
 		path := config.ProviderPaths[i]
@@ -76,6 +77,7 @@ func (p *LocalProviderProvisioner) CreateProvider(providerType string, managerIP
 				pConn.Port = candidatePort
 				break
 			}
+
 		}
 	}
 	path, exists := p.Paths[providerType]
@@ -83,9 +85,20 @@ func (p *LocalProviderProvisioner) CreateProvider(providerType string, managerIP
 		panic("cannot create provider")
 	}
 	LogWithMessage(NameLocalProvisioner, CreatingProvider, true, true,
-		fmt.Sprintf("configType=%s assignedAddress=%s assignedPort=%d path=%s",
-			providerType, pConn.Address, pConn.Port, path))
-	cmd := exec.Command(path, "--managerIP", managerIP, "--address", pConn.Address, "--port", string(pConn.Port), "--authKey", pConn.AuthKey)
+		fmt.Sprintf("configType=%s providerKey=%s assignedAddress=%s assignedPort=%d path=%s",
+			providerType, pConn.ProviderKey, pConn.Address, pConn.Port, path))
+	portStr := fmt.Sprintf("%d", pConn.Port)
+	args := []string{
+		"--managerIP", managerIP,
+		"--address", pConn.Address,
+		"--providerKey", pConn.ProviderKey,
+		"--port", portStr,
+	}
+	if pConn.AuthKey != "" {
+		args = append(args, "--authKey", pConn.AuthKey)
+	}
+
+	cmd := exec.Command(path, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Start()
@@ -95,11 +108,11 @@ func (p *LocalProviderProvisioner) CreateProvider(providerType string, managerIP
 	// TODO save processs for gracefull shutdown
 }
 
-func (p *LocalProviderProvisioner) OnProviderDestroyed(pConn *ProviderConnection) {
+func (p *LocalProviderProvisioner) OnProviderClose(pc *ProviderConnection) {
 	p.mut.Lock()
 	defer p.mut.Unlock()
 	if !p.AssignPort {
 		return
 	}
-	p.portsInUse[pConn.Port] = false
+	p.portsInUse[pc.Port] = false
 }
