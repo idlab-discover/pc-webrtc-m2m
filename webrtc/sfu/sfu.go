@@ -19,15 +19,19 @@ const NameSFU = "SFU"
 
 type SFU struct {
 	settings  SFUSettings
+	address   string
+	port      uint
 	clients   map[uint]*ClientConnection
 	websocket *threadSafeWriter
 	mut       sync.Mutex
 }
 
-func NewSFU() *SFU {
+func NewSFU(address string, port uint) *SFU {
 	Log(NameSFU, Creating, true, true)
 	sfu := &SFU{
-		clients: make(map[uint]*ClientConnection),
+		address: address,
+		port:    port,
+		clients: map[uint]*ClientConnection{},
 		mut:     sync.Mutex{},
 	}
 	Log(NameSFU, Created, true, true)
@@ -38,6 +42,8 @@ func (sfu *SFU) AddClient(msg NewClientMessage) {
 	sfu.mut.Lock()
 	defer sfu.mut.Unlock()
 	client := NewClientConnection(msg.ClientID, msg.AuthKey, msg.SenderVideoTracks, msg.SenderAudioTracks)
+	client.SetupPeerConnection(&sfu.settings)
+	// This will need to be changed to do it based on ReceiverVideoTracksInstead
 	for _, otherC := range sfu.clients {
 		hasChanged := false
 		for _, t := range client.SenderVideoTracks {
@@ -51,9 +57,14 @@ func (sfu *SFU) AddClient(msg NewClientMessage) {
 		if hasChanged {
 			otherC.SignalRenegotiation()
 		}
+		for _, t := range otherC.SenderVideoTracks {
+			client.AddTrackFromOther("client", otherC.clientID, t.TrackID, t.WebRTCTrack)
+		}
+		for _, t := range otherC.SenderAudioTracks {
+			client.AddTrackFromOther("client", otherC.clientID, t.TrackID, t.WebRTCTrack)
+		}
 	}
 	sfu.clients[msg.ClientID] = client
-	client.SignalRenegotiation()
 }
 
 func (sfu *SFU) SetupSFU(settings SFUSettings) {
@@ -71,7 +82,7 @@ func (sfu *SFU) SetupSFU(settings SFUSettings) {
 	dashboardTemplate := template.Must(template.New("").Parse(string(dashboardHTML)))
 
 	// WebSocket handler
-	http.HandleFunc("/websocket", sfu.websocketHandler)
+	http.HandleFunc("/websocket_client", sfu.websocketHandler)
 	http.HandleFunc("/dashboardws", websocketHandlerDashboard)
 	http.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
 		if err := dashboardTemplate.Execute(w, "ws://"+r.Host+"/dashboardws"); err != nil {
@@ -87,7 +98,7 @@ func (sfu *SFU) SetupSFU(settings SFUSettings) {
 	})
 
 	// start HTTP server
-	log.Fatal(http.ListenAndServe(sfu.settings.AddressAndPort, nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", sfu.address, sfu.port), nil))
 }
 
 // Handle incoming websockets
@@ -134,33 +145,21 @@ func (sfu *SFU) websocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("WebRTCSFU: webSocketHandler: Websocket handler upgraded")
 
-	client.SetupPeerConnection(
-		&sfu.settings,
-		&threadSafeWriter{
+	client.SetupWebsocket(
+		&ThreadSafeWebsocket{
 			unsafeWebSocketConn, sync.Mutex{},
 		},
 	)
 	sfu.mut.Lock()
+	// TODO Check if this is even needed, atm we already add all tracks when new client connects
 	// Add all tracks from other clients to client
 	// If quality adaptation is enabled => unpause if needed
 	// For the first time tracks need to be added with AddTrack to get the RTPSender
-
-	for _, clOther := range sfu.clients {
-		if clOther.clientID == client.clientID {
-			continue
-		}
-		for _, rt := range clOther.SenderVideoTracks {
-			client.AddTrackFromOther("client", clOther.clientID, rt.TrackID, rt.WebRTCTrack)
-		}
-	}
-	sfu.clients[client.clientID] = client
-
+	client.SignalRenegotiation()
 	sfu.mut.Unlock()
+
 	fmt.Println("WebRTCSFU: webSocketHandler: Will now call signalpeerconnections again")
 
-	// Signal for the new PeerConnection
-	// Probably only need to signal the one client
-	signalPeerConnections()
 }
 
 // If someone connects => signal all PeerConnections again

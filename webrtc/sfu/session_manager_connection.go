@@ -24,7 +24,7 @@ type SessionManagerConnection struct {
 	managerIP   string
 	providerKey string
 	authKey     string
-	conn        *ThreadSafeWebsocket
+	websocket   *ThreadSafeWebsocket
 	sfu         *SFU
 }
 
@@ -65,7 +65,7 @@ func NewSessionManagerConnection(managerIP string, providerKey string, authKey s
 		managerIP:   managerIP,
 		providerKey: providerKey,
 		authKey:     authKey,
-		conn: &ThreadSafeWebsocket{
+		websocket: &ThreadSafeWebsocket{
 			conn, sync.Mutex{},
 		},
 		sfu: sfu,
@@ -78,10 +78,12 @@ func (smc *SessionManagerConnection) StartListening() {
 	go func() {
 		for {
 			var msg SessionManagerMessage
-			if err := smc.conn.ReadJSON(&msg); err != nil {
-				// fmt.Errorf("error reading message: %w", err)
+
+			if err := smc.websocket.ReadJSON(&msg); err != nil {
+				//fmt.Printf("error reading message: %v\n", err)
 				continue // TODO Handle errors
 			}
+
 			LogWithMessage(NameManagerConnection, ReceivedWSMessage, true, true,
 				fmt.Sprintf("origin=manager type=%s", msg.MessageType),
 			)
@@ -100,6 +102,7 @@ func (smc *SessionManagerConnection) StartListening() {
 				// Unknown message type, ignore or log
 			}
 		}
+
 	}()
 }
 
@@ -110,7 +113,6 @@ type SFUSettings struct {
 	UseCC              bool            `json:"useCCs"`
 	CCMethod           string          `json:"ccMethod"`
 	CCSettings         json.RawMessage `json:"ccSettings"`
-	AddressAndPort     string          `json:"addressAndPort"`
 	ContentType        string          `json:"contentType"`
 	VerifyAuthKey      bool            `json:"verifyAuthKey"`
 	NackSettings       NackSettings    `json:"nackSettings"`
@@ -126,8 +128,9 @@ func (smc *SessionManagerConnection) handleFullyConnected(payload json.RawMessag
 		return
 	}
 	fmt.Printf("Received FullyConnected: %+v\n", msg)
-
-	smc.sfu.SetupSFU(msg)
+	go func() {
+		smc.sfu.SetupSFU(msg)
+	}()
 }
 
 func (smc *SessionManagerConnection) handleClientConnected(payload json.RawMessage) {
@@ -136,8 +139,13 @@ func (smc *SessionManagerConnection) handleClientConnected(payload json.RawMessa
 		fmt.Printf("failed to unmarshal payload: %v\n", err)
 		return
 	}
-	fmt.Printf("Received FullyConnected: %+v\n", msg)
+	fmt.Printf("Received ClientConnected: %+v\n", msg)
 	smc.sfu.AddClient(msg)
+	msgNew := ClientMessage{
+		MessageType: "ClientAdded",
+		Message:     payload,
+	}
+	smc.websocket.WriteJSONSafe(msgNew)
 }
 func (smc *SessionManagerConnection) handleClientDisconnected(payload json.RawMessage) {
 

@@ -54,6 +54,19 @@ type DebugController struct {
 }
 
 func main() {
+	LogInit("SFUPeer", "sfup", LogGreen)
+	managerIP := flag.String("manager", "", "IP address of the session manager instance, with port")
+	providersPath := flag.String("providers", "", "Path to JSON file containing all the preferred providers with tracks")
+	preferredClientID := flag.Uint("c", 0, "Preferred client ID")
+	flag.Parse()
+	smc, err := NewSessionManagerConnection(*managerIP, *preferredClientID, *providersPath)
+	if err != nil {
+		LogWithMessage(NameManagerConnection, Failed, true, true, fmt.Sprintf("error=%v", err))
+		return
+	}
+	smc.StartListening()
+	select {}
+	return
 	sfuAddress := flag.String("sfu", "localhost:8080", "SFU address")
 	proxyPort := flag.String("p", ":0", "Port through which the DLL is connected")
 	useProxyInput := flag.Bool("i", false, "Receive content from the DLL to forward over WebRTC")

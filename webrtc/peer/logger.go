@@ -30,22 +30,27 @@ const (
 	ConfigLoaded        uint = 101
 	ConfigLoadingFailed uint = 102
 
-	InvalidProvider              uint = 1000
-	InvalidProviderAuthKey       uint = 1001
-	ProviderAlreadyExists        uint = 1002
-	CreatingProvider             uint = 1003
-	CreatedProvider              uint = 1004
-	ProviderClosed               uint = 1005
-	AddingClientToProvider       uint = 1006
-	AddingClientToProviderBuffer uint = 1007
+	InvalidProvider        uint = 1000
+	InvalidProviderAuthKey uint = 1001
+	ProviderAlreadyExists  uint = 1002
+	CreatingProvider       uint = 1003
+	CreatedProvider        uint = 1004
+	ClientAddedToProvider  uint = 1005
 
-	InvalidClientID       uint = 1000
-	InvalidClientAuthKey  uint = 1001
-	ClientAlreadyExists   uint = 1002
-	ClientAddedToProvider uint = 1003
+	ClientConnectionComplete      uint = 2000
+	ClientSendingProviders        uint = 2001
+	ClientAddedSenderVideoTrack   uint = 2002
+	ClientAddedSenderAudioTrack   uint = 2003
+	ClientAddedToBufferedProvider uint = 2004
+
+	RemoteClientAdded uint = 3000
 
 	ProviderConfigReadDefaultStart uint = 4000
 	ProviderConfigReadDefaultEnd   uint = 4001
+
+	ReceivedWSMessage uint = 7000
+
+	SFUReceivedOffer uint = 8000
 
 	CriticalFail uint = 9999
 )

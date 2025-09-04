@@ -36,6 +36,10 @@ const (
 	CreatingProvider       uint = 1003
 	CreatedProvider        uint = 1004
 
+	ClientAddingTransceivers   uint = 2000
+	ClientAddedTransceivers    uint = 2001
+	ClientAddingTrackFromOther uint = 2002
+
 	ProviderConfigReadDefaultStart uint = 4000
 	ProviderConfigReadDefaultEnd   uint = 4001
 

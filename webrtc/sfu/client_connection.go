@@ -13,6 +13,8 @@ import (
 	"github.com/pion/webrtc/v3"
 )
 
+const NameClientConnection = "ClientConnection"
+
 type SenderTrack struct {
 	TrackID      string `json:"trackID"`
 	trackBitrate *TrackBitrate
@@ -53,10 +55,11 @@ type TrackBitrate struct {
 }
 
 type ClientConnection struct {
+	NeedsUpdate    bool
 	clientID       uint
 	authKey        string
 	peerConnection *webrtc.PeerConnection
-	websocket      *threadSafeWriter
+	websocket      *ThreadSafeWebsocket
 
 	nActiveTracks       int
 	BandwidthEstimator  cc.BandwidthEstimator
@@ -82,6 +85,7 @@ func NewClientConnection(clientID uint, authKey string,
 	senderVideoTracks []SenderTrack,
 	senderAudioTracks []SenderTrack,
 ) *ClientConnection {
+	LogWithMessage(NameClientConnection, Creating, true, true, fmt.Sprintf("clientID=%d authKey=%s", clientID, authKey))
 	videoTracksMap := make(map[string]*SenderTrack)
 	audioTracksMap := make(map[string]*SenderTrack)
 
@@ -131,7 +135,7 @@ func NewClientConnection(clientID uint, authKey string,
 			WebRTCTrack:  trackLocal,
 		}
 	}
-	return &ClientConnection{
+	cl := &ClientConnection{
 		clientID:            clientID,
 		authKey:             authKey,
 		SenderVideoTracks:   videoTracksMap,
@@ -140,13 +144,18 @@ func NewClientConnection(clientID uint, authKey string,
 		ReceiverAudioTracks: make(map[string]*ReceiverTrack),
 		mut:                 sync.Mutex{},
 	}
+	LogWithMessage(NameClientConnection, Created, true, true, fmt.Sprintf("clientID=%d authKey=%s", clientID, authKey))
+	return cl
 }
 
-func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings, ws *threadSafeWriter) {
+func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings) {
+	LogWithMessage(NameClientConnection, ClientAddingTransceivers, true, true,
+		fmt.Sprintf("clientID=%d nVideoTrack=%d nAudioTracks=%d",
+			clc.clientID, len(clc.SenderVideoTracks), len(clc.SenderAudioTracks)),
+	)
 	mediaEngine := SetupDefaultMediaEngine()
 	interceptorRegistry := &interceptor.Registry{}
-	clc.websocket = ws
-	clc.startListening()
+
 	clc.gatherTrackStats = sfuSettings.UseABR || sfuSettings.GatherTrackStats
 
 	if sfuSettings.UseCC {
@@ -164,7 +173,8 @@ func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings, ws *t
 	}
 
 	peerConnection, err := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine), webrtc.WithMediaEngine(mediaEngine), webrtc.WithInterceptorRegistry(interceptorRegistry)).NewPeerConnection(webrtc.Configuration{})
-
+	clc.peerConnection = peerConnection
+	clc.AddPeerConnectionCallbacks()
 	if err != nil {
 		panic(err)
 	}
@@ -186,7 +196,12 @@ func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings, ws *t
 			return
 		}
 	}
+	LogWithMessage(NameClientConnection, ClientAddedTransceivers, true, true, fmt.Sprintf("clientID=%d", clc.clientID))
+}
 
+func (clc *ClientConnection) SetupWebsocket(ws *ThreadSafeWebsocket) {
+	clc.websocket = ws
+	clc.startListening()
 }
 
 func (clc *ClientConnection) AddPeerConnectionCallbacks() {
@@ -194,25 +209,8 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 		if i == nil {
 			return
 		}
-		payload := i.ToJSON().Candidate
-		candidate := ClientCandidate{
-			Message: payload,
-		}
-		msgBytes, err := json.Marshal(candidate)
-		if err != nil {
-			fmt.Printf("WebRTCSFU: webSocketHandler: OnICECandidate: ERROR: %s\n", err)
-			return
-		}
-		msg := ClientMessage{
-			MessageType: 4,
-			Message:     json.RawMessage(msgBytes),
-		}
 		fmt.Println("WebRTCSFU: webSocketHandler: OnICECandidate: Found a candidate")
-
-		if err := clc.websocket.WriteJSONSafe(msg); err != nil {
-			//panic(err)
-			fmt.Println("WebRTCSFU: webSocketHandler: ERROR: ", err)
-		}
+		clc.websocket.WriteJSONMessageSafe("CandidateMessage", i.ToJSON().Candidate)
 	})
 
 	// If PeerConnection is closed remove it from global list
@@ -301,6 +299,9 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 func (clc *ClientConnection) AddTrackFromOther(originType string, originID uint, trackID string, track webrtc.TrackLocal) {
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
+	LogWithMessage(NameClientConnection, ClientAddingTrackFromOther, true, true,
+		fmt.Sprintf("clientID=%d originType=%s originID=%d trackID=%s",
+			clc.clientID, originType, originID, trackID))
 	// TODO Check if trackID appears from session manager track
 	var recvTrack *ReceiverTrack
 	var exists bool
@@ -340,6 +341,11 @@ func (clc *ClientConnection) AddTrackFromOther(originType string, originID uint,
 func (clc *ClientConnection) SignalRenegotiation() {
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
+	clc.NeedsUpdate = true
+	if clc.websocket == nil {
+		return
+	}
+
 	offer, err := clc.peerConnection.CreateOffer(nil)
 	if err != nil {
 		panic(err)
@@ -348,9 +354,10 @@ func (clc *ClientConnection) SignalRenegotiation() {
 	if err = clc.peerConnection.SetLocalDescription(offer); err != nil {
 		panic(err)
 	}
-	if err = clc.websocket.WriteJSONSafe(offer); err != nil {
+	if err = clc.websocket.WriteJSONMessageSafe("OfferMessage", offer); err != nil {
 		panic(err)
 	}
+	clc.NeedsUpdate = false
 }
 
 func (clc *ClientConnection) startListening() {
@@ -361,52 +368,96 @@ func (clc *ClientConnection) startListening() {
 				fmt.Printf("WebRTCSFU: webSocketHandler: ReadMessage: error %w\n", err)
 				break
 			}
-
+			LogWithMessage(NameManagerConnection, ReceivedWSMessage, true, true,
+				fmt.Sprintf("origin=client clientID=%d type=%s", clc.clientID, msg.MessageType),
+			)
 			switch msg.MessageType {
-			// answer
-			case 3:
-				answer := webrtc.SessionDescription{}
-				if err := json.Unmarshal(msg.Message, &answer); err != nil {
-					panic(err)
-				}
-				if err := clc.peerConnection.SetRemoteDescription(answer); err != nil {
-					panic(err)
-				}
+			case "AnswerMessage":
+				clc.handleAnswerMessage(msg.Message)
+			case "CandidateMessage":
+				clc.handleCandidateMessage(msg.Message)
+				// answer
+				/*case 3:
+					answer := webrtc.SessionDescription{}
+					if err := json.Unmarshal(msg.Message, &answer); err != nil {
+						panic(err)
+					}
+					if err := clc.peerConnection.SetRemoteDescription(answer); err != nil {
+						panic(err)
+					}
 
-				for _, c := range clc.pendingCandidatesString {
-					if candidateErr := clc.peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: c}); candidateErr != nil {
-						panic(candidateErr)
+					for _, c := range clc.pendingCandidatesString {
+						if candidateErr := clc.peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: c}); candidateErr != nil {
+							panic(candidateErr)
+						}
 					}
-				}
-			// candidate
-			case 4:
-				candidate := ClientCandidate{}
-				if err := json.Unmarshal(msg.Message, &candidate); err != nil {
-					panic(err)
-				}
-				desc := clc.peerConnection.RemoteDescription()
-				if desc == nil {
-					clc.pendingCandidatesString = append(clc.pendingCandidatesString, candidate.Message)
-				} else {
-					if candidateErr := clc.peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate.Message}); candidateErr != nil {
-						panic(candidateErr)
+				// candidate
+				case 4:
+					candidate := ClientCandidate{}
+					if err := json.Unmarshal(msg.Message, &candidate); err != nil {
+						panic(err)
 					}
-				}
-			// remove track
-			case 5:
-				//removeTrackforPeer(pcState, message)
-			// add track
-			case 6:
-				//addTrackforPeer(pcState, message)
-			case 7:
-				candidate := ClientCandidate{}
-				if err := json.Unmarshal(msg.Message, &candidate); err != nil {
-					panic(err)
-				}
-				clc.updateCamInfo(candidate.Message)
+					desc := clc.peerConnection.RemoteDescription()
+					if desc == nil {
+						clc.pendingCandidatesString = append(clc.pendingCandidatesString, candidate.Message)
+					} else {
+						if candidateErr := clc.peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate.Message}); candidateErr != nil {
+							panic(candidateErr)
+						}
+					}
+				// remove track
+				case 5:
+					//removeTrackforPeer(pcState, message)
+				// add track
+				case 6:
+					//addTrackforPeer(pcState, message)
+				case 7:
+					candidate := ClientCandidate{}
+					if err := json.Unmarshal(msg.Message, &candidate); err != nil {
+						panic(err)
+					}
+					clc.updateCamInfo(candidate.Message)*/
 			}
 		}
 	}()
+}
+
+func (clc *ClientConnection) handleAnswerMessage(payload json.RawMessage) {
+	answer := webrtc.SessionDescription{}
+
+	if err := json.Unmarshal(payload, &answer); err != nil {
+		fmt.Printf("failed to unmarshal payload: %v\n", err)
+		return
+	}
+
+	if err := clc.peerConnection.SetRemoteDescription(answer); err != nil {
+		panic(err)
+	}
+
+	for _, c := range clc.pendingCandidatesString {
+		if candidateErr := clc.peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: c}); candidateErr != nil {
+			panic(candidateErr)
+		}
+	}
+}
+
+func (clc *ClientConnection) handleCandidateMessage(payload json.RawMessage) {
+	clc.mut.Lock()
+	defer clc.mut.Unlock()
+	desc := clc.peerConnection.RemoteDescription()
+	var candidate string
+	if err := json.Unmarshal(payload, &candidate); err != nil {
+		panic(err)
+	}
+
+	if desc == nil {
+		clc.pendingCandidatesString = append(clc.pendingCandidatesString, candidate)
+	} else {
+		if candidateErr := clc.peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate}); candidateErr != nil {
+			panic(candidateErr)
+		}
+	}
+	println("Added candidate")
 }
 
 func (clc *ClientConnection) updateCamInfo(data string) {

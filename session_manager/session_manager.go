@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 )
 
@@ -17,6 +18,9 @@ type SessionManager struct {
 	providerConfigs *ProviderConfigRepository
 	provisioner     ProviderProvisioner
 
+	clientIDCounter uint
+	clients         map[uint]*ClientConnection
+
 	mut sync.Mutex
 }
 
@@ -27,6 +31,8 @@ type SessionManagerConfig struct {
 	ProvisionerType           string                       `json:"provisionerType"`
 	ProvisionerConfigPath     string                       `json:"provisionerConfigPath"`
 	ProvidersToCreate         []SessionManagerProviderPair `json:"providersToCreate"`
+
+	IgnorePreferredClientID bool `json:"ignorePreferredClientID"`
 }
 
 type SessionManagerProviderPair struct {
@@ -59,6 +65,7 @@ func NewSessionManager(configPath string) *SessionManager {
 		provisioner:     CreateProviderProvisioner(config.ProvisionerType, config.ProvisionerConfigPath),
 		providerConfigs: NewProviderConfigRepository(config.DefaultProviderConfigPath),
 		providers:       map[string]*ProviderConnection{},
+		clients:         map[uint]*ClientConnection{},
 		mut:             sync.Mutex{},
 	}
 	for i := range config.ProvidersToCreate {
@@ -69,12 +76,13 @@ func NewSessionManager(configPath string) *SessionManager {
 	return ses
 }
 
-func (sm *SessionManager) CreateProvider(providerType string, providerKey string, address string, port uint) {
+func (sm *SessionManager) CreateProvider(providerType string, providerKey string, address string, port uint) *ProviderConnection {
 	sm.mut.Lock()
 
-	if _, exists := sm.providers[providerKey]; exists {
+	if pc, exists := sm.providers[providerKey]; exists {
 		Log(NameManager, ProviderAlreadyExists, true, true)
-		return
+		sm.mut.Unlock()
+		return pc
 	}
 	authKey := ""
 	if sm.config.VerifyAuthKey {
@@ -82,17 +90,19 @@ func (sm *SessionManager) CreateProvider(providerType string, providerKey string
 	}
 	config := sm.providerConfigs.GetConfigForTypeAndKey(providerType, providerKey)
 	if config == nil {
-		return
+		return nil
 	}
 	pc := NewProviderConnection(sm, providerKey, address, port, authKey, config.Settings)
 	sm.providers[providerKey] = pc
 	sm.mut.Unlock()
 	sm.provisioner.CreateProvider(providerType, sm.config.Address, pc, config.ExtraCmdArgs)
+	return pc
 }
 
 func (sm *SessionManager) StartListening() {
 	http.HandleFunc("/websocket_provider", sm.websocketHandlerProvider)
 	http.HandleFunc("/websocket_client", sm.websocketHandlerClient)
+	http.HandleFunc("/websocket_reconnect_client", sm.websocketHandlerClient)
 	log.Fatal(http.ListenAndServe(sm.config.Address, nil))
 }
 
@@ -144,17 +154,106 @@ func (sm *SessionManager) websocketHandlerProvider(w http.ResponseWriter, r *htt
 }
 
 func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.Request) {
+	preferredClientIDS := r.URL.Query().Get("preferredClientID")
+	var clientID uint
 
+	sm.mut.Lock()
+
+	if !sm.config.IgnorePreferredClientID && preferredClientIDS != "" {
+		clientID64, err := strconv.ParseUint(preferredClientIDS, 10, 64)
+		if err != nil {
+			Log(NameManager, InvalidClientID, true, true)
+			http.Error(w, "Invalid preferredclientID", http.StatusBadRequest)
+			sm.mut.Unlock()
+			return
+		}
+		clientID = uint(clientID64)
+		clOld, exists := sm.clients[clientID]
+		if exists && clOld.Status != ClientStatusCreated {
+			Log(NameManager, ClientAlreadyExists, true, true)
+			http.Error(w, "ClientID already in use", http.StatusBadRequest)
+			sm.mut.Unlock()
+			return
+		} else {
+			clientID = sm.clientIDCounter
+			sm.clientIDCounter++
+		}
+	}
+	authKey := ""
+	if sm.config.VerifyAuthKey {
+		authKey = sm.generateAuthKey() // TODO
+	}
+
+	client := NewClientConnection(sm, clientID, authKey)
+	sm.clients[clientID] = client
+	sm.mut.Unlock()
+
+	// Upgrade HTTP request to Websocket
+
+	unsafeWebSocketConn, err := upgrader.Upgrade(w, r, nil)
+
+	if err != nil {
+		fmt.Printf("WebRTCSFU: webSocketHandler: ERROR: %s\n", err)
+		return
+	}
+
+	fmt.Println("WebRTCSFU: webSocketHandler: Websocket handler upgraded")
+
+	client.SetupClient(
+		&ThreadSafeWebsocket{
+			unsafeWebSocketConn, sync.Mutex{},
+		},
+	)
+}
+
+func (sm *SessionManager) websocketHandlerReconnectClient(w http.ResponseWriter, r *http.Request) {
+	// Check ClientID + AuthKey in URL
 }
 
 func (sm *SessionManager) generateAuthKey() string {
 	return "TODO" // TODO
 }
 
-func (sm *SessionManager) onProviderClose(pc *ProviderConnection) {
+func (sm *SessionManager) OnProviderClose(pc *ProviderConnection) {
 	sm.mut.Lock()
 	defer sm.mut.Lock()
 	LogWithMessage(NameManager, ProviderClosed, true, true, fmt.Sprintf("providerKey=%s", pc.ProviderKey))
 	sm.provisioner.OnProviderClose(pc)
 	delete(sm.providers, pc.ProviderKey)
+}
+
+func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedMsg ProviderClientAddedMessage) {
+	sm.mut.Lock()
+	defer sm.mut.Unlock()
+	client, exists := sm.clients[addedMsg.ClientID]
+	if !exists {
+		// TODO Log
+		LogWithMessage(NameManager, InvalidClientID, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
+		return
+	}
+	msgToClient := ClientAddedToProviderMessage{
+		ProviderKey: pc.ProviderKey,
+		Address:     pc.Address,
+		Port:        pc.Port,
+	}
+
+	msgBytes, err := json.Marshal(msgToClient)
+	if err != nil {
+		// TODO Log error
+		fmt.Printf("WebRTCSFU: webSocketHandler: OnClientAddedToProvider: ERROR: %s\n", err)
+		return
+	}
+	msg := ClientMessage{
+		MessageType: "ClientAddedToProvider",
+		Message:     json.RawMessage(msgBytes),
+	}
+	client.websocket.WriteJSONSafe(msg)
+	LogWithMessage(NameManager, ClientAddedToProvider, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
+}
+
+func (sm *SessionManager) OnClientClose(cl *ClientConnection) {
+	sm.mut.Lock()
+	defer sm.mut.Lock()
+	// TODO
+	// Make sure to keep client connection semi-alive so he can reconnect
 }

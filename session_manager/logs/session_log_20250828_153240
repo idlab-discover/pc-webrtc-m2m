@@ -1,8 +1,0 @@
-id=SessionManager status=0
-id=SessionManager status=100
-id=SessionManager status=101 address=:8080 defaultProviderConfigPath=config/providers/general.json  provisionerType=local verifyAuthKey=false providersToCreate=[{Type:sfu Key:sfu_mdc}]
-id=ProviderConfigRepository status=0
-id=ProviderConfigRepository status=4000
-id=ProviderConfigRepository status=4001
-id=ProviderConfigRepository status=1
-id=SessionManager status=1

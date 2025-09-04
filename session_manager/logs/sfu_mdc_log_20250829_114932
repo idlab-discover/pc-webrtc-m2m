@@ -1,5 +1,0 @@
-id=sfu_mdc status=0 managerIP=:8080 address=127.0.0.1 port=8024 authKey=
-id=SFU status=0
-id=SFU status=1
-id=SessionManagerConnection status=0 managerIP=:8080 providerKey=sfu_mdc authKey=
-id=SessionManagerConnection status=1
