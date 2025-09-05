@@ -20,6 +20,7 @@ type ClientConnection struct {
 	parent            *SessionManager
 	ClientID          uint
 	AuthKey           string
+	CodecMode         string
 	websocket         *ThreadSafeWebsocket
 	config            map[string]interface{}
 	IsReady           bool
@@ -32,6 +33,7 @@ type ClientConnection struct {
 }
 
 type JoinSessionMessage struct {
+	CodecMode string                      `json:"codecMode"`
 	Providers []ConnectionProviderMessage `json:"providers"`
 }
 
@@ -163,6 +165,13 @@ func (clc *ClientConnection) startListening() {
 	}()
 }
 
+type SessionJoinedMessage struct {
+	DefaultProvider string                      `json:"defaultProvider"`
+	CodecMode       string                      `json:"codecMode"`
+	Providers       []ConnectionProviderMessage `json:"providers"`
+	// TODO Add clients to this
+}
+
 func (clc *ClientConnection) handleJoinMessage(payload json.RawMessage) {
 	var msg JoinSessionMessage
 	if err := json.Unmarshal(payload, &msg); err != nil {
@@ -172,48 +181,39 @@ func (clc *ClientConnection) handleJoinMessage(payload json.RawMessage) {
 	fmt.Printf("Received JoinSessionMessage: %+v\n", msg)
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
-	clVideoTracks := []ClientTrackInfo{}
-	clAudioTracks := []ClientTrackInfo{}
-	clProviders := []ProviderMessage{}
-	providersAddedToMessage := map[string]bool{}
+
+	validProviders := []ConnectionProviderMessage{}
+	validProviderConnections := map[string]*ProviderConnection{}
 	for i := range msg.Providers {
 		provider := &msg.Providers[i]
-		providersAddedToMessage[provider.ProviderKey] = true
-		clProviders = append(clProviders, ProviderMessage{
-			ProviderType:     provider.ProviderType,
-			ProviderKey:      provider.ProviderKey,
-			ProviderSettings: provider.ProviderSettings,
-		})
 		pc := clc.parent.CreateProvider(provider.ProviderType, provider.ProviderKey, "", 0) // TODO Fix port + address
 		if pc == nil {
 			continue
 			// TODO Log invalid provider
 		}
-		processTracks := func(tracks []ClientTrackInfo, providerKey string, senderTracks map[string]ClientTrackInfo, collectedTracks *[]ClientTrackInfo) {
-			for j := range tracks {
-				track := &tracks[j]
-				track.ProviderKey = providerKey
-				track.TrackID = fmt.Sprintf("cl%d_%s", clc.ClientID, track.TrackID)
-				senderTracks[track.TrackID] = *track
-				*collectedTracks = append(*collectedTracks, *track)
-			}
+		for i := range provider.VideoTracks {
+			track := &provider.VideoTracks[i]
+			track.ProviderKey = provider.ProviderKey
+			track.TrackID = fmt.Sprintf("cl%d_%s", clc.ClientID, track.TrackID) // Make trackID globally unique
+			clc.SenderVideoTracks[track.TrackID] = *track
 		}
-		processTracks(provider.VideoTracks, provider.ProviderKey, clc.SenderVideoTracks, &clVideoTracks)
-		processTracks(provider.AudioTracks, provider.ProviderKey, clc.SenderAudioTracks, &clAudioTracks)
-		pc.AddNewClient(clc.ClientID, clc.AuthKey, provider.VideoTracks, provider.AudioTracks)
-	}
-	// Alert other clients of this client
-
-	// Add providers and remote clients to message
-
-	// Send updated tracks to client
-	ClientTracksAdded := ClientTracksAdded{
-		Providers:   clProviders,
-		VideoTracks: clVideoTracks,
-		AudioTracks: clAudioTracks,
+		validProviderConnections[provider.ProviderKey] = pc
+		validProviders = append(validProviders, *provider)
 	}
 
-	clc.websocket.WriteJSONMessageSafe("SessionJoined", "")
+	clientMsg := SessionJoinedMessage{
+		DefaultProvider: "",
+		CodecMode:       msg.CodecMode,  // TODO Validate codec mode based on tracks
+		Providers:       validProviders, // TODO Filter this out
+	}
+	clc.websocket.WriteJSONMessageSafe("SessionJoined", clientMsg)
+
+	for i := range validProviders {
+		validProviderMessage := &validProviders[i]
+		pc := validProviderConnections[validProviderMessage.ProviderKey]
+		pc.AddNewClient(clc.ClientID, clc.AuthKey, validProviderMessage.VideoTracks, validProviderMessage.AudioTracks)
+	}
+
 }
 
 func (clc *ClientConnection) onClose() {

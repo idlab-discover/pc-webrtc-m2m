@@ -16,7 +16,7 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/gorilla/websocket"
-	"github.com/pion/webrtc/v3"
+	"github.com/pion/webrtc/v4"
 
 	"github.com/pion/interceptor/pkg/cc"
 )
@@ -602,12 +602,6 @@ func main() {
 
 // Add to list of tracks and fire renegotation for all PeerConnections
 func addTrack(t *webrtc.TrackRemote) *webrtc.TrackLocalStaticRTP {
-	listLock.Lock()
-	defer func() {
-		listLock.Unlock()
-		fmt.Println("WebRTCSFU: addTrack: Calling signalPeerConnections")
-		signalPeerConnections()
-	}()
 
 	fmt.Printf("WebRTCSFU: addTrack: t.ID %s, t.StreamID %s\n", t.ID(), t.StreamID())
 

@@ -10,7 +10,7 @@ import (
 	"github.com/pion/interceptor"
 	"github.com/pion/interceptor/pkg/cc"
 	"github.com/pion/sdp/v3"
-	"github.com/pion/webrtc/v3"
+	"github.com/pion/webrtc/v4"
 )
 
 const NameClientConnection = "ClientConnection"
@@ -171,8 +171,10 @@ func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings) {
 	if err := webrtc.RegisterDefaultInterceptors(mediaEngine, interceptorRegistry); err != nil {
 		panic(err)
 	}
-
-	peerConnection, err := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine), webrtc.WithMediaEngine(mediaEngine), webrtc.WithInterceptorRegistry(interceptorRegistry)).NewPeerConnection(webrtc.Configuration{})
+	settingEngine2 := webrtc.SettingEngine{}
+	settingEngine2.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
+	settingEngine2.SetReceiveMTU(1500)
+	peerConnection, err := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine2), webrtc.WithMediaEngine(mediaEngine), webrtc.WithInterceptorRegistry(interceptorRegistry)).NewPeerConnection(webrtc.Configuration{})
 	clc.peerConnection = peerConnection
 	clc.AddPeerConnectionCallbacks()
 	if err != nil {
@@ -230,11 +232,19 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 		}
 	})
 
-	clc.peerConnection.OnTrack(func(t *webrtc.TrackRemote, _ *webrtc.RTPReceiver) {
+	clc.peerConnection.OnTrack(func(t *webrtc.TrackRemote, trackReceiver *webrtc.RTPReceiver) {
 		// Create a track to fan out our incoming video to all peers
 		//if t.Kind() == webrtc.RTPCodecTypeAudio {
 		//	return
 		//}
+		go func() {
+			rtcpBuf := make([]byte, 1500)
+			for {
+				if _, _, rtcpErr := trackReceiver.Read(rtcpBuf); rtcpErr != nil {
+					panic(rtcpErr)
+				}
+			}
+		}()
 		var senderTrack *SenderTrack
 		exists := false
 		clc.mut.Lock()
@@ -256,20 +266,18 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 		clc.mut.Unlock()
 		trackLocal := addTrack(t)
 		fmt.Printf("WebRTCSFU: OnTrack: Adding track %v\n", trackLocal.ID())
-		defer func() {
-			fmt.Printf("WebRTCSFU: OnTrack: removing track %v\n", trackLocal.ID())
-			removeTrack(trackLocal)
-		}()
 
 		startTime := time.Now().UnixNano() // / int64(time.Millisecond)
 		prevBucket := int64(0)
 		for {
-			buf := make([]byte, 1500)
+
+			buf := make([]byte, 15000)
 			i, _, err := t.Read(buf)
 			if err != nil {
 				fmt.Printf("WebRTCSFU: OnTrack: error during read: %s\n", err)
 				break
 			}
+
 			if clc.gatherTrackStats && t.Kind() == webrtc.RTPCodecTypeVideo {
 				nextTime := time.Now().UnixNano() //
 				nsDiff := nextTime - startTime
@@ -285,6 +293,7 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 				trackBitrate.tempCounter += uint32(i)
 				prevBucket = msBucket
 			}
+
 			go func() {
 				if _, err = trackLocal.Write(buf[:i]); err != nil {
 					fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/pion/rtp"
-	"github.com/pion/webrtc/v3"
+	"github.com/pion/webrtc/v4"
 )
 
 // TrackLocalStaticRTP  is a TrackLocal that has a pre-set codec and accepts RTP Packets.
@@ -90,6 +90,7 @@ func (s *TrackLocalAudioRTP) WriteAudioFrame(audio []byte) error {
 		packets := p.Packetize(audio, samples)
 		counter := 0
 		for _, p := range packets {
+
 			if err := s.rtpTrack.WriteRTP(p); err != nil {
 				fmt.Printf("WebRTCPeer: ERROR: %s\n", err)
 			}

@@ -42,6 +42,7 @@ const (
 	ClientAddedSenderVideoTrack   uint = 2002
 	ClientAddedSenderAudioTrack   uint = 2003
 	ClientAddedToBufferedProvider uint = 2004
+	ClientSessionJoined           uint = 2005
 
 	RemoteClientAdded uint = 3000
 

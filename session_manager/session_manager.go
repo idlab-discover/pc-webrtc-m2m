@@ -231,10 +231,32 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 		LogWithMessage(NameManager, InvalidClientID, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
 		return
 	}
+	// Convert track simple to actual track info
+	videoTracksToSend := []ClientTrackInfo{}
+	for _, track := range addedMsg.SenderVideoTracks {
+		var videoTrack ClientTrackInfo
+		println("Looking for track", track.TrackID)
+		if videoTrack, exists = client.SenderVideoTracks[track.TrackID]; !exists {
+			continue
+		}
+		videoTracksToSend = append(videoTracksToSend, videoTrack)
+	}
+	audioTracksToSend := []ClientTrackInfo{}
+	for _, track := range addedMsg.SenderAudioTracks {
+		var audioTrack ClientTrackInfo
+		if audioTrack, exists = client.SenderAudioTracks[track.TrackID]; !exists {
+			continue
+		}
+		audioTracksToSend = append(audioTracksToSend, audioTrack)
+	}
+	// Also add remote
 	msgToClient := ClientAddedToProviderMessage{
-		ProviderKey: pc.ProviderKey,
-		Address:     pc.Address,
-		Port:        pc.Port,
+		ProviderKey:       pc.ProviderKey,
+		Address:           pc.Address,
+		Port:              pc.Port,
+		Config:            pc.config,
+		SenderVideoTracks: videoTracksToSend,
+		SenderAudioTracks: audioTracksToSend,
 	}
 
 	msgBytes, err := json.Marshal(msgToClient)
@@ -243,6 +265,8 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 		fmt.Printf("WebRTCSFU: webSocketHandler: OnClientAddedToProvider: ERROR: %s\n", err)
 		return
 	}
+	// TODO Inform other clients that they now can listen to these tracks
+	// Also send information about provider to it
 	msg := ClientMessage{
 		MessageType: "ClientAddedToProvider",
 		Message:     json.RawMessage(msgBytes),

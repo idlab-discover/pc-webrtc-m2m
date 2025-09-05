@@ -1,5 +1,6 @@
 {
     "preferredClientID": 0,
+    "codecMode": "mdc",
     "providers": [
         {
             "providerType": "webrtc_sfu",

@@ -18,7 +18,7 @@ import (
 	"github.com/pion/interceptor"
 	"github.com/pion/interceptor/pkg/nack"
 	"github.com/pion/sdp/v3"
-	"github.com/pion/webrtc/v3"
+	"github.com/pion/webrtc/v4"
 )
 
 const NameSFUConnection = "SFUConnection"
@@ -73,11 +73,12 @@ func NewWebRTCVideoTrack(track *TrackLocalCloudRTP, transcoder Transcoder) *WebR
 }
 
 func (t *WebRTCVideoTrack) StartSending() {
+
 	go func() {
 		frameNr := 0
 		for {
 			if err := t.track.WriteFrame(t.transcoder, frameNr); err != nil {
-				//panic(err)
+				panic(err)
 			}
 			// TODO Log the sending
 			frameNr++
@@ -141,7 +142,7 @@ func (s *SFUConnection) connectToSFU(clientID uint, authKey string) {
 func (s *SFUConnection) preparePeerConnection() {
 	settingEngine := webrtc.SettingEngine{}
 	settingEngine.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
-
+	settingEngine.SetReceiveMTU(1500)
 	i := &interceptor.Registry{}
 	m := &webrtc.MediaEngine{}
 	if err := m.RegisterDefaultCodecs(); err != nil {
@@ -504,6 +505,7 @@ func (s *SFUConnection) AddVideoTrack(trackID string) {
 }
 
 func (s *SFUConnection) addTrackToPeerConnection(track webrtc.TrackLocal) {
+
 	var rtpSender *webrtc.RTPSender
 	var err error
 	if rtpSender, err = s.peerConnection.AddTrack(track); err != nil {
@@ -513,6 +515,7 @@ func (s *SFUConnection) addTrackToPeerConnection(track webrtc.TrackLocal) {
 		rtcpBuf := make([]byte, 1500)
 		for {
 			if _, _, err := rtpSender.Read(rtcpBuf); err != nil {
+				panic(err)
 				return
 			}
 		}

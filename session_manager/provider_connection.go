@@ -93,9 +93,12 @@ type ProviderClientAddedMessage struct {
 }
 
 type ClientAddedToProviderMessage struct {
-	ProviderKey string `json:"providerKey"`
-	Address     string `json:"address"`
-	Port        uint   `json:"port"`
+	ProviderKey       string                 `json:"providerKey"`
+	Address           string                 `json:"address"`
+	Port              uint                   `json:"port"`
+	Config            map[string]interface{} `json:"config"`
+	SenderVideoTracks []ClientTrackInfo      `json:"senderVideoTracks"`
+	SenderAudioTracks []ClientTrackInfo      `json:"senderAudioTracks"`
 }
 
 func (clc *ProviderConnection) AddNewClient(clientID uint, authKey string, videoTracks []ClientTrackInfo, audioTracks []ClientTrackInfo) { // TODO Maybe add auth key
