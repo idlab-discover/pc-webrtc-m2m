@@ -1,15 +1,23 @@
 package main
 
-import (
-	"sync"
-	"time"
-)
-
 type Transcoder interface {
-	EncodeFrame(uint32, uint32) []byte
+	EncodeFrame(string) []byte
 }
 
-type TranscoderRemote struct {
+type TranscoderFixed struct {
+	bitrate uint
+	fps     uint
+}
+
+func NewTranscoderFixed(bitrate uint, fps uint) *TranscoderFixed {
+	return &TranscoderFixed{bitrate: bitrate, fps: fps}
+}
+
+func (t *TranscoderFixed) EncodeFrame(trackID string) []byte {
+	return make([]byte, t.bitrate/t.fps/8)
+}
+
+/*type TranscoderRemote struct {
 	proxy_con    *ProxyConnection
 	frameCounter uint32
 	isReady      bool
@@ -19,8 +27,8 @@ func NewTranscoderRemote(proxy_con *ProxyConnection) *TranscoderRemote {
 	return &TranscoderRemote{proxy_con, 0, true}
 }
 
-func (t *TranscoderRemote) EncodeFrame(capturerID uint32, tile uint32) []byte {
-	return proxyConn.NextTile(capturerID, tile)
+func (t *TranscoderRemote) EncodeFrame(trackID string) []byte {
+	return proxyConn.NextTile(trackID)
 }
 
 type TranscoderDummy struct {
@@ -33,7 +41,7 @@ func NewTranscoderDummy(proxy_con *ProxyConnection) *TranscoderDummy {
 	return &TranscoderDummy{proxy_con, 0, true}
 }
 
-func (t *TranscoderDummy) EncodeFrame(capturerID uint32, tile uint32) []byte {
+func (t *TranscoderDummy) EncodeFrame(trackID string) []byte {
 	return nil
 }
 
@@ -60,7 +68,7 @@ func NewTranscoderDebug(dbgConfig DebugConfig) *TranscoderDebug {
 	return t
 }
 
-func (t *TranscoderDebug) EncodeFrame(capturerID uint32, tile uint32) []byte {
+func (t *TranscoderDebug) EncodeFrame(trackID string) []byte {
 	t.m_video.Lock()
 	if !t.complete_tiles[tile] {
 		t.cond_video[tile].Wait()
@@ -89,4 +97,4 @@ func (t *TranscoderDebug) produceFrames() {
 			}
 		}
 	}()
-}
+}*/

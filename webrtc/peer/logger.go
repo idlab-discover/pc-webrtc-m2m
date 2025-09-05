@@ -50,7 +50,8 @@ const (
 
 	ReceivedWSMessage uint = 7000
 
-	SFUReceivedOffer uint = 8000
+	SFUReceivedOffer          uint = 8000
+	SFUClientConnectionChange uint = 8001
 
 	CriticalFail uint = 9999
 )

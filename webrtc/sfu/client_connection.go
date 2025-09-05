@@ -216,17 +216,16 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 	// If PeerConnection is closed remove it from global list
 	clc.peerConnection.OnConnectionStateChange(func(p webrtc.PeerConnectionState) {
 		// TODO Maybe inform sfu/session manager
-		fmt.Printf("WebRTCSFU: webSocketHandler: OnConnectionStateChange: Peer connection state has changed to %s\n", p.String())
+		LogWithMessage(NameClientConnection, SFUClientConnectionChange, true, true,
+			fmt.Sprintf("clientID=%d state=%s", clc.clientID, p.String()))
 		switch p {
 		case webrtc.PeerConnectionStateFailed:
 			if err := clc.peerConnection.Close(); err != nil {
 				fmt.Printf("WebRTCSFU: webSocketHandler: ERROR: %s\n", err)
 			}
 		case webrtc.PeerConnectionStateClosed:
-			fmt.Println("WebRTCSFU: webSocketHandler: OnConnectionStateChange: Closed")
-			signalPeerConnections()
+			// Alert other clients that this client is gone
 		case webrtc.PeerConnectionStateConnected:
-			fmt.Println("WebRTCSFU: webSocketHandler: OnConnectionStateChange: Connected")
 
 		}
 	})

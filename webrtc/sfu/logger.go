@@ -45,6 +45,8 @@ const (
 
 	ReceivedWSMessage uint = 7000
 
+	SFUClientConnectionChange uint = 8000
+
 	CriticalFail uint = 9999
 )
 

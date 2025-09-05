@@ -69,6 +69,7 @@ public class  RemoteTrackInfo : ReceivingTrackInfo
 {
     [NonSerialized]
     public NetworkReceiverBase Receiver;
+    // TODO Make constructor and call receiver to add the track
 
     public void StartPollingTrack(NetworkReceiverBase.OnStreamDataReceivedCb cb)
     {

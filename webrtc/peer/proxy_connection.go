@@ -120,6 +120,7 @@ func NewProxyConnection() *ProxyConnection {
 func (pc *ProxyConnection) sendPacket(b []byte, offset uint32, packet_type uint32) {
 	buffProxy := make([]byte, 1300)
 	binary.LittleEndian.PutUint32(buffProxy[0:], packet_type)
+	// TODO Add internal ID mapping string to int
 	copy(buffProxy[4:], b[offset:])
 	pc.send_mutex.Lock()
 	_, err := pc.conn.WriteToUDP(buffProxy, pc.addr)

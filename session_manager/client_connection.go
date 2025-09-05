@@ -212,8 +212,8 @@ func (clc *ClientConnection) handleJoinMessage(payload json.RawMessage) {
 		VideoTracks: clVideoTracks,
 		AudioTracks: clAudioTracks,
 	}
-	fmt.Printf("Sending ClientTracksAdded: %+v\n", ClientTracksAdded)
-	clc.websocket.WriteJSONMessageSafe("ClientTracksAdded", ClientTracksAdded)
+
+	clc.websocket.WriteJSONMessageSafe("SessionJoined", "")
 }
 
 func (clc *ClientConnection) onClose() {

@@ -30,6 +30,7 @@ type SessionManagerConnection struct {
 	localClient       *ConnectedClient
 	remoteClient      map[uint]*ConnectedClient
 	bufferedProviders map[string]AddedToProviderMessage
+	transcoder        Transcoder
 	conn              *ThreadSafeWebsocket
 	mut               sync.Mutex
 }
@@ -66,7 +67,20 @@ type ClientTrackInfo struct {
 	TrackSettings json.RawMessage `json:"trackSettings"`
 }
 
-func NewSessionManagerConnection(managerIP string, preferredClientID uint, providersPath string) (*SessionManagerConnection, error) {
+type SenderTrackInfo struct {
+	ClientTrackInfo
+	providerConnection *SFUConnection
+}
+
+// TODO Add function addSenderTrack
+// TODO Add function addReceiverTrack
+
+type ReceiverTrackInfo struct {
+	ClientTrackInfo
+	providerConnection *SFUConnection
+}
+
+func NewSessionManagerConnection(managerIP string, preferredClientID uint, providersPath string, transcoder Transcoder) (*SessionManagerConnection, error) {
 	LogWithMessage(NameManagerConnection, Creating, true, true, fmt.Sprintf("managerIP=%s preferredclientID=%d", managerIP, preferredClientID))
 	u := url.URL{
 		Scheme: "ws",
@@ -88,6 +102,7 @@ func NewSessionManagerConnection(managerIP string, preferredClientID uint, provi
 		providers:         map[string]*SFUConnection{},
 		remoteClient:      make(map[uint]*ConnectedClient),
 		bufferedProviders: map[string]AddedToProviderMessage{},
+		transcoder:        transcoder,
 		conn: &ThreadSafeWebsocket{
 			conn, sync.Mutex{},
 		},
@@ -208,9 +223,13 @@ func (smc *SessionManagerConnection) handleClientTracksAdded(payload json.RawMes
 		return
 	}
 	fmt.Printf("Received ClientTracksAdded: %+v\n", msg)
-	smc.AddProviders(msg.Providers)
-	smc.localClient.AddVideoTracks(msg.VideoTracks)
-	smc.localClient.AddAudioTracks(msg.AudioTracks)
+	smc.mut.Lock()
+	defer smc.mut.Unlock()
+	// Generate maps for video and audio tracks per provider
+
+	//smc.AddProviders(msg.Providers, msg.VideoTracks, msg.AudioTracks)
+	//smc.localClient.AddVideoTracks(msg.VideoTracks)
+	//smc.localClient.AddAudioTracks(msg.AudioTracks)
 }
 
 func (smc *SessionManagerConnection) sendProviders() {
@@ -236,11 +255,24 @@ func (smc *SessionManagerConnection) sendProviders() {
 	fmt.Printf("Sent providers: %+v\n", providers)
 }
 
-func (smc *SessionManagerConnection) AddProviders(providers []ProviderMessage) {
-	smc.mut.Lock()
-	defer smc.mut.Unlock()
+func (smc *SessionManagerConnection) AddProviders(providers []ProviderMessage, videoTracks []ClientTrackInfo, audioTracks []ClientTrackInfo) {
+	videoTracksByProvider := make(map[string][]ClientTrackInfo)
+	audioTracksByProvider := make(map[string][]ClientTrackInfo)
+
+	for _, track := range videoTracks {
+		providerKey := track.ProviderKey
+		videoTracksByProvider[providerKey] = append(videoTracksByProvider[providerKey], track)
+	}
+	for _, track := range audioTracks {
+		providerKey := track.ProviderKey
+		audioTracksByProvider[providerKey] = append(audioTracksByProvider[providerKey], track)
+	}
 	for _, provider := range providers {
-		newProvider := NewSFUConnection(provider.ProviderKey)
+		newProvider := NewSFUConnection(provider.ProviderKey,
+			videoTracksByProvider[provider.ProviderKey],
+			audioTracksByProvider[provider.ProviderKey],
+			smc.transcoder,
+		)
 		smc.providers[provider.ProviderKey] = newProvider
 		bufferedProvider, exists := smc.bufferedProviders[provider.ProviderKey]
 		if exists {
