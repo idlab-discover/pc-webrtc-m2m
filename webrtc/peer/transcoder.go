@@ -1,19 +1,34 @@
 package main
 
+import "time"
+
 type Transcoder interface {
 	EncodeFrame(string) []byte
 }
 
 type TranscoderFixed struct {
-	bitrate uint
-	fps     uint
+	bitrate       uint
+	fps           uint
+	lastFrameTime time.Time
+	sleepTime     time.Duration
 }
 
 func NewTranscoderFixed(bitrate uint, fps uint) *TranscoderFixed {
-	return &TranscoderFixed{bitrate: bitrate, fps: fps}
+	interval := time.Duration(1000.0/float64(fps)) * time.Millisecond
+	return &TranscoderFixed{bitrate: bitrate, fps: fps, lastFrameTime: time.Now(), sleepTime: interval}
 }
 
 func (t *TranscoderFixed) EncodeFrame(trackID string) []byte {
+	now := time.Now()
+	nextFrameTime := t.lastFrameTime.Add(t.sleepTime)
+	sleepDuration := nextFrameTime.Sub(now)
+	if sleepDuration > 0 {
+		time.Sleep(sleepDuration)
+		t.lastFrameTime = nextFrameTime
+	} else {
+		// If we're behind, reset to now to avoid drift
+		t.lastFrameTime = now
+	}
 	return make([]byte, t.bitrate/t.fps/8)
 }
 
