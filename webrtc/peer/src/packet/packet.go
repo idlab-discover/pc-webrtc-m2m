@@ -1,4 +1,4 @@
-package main
+package packet
 
 type FramePacketHeader struct {
 	ClientNr  uint32 // 8

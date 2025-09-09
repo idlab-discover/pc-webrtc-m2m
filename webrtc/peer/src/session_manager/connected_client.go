@@ -1,7 +1,8 @@
-package main
+package session_manager
 
 import (
 	"fmt"
+	"goweb/peer/src/logger"
 	"sync"
 )
 
@@ -29,7 +30,7 @@ func (cc *ConnectedClient) AddVideoTracks(tracks []ClientTrackInfo) {
 		trackCopy := track
 		cc.VideoTracks[track.TrackID] = &trackCopy
 	}
-	LogWithMessage(NameManagerConnection, ClientAddedSenderVideoTrack, true, true,
+	logger.LogWithMessage(NameManagerConnection, logger.ClientAddedSenderVideoTrack, true, true,
 		fmt.Sprintf("clientID=%d nTracks=%d", cc.ClientID, len(tracks)),
 	)
 }
@@ -41,7 +42,7 @@ func (cc *ConnectedClient) AddAudioTracks(tracks []ClientTrackInfo) {
 		trackCopy := track
 		cc.AudioTracks[track.TrackID] = &trackCopy
 	}
-	LogWithMessage(NameManagerConnection, ClientAddedSenderAudioTrack, true, true,
+	logger.LogWithMessage(NameManagerConnection, logger.ClientAddedSenderAudioTrack, true, true,
 		fmt.Sprintf("clientID=%d nTracks=%d", cc.ClientID, len(tracks)),
 	)
 }
@@ -66,7 +67,8 @@ func (cc *ConnectedClient) SetTracksConnectionStatus(codecMode string, providers
 	}
 }
 
-func (cc *ConnectedClient) SetTracksAsConnected(videoTracks []ClientTrackInfo, audioTracks []ClientTrackInfo) {
+// In C# this will trigger a callback so systems knows he can read now
+func (cc *ConnectedClient) SetTracksAsConnected(videoTracks []TrackSimple, audioTracks []TrackSimple) {
 	cc.mut.Lock()
 	defer cc.mut.Unlock()
 	for _, t := range videoTracks {

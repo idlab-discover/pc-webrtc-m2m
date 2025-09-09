@@ -39,6 +39,8 @@ const (
 	ClientAddingTransceivers   uint = 2000
 	ClientAddedTransceivers    uint = 2001
 	ClientAddingTrackFromOther uint = 2002
+	ClientSignalRenegotiation  uint = 2003
+	ClientOnTrackCalled        uint = 2004
 
 	ProviderConfigReadDefaultStart uint = 4000
 	ProviderConfigReadDefaultEnd   uint = 4001

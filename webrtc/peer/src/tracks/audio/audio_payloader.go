@@ -1,4 +1,4 @@
-package main
+package audio
 
 import "encoding/binary"
 
@@ -19,7 +19,7 @@ func (p *AudioPayloader) Payload(mtu uint16, payload []byte) (payloads [][]byte)
 			currentFragmentSize = payloadRemaining
 		}
 		buf := make([]byte, currentFragmentSize+20)
-		binary.LittleEndian.PutUint32(buf[0:], uint32(*clientID))
+		binary.LittleEndian.PutUint32(buf[0:], 0)
 		binary.LittleEndian.PutUint32(buf[4:], p.frameCounter)
 
 		binary.LittleEndian.PutUint32(buf[8:], payloadLen)

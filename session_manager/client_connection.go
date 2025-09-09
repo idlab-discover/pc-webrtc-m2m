@@ -25,9 +25,9 @@ type ClientConnection struct {
 	config            map[string]interface{}
 	IsReady           bool
 	Status            uint
-	SenderVideoTracks map[string]ClientTrackInfo
-	SenderAudioTracks map[string]ClientTrackInfo
-	RemoteClients     map[uint]RemoteClient
+	SenderVideoTracks map[string]*ClientTrackInfo
+	SenderAudioTracks map[string]*ClientTrackInfo
+	RemoteClients     map[uint]*RemoteClient
 
 	mut sync.Mutex
 }
@@ -46,12 +46,13 @@ type ConnectionProviderMessage struct {
 }
 
 type ClientTrackInfo struct {
-	ClientID      uint            `json:"clientID"`
-	ProviderKey   string          `json:"providerKey"`
-	TrackID       string          `json:"trackID"`
-	CapturerType  string          `json:"capturerType"`
-	TrackType     string          `json:"trackType"` // Make it so there is a defaultForTrackType thingy in sessionmanager
-	TrackSettings json.RawMessage `json:"trackSettings"`
+	ClientID              uint            `json:"clientID"`
+	ProviderKey           string          `json:"providerKey"`
+	TrackID               string          `json:"trackID"`
+	CapturerType          string          `json:"capturerType"`
+	TrackType             string          `json:"trackType"` // Make it so there is a defaultForTrackType thingy in sessionmanager
+	TrackSettings         json.RawMessage `json:"trackSettings"`
+	IsConnectedToProvider bool            `json:"isConnectedToProvider"`
 }
 
 type ProviderMessage struct {
@@ -75,9 +76,9 @@ func NewClientConnection(parent *SessionManager, clientID uint, authKey string) 
 		AuthKey:           authKey,
 		config:            map[string]interface{}{},
 		Status:            ClientStatusCreated,
-		RemoteClients:     map[uint]RemoteClient{},
-		SenderVideoTracks: map[string]ClientTrackInfo{}, // TrackID here has to be global unique i.e., clientID + trackID from client
-		SenderAudioTracks: map[string]ClientTrackInfo{},
+		RemoteClients:     map[uint]*RemoteClient{},
+		SenderVideoTracks: map[string]*ClientTrackInfo{}, // TrackID here has to be global unique i.e., clientID + trackID from client
+		SenderAudioTracks: map[string]*ClientTrackInfo{},
 		mut:               sync.Mutex{},
 	}
 	Log(NameClient, Created, true, true)
@@ -91,14 +92,15 @@ type ClientFullyConnectedMessage struct {
 
 type RemoteClient struct {
 	ClientID    uint
-	VideoTracks map[string]ClientTrackInfo
-	AudioTracks map[string]ClientTrackInfo
+	VideoTracks map[string]*ClientTrackInfo
+	AudioTracks map[string]*ClientTrackInfo
 }
 
 type RemoteClientSimple struct {
-	ClientID    uint              `json:"clientID"`
-	VideoTracks []ClientTrackInfo `json:"videoTracks"`
-	AudioTracks []ClientTrackInfo `json:"audioTracks"`
+	ProviderKey string        `json:"providerKey"`
+	ClientID    uint          `json:"clientID"`
+	VideoTracks []TrackSimple `json:"videoTracks"`
+	AudioTracks []TrackSimple `json:"audioTracks"`
 }
 
 func (clc *ClientConnection) SetupClient(ws *ThreadSafeWebsocket) {
@@ -124,8 +126,12 @@ type RemoteClientMessage struct {
 func (clc *ClientConnection) AddRemoteClient(remoteClient *ClientConnection) {
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
+	clc.AddRemoteClientUnsafe(remoteClient)
+}
+
+func (clc *ClientConnection) AddRemoteClientUnsafe(remoteClient *ClientConnection) {
 	// TODO Maybe filter out some tracks based on preferences?
-	clc.RemoteClients[remoteClient.ClientID] = RemoteClient{
+	clc.RemoteClients[remoteClient.ClientID] = &RemoteClient{
 		ClientID:    remoteClient.ClientID,
 		VideoTracks: remoteClient.SenderVideoTracks,
 		AudioTracks: remoteClient.SenderAudioTracks,
@@ -133,11 +139,11 @@ func (clc *ClientConnection) AddRemoteClient(remoteClient *ClientConnection) {
 	// Inform client of this new remote client
 	videoTracks := make([]ClientTrackInfo, 0, len(remoteClient.SenderVideoTracks))
 	for _, t := range remoteClient.SenderVideoTracks {
-		videoTracks = append(videoTracks, t)
+		videoTracks = append(videoTracks, *t)
 	}
 	audioTracks := make([]ClientTrackInfo, 0, len(remoteClient.SenderAudioTracks))
 	for _, t := range remoteClient.SenderAudioTracks {
-		audioTracks = append(audioTracks, t)
+		audioTracks = append(audioTracks, *t)
 	}
 	rmMsg := RemoteClientMessage{
 		ClientID:    remoteClient.ClientID,
@@ -188,14 +194,16 @@ func (clc *ClientConnection) handleJoinMessage(payload json.RawMessage) {
 		provider := &msg.Providers[i]
 		pc := clc.parent.CreateProvider(provider.ProviderType, provider.ProviderKey, "", 0) // TODO Fix port + address
 		if pc == nil {
+
 			continue
 			// TODO Log invalid provider
 		}
 		for i := range provider.VideoTracks {
-			track := &provider.VideoTracks[i]
+			track := provider.VideoTracks[i]
 			track.ProviderKey = provider.ProviderKey
 			track.TrackID = fmt.Sprintf("cl%d_%s", clc.ClientID, track.TrackID) // Make trackID globally unique
-			clc.SenderVideoTracks[track.TrackID] = *track
+			provider.VideoTracks[i] = track
+			clc.SenderVideoTracks[track.TrackID] = &track
 		}
 		validProviderConnections[provider.ProviderKey] = pc
 		validProviders = append(validProviders, *provider)
@@ -207,11 +215,52 @@ func (clc *ClientConnection) handleJoinMessage(payload json.RawMessage) {
 		Providers:       validProviders, // TODO Filter this out
 	}
 	clc.websocket.WriteJSONMessageSafe("SessionJoined", clientMsg)
-
+	// Add remote clients to new client
+	println("sddsdssddsdsds")
+	for _, clOther := range clc.parent.clients {
+		if clOther.ClientID == clc.ClientID {
+			continue
+		}
+		clOther.AddRemoteClient(clc)
+		clc.AddRemoteClientUnsafe(clOther)
+	}
+	println("sddsdssdds")
 	for i := range validProviders {
 		validProviderMessage := &validProviders[i]
 		pc := validProviderConnections[validProviderMessage.ProviderKey]
-		pc.AddNewClient(clc.ClientID, clc.AuthKey, validProviderMessage.VideoTracks, validProviderMessage.AudioTracks)
+
+		videoTrackPtrs := make([]*ClientTrackInfo, len(validProviderMessage.VideoTracks))
+		for j := range validProviderMessage.VideoTracks {
+			videoTrackPtrs[j] = &validProviderMessage.VideoTracks[j]
+		}
+		audioTrackPtrs := make([]*ClientTrackInfo, len(validProviderMessage.AudioTracks))
+		for j := range validProviderMessage.AudioTracks {
+			audioTrackPtrs[j] = &validProviderMessage.AudioTracks[j]
+		}
+
+		pc.AddNewClient(clc.ClientID, clc.AuthKey, videoTrackPtrs, audioTrackPtrs)
+	}
+
+}
+
+func (clc *ClientConnection) SetTracksToConnected(clientID uint, videoTracks []TrackSimple, audioTracks []TrackSimple) {
+	clc.mut.Lock()
+	defer clc.mut.Unlock()
+
+	for _, t := range videoTracks {
+		track, exists := clc.SenderVideoTracks[t.TrackID]
+		if !exists {
+			continue
+		}
+		track.IsConnectedToProvider = true
+	}
+
+	for _, t := range audioTracks {
+		track, exists := clc.SenderAudioTracks[t.TrackID]
+		if !exists {
+			continue
+		}
+		track.IsConnectedToProvider = true
 	}
 
 }

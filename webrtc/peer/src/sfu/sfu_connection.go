@@ -1,7 +1,7 @@
 // Hold tracks per SFU / send and receive
 // Create when sending to session manager
 // Set status to ready when receiving AddedToProvider message
-package main
+package sfu
 
 import (
 	"bytes"
@@ -13,6 +13,13 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"goweb/peer/src/logger"
+	"goweb/peer/src/packet"
+	"goweb/peer/src/session_manager"
+	"goweb/peer/src/tracks/audio"
+	"goweb/peer/src/tracks/point_cloud"
+	"goweb/peer/src/utils"
 
 	"github.com/gorilla/websocket"
 	"github.com/pion/interceptor"
@@ -36,17 +43,17 @@ type SFUConnection struct {
 	peerConnection          *webrtc.PeerConnection
 	pendingCandidates       []*webrtc.ICECandidate
 	pendingCandidatesString []string
-	transcoder              Transcoder
+	transcoder              utils.Transcoder
 
-	websocket *ThreadSafeWebsocket
+	websocket *utils.ThreadSafeWebsocket
 	mut       sync.Mutex
 }
 
 type WebRTCAudioTrack struct {
-	track *TrackLocalAudioRTP
+	track *audio.TrackLocalAudioRTP
 }
 
-func NewWebRTCAudioTrack(track *TrackLocalAudioRTP) *WebRTCAudioTrack {
+func NewWebRTCAudioTrack(track *audio.TrackLocalAudioRTP) *WebRTCAudioTrack {
 	t := &WebRTCAudioTrack{
 		track: track,
 	}
@@ -60,11 +67,11 @@ func (t *WebRTCAudioTrack) StartSending() {
 }
 
 type WebRTCVideoTrack struct {
-	track      *TrackLocalCloudRTP
-	transcoder Transcoder
+	track      *point_cloud.TrackLocalCloudRTP
+	transcoder utils.Transcoder
 }
 
-func NewWebRTCVideoTrack(track *TrackLocalCloudRTP, transcoder Transcoder) *WebRTCVideoTrack {
+func NewWebRTCVideoTrack(track *point_cloud.TrackLocalCloudRTP, transcoder utils.Transcoder) *WebRTCVideoTrack {
 	t := &WebRTCVideoTrack{
 		track:      track,
 		transcoder: transcoder,
@@ -75,19 +82,22 @@ func NewWebRTCVideoTrack(track *TrackLocalCloudRTP, transcoder Transcoder) *WebR
 func (t *WebRTCVideoTrack) StartSending() {
 
 	go func() {
+		println("START SENDING")
 		frameNr := 0
 		for {
+			//	println("START", time.Now().UnixMilli(), frameNr)
 			if err := t.track.WriteFrame(t.transcoder, frameNr); err != nil {
 				panic(err)
 			}
+			//	println("END", time.Now().UnixMilli(), frameNr)
 			// TODO Log the sending
 			frameNr++
 		}
 	}()
 }
 
-func NewSFUConnection(providerKey string, videoTracks []ClientTrackInfo, audioTracks []ClientTrackInfo, transcoder Transcoder) *SFUConnection {
-	LogWithMessage(NameSFUConnection, CreatingProvider, true, true, fmt.Sprintf("providerKey=%s", providerKey))
+func NewSFUConnection(providerKey string, videoTracks []session_manager.TrackSimple, audioTracks []session_manager.TrackSimple, transcoder utils.Transcoder) *SFUConnection {
+	logger.LogWithMessage(NameSFUConnection, logger.CreatingProvider, true, true, fmt.Sprintf("providerKey=%s", providerKey))
 	sfu := &SFUConnection{
 		providerKey:             providerKey,
 		senderVideoTracks:       map[string]*WebRTCVideoTrack{},
@@ -103,14 +113,14 @@ func NewSFUConnection(providerKey string, videoTracks []ClientTrackInfo, audioTr
 	for _, track := range audioTracks {
 		sfu.AddAudioTrack(track.TrackID)
 	}
-	LogWithMessage(NameSFUConnection, CreatedProvider, true, true, fmt.Sprintf("providerKey=%s", providerKey))
+	logger.LogWithMessage(NameSFUConnection, logger.CreatedProvider, true, true, fmt.Sprintf("providerKey=%s", providerKey))
 	return sfu
 }
 
 func (s *SFUConnection) OnFullyConnected(clientID uint, authKey string, address string, port uint) {
 	s.mut.Lock()
 	defer s.mut.Unlock()
-	LogWithMessage(NameSFUConnection, ClientAddedToProvider, true, true,
+	logger.LogWithMessage(NameSFUConnection, logger.ClientAddedToProvider, true, true,
 		fmt.Sprintf("providerKey=%s", s.providerKey),
 	)
 	s.IsReady = true
@@ -118,6 +128,21 @@ func (s *SFUConnection) OnFullyConnected(clientID uint, authKey string, address 
 	s.Port = port
 	s.preparePeerConnection()
 	s.connectToSFU(clientID, authKey)
+}
+
+type SubscribeToRemoteClientsMessage struct {
+	Clients []session_manager.RemoteClientSimple `json:"clients"`
+}
+
+func (s *SFUConnection) SubscribeToRemoteClientTracks(clients []session_manager.RemoteClientSimple) {
+	s.mut.Lock()
+	defer s.mut.Unlock()
+	if len(clients) == 0 {
+		return
+	}
+	s.websocket.WriteJSONMessageSafe("SubscribeToRemoteClientsMessage", SubscribeToRemoteClientsMessage{
+		Clients: clients,
+	})
 }
 
 func (s *SFUConnection) connectToSFU(clientID uint, authKey string) {
@@ -133,7 +158,7 @@ func (s *SFUConnection) connectToSFU(clientID uint, authKey string) {
 		fmt.Printf("WebRTCPeer: NewWSHandler: ERROR: %s\n", err)
 		panic(err)
 	}
-	s.websocket = &ThreadSafeWebsocket{
+	s.websocket = &utils.ThreadSafeWebsocket{
 		conn, sync.Mutex{},
 	}
 	s.startListening()
@@ -238,13 +263,13 @@ func (s *SFUConnection) preparePeerConnection() {
 func (s *SFUConnection) startListening() {
 	go func() {
 		for {
-			var msg ClientMessage
+			var msg utils.ClientMessage
 			if err := s.websocket.ReadJSON(&msg); err != nil {
 				fmt.Printf("SessionManager: webSocketHandler: ReadMessage: error %s\n", err.Error())
 				s.onClose()
 				break
 			}
-			LogWithMessage(NameManagerConnection, ReceivedWSMessage, true, true,
+			logger.LogWithMessage(NameSFUConnection, logger.ReceivedWSMessage, true, true,
 				fmt.Sprintf("origin=sfu providerKey=%s type=%s", s.providerKey, msg.MessageType),
 			)
 			switch msg.MessageType {
@@ -285,21 +310,7 @@ func (s *SFUConnection) addOnTrackCallback() {
 		fmt.Printf("WebRTCPeer: MIME type %s\n", track.Codec().MimeType)
 		fmt.Printf("WebRTCPeer: Payload type %d\n", track.PayloadType())
 		fmt.Printf("WebRTCPeer: Track SSRC %d\n", track.SSRC())
-		trackIsAllowed := false
-		s.mut.Lock()
-		if track.Kind() == webrtc.RTPCodecTypeVideo {
-			if _, exists := s.receiverVideoTracks[track.ID()]; exists {
-				trackIsAllowed = true
-			}
-		} else if track.Kind() == webrtc.RTPCodecTypeAudio {
-			if _, exists := s.receiverAudioTracks[track.ID()]; exists {
-				trackIsAllowed = true
-			}
-		}
-		s.mut.Unlock()
-		if !trackIsAllowed {
-			panic("oops")
-		}
+
 		/*if *useProxyInput {
 			proxyConn.SendTrackStatusPacket(uint32(clientID), 0, uint32(capturerID), uint32(trackID), isVideo, true)
 		}*/
@@ -333,7 +344,7 @@ func (s *SFUConnection) addOnTrackCallback() {
 				bufBinary := bytes.NewBuffer(buf[20:])
 
 				// Read the fields from the buffer into a struct
-				var p VideoFramePacket
+				var p packet.VideoFramePacket
 				err := binary.Read(bufBinary, binary.LittleEndian, &p)
 				if err != nil {
 					panic(err)
@@ -344,15 +355,15 @@ func (s *SFUConnection) addOnTrackCallback() {
 				frames[p.FrameNr] += p.SeqLen
 				if frames[p.FrameNr] == p.FrameLen && p.FrameNr%100 == 0 {
 					// Frame complete
-					fmt.Printf("WebRTCPeer: [VIDEO] Received video frame %d from client %d for camera %d and tile %d with length %d\n",
-						p.FrameNr, p.ClientNr, p.CapturerID, p.TileNr, p.FrameLen)
+					fmt.Printf("WebRTCPeer: [VIDEO] %s %d Received video frame %d from client %d for camera %d and tile %d with length %d\n",
+						track.ID(), time.Now().UnixMilli(), p.FrameNr, p.ClientNr, p.CapturerID, p.TileNr, p.FrameLen)
 				}
 
 			} else {
 				bufBinary := bytes.NewBuffer(buf[20:])
 
 				// Read the fields from the buffer into a struct
-				var p AudioFramePacket
+				var p packet.AudioFramePacket
 				err := binary.Read(bufBinary, binary.LittleEndian, &p)
 				if err != nil {
 					panic(err)
@@ -371,7 +382,7 @@ func (s *SFUConnection) addOnTrackCallback() {
 
 func (s *SFUConnection) addOnConnectionStatusChanged() {
 	s.peerConnection.OnConnectionStateChange(func(state webrtc.PeerConnectionState) {
-		LogWithMessage(NameSFUConnection, SFUClientConnectionChange, true, true,
+		logger.LogWithMessage(NameSFUConnection, logger.SFUClientConnectionChange, true, true,
 			fmt.Sprintf("providerKey=%s state=%s", s.providerKey, state.String()))
 		if state == webrtc.PeerConnectionStateFailed {
 			fmt.Println("WebRTCPeer: Peer connection failed, exiting")
@@ -398,7 +409,7 @@ func (s *SFUConnection) handleOfferMessage(payload json.RawMessage) {
 	if err != nil {
 		panic(err)
 	}
-
+	fmt.Printf("%+v\n", offer)
 	err = s.peerConnection.SetRemoteDescription(offer)
 	if err != nil {
 		panic(err)
@@ -471,7 +482,7 @@ func (s *SFUConnection) AddAudioTrack(trackID string) {
 		SDPFmtpLine:  "",
 		RTCPFeedback: nil,
 	}
-	audioTrack, err := NewTrackLocalAudioRTP(audioCodecCapability, trackID, trackID)
+	audioTrack, err := audio.NewTrackLocalAudioRTP(audioCodecCapability, trackID, trackID)
 	if err != nil {
 		panic(err)
 	}
@@ -496,7 +507,7 @@ func (s *SFUConnection) AddVideoTrack(trackID string) {
 		SDPFmtpLine:  "",
 		RTCPFeedback: videoRTCPFeedback,
 	}
-	videoTrack, err := NewTrackLocalCloudRTP(videoCodecCapability, trackID, trackID)
+	videoTrack, err := point_cloud.NewTrackLocalCloudRTP(videoCodecCapability, trackID, trackID)
 	if err != nil {
 		panic(err)
 	}
@@ -511,6 +522,7 @@ func (s *SFUConnection) addTrackToPeerConnection(track webrtc.TrackLocal) {
 	if rtpSender, err = s.peerConnection.AddTrack(track); err != nil {
 		panic(err)
 	}
+
 	go func() {
 		rtcpBuf := make([]byte, 1500)
 		for {

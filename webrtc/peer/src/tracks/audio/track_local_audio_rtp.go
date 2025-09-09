@@ -1,4 +1,4 @@
-package main
+package audio
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 // TrackLocalStaticRTP  is a TrackLocal that has a pre-set codec and accepts RTP Packets.
 // If you wish to send a media.Sample use TrackLocalStaticSample
-type TrackLocalCloudRTP struct {
+type TrackLocalAudioRTP struct {
 	packetizer rtp.Packetizer
 	sequencer  rtp.Sequencer
 	rtpTrack   *webrtc.TrackLocalStaticRTP
@@ -17,12 +17,12 @@ type TrackLocalCloudRTP struct {
 }
 
 // NewTrackLocalStaticSample returns a TrackLocalStaticSample
-func NewTrackLocalCloudRTP(c webrtc.RTPCodecCapability, id, streamID string, options ...func(*webrtc.TrackLocalStaticRTP)) (*TrackLocalCloudRTP, error) {
+func NewTrackLocalAudioRTP(c webrtc.RTPCodecCapability, id, streamID string, options ...func(*webrtc.TrackLocalStaticRTP)) (*TrackLocalAudioRTP, error) {
 	rtpTrack, err := webrtc.NewTrackLocalStaticRTP(c, id, streamID, options...)
 	if err != nil {
 		return nil, err
 	}
-	return &TrackLocalCloudRTP{
+	return &TrackLocalAudioRTP{
 		rtpTrack: rtpTrack,
 	}, nil
 }
@@ -30,7 +30,7 @@ func NewTrackLocalCloudRTP(c webrtc.RTPCodecCapability, id, streamID string, opt
 // Bind is called by the PeerConnection after negotiation is complete
 // This asserts that the code requested is supported by the remote peer.
 // If so it setups all the state (SSRC and PayloadType) to have a call
-func (s *TrackLocalCloudRTP) Bind(t webrtc.TrackLocalContext) (webrtc.RTPCodecParameters, error) {
+func (s *TrackLocalAudioRTP) Bind(t webrtc.TrackLocalContext) (webrtc.RTPCodecParameters, error) {
 	codec, err := s.rtpTrack.Bind(t)
 	if err != nil {
 		return codec, err
@@ -40,11 +40,12 @@ func (s *TrackLocalCloudRTP) Bind(t webrtc.TrackLocalContext) (webrtc.RTPCodecPa
 		return codec, nil
 	}
 	s.sequencer = rtp.NewRandomSequencer()
+
 	s.packetizer = rtp.NewPacketizer(
 		1200, // Not MTU but ok
 		0,    // Value is handled when writing
 		0,    // Value is handled when writing
-		NewPointCloudPayloader(),
+		NewAudioPayloader(),
 		s.sequencer,
 		codec.ClockRate,
 	)
@@ -54,40 +55,39 @@ func (s *TrackLocalCloudRTP) Bind(t webrtc.TrackLocalContext) (webrtc.RTPCodecPa
 
 // Unbind implements the teardown logic when the track is no longer needed. This happens
 // because a track has been stopped.
-func (s *TrackLocalCloudRTP) Unbind(t webrtc.TrackLocalContext) error {
+func (s *TrackLocalAudioRTP) Unbind(t webrtc.TrackLocalContext) error {
 	return s.rtpTrack.Unbind(t)
 }
 
 // ID is the unique identifier for this Track. This should be unique for the
 // stream, but doesn't have to globally unique. A common example would be 'audio' or 'video'
 // and StreamID would be 'desktop' or 'webcam'
-func (s *TrackLocalCloudRTP) ID() string { return s.rtpTrack.ID() }
+func (s *TrackLocalAudioRTP) ID() string { return s.rtpTrack.ID() }
 
 // StreamID is the group this track belongs too. This must be unique
-func (s *TrackLocalCloudRTP) StreamID() string { return s.rtpTrack.StreamID() }
+func (s *TrackLocalAudioRTP) StreamID() string { return s.rtpTrack.StreamID() }
 
 // RID is the RTP stream identifier
-func (s *TrackLocalCloudRTP) RID() string { return s.rtpTrack.RID() }
+func (s *TrackLocalAudioRTP) RID() string { return s.rtpTrack.RID() }
 
 // Kind controls if this TrackLocal is audio or video
-func (s *TrackLocalCloudRTP) Kind() webrtc.RTPCodecType { return s.rtpTrack.Kind() }
+func (s *TrackLocalAudioRTP) Kind() webrtc.RTPCodecType { return s.rtpTrack.Kind() }
 
 // Codec gets the Codec of the track
-func (s *TrackLocalCloudRTP) Codec() webrtc.RTPCodecCapability {
+func (s *TrackLocalAudioRTP) Codec() webrtc.RTPCodecCapability {
 	return s.rtpTrack.Codec()
 }
 
-func (s *TrackLocalCloudRTP) WriteFrame(t Transcoder, frameNr int) error {
+func (s *TrackLocalAudioRTP) WriteAudioFrame(audio []byte) error {
 	p := s.packetizer
 	clockRate := s.clockRate
 	if p == nil {
 		return nil
 	}
 	samples := uint32(1 * clockRate)
-	data := t.EncodeFrame(s.ID())
 
-	if data != nil {
-		packets := p.Packetize(data, samples)
+	if audio != nil {
+		packets := p.Packetize(audio, samples)
 		counter := 0
 		for _, p := range packets {
 

@@ -8,11 +8,42 @@ import (
 
 const NameProvider = "ProviderConnection"
 
+type ProviderTrackSimple struct {
+	TrackID     string
+	IsConnected bool
+}
+
+type ProviderClient struct {
+	ClientID    uint
+	VideoTracks map[string]*ProviderTrackSimple
+	AudioTracks map[string]*ProviderTrackSimple
+}
+
+func (pc *ProviderClient) GetConnectedVideoTracks() []TrackSimple {
+	var connectedTracks []TrackSimple
+	for _, track := range pc.VideoTracks {
+		if track.IsConnected {
+			connectedTracks = append(connectedTracks, TrackSimple{TrackID: track.TrackID, IsConnected: true})
+		}
+	}
+	return connectedTracks
+}
+
+func (pc *ProviderClient) GetConnectedAudioTracks() []TrackSimple {
+	var connectedTracks []TrackSimple
+	for _, track := range pc.AudioTracks {
+		if track.IsConnected {
+			connectedTracks = append(connectedTracks, TrackSimple{TrackID: track.TrackID, IsConnected: true})
+		}
+	}
+	return connectedTracks
+}
+
 type ProviderNewClient struct {
 	ClientID    uint
 	AuthKey     string
-	VideoTracks []ClientTrackInfo
-	AudioTracks []ClientTrackInfo
+	VideoTracks []*ClientTrackInfo
+	AudioTracks []*ClientTrackInfo
 }
 
 type ProviderConnection struct {
@@ -23,15 +54,14 @@ type ProviderConnection struct {
 	AuthKey         string
 	websocket       *ThreadSafeWebsocket
 	config          map[string]interface{}
-	videoTracks     map[string]ClientTrackInfo
-	audioTracks     map[string]ClientTrackInfo
+	Clients         map[uint]*ProviderClient
 	IsReady         bool
 	newClientBuffer []ProviderNewClient
 	mut             sync.Mutex
 }
 
 func NewProviderConnection(parent *SessionManager, providerKey string, address string, port uint, authKey string, config map[string]interface{}) *ProviderConnection {
-	Log(NameProvider, Creating, true, true)
+	LogWithMessage(NameProvider, Creating, true, true, fmt.Sprintf("providerKey=%s", providerKey))
 	pro := &ProviderConnection{
 		parent:          parent,
 		ProviderKey:     providerKey,
@@ -39,8 +69,7 @@ func NewProviderConnection(parent *SessionManager, providerKey string, address s
 		Port:            port,
 		AuthKey:         authKey,
 		config:          config,
-		videoTracks:     map[string]ClientTrackInfo{},
-		audioTracks:     map[string]ClientTrackInfo{},
+		Clients:         map[uint]*ProviderClient{},
 		newClientBuffer: []ProviderNewClient{},
 		mut:             sync.Mutex{},
 	}
@@ -81,7 +110,8 @@ type ProviderNewClientMessage struct {
 }
 
 type TrackSimple struct {
-	TrackID string `json:"trackID"`
+	TrackID     string `json:"trackID"`
+	IsConnected bool   `json:"isConnected"`
 }
 
 type ProviderClientAddedMessage struct {
@@ -97,11 +127,12 @@ type ClientAddedToProviderMessage struct {
 	Address           string                 `json:"address"`
 	Port              uint                   `json:"port"`
 	Config            map[string]interface{} `json:"config"`
-	SenderVideoTracks []ClientTrackInfo      `json:"senderVideoTracks"`
-	SenderAudioTracks []ClientTrackInfo      `json:"senderAudioTracks"`
+	SenderVideoTracks []TrackSimple          `json:"senderVideoTracks"`
+	SenderAudioTracks []TrackSimple          `json:"senderAudioTracks"`
+	RemoteClients     []RemoteClientSimple   `json:"remoteClients"`
 }
 
-func (clc *ProviderConnection) AddNewClient(clientID uint, authKey string, videoTracks []ClientTrackInfo, audioTracks []ClientTrackInfo) { // TODO Maybe add auth key
+func (clc *ProviderConnection) AddNewClient(clientID uint, authKey string, videoTracks []*ClientTrackInfo, audioTracks []*ClientTrackInfo) { // TODO Maybe add auth key
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
 
@@ -118,7 +149,7 @@ func (clc *ProviderConnection) AddNewClient(clientID uint, authKey string, video
 	clc._addNewClient(clientID, authKey, videoTracks, audioTracks)
 }
 
-func (pc *ProviderConnection) _addNewClient(clientID uint, authKey string, videoTracks []ClientTrackInfo, audioTracks []ClientTrackInfo) {
+func (pc *ProviderConnection) _addNewClient(clientID uint, authKey string, videoTracks []*ClientTrackInfo, audioTracks []*ClientTrackInfo) {
 	LogWithMessage(NameProvider, AddingClientToProvider, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, clientID))
 	msgContent := ProviderNewClientMessage{
 		ClientID:          clientID,
@@ -126,13 +157,25 @@ func (pc *ProviderConnection) _addNewClient(clientID uint, authKey string, video
 		SenderVideoTracks: []ClientTrackInfo{},
 		SenderAudioTracks: []ClientTrackInfo{},
 	}
+	client := &ProviderClient{
+		ClientID:    clientID,
+		VideoTracks: map[string]*ProviderTrackSimple{},
+		AudioTracks: map[string]*ProviderTrackSimple{},
+	}
+	pc.Clients[clientID] = client
 	for _, track := range videoTracks {
-		pc.videoTracks[track.TrackID] = track
-		msgContent.SenderVideoTracks = append(msgContent.SenderVideoTracks, track)
+		client.VideoTracks[track.TrackID] = &ProviderTrackSimple{
+			TrackID:     track.TrackID,
+			IsConnected: false,
+		}
+		msgContent.SenderVideoTracks = append(msgContent.SenderVideoTracks, *track)
 	}
 	for _, track := range audioTracks {
-		pc.audioTracks[track.TrackID] = track
-		msgContent.SenderAudioTracks = append(msgContent.SenderAudioTracks, track)
+		client.AudioTracks[track.TrackID] = &ProviderTrackSimple{
+			TrackID:     track.TrackID,
+			IsConnected: false,
+		}
+		msgContent.SenderAudioTracks = append(msgContent.SenderAudioTracks, *track)
 	}
 	msgBytes, err := json.Marshal(msgContent)
 	if err != nil {
@@ -165,14 +208,22 @@ func (clc *ProviderConnection) startListening() {
 	}()
 }
 
-func (clc *ProviderConnection) handleClientAdded(payload json.RawMessage) {
+type ProviderTracksConnectedMessage struct {
+	ProviderKey string        `json:"providerKey"`
+	ClientID    uint          `json:"clientID"`
+	VideoTracks []TrackSimple `json:"videoTracks"`
+	AudioTracks []TrackSimple `json:"audioTracks"`
+}
+
+func (pc *ProviderConnection) handleClientAdded(payload json.RawMessage) {
 	var msg ProviderClientAddedMessage
 	if err := json.Unmarshal(payload, &msg); err != nil {
 		fmt.Printf("failed to unmarshal payload: %v\n", err)
 		return
 	}
 	fmt.Printf("Received ClientAddedMessage: %+v\n", msg)
-	clc.parent.OnClientAddedToProvider(clc, msg)
+	// Set ProviderClient Tracks to connected
+	pc.parent.OnClientAddedToProvider(pc, msg)
 }
 
 func (clc *ProviderConnection) onClose() {

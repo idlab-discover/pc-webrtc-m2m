@@ -33,13 +33,23 @@ type SessionManagerMessage struct {
 	Message     json.RawMessage `json:"message"`
 }
 
+type TrackSimple struct {
+	TrackID string `json:"trackID"`
+}
+
 type NewClientMessage struct {
-	ClientID            uint            `json:"clientID"`
-	AuthKey             string          `json:"authKey"`
-	SenderVideoTracks   []SenderTrack   `json:"senderVideoTracks"`
-	ReceiverVideoTracks []ReceiverTrack `json:"receiverVideoTracks"`
-	SenderAudioTracks   []SenderTrack   `json:"senderAudioTracks"`
-	ReceiverAudioTracks []ReceiverTrack `json:"receiverAudioTracks"`
+	ClientID          uint          `json:"clientID"`
+	AuthKey           string        `json:"authKey"`
+	SenderVideoTracks []SenderTrack `json:"senderVideoTracks"`
+
+	SenderAudioTracks []SenderTrack  `json:"senderAudioTracks"`
+	RemoteClients     []RemoteClient `json:"remoteClients"`
+}
+
+type RemoteClient struct {
+	ClientID            uint          `json:"clientID"`
+	ReceiverAudioTracks []TrackSimple `json:"receiverAudioTracks"`
+	ReceiverVideoTracks []TrackSimple `json:"receiverVideoTracks"`
 }
 
 func NewSessionManagerConnection(managerIP string, providerKey string, authKey string, sfu *SFU) (*SessionManagerConnection, error) {

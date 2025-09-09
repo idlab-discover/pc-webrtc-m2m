@@ -1,4 +1,4 @@
-package main
+package session_manager
 
 import "encoding/json"
 

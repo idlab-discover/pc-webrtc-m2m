@@ -41,10 +41,10 @@ func NewSFU(address string, port uint) *SFU {
 func (sfu *SFU) AddClient(msg NewClientMessage) {
 	sfu.mut.Lock()
 	defer sfu.mut.Unlock()
-	client := NewClientConnection(msg.ClientID, msg.AuthKey, msg.SenderVideoTracks, msg.SenderAudioTracks)
+	client := NewClientConnection(sfu, msg.ClientID, msg.AuthKey, msg.SenderVideoTracks, msg.SenderAudioTracks)
 	client.SetupPeerConnection(&sfu.settings)
 	// This will need to be changed to do it based on ReceiverVideoTracksInstead
-	for _, otherC := range sfu.clients {
+	/*for _, otherC := range sfu.clients {
 		hasChanged := false
 		for _, t := range client.SenderVideoTracks {
 			otherC.AddTrackFromOther("client", client.clientID, t.TrackID, t.WebRTCTrack)
@@ -63,7 +63,7 @@ func (sfu *SFU) AddClient(msg NewClientMessage) {
 		for _, t := range otherC.SenderAudioTracks {
 			client.AddTrackFromOther("client", otherC.clientID, t.TrackID, t.WebRTCTrack)
 		}
-	}
+	}*/
 	sfu.clients[msg.ClientID] = client
 }
 

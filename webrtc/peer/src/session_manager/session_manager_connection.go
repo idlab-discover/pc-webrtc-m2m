@@ -1,4 +1,4 @@
-package main
+package session_manager
 
 import (
 	"encoding/json"
@@ -8,8 +8,18 @@ import (
 	"os"
 	"sync"
 
+	"goweb/peer/src/logger"
+	"goweb/peer/src/utils"
+
 	"github.com/gorilla/websocket"
 )
+
+type Provider interface {
+	OnFullyConnected(clientID uint, authKey string, address string, port uint)
+	SubscribeToRemoteClientTracks(clients []RemoteClientSimple)
+	// Add other methods needed by session_manager
+}
+type ProviderFactory func(providerKey string, videoTracks []TrackSimple, audioTracks []TrackSimple) Provider
 
 const NameManagerConnection = "SessionManagerConnection"
 
@@ -22,16 +32,17 @@ const (
 )
 
 type SessionManagerConnection struct {
-	managerIP     string
-	clientID      uint
-	authKey       string
-	providersPath string
-	providers     map[string]*SFUConnection
-	localClient   *ConnectedClient
-	remoteClient  map[uint]*ConnectedClient
-	transcoder    Transcoder
-	conn          *ThreadSafeWebsocket
-	mut           sync.Mutex
+	managerIP       string
+	clientID        uint
+	authKey         string
+	providersPath   string
+	providers       map[string]Provider
+	localClient     *ConnectedClient
+	remoteClient    map[uint]*ConnectedClient
+	transcoder      utils.Transcoder
+	conn            *utils.ThreadSafeWebsocket
+	providerFactory ProviderFactory
+	mut             sync.Mutex
 }
 
 type SessionManagerMessage struct {
@@ -39,13 +50,25 @@ type SessionManagerMessage struct {
 	Message     json.RawMessage `json:"message"`
 }
 
+type TrackSimple struct {
+	TrackID     string `json:"trackID"`
+	IsConnected bool   `json:"isConnected"`
+}
+
+type RemoteClientSimple struct {
+	ClientID    uint          `json:"clientID"`
+	VideoTracks []TrackSimple `json:"videoTracks"`
+	AudioTracks []TrackSimple `json:"audioTracks"`
+}
+
 type ClientAddedToProviderMessage struct {
 	ProviderKey       string                 `json:"providerKey"`
 	Address           string                 `json:"address"`
 	Port              uint                   `json:"port"`
 	Config            map[string]interface{} `json:"config"`
-	SenderVideoTracks []ClientTrackInfo      `json:"senderVideoTracks"`
-	SenderAudioTracks []ClientTrackInfo      `json:"senderAudioTracks"`
+	SenderVideoTracks []TrackSimple          `json:"senderVideoTracks"`
+	SenderAudioTracks []TrackSimple          `json:"senderAudioTracks"`
+	RemoteClients     []RemoteClientSimple   `json:"remoteClients"`
 }
 
 type JoinSessionMessage struct {
@@ -73,7 +96,7 @@ type ClientTrackInfo struct {
 
 type SenderTrackInfo struct {
 	ClientTrackInfo
-	providerConnection *SFUConnection
+	providerConnection Provider
 }
 
 // TODO Add function addSenderTrack
@@ -81,11 +104,11 @@ type SenderTrackInfo struct {
 
 type ReceiverTrackInfo struct {
 	ClientTrackInfo
-	providerConnection *SFUConnection
+	providerConnection Provider
 }
 
-func NewSessionManagerConnection(managerIP string, preferredClientID uint, providersPath string, transcoder Transcoder) (*SessionManagerConnection, error) {
-	LogWithMessage(NameManagerConnection, Creating, true, true, fmt.Sprintf("managerIP=%s preferredclientID=%d", managerIP, preferredClientID))
+func NewSessionManagerConnection(managerIP string, preferredClientID uint, providersPath string, transcoder utils.Transcoder, providerFactory ProviderFactory) (*SessionManagerConnection, error) {
+	logger.LogWithMessage(NameManagerConnection, logger.Creating, true, true, fmt.Sprintf("managerIP=%s preferredclientID=%d", managerIP, preferredClientID))
 	u := url.URL{
 		Scheme: "ws",
 		Host:   managerIP,
@@ -97,21 +120,22 @@ func NewSessionManagerConnection(managerIP string, preferredClientID uint, provi
 
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		Log(NameManagerConnection, Failed, true, true)
+		logger.Log(NameManagerConnection, logger.Failed, true, true)
 		return nil, fmt.Errorf("failed to connect to manager: %w", err)
 	}
 	smc := &SessionManagerConnection{
-		managerIP:     managerIP,
-		providersPath: providersPath,
-		providers:     map[string]*SFUConnection{},
-		remoteClient:  map[uint]*ConnectedClient{},
-		transcoder:    transcoder,
-		conn: &ThreadSafeWebsocket{
+		managerIP:       managerIP,
+		providersPath:   providersPath,
+		providers:       map[string]Provider{},
+		remoteClient:    map[uint]*ConnectedClient{},
+		transcoder:      transcoder,
+		providerFactory: providerFactory,
+		conn: &utils.ThreadSafeWebsocket{
 			conn, sync.Mutex{},
 		},
 		mut: sync.Mutex{},
 	}
-	Log(NameManagerConnection, Created, true, true)
+	logger.Log(NameManagerConnection, logger.Created, true, true)
 	return smc, nil
 }
 
@@ -123,7 +147,7 @@ func (smc *SessionManagerConnection) StartListening() {
 				// fmt.Errorf("error reading message: %w", err)
 				continue // TODO Handle errors
 			}
-			LogWithMessage(NameManagerConnection, ReceivedWSMessage, true, true,
+			logger.LogWithMessage(NameManagerConnection, logger.ReceivedWSMessage, true, true,
 				fmt.Sprintf("origin=manager type=%s", msg.MessageType),
 			)
 			switch msg.MessageType {
@@ -135,6 +159,8 @@ func (smc *SessionManagerConnection) StartListening() {
 				smc.handleClientAddedToProvider(msg.Message)
 			case "RemoteClientAdded":
 				smc.handleRemoteClientAdded(msg.Message)
+			case "ProviderRemoteClientTracksConnected":
+				smc.handleRemoteClientTracksConnected(msg.Message)
 			default:
 				// Unknown message type, ignore or log
 			}
@@ -154,7 +180,7 @@ func (smc *SessionManagerConnection) handleFullyConnected(payload json.RawMessag
 	smc.authKey = msg.AuthKey
 	smc.localClient = NewConnectedClient(smc.clientID)
 
-	LogWithMessage(NameManagerConnection, ClientConnectionComplete, true, true,
+	logger.LogWithMessage(NameManagerConnection, logger.ClientConnectionComplete, true, true,
 		fmt.Sprintf("clientID=%d authKey=%s", smc.clientID, smc.authKey),
 	)
 	// Send All tracks with requested providers
@@ -168,7 +194,7 @@ func (smc *SessionManagerConnection) handleSessionJoined(payload json.RawMessage
 		return
 	}
 	fmt.Printf("Received SessionJoined: %+v\n", msg)
-	LogWithMessage(NameManagerConnection, ClientSessionJoined, true, true,
+	logger.LogWithMessage(NameManagerConnection, logger.ClientSessionJoined, true, true,
 		fmt.Sprintf("codecMode=%s defaultProvider=%s nProviders=%d", msg.CodecMode, msg.DefaultProvider, len(msg.Providers)),
 	)
 	smc.localClient.SetTracksConnectionStatus(msg.CodecMode, msg.Providers, false)
@@ -183,11 +209,18 @@ func (smc *SessionManagerConnection) handleClientAddedToProvider(payload json.Ra
 	fmt.Printf("Received ClientAddedToProvider: %+v\n", msg)
 	smc.mut.Lock()
 	defer smc.mut.Unlock()
-	conn := NewSFUConnection(msg.ProviderKey, msg.SenderVideoTracks, msg.SenderAudioTracks, smc.transcoder)
+	// TODO maybe change this by using track info from client
+	// i.e. use trackID from message to collect real tracks from smc.localClient
+	conn := smc.providerFactory(msg.ProviderKey, msg.SenderVideoTracks, msg.SenderAudioTracks)
 	smc.providers[msg.ProviderKey] = conn
 
 	conn.OnFullyConnected(smc.clientID, smc.authKey, msg.Address, msg.Port)
 	smc.localClient.SetTracksAsConnected(msg.SenderVideoTracks, msg.SenderAudioTracks)
+	for _, rc := range msg.RemoteClients {
+		rClient := smc.remoteClient[rc.ClientID]
+		rClient.SetTracksAsConnected(rc.VideoTracks, rc.AudioTracks)
+	}
+	conn.SubscribeToRemoteClientTracks(msg.RemoteClients) // TODO Make sure this does not interfere with WebRTC negotiation
 }
 
 func (smc *SessionManagerConnection) handleRemoteClientAdded(payload json.RawMessage) {
@@ -201,13 +234,37 @@ func (smc *SessionManagerConnection) handleRemoteClientAdded(payload json.RawMes
 	remoteClient.AddVideoTracks(msg.VideoTracks)
 	remoteClient.AddAudioTracks(msg.AudioTracks)
 	smc.remoteClient[msg.ClientID] = remoteClient
-	LogWithMessage(NameManagerConnection, RemoteClientAdded, true, true,
+	logger.LogWithMessage(NameManagerConnection, logger.RemoteClientAdded, true, true,
 		fmt.Sprintf("clientID=%d", msg.ClientID),
 	)
 }
 
+type ProviderTracksConnectedMessage struct {
+	ProviderKey string        `json:"providerKey"`
+	ClientID    uint          `json:"clientID"`
+	VideoTracks []TrackSimple `json:"videoTracks"`
+	AudioTracks []TrackSimple `json:"audioTracks"`
+}
+
+func (smc *SessionManagerConnection) handleRemoteClientTracksConnected(payload json.RawMessage) {
+	var msg ProviderTracksConnectedMessage
+	if err := json.Unmarshal(payload, &msg); err != nil {
+		fmt.Printf("failed to unmarshal payload: %v\n", err)
+		return
+	}
+	fmt.Printf("Received TracksConnected: %+v\n", msg)
+	smc.mut.Lock()
+	defer smc.mut.Unlock()
+	smc.remoteClient[msg.ClientID].SetTracksAsConnected(msg.VideoTracks, msg.AudioTracks)
+	smc.providers[msg.ProviderKey].SubscribeToRemoteClientTracks([]RemoteClientSimple{{
+		ClientID:    msg.ClientID,
+		VideoTracks: msg.VideoTracks,
+		AudioTracks: msg.AudioTracks,
+	}})
+}
+
 func (smc *SessionManagerConnection) sendProviders() {
-	Log(NameManagerConnection, ClientSendingProviders, true, true)
+	logger.Log(NameManagerConnection, logger.ClientSendingProviders, true, true)
 	var providers JoinSessionMessage
 	file, err := os.Open(smc.providersPath)
 	if err != nil {

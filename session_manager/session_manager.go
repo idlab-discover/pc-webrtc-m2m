@@ -168,17 +168,18 @@ func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.
 			return
 		}
 		clientID = uint(clientID64)
-		clOld, exists := sm.clients[clientID]
-		if exists && clOld.Status != ClientStatusCreated {
-			Log(NameManager, ClientAlreadyExists, true, true)
-			http.Error(w, "ClientID already in use", http.StatusBadRequest)
-			sm.mut.Unlock()
-			return
-		} else {
-			clientID = sm.clientIDCounter
-			sm.clientIDCounter++
-		}
 	}
+	clOld, exists := sm.clients[clientID]
+	if exists && clOld.Status != ClientStatusCreated {
+		Log(NameManager, ClientAlreadyExists, true, true)
+		http.Error(w, "ClientID already in use", http.StatusBadRequest)
+		sm.mut.Unlock()
+		return
+	} else {
+		clientID = sm.clientIDCounter
+		sm.clientIDCounter++
+	}
+
 	authKey := ""
 	if sm.config.VerifyAuthKey {
 		authKey = sm.generateAuthKey() // TODO
@@ -204,6 +205,7 @@ func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.
 			unsafeWebSocketConn, sync.Mutex{},
 		},
 	)
+
 }
 
 func (sm *SessionManager) websocketHandlerReconnectClient(w http.ResponseWriter, r *http.Request) {
@@ -225,53 +227,55 @@ func (sm *SessionManager) OnProviderClose(pc *ProviderConnection) {
 func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedMsg ProviderClientAddedMessage) {
 	sm.mut.Lock()
 	defer sm.mut.Unlock()
+	pc.mut.Lock()
+	defer pc.mut.Unlock()
 	client, exists := sm.clients[addedMsg.ClientID]
 	if !exists {
 		// TODO Log
 		LogWithMessage(NameManager, InvalidClientID, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
 		return
 	}
-	// Convert track simple to actual track info
-	videoTracksToSend := []ClientTrackInfo{}
-	for _, track := range addedMsg.SenderVideoTracks {
-		var videoTrack ClientTrackInfo
-		println("Looking for track", track.TrackID)
-		if videoTrack, exists = client.SenderVideoTracks[track.TrackID]; !exists {
+	pcClient := pc.Clients[addedMsg.ClientID]
+	for _, t := range addedMsg.SenderVideoTracks {
+		pcClient.VideoTracks[t.TrackID].IsConnected = true
+	}
+	for _, t := range addedMsg.SenderAudioTracks {
+		pcClient.AudioTracks[t.TrackID].IsConnected = true
+	}
+	msgAllClients := &ProviderTracksConnectedMessage{
+		ProviderKey: pc.ProviderKey,
+		ClientID:    pcClient.ClientID,
+		VideoTracks: pcClient.GetConnectedVideoTracks(),
+		AudioTracks: pcClient.GetConnectedAudioTracks(),
+	}
+
+	// Inform remote clients that they can now subscribe to these tracks properly
+	msgRemoteClients := []RemoteClientSimple{}
+	for pcOtherID, pcOtherClient := range pc.Clients {
+		if pcOtherID == client.ClientID {
 			continue
 		}
-		videoTracksToSend = append(videoTracksToSend, videoTrack)
+		otherC := sm.clients[pcOtherID]
+		otherC.websocket.WriteJSONMessageSafe("ProviderRemoteClientTracksConnected", msgAllClients)
+		msgRemoteClients = append(msgRemoteClients, RemoteClientSimple{
+			ProviderKey: pc.ProviderKey,
+			ClientID:    pcOtherID,
+			VideoTracks: pcOtherClient.GetConnectedVideoTracks(),
+			AudioTracks: pcOtherClient.GetConnectedAudioTracks(),
+		})
 	}
-	audioTracksToSend := []ClientTrackInfo{}
-	for _, track := range addedMsg.SenderAudioTracks {
-		var audioTrack ClientTrackInfo
-		if audioTrack, exists = client.SenderAudioTracks[track.TrackID]; !exists {
-			continue
-		}
-		audioTracksToSend = append(audioTracksToSend, audioTrack)
-	}
-	// Also add remote
+
 	msgToClient := ClientAddedToProviderMessage{
 		ProviderKey:       pc.ProviderKey,
 		Address:           pc.Address,
 		Port:              pc.Port,
 		Config:            pc.config,
-		SenderVideoTracks: videoTracksToSend,
-		SenderAudioTracks: audioTracksToSend,
+		SenderVideoTracks: addedMsg.SenderVideoTracks,
+		SenderAudioTracks: addedMsg.SenderAudioTracks,
+		RemoteClients:     msgRemoteClients,
 	}
+	client.websocket.WriteJSONMessageSafe("ClientAddedToProvider", msgToClient)
 
-	msgBytes, err := json.Marshal(msgToClient)
-	if err != nil {
-		// TODO Log error
-		fmt.Printf("WebRTCSFU: webSocketHandler: OnClientAddedToProvider: ERROR: %s\n", err)
-		return
-	}
-	// TODO Inform other clients that they now can listen to these tracks
-	// Also send information about provider to it
-	msg := ClientMessage{
-		MessageType: "ClientAddedToProvider",
-		Message:     json.RawMessage(msgBytes),
-	}
-	client.websocket.WriteJSONSafe(msg)
 	LogWithMessage(NameManager, ClientAddedToProvider, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
 }
 

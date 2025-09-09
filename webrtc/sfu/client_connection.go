@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/pion/interceptor"
 	"github.com/pion/interceptor/pkg/cc"
@@ -18,7 +17,7 @@ const NameClientConnection = "ClientConnection"
 type SenderTrack struct {
 	TrackID      string `json:"trackID"`
 	trackBitrate *TrackBitrate
-	WebRTCTrack  webrtc.TrackLocal
+	WebRTCTrack  *webrtc.TrackLocalStaticRTP
 }
 
 type ReceiverTrack struct {
@@ -26,7 +25,7 @@ type ReceiverTrack struct {
 	OriginType               string `json:"originType"` // User, SFU etc...
 	OriginID                 uint   `json:"originID"`   // userID, SFU_ID etc...
 	SenderTrackID            string `json:"senderTrackID"`
-	CorrespondingSenderTrack webrtc.TrackLocal
+	CorrespondingSenderTrack *webrtc.TrackLocalStaticRTP
 	RTPSender                *webrtc.RTPSender
 }
 
@@ -55,11 +54,14 @@ type TrackBitrate struct {
 }
 
 type ClientConnection struct {
+	parent         *SFU
 	NeedsUpdate    bool
+	IsNegotiating  bool
 	clientID       uint
 	authKey        string
 	peerConnection *webrtc.PeerConnection
-	websocket      *ThreadSafeWebsocket
+
+	websocket *ThreadSafeWebsocket
 
 	nActiveTracks       int
 	BandwidthEstimator  cc.BandwidthEstimator
@@ -81,7 +83,7 @@ type ClientCandidate struct {
 	Message string `json:"candidate"`
 }
 
-func NewClientConnection(clientID uint, authKey string,
+func NewClientConnection(parent *SFU, clientID uint, authKey string,
 	senderVideoTracks []SenderTrack,
 	senderAudioTracks []SenderTrack,
 ) *ClientConnection {
@@ -136,6 +138,7 @@ func NewClientConnection(clientID uint, authKey string,
 		}
 	}
 	cl := &ClientConnection{
+		parent:              parent,
 		clientID:            clientID,
 		authKey:             authKey,
 		SenderVideoTracks:   videoTracksMap,
@@ -237,6 +240,9 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 		//if t.Kind() == webrtc.RTPCodecTypeAudio {
 		//	return
 		//}
+
+		LogWithMessage(NameClientConnection, ClientOnTrackCalled, true, true,
+			fmt.Sprintf("clientID=%d trackID=%s streamID=%s", clc.clientID, t.ID(), t.StreamID()))
 		go func() {
 			rtcpBuf := make([]byte, 1500)
 			for {
@@ -263,12 +269,13 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 			counters: make([]uint32, 20),
 		}
 		senderTrack.trackBitrate = trackBitrate
+		trackLocal := senderTrack.WebRTCTrack
 		clc.mut.Unlock()
-		trackLocal := addTrack(t)
+
 		fmt.Printf("WebRTCSFU: OnTrack: Adding track %v\n", trackLocal.ID())
 
-		startTime := time.Now().UnixNano() // / int64(time.Millisecond)
-		prevBucket := int64(0)
+		//startTime := time.Now().UnixNano() // / int64(time.Millisecond)
+		//prevBucket := int64(0)
 		for {
 
 			buf := make([]byte, 15000)
@@ -278,7 +285,7 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 				break
 			}
 
-			if clc.gatherTrackStats && t.Kind() == webrtc.RTPCodecTypeVideo {
+			/*if clc.gatherTrackStats && t.Kind() == webrtc.RTPCodecTypeVideo {
 				nextTime := time.Now().UnixNano() //
 				nsDiff := nextTime - startTime
 				msBucket := nsDiff / int64(50*time.Millisecond)
@@ -292,68 +299,83 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 				}
 				trackBitrate.tempCounter += uint32(i)
 				prevBucket = msBucket
-			}
+			}*/
 
-			go func() {
-				if _, err = trackLocal.Write(buf[:i]); err != nil {
-					fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)
-				}
-			}()
+			//go func() {
+			if _, err = trackLocal.Write(buf[:i]); err != nil {
+				fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)
+			}
+			//}()
 
 		}
 	})
 }
 
-func (clc *ClientConnection) AddTrackFromOther(originType string, originID uint, trackID string, track webrtc.TrackLocal) {
+func (clc *ClientConnection) AddTrackFromOther(originType string, originID uint, trackID string, track *webrtc.TrackLocalStaticRTP) {
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
+	clc.AddTrackFromOtherUnsafe(originType, originID, trackID, track)
+
+}
+
+func (clc *ClientConnection) AddTrackFromOtherUnsafe(originType string, originID uint, trackID string, track *webrtc.TrackLocalStaticRTP) {
+	// No locking, must be called with caution
 	LogWithMessage(NameClientConnection, ClientAddingTrackFromOther, true, true,
 		fmt.Sprintf("clientID=%d originType=%s originID=%d trackID=%s",
 			clc.clientID, originType, originID, trackID))
 	// TODO Check if trackID appears from session manager track
-	var recvTrack *ReceiverTrack
-	var exists bool
+	recvTrack := &ReceiverTrack{
+		TrackID:    trackID,
+		OriginType: originType,
+		OriginID:   originID,
+	}
 	if track.Kind() == webrtc.RTPCodecTypeVideo {
-		recvTrack, exists = clc.ReceiverVideoTracks[trackID]
+		clc.ReceiverVideoTracks[trackID] = recvTrack
 	} else if track.Kind() == webrtc.RTPCodecTypeAudio {
-		recvTrack, exists = clc.ReceiverAudioTracks[trackID]
+		clc.ReceiverAudioTracks[trackID] = recvTrack
 	}
-	if !exists {
-		// TODO Error logging
-		return
-	}
-	if recvTrack.OriginType != originType || recvTrack.OriginID != originID {
-		// TODO Error logging
-		return
-	}
-
+	println("ADDING TRACK", track == nil)
+	fmt.Printf("TrackID=%s streamID=%s\n", track.ID(), track.StreamID())
 	rtpSender, err := clc.peerConnection.AddTrack(track)
+
 	if err != nil {
+		println("OOPSSS")
 		// TODO error handling
 		return
 	}
 	recvTrack.CorrespondingSenderTrack = track
 	recvTrack.RTPSender = rtpSender
+
 	go func() {
 		rtcpBuf := make([]byte, 1500)
 		for {
 			if _, _, err := rtpSender.Read(rtcpBuf); err != nil {
+				panic(err)
 				return
 			}
 		}
 		// TODO Handle track closure?
 	}()
-
+	println("track added")
 }
 
 func (clc *ClientConnection) SignalRenegotiation() {
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
-	clc.NeedsUpdate = true
+	clc.SignalRenegotiationUnsafe()
+}
+
+func (clc *ClientConnection) SignalRenegotiationUnsafe() {
+	LogWithMessage(NameClientConnection, ClientSignalRenegotiation, true, true, fmt.Sprintf("clientID=%d", clc.clientID))
+
 	if clc.websocket == nil {
 		return
 	}
-
+	if clc.IsNegotiating {
+		clc.NeedsUpdate = true
+		return
+	}
+	clc.IsNegotiating = true
 	offer, err := clc.peerConnection.CreateOffer(nil)
 	if err != nil {
 		panic(err)
@@ -362,6 +384,7 @@ func (clc *ClientConnection) SignalRenegotiation() {
 	if err = clc.peerConnection.SetLocalDescription(offer); err != nil {
 		panic(err)
 	}
+	//fmt.Printf("WebRTCSFU: webSocketHandler: SignalRenegotiation: Sending offer to clientID=%d %v+\n", clc.clientID, offer)
 	if err = clc.websocket.WriteJSONMessageSafe("OfferMessage", offer); err != nil {
 		panic(err)
 	}
@@ -384,6 +407,10 @@ func (clc *ClientConnection) startListening() {
 				clc.handleAnswerMessage(msg.Message)
 			case "CandidateMessage":
 				clc.handleCandidateMessage(msg.Message)
+			case "SubscribeToTracksMessage":
+				clc.handleSubscribeToTracksMessage(msg.Message)
+			case "SubscribeToRemoteClientsMessage":
+				clc.handleSubscribeToRemoteClientsMessage(msg.Message)
 				// answer
 				/*case 3:
 					answer := webrtc.SessionDescription{}
@@ -437,7 +464,8 @@ func (clc *ClientConnection) handleAnswerMessage(payload json.RawMessage) {
 		fmt.Printf("failed to unmarshal payload: %v\n", err)
 		return
 	}
-
+	clc.mut.Lock()
+	defer clc.mut.Unlock()
 	if err := clc.peerConnection.SetRemoteDescription(answer); err != nil {
 		panic(err)
 	}
@@ -446,6 +474,13 @@ func (clc *ClientConnection) handleAnswerMessage(payload json.RawMessage) {
 		if candidateErr := clc.peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: c}); candidateErr != nil {
 			panic(candidateErr)
 		}
+	}
+	clc.IsNegotiating = false
+	if clc.NeedsUpdate {
+		println("NEED RENEGGGGG")
+		clc.SignalRenegotiationUnsafe()
+	} else {
+		println("DONT NEED NEEG")
 	}
 }
 
@@ -466,6 +501,91 @@ func (clc *ClientConnection) handleCandidateMessage(payload json.RawMessage) {
 		}
 	}
 	println("Added candidate")
+}
+
+type SubscribeToTracksMessage struct {
+	ClientID    uint          `json:"clientID"`
+	VideoTracks []TrackSimple `json:"videoTracks"`
+	AudioTracks []TrackSimple `json:"audioTracks"`
+}
+
+func (clc *ClientConnection) handleSubscribeToTracksMessage(payload json.RawMessage) {
+	var msg SubscribeToTracksMessage
+	if err := json.Unmarshal(payload, &msg); err != nil {
+		fmt.Printf("failed to unmarshal payload: %v\n", err)
+		return
+	}
+	fmt.Printf("Received SubscribeToTracksMessage: %+v\n", msg)
+	clc.parent.mut.Lock()
+	defer clc.parent.mut.Unlock()
+	otherC := clc.parent.clients[msg.ClientID]
+	if otherC == nil {
+		fmt.Printf("WebRTCSFU: handleSubscribeToTracksMessage: No client with ID %d found\n", msg.ClientID)
+		return
+	}
+	clc.subscribeToTracks(msg, otherC)
+	clc.SignalRenegotiation()
+	// TODO
+	// Renegotiate SDP
+}
+
+type SubscribeToRemoteClientsMessage struct {
+	Clients []SubscribeToTracksMessage `json:"clients"`
+}
+
+func (clc *ClientConnection) handleSubscribeToRemoteClientsMessage(payload json.RawMessage) {
+	var msg SubscribeToRemoteClientsMessage
+	if err := json.Unmarshal(payload, &msg); err != nil {
+		fmt.Printf("failed to unmarshal payload: %v\n", err)
+		return
+	}
+	fmt.Printf("Received SubscribeToRemoteClientsMessage %d: %+v\n", clc.clientID, msg)
+	clc.parent.mut.Lock()
+	defer clc.parent.mut.Unlock()
+	for _, sub := range msg.Clients {
+		otherC := clc.parent.clients[sub.ClientID]
+		if otherC == nil {
+			fmt.Printf("WebRTCSFU: handleSubscribeToRemoteClientsMessage: No client with ID %d found\n", sub.ClientID)
+			return
+		}
+		clc.subscribeToTracks(sub, otherC)
+	}
+
+	fmt.Printf("WebRTCSFU: handleSubscribeToRemoteClientsMessage: Signaling renegotiation for clientID=%d\n", clc.clientID)
+	clc.SignalRenegotiation()
+
+	fmt.Printf("WebRTCSFU: handleSubscribeToRemoteClientsMessage: Signaling renegotiation done for clientID=%d\n", clc.clientID)
+	// TODO
+	// Renegotiate SDP
+}
+
+func (clc *ClientConnection) subscribeToTracks(subMessage SubscribeToTracksMessage, otherClient *ClientConnection) {
+	// Prevent deadlock CL_A locks CL_B, CL_B locks CL_A, CL_A waits to lock CL_A
+	if clc.clientID > otherClient.clientID {
+		clc.mut.Lock()
+		otherClient.mut.Lock()
+	} else {
+		otherClient.mut.Lock()
+		clc.mut.Lock()
+	}
+	defer clc.mut.Unlock()
+	defer otherClient.mut.Unlock()
+
+	for _, t := range subMessage.VideoTracks {
+		track, exists := otherClient.SenderVideoTracks[t.TrackID]
+		if !exists {
+			continue
+		}
+		clc.AddTrackFromOtherUnsafe("client", otherClient.clientID, t.TrackID, track.WebRTCTrack)
+	}
+	for _, t := range subMessage.AudioTracks {
+		track, exists := otherClient.SenderAudioTracks[t.TrackID]
+		if !exists {
+			continue
+		}
+		clc.AddTrackFromOtherUnsafe("client", otherClient.clientID, t.TrackID, track.WebRTCTrack)
+	}
+
 }
 
 func (clc *ClientConnection) updateCamInfo(data string) {
