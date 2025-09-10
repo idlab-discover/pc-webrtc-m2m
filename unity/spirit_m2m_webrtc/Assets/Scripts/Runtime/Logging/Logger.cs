@@ -106,6 +106,7 @@ public class Logger
         ClientTrackReceiverNull = 3009,
         ClientTrackReceiverInvalid = 3010,
         ClientTrackReceiverNotReady = 3011,
+        ClientTrackNotStarted = 3012,
 
         // TrackInfo Status
         GatheringTrackInfo = 4000,

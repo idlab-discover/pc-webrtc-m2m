@@ -46,7 +46,7 @@ public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
     // TODO move this to mdc encoder queue class
     private void OnDescriptionDoneCallback(EncodedMDCDescription desc)
     {
-        string trackID = $"mdc_0_{desc.Header.DescriptionNr}";
+        string trackID = $"cl{LocalClient.ClientID}_mdc_0_{desc.Header.DescriptionNr}";
         
         if (keepWorking)
         {

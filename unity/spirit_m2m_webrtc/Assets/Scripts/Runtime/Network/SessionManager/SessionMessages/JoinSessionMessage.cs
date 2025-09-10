@@ -7,5 +7,6 @@ using UnityEngine;
 public class JoinSessionMessage 
 {
     public uint preferredClientID;
+    public string codecMode;
     public List<ConnectionProviderMessage> providers = new();
 }

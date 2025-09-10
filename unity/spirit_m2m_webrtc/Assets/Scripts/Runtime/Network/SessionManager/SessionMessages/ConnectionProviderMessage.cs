@@ -21,10 +21,10 @@ using UnityEngine;
 [System.Serializable]
 public class ConnectionProviderMessage
 {
-    public string key;
-    public string type;
+    public string providerKey;
+    public string providerType;
     public JObject providerSettings;
-    public List<ReceivingTrackInfo> sendingTracks = new();
+    public List<ReceivingTrackInfo> videoTracks = new();
 
 }
 

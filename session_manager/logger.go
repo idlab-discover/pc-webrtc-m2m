@@ -47,6 +47,8 @@ const (
 	ProviderConfigReadDefaultStart uint = 4000
 	ProviderConfigReadDefaultEnd   uint = 4001
 
+	ReceivedWSMessage uint = 7000
+
 	CriticalFail uint = 9999
 )
 

@@ -48,6 +48,7 @@ type ProviderNewClient struct {
 
 type ProviderConnection struct {
 	parent          *SessionManager
+	ProviderType    string
 	ProviderKey     string
 	Address         string
 	Port            uint
@@ -60,10 +61,11 @@ type ProviderConnection struct {
 	mut             sync.Mutex
 }
 
-func NewProviderConnection(parent *SessionManager, providerKey string, address string, port uint, authKey string, config map[string]interface{}) *ProviderConnection {
+func NewProviderConnection(parent *SessionManager, providerType string, providerKey string, address string, port uint, authKey string, config map[string]interface{}) *ProviderConnection {
 	LogWithMessage(NameProvider, Creating, true, true, fmt.Sprintf("providerKey=%s", providerKey))
 	pro := &ProviderConnection{
 		parent:          parent,
+		ProviderType:    providerType,
 		ProviderKey:     providerKey,
 		Address:         address,
 		Port:            port,
@@ -123,6 +125,7 @@ type ProviderClientAddedMessage struct {
 }
 
 type ClientAddedToProviderMessage struct {
+	ProviderType      string                 `json:"providerType"`
 	ProviderKey       string                 `json:"providerKey"`
 	Address           string                 `json:"address"`
 	Port              uint                   `json:"port"`

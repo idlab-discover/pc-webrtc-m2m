@@ -9,7 +9,7 @@ public class ExternalWebRTCProvider : ConnectionProviderBase, ISenderSupported, 
     private Process peerProcess;
     public ExternalWebRTCProvider(string ID, JObject jsonSettings) : base(ID, jsonSettings)
     {
-        Logger.
+        //Logger.
         var settings = jsonSettings.ToObject<ExternalWebRTCSettings>();
       //  WebRTCInvoker.initialize("127.0.0.1", (uint)sessionInfo.peerUDPPort, "127.0.0.1", (uint)sessionInfo.peerUDPPort, 1, (uint)NDescriptions, (uint)ClientID, "1.0");
         

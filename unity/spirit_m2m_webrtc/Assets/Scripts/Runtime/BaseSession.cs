@@ -92,7 +92,7 @@ public class BaseSession : MonoBehaviour
             if (provConfig != null) {
                 foreach (var p in provConfig.providers)
                 {
-                    if (p.key == "default")
+                    if (p.providerKey == "default")
                     {
                         Debug.LogWarning("Provider with key 'default' is reserved, skipping");
                         continue;
@@ -100,12 +100,12 @@ public class BaseSession : MonoBehaviour
 
                     ConnectionProviderMessage provider = new()
                     {
-                        key = p.key,
-                        type = p.type,
+                        providerKey = p.providerKey,
+                        providerType = p.providerType,
                         providerSettings = p.providerSettings,
                     };
 
-                    foreach (var t in p.sendingTracks)
+                    foreach (var t in p.videoTracks)
                     {
                         if (!tracks.TryGetValue(t.trackID, out var track))
                         {
@@ -113,9 +113,9 @@ public class BaseSession : MonoBehaviour
                             continue;
                         }
                         trackHasPreferredProvider[t.trackID] = true;
-                        provider.sendingTracks.Add(new()
+                        provider.videoTracks.Add(new()
                         {
-                            providerKey = p.key,
+                            providerKey = p.providerKey,
                             trackID = track.trackID,
                             capturerType = sessionInfo.capturerName, /*TODO CHANGE THIS TO BE MORE DYNAMIC*/
                             trackType = track.mode,
@@ -123,9 +123,9 @@ public class BaseSession : MonoBehaviour
                         });
 
                     }
-                    if (provConfig.defaultProvider == p.key)
+                    if (provConfig.defaultProvider == p.providerKey)
                     {
-                        Debug.Log($"Setting {p.key} as default provider");
+                        Debug.Log($"Setting {p.providerKey} as default provider");
                         defaultProvider = provider;
                     }
                     message.providers.Add(provider);
@@ -137,8 +137,8 @@ public class BaseSession : MonoBehaviour
             {
                 defaultProvider = new()
                 {
-                    key = "default",
-                    type = "default",
+                    providerKey = "default",
+                    providerType = "default",
                 };
                 message.providers.Add(defaultProvider);
             }
@@ -147,9 +147,9 @@ public class BaseSession : MonoBehaviour
             {
                 if (!trackHasPreferredProvider[t.Key])
                 {
-                    defaultProvider.sendingTracks.Add(new()
+                    defaultProvider.videoTracks.Add(new()
                     {
-                        providerKey = defaultProvider.key,
+                        providerKey = defaultProvider.providerKey,
                         trackID = t.Value.trackID,
                         capturerType = sessionInfo.capturerName, /*TODO CHANGE THIS TO BE MORE DYNAMIC*/
                         trackType = t.Value.mode,
@@ -280,6 +280,7 @@ public class BaseSession : MonoBehaviour
     }
     void OnDestroy()
     {
+        sessionManager?.DisconnectFromSession();
         Logger.ForceFlush();
         if(Application.platform == RuntimePlatform.WindowsEditor)
         {

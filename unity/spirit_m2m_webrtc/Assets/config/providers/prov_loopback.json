@@ -1,0 +1,18 @@
+{
+    "defaultProvider": "loopback",
+    "providers": [
+        {
+            "key": "loopback",
+            "type": "loopback",
+            "providerSettings": {
+                "name": "Loopback Provider",
+                "description": "A loopback provider for testing purposes"
+            },
+            "videoTracks": [
+               {
+                    "trackID": "mdc_0_1"
+               } 
+            ]
+        }
+    ]
+}

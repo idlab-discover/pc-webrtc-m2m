@@ -50,18 +50,18 @@ public class LoopbackSessionManager : SessionManagerBase
         };
         ConnectionProviderMessage provMessage = new()
         {
-            key = "loopback",
-            type = "loopback",
+            providerKey = "loopback",
+            providerType = "loopback",
             providerSettings = new()
         };
 
         // Add all requested sending tracks to the loopback provider
         foreach(var p in joinMessage.providers)
         {
-            foreach(var t in p.sendingTracks)
+            foreach(var t in p.videoTracks)
             {
                 t.providerKey = "loopback";
-                provMessage.sendingTracks.Add(t);
+                provMessage.videoTracks.Add(t);
             }   
         }
         message.providers.Add(provMessage);

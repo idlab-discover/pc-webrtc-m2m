@@ -14,12 +14,12 @@ public class PipelineRemotePointcloudMDC : PipelineRemotePointcloudBase
         foreach (var track in tracks)
         {
             string[] tokens = track.Value.trackID.Split("_");
-            if(tokens.Length < 3)
+            if(tokens.Length < 4)
             {
                 Debug.LogError("Track ID does not contain enough tokens to identify capturer and description number.");
                 continue;
             }
-            if (tokens[0] != "mdc")
+            if (tokens[1] != "mdc")
             {
                 Debug.LogError("Track ID does not start with 'mdc'.");
                 continue;

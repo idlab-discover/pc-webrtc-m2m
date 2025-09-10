@@ -92,7 +92,7 @@ func (sm *SessionManager) CreateProvider(providerType string, providerKey string
 	if config == nil {
 		return nil
 	}
-	pc := NewProviderConnection(sm, providerKey, address, port, authKey, config.Settings)
+	pc := NewProviderConnection(sm, providerType, providerKey, address, port, authKey, config.Settings)
 	sm.providers[providerKey] = pc
 	sm.mut.Unlock()
 	sm.provisioner.CreateProvider(providerType, sm.config.Address, pc, config.ExtraCmdArgs)
@@ -266,6 +266,7 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 	}
 
 	msgToClient := ClientAddedToProviderMessage{
+		ProviderType:      pc.ProviderType,
 		ProviderKey:       pc.ProviderKey,
 		Address:           pc.Address,
 		Port:              pc.Port,

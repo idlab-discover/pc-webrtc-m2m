@@ -1,14 +1,14 @@
 {
-    "defaultProvider": "loopback",
+    "defaultProvider": "sfu_mdc",
     "providers": [
         {
-            "key": "loopback",
-            "type": "loopback",
+            "providerKey": "sfu_mdc",
+            "providerType": "webrtc_sfu",
             "providerSettings": {
-                "name": "Loopback Provider",
-                "description": "A loopback provider for testing purposes"
+                "name": "WebRTC SFU Provider",
+                "description": "A WebRTC SFU provider"
             },
-            "sendingTracks": [
+            "videoTracks": [
                {
                     "trackID": "mdc_0_1"
                } 

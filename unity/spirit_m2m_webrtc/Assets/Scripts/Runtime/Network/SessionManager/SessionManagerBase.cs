@@ -146,6 +146,11 @@ public class LocalConnectedClient : ConnectedClient<LocalTrackInfo>
         // TODDO probably do need to lock this tbh
         if (receivingTracks.TryGetValue(trackID, out var track))
         {
+            if(track.status == TrackStatus.NotStarted)
+            {
+                Logger.LogTrackStatus(NAME, Logger.Status.ClientTrackNotStarted, ClientID, trackID);
+                return 0;
+            }
             if (track.Sender == null)
             {
                 Logger.LogTrackStatus(NAME, Logger.Status.ClientTrackSenderNull, ClientID, trackID);
@@ -239,6 +244,7 @@ public abstract class SessionManagerBase
             return;
         }
          _ = prov.ConnectAsync();
+       
 
     }
     protected void onConnectionProviderRemoved(string key)
@@ -328,40 +334,39 @@ public abstract class SessionManagerBase
         Logger.LogStatus(NAME, Logger.Status.ManagerConnectionSuccess);
         OnConnectedToSessionManager?.Invoke();
     }
-    protected void onConnectedToSession(uint assignedClientID, string connectMessageJSON, string sessionInfo)
+    protected void onConnectedToSession(uint assignedClientID, SessionConnectionMessage connectionMessage, string sessionInfo)
     {
         Logger.LogStatus(NAME, Logger.Status.ManagerSessionJoined);
-        SessionConnectionMessage connectionMessage = SessionConnectionMessage.CreateFromJSON(connectMessageJSON);
         LocalClient = new LocalConnectedClient(assignedClientID, connectionMessage.codecMode);
 
         foreach (var p in connectionMessage.providers)
         {
-            onConnectionProviderRequested(p.type, p.key, p.providerSettings);
-            ConnectionProviderBase provider = ConnectionProviderRepository.GetProvider(p.key);
+            /*onConnectionProviderRequested(p.providerType, p.providerKey, p.providerSettings);
+            ConnectionProviderBase provider = ConnectionProviderRepository.GetProvider(p.providerKey);
             if (provider == null)
             {
-                Debug.LogWarning($"Provider {p.key} not found");
+                Debug.LogWarning($"Provider {p.providerKey} not found");
                 continue; // Provider not found, skip
             }
-            if (p.sendingTracks.Count > 0)
+            if (p.videoTracks.Count > 0)
             {
                 // Check if provider supports sending
                 if (provider is not ISenderSupported senderSupported)
                 {
-                    Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderSenderNotSupported, $"provider={p.key}");
+                    Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderSenderNotSupported, $"provider={p.providerKey}");
                     continue; // Provider does not support sending
                 }
-            }
-            foreach (var t in p.sendingTracks)
+            }*/
+            foreach (var t in p.videoTracks)
             {
                 LocalClient.AddVideoTrack(new LocalTrackInfo
                 {
-                    providerKey = p.key,
+                    providerKey = p.providerKey,
                     trackID = t.trackID,
                     capturerType = t.capturerType,
                     trackType = t.trackType,
                     trackSettings = t.trackSettings,
-                    Sender = (provider as ISenderSupported).GetSender(t)
+                    Sender = null /*(provider as ISenderSupported).GetSender(t)*/
                 });
             }
         }
@@ -371,6 +376,12 @@ public abstract class SessionManagerBase
         {
             onNewClientConnected(c); // TODO probably change this to JObject
         }
+    }
+    protected void onConnectedToSession(uint assignedClientID, string connectMessageJSON, string sessionInfo)
+    {
+       
+        SessionConnectionMessage connectionMessage = SessionConnectionMessage.CreateFromJSON(connectMessageJSON);
+        onConnectedToSession(assignedClientID, connectionMessage, sessionInfo);
     }
     protected void onSessionCreated(uint assignedClientID, string connectMessage, string sessionInfo)
     {

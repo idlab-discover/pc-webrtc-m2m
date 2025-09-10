@@ -162,7 +162,7 @@ func (clc *ClientConnection) startListening() {
 				clc.onClose()
 				break
 			}
-
+			LogWithMessage(NameClient, ReceivedWSMessage, true, true, fmt.Sprintf("messageType=%s", msg.MessageType))
 			switch msg.MessageType {
 			case "JoinMessage":
 				clc.handleJoinMessage(msg.Message)

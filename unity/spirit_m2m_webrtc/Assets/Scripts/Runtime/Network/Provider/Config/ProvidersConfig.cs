@@ -29,10 +29,10 @@ public class PreferredProvidersConfig
 
 [System.Serializable]
 public class ProviderConfig {
-    public string key;
-    public string type;
+    public string providerKey;
+    public string providerType;
     public JObject providerSettings;
-    public ProviderTrackInfo[] sendingTracks;
+    public ProviderTrackInfo[] videoTracks;
 }
 
 [System.Serializable]

@@ -15,9 +15,9 @@
     },
     "pushBack": {"x": 0.229103, "y":0.0, "z": 0},
     "sessionManagerSettings": {
-        "type": "websocket",
+        "type": "loopback",
         "defaultName": "Loopback_Session",
-        "configPath": "/config/session/websocket.json"
+        "configPath": "/config/session/loopback_0.json"
     },
     "supportedModes": [
         {
