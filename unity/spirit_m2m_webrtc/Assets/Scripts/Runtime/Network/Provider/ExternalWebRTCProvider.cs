@@ -4,13 +4,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
+[ConnectionProviderRegister("webrtc_sfu")]
 public class ExternalWebRTCProvider : ConnectionProviderBase, ISenderSupported, IReceiverSupported
 {
     private Process peerProcess;
-    public ExternalWebRTCProvider(string ID, JObject jsonSettings) : base(ID, jsonSettings)
+    public ExternalWebRTCProvider(string ID, string ip, uint port, JObject jsonSettings) : base(ID, ip, port, jsonSettings)
     {
         //Logger.
         var settings = jsonSettings.ToObject<ExternalWebRTCSettings>();
+
       //  WebRTCInvoker.initialize("127.0.0.1", (uint)sessionInfo.peerUDPPort, "127.0.0.1", (uint)sessionInfo.peerUDPPort, 1, (uint)NDescriptions, (uint)ClientID, "1.0");
         
         // TODO Make this portable to other OS

@@ -50,7 +50,7 @@ public abstract class ConnectedClient<TTrackInfo> where TTrackInfo : ReceivingTr
 
     // With this property:
     protected abstract string NAME { get; }
-    private readonly object _lock = new();
+    protected readonly object _lock = new();
     //public delegate void ClientConnectedCallback();
 
     // TODO Add on provider change
@@ -105,6 +105,22 @@ public abstract class ConnectedClient<TTrackInfo> where TTrackInfo : ReceivingTr
         }
         OnUserVideoTrackRemoved?.Invoke(provider, trackID);
     }
+    public void SetVideoTracksStatus(List<TrackSimple> tracks, TrackStatus status)
+    {
+        lock (_lock)
+        {
+            foreach (var t in tracks)
+            {
+                if (!receivingTracks.TryGetValue(t.trackID, out var track))
+                {
+                    continue; // Track not found
+                }
+                track.status = status;
+                // TODO Maybe add an onTrack Status changed
+               
+            }
+        }
+    }
     public void AddAudioTrack(string provider)
     {
         Logger.LogTrackStatusWithProvider(NAME, Logger.Status.ClientAddAudioTrack, ClientID, "audio", provider);
@@ -137,6 +153,18 @@ public class LocalConnectedClient : ConnectedClient<LocalTrackInfo>
     protected override string NAME => "LocalConnectedClient";
     public LocalConnectedClient(uint clientID, string codecMode) : base(clientID, codecMode)
     {
+    }
+    public void SetTracksNetworkSender(List<TrackSimple> tracks, ISenderSupported sender)
+    {
+        lock (_lock) {
+            foreach (var t in tracks) {
+                if (!receivingTracks.TryGetValue(t.trackID, out var track))
+                {
+                    continue; // Track not found
+                }
+                track.SetSender(sender.GetSender(track));
+            }
+        }
     }
 
     // TODO Also make it so you can send via track itself
@@ -182,6 +210,21 @@ public class RemoteConnectedClient : ConnectedClient<RemoteTrackInfo>
     protected override string NAME => "RemoteConnectedClient";
     public RemoteConnectedClient(uint clientID, string codecMode) : base(clientID, codecMode)
     {
+    }
+
+    public void SetTracksNetworkReceiver(List<TrackSimple> tracks, IReceiverSupported receiver)
+    {
+        lock (_lock)
+        {
+            foreach (var t in tracks)
+            {
+                if (!receivingTracks.TryGetValue(t.trackID, out var track))
+                {
+                    continue; // Track not found
+                }
+                track.SetReceiver(receiver.GetReceiver(track, ClientID));
+            }
+        }
     }
 }
 
@@ -234,13 +277,13 @@ public abstract class SessionManagerBase
 
 
     }
-    protected void onConnectionProviderRequested(string type, string key, JObject jsonSettings)
+    protected void onConnectionProviderRequested(string type, string key, string ip, uint port, JObject jsonSettings)
     {
-        Logger.LogStatusWithMessage(NAME, Logger.Status.ManagerProviderRequested, $"provider={key}");
-        ConnectionProviderBase prov = ConnectionProviderRepository.CreateProvider(type, key, jsonSettings);
+        Logger.LogStatusWithMessage(NAME, Logger.Status.ManagerProviderRequested, $"type={type} provider={key}");
+        ConnectionProviderBase prov = ConnectionProviderRepository.CreateProvider(type, key, ip, port, jsonSettings);
         if (prov == null)
         {
-            Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderNotFound, $"provider={key}");
+            Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderNotFound, $"type={type} provider={key}");
             return;
         }
          _ = prov.ConnectAsync();
@@ -272,20 +315,6 @@ public abstract class SessionManagerBase
         
         foreach (var t in c.receivingTracks)
         {
-            // TODO Check if provider already exists
-            // Request receiver from provider
-            ConnectionProviderBase provider = ConnectionProviderRepository.GetProvider(t.providerKey);
-            if (provider == null)
-            {
-                // TODO Logger.LogStatus();
-                continue;
-            }
-            // Check if provider supports receiving
-            if (provider is not IReceiverSupported receiverSupported)
-            {
-                Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderReceiverNotSupported, $"provider={t.providerKey}");
-                continue; // Provider does not support receiving
-            }
             client.AddVideoTrack(new RemoteTrackInfo
             {
                 clientID = c.clientID,
@@ -294,7 +323,6 @@ public abstract class SessionManagerBase
                 capturerType = t.capturerType,
                 trackType = t.trackType,
                 trackSettings = t.trackSettings,
-                Receiver = (provider as IReceiverSupported).GetReceiver(t, c.clientID)
             });
         }
         
@@ -341,22 +369,6 @@ public abstract class SessionManagerBase
 
         foreach (var p in connectionMessage.providers)
         {
-            /*onConnectionProviderRequested(p.providerType, p.providerKey, p.providerSettings);
-            ConnectionProviderBase provider = ConnectionProviderRepository.GetProvider(p.providerKey);
-            if (provider == null)
-            {
-                Debug.LogWarning($"Provider {p.providerKey} not found");
-                continue; // Provider not found, skip
-            }
-            if (p.videoTracks.Count > 0)
-            {
-                // Check if provider supports sending
-                if (provider is not ISenderSupported senderSupported)
-                {
-                    Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderSenderNotSupported, $"provider={p.providerKey}");
-                    continue; // Provider does not support sending
-                }
-            }*/
             foreach (var t in p.videoTracks)
             {
                 LocalClient.AddVideoTrack(new LocalTrackInfo
@@ -365,8 +377,7 @@ public abstract class SessionManagerBase
                     trackID = t.trackID,
                     capturerType = t.capturerType,
                     trackType = t.trackType,
-                    trackSettings = t.trackSettings,
-                    Sender = null /*(provider as ISenderSupported).GetSender(t)*/
+                    trackSettings = t.trackSettings
                 });
             }
         }

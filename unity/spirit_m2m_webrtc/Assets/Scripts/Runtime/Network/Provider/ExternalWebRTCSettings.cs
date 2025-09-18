@@ -5,7 +5,6 @@ using UnityEngine;
 [System.Serializable]
 public class ExternalWebRTCSettings 
 {
-    public string sfuAddress;
     public int peerUDPConnectorPort;
     public int peerUDPAppPort;
     public int nMaxTracks;

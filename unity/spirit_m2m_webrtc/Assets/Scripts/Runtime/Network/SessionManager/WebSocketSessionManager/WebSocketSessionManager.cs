@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -126,7 +127,7 @@ public class WebSocketSessionManager : SessionManagerBase
                             }
                         case "ClientAddedToProvider": 
                             {
-
+                                handleClientAddedToProvider(msg.message);
                                 break;
                             }
                     }
@@ -163,24 +164,47 @@ public class WebSocketSessionManager : SessionManagerBase
 
     private void handleClientAddedToProvider(JObject msg)
     {
-        onConnectionProviderRequested(p.providerType, p.providerKey, p.providerSettings);
-        ConnectionProviderBase provider = ConnectionProviderRepository.GetProvider(p.providerKey);
+        ClientAddedToProviderMessage pMsg= msg.ToObject<ClientAddedToProviderMessage>();
+        
+        onConnectionProviderRequested(pMsg.providerType, pMsg.providerKey, pMsg.config);
+        ConnectionProviderBase provider = ConnectionProviderRepository.GetProvider(pMsg.providerKey);
         if (provider == null)
         {
-            Debug.LogWarning($"Provider {p.providerKey} not found");
+            Debug.LogWarning($"Provider {pMsg.providerKey} not found");
             return; // Provider not found, skip
         }
-        if (p.videoTracks.Count > 0)
+        if (pMsg.senderVideoTracks.Count > 0)
         {
             // Check if provider supports sending
             if (provider is not ISenderSupported senderSupported)
             {
-                Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderSenderNotSupported, $"provider={p.providerKey}");
+                Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderSenderNotSupported, $"provider={pMsg.providerKey}");
                 return; // Provider does not support sending
             }
+            LocalClient.SetTracksNetworkSender(pMsg.senderVideoTracks, (provider as ISenderSupported));
+            LocalClient.SetVideoTracksStatus(pMsg.senderVideoTracks, TrackStatus.Started);
         }
         // Check for remote clients
         //          => retrieve remote clients and set their receiver!!! to the provider receiver
+        if(pMsg.remoteClients.Count > 0)
+        {
+            // Check if provider supports receiving
+            if (provider is not IReceiverSupported receiverSupported)
+            {
+                Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderReceiverNotSupported, $"provider={pMsg.providerKey}");
+                return; // Provider does not support receiving
+            }
+        }
+        foreach (var remoteClient in pMsg.remoteClients)
+        {
+            if(!ConnectedClients.TryGetValue(remoteClient.clientID, out var cClient))
+            {
+                // TODO LOG
+                continue;
+            }
+            cClient.SetTracksNetworkReceiver(remoteClient.videoTracks, (provider as IReceiverSupported));
+            cClient.SetVideoTracksStatus(remoteClient.videoTracks, TrackStatus.Started);
+        }
     }
     private void sendJSONMessage(string messageType, object messageObj)
     {

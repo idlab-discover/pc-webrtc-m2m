@@ -55,7 +55,7 @@ public class LoopbackProvider : ConnectionProviderBase, ISenderSupported, IRecei
 
 
 
-    public LoopbackProvider(string ID, JObject jsonSettings) : base(ID, jsonSettings) { 
+    public LoopbackProvider(string ID, string ip, uint port, JObject jsonSettings) : base(ID, ip, port, jsonSettings) { 
         
     }
 

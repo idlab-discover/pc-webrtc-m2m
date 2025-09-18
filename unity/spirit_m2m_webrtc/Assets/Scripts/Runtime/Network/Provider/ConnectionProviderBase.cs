@@ -42,7 +42,7 @@ public class SafeCallback
     public bool IsConnected { get; protected set; }
     private bool disposedValue;
     public readonly string ID;
-    public ConnectionProviderBase(string ID, JObject jsonSettings)
+    public ConnectionProviderBase(string ID, string ip, uint port, JObject jsonSettings)
     {
         this.ID = ID;
     }

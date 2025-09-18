@@ -62,6 +62,7 @@ type RemoteClientSimple struct {
 }
 
 type ClientAddedToProviderMessage struct {
+	ProviderType      string                 `json:"providerType"`
 	ProviderKey       string                 `json:"providerKey"`
 	Address           string                 `json:"address"`
 	Port              uint                   `json:"port"`

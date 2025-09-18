@@ -24,7 +24,7 @@ public static class ConnectionProviderRepository
         foreach (var type in types)
         {
             var attr = type.GetCustomAttribute<ConnectionProviderRegisterAttribute>();
-            var ctor = type.GetConstructor(new[] { typeof(string), typeof(JObject)});
+            var ctor = type.GetConstructor(new[] { typeof(string), typeof(string), typeof(uint), typeof(JObject)});
             if(ctor != null)
             {
                 constructors[attr.Key.ToLower()] = ctor;
@@ -42,9 +42,9 @@ public static class ConnectionProviderRepository
         }
     }
 
-    public static ConnectionProviderBase CreateProvider(string type, string key, JObject jsonSettings)
+    public static ConnectionProviderBase CreateProvider(string type, string key, string ip, uint port, JObject jsonSettings)
     {
-        Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreate, $"type={type} key={key}");
+        Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreate, $"type={type} key={key} ip={ip} port={port}");
         bool succes = constructors.TryGetValue(type.ToLower(), out var constructor);
         if (!succes)
         {
@@ -56,7 +56,7 @@ public static class ConnectionProviderRepository
         providers.Add(key, provider);
         return provider;
     }
-    public static ConnectionProviderBase GetAndCreateIfNotExists(string type, string key, JObject jsonSettings)
+    public static ConnectionProviderBase GetAndCreateIfNotExists(string type, string key, string ip, uint port, JObject jsonSettings)
     {
         lock (_lock)
         {
@@ -64,7 +64,7 @@ public static class ConnectionProviderRepository
             {
                 return provider; 
             }
-            return CreateProvider(type, key, jsonSettings);
+            return CreateProvider(type, key, ip, port, jsonSettings);
         }
         
     }

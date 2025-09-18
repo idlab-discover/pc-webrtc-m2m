@@ -54,36 +54,54 @@ public class ReceivingTrackInfo
     [NonSerialized]
     public TrackStatus status = TrackStatus.NotStarted;
 
+    [NonSerialized]
+    protected readonly object _lock = new();
+
 }
 
 [System.Serializable]
 public class LocalTrackInfo : ReceivingTrackInfo 
 {
-    [NonSerialized]
-    public NetworkSenderBase Sender;
-
+    public NetworkSenderBase Sender { get; private set; }
+    public void SetSender(NetworkSenderBase sender) 
+    {
+        lock(_lock)
+        {
+            Sender = sender;
+        }
+    }
 }
 
 [Serializable]
 public class  RemoteTrackInfo : ReceivingTrackInfo
 {
-    [NonSerialized]
-    public NetworkReceiverBase Receiver;
+    public NetworkReceiverBase Receiver { get; private set; }
     // TODO Make constructor and call receiver to add the track
+    private NetworkReceiverBase.OnStreamDataReceivedCb tempCb;
 
     public void StartPollingTrack(NetworkReceiverBase.OnStreamDataReceivedCb cb)
     {
-        if (Receiver == null)
+        lock (_lock)
         {
-            // DO something 
-            return;
+            if (Receiver == null || !Receiver.IsValid)
+            {
+                tempCb = cb;
+                return;
+            }
+            Receiver.StartPollVideoTrack(clientID, trackID, cb);
         }
-        if(!Receiver.IsValid)
+    }
+
+    public void SetReceiver(NetworkReceiverBase receiver) { 
+        lock(_lock)
         {
-            // DO Something
+            Receiver = receiver;
+            if (tempCb != null && Receiver != null && Receiver.IsValid)
+            {
+                Receiver.StartPollVideoTrack(clientID, trackID, tempCb);
+                tempCb = null;
+            }
         }
-    
-        Receiver.StartPollVideoTrack(clientID, trackID, cb);
     }
 }
 

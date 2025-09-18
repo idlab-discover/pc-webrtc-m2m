@@ -48,6 +48,20 @@ public class ClientAddedToProviderMessage
     public List<TrackSimple> senderAudioTracks = new();
     public List<RemoteClientSimple> remoteClients = new();
 }
+[System.Serializable]
+public class TrackSimple
+{
+    public string trackID;
+    public bool isConnected;
+}
+
+[System.Serializable]
+public class RemoteClientSimple
+{
+    public uint clientID;
+    public List<TrackSimple> videoTracks = new();
+    public List<TrackSimple> audioTracks = new();
+}
 /*
  type ClientAddedToProviderMessage struct {
 	ProviderType      string                 `json:"providerType"`
