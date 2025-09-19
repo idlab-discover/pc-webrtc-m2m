@@ -85,20 +85,7 @@ void register_intrisics_updated_callback(IntrinsicsUpdatedCallBack cb) {
 	intrinsicsUpdatedCallBackInstance = cb;
 }
 
-enum CONNECTION_SETUP_CODE : int {
-	ConnectionSuccess = 0,
-	StartUpError = 1,
-	SocketCreationError = 2,
-	SendToError = 3,
-	AlreadyInitialized = 4,
-	WrongAPIVersion = 5
-};
 
-enum LOG_LEVEL : int {
-	Default = 0,
-	Verbose = 1,
-	Debug = 2
-};
 
 /*
 	This function is used to get the current date/time in a predefined format, used by the custom_log function.
@@ -120,6 +107,7 @@ inline string get_current_date_time(bool date_only) {
 	}
 	return string(buf);
 };
+
 
 /*
 	This function is used to pass log messages to the user. Verbose logging can be enabled, and different colors can be
@@ -149,6 +137,8 @@ void set_logging(char* log_directory, int _log_level) {
 	log_level = _log_level;
 	Log::log("set_logging: Log level set to " + to_string(log_level), Color::Orange);
 }
+
+
 
 /*
 	This function enables the retrieval and (if needed) the creation of a client receiver. One receivere is required

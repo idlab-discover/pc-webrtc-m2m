@@ -1,5 +1,14 @@
 #pragma once
 
+enum CONNECTION_SETUP_CODE : int {
+	ConnectionSuccess = 0,
+	StartUpError = 1,
+	SocketCreationError = 2,
+	SendToError = 3,
+	AlreadyInitialized = 4,
+	WrongAPIVersion = 5
+};
+
 #if defined(_WIN32) || defined(_WIN64)
 // Exclude rarely-used stuff from Windows headers
 #define WIN32_LEAN_AND_MEAN

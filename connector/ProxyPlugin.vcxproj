@@ -157,6 +157,7 @@
   <ItemGroup>
     <ClInclude Include="audio_buffer.hpp" />
     <ClInclude Include="capturer_intrinsics.hpp" />
+    <ClInclude Include="connected_client.h" />
     <ClInclude Include="data_parser.hpp" />
     <ClInclude Include="log.h" />
     <ClInclude Include="framework.h" />
@@ -169,8 +170,13 @@
     <ClInclude Include="buffer.hpp" />
     <ClInclude Include="client_receiver.hpp" />
     <ClInclude Include="tile_receiver.hpp" />
+    <ClInclude Include="track_frame.h" />
+    <ClInclude Include="track_frame_queue.h" />
+    <ClInclude Include="track_internal.h" />
+    <ClInclude Include="webrtc_connection.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="connected_client.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="plugin.cpp" />
@@ -180,6 +186,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="track_frame.cpp" />
+    <ClCompile Include="track_frame_queue2_test.cpp" />
+    <ClCompile Include="track_internal.cpp" />
+    <ClCompile Include="webrtc_connection.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

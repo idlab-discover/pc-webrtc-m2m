@@ -1,0 +1,46 @@
+#pragma once
+#include "connected_client.h"
+#include <vector>
+
+class WebRTCConnection
+{
+public:
+	WebRTCConnection(unsigned int port_this, unsigned int port_remote);
+	~WebRTCConnection();
+	int connect();
+	void disconnect();
+private:
+	unsigned int port_this;
+	unsigned int port_remote;
+	bool initialized = false;
+	std::thread worker;
+	sockaddr_in si_send;
+	SOCKET s_send;
+	int slen_send = sizeof(si_send);
+	sockaddr_in si_recv;
+	SOCKET s_recv;
+	int slen_recv = sizeof(si_recv);
+	char* buf = NULL;
+	char* buf_ori = NULL;
+	bool keep_working = false;
+	std::mutex m_receivers;
+	std::mutex m_recv_data;
+	std::mutex m_send_data;
+	std::mutex m_recv_control;
+	std::mutex m_peer_ready;
+	std::condition_variable cv_peer_ready;
+	bool peer_ready = false;
+	std::map<uint32_t, ConnectedClient*> clients;
+	std::map<std::string, uint32_t> track_name_to_id;
+	unsigned int track_id_counter = 0;
+	#define BUFLEN 1300
+
+	#ifdef WIN32
+	WSADATA wsa;
+	#endif
+
+	void listen_for_data();
+	ConnectedClient* find_client(unsigned int client_id);
+	ConnectedClient* add_client(unsigned int client_id, const std::vector<std::string>& track_ids);
+};
+

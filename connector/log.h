@@ -12,7 +12,11 @@ extern "C"
 	static FuncCallBack callbackInstance = nullptr;
 	DLLExport void RegisterDebugCallback(FuncCallBack cb);
 }
-
+enum LOG_LEVEL : int {
+	Default = 0,
+	Verbose = 1,
+	Debug = 2
+};
 enum class Color { Red, Green, Blue, Black, White, Yellow, Orange };
 
 class Log {

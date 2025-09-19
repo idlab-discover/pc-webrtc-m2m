@@ -27,13 +27,63 @@ struct PacketType {
 
 	enum Type {
 		ReadyPacket = 0,
-		TilePacket = 1,
-		AudioPacket = 2,
-		ControlPacket = 3,
-		TrackStatusPacket = 4,
-		CapturerIntrinsics = 5
+		FramePacket = 1,
+		TilePacket = 11,
+		AudioPacket = 21,
+		ControlPacket = 31,
+		TrackStatusPacket = 41,
+		CapturerIntrinsics = 51
 		//NumTilePacket = 5
 	};
+};
+
+struct PacketFrameHeader {
+	uint32_t client_id;
+	uint32_t track_id;
+	uint32_t frame_number;
+	uint32_t frame_length;
+	uint32_t frame_offset;
+	uint32_t packet_length;
+
+
+	static constexpr auto size() {
+		return sizeof(struct PacketFrameHeader);
+	}
+
+	PacketFrameHeader(uint32_t client_id, uint32_t track_id, uint32_t frame_number,
+		uint32_t frame_length, uint32_t frame_offset, uint32_t packet_length) {
+		this->client_id = client_id;
+		this->track_id = track_id;
+		this->frame_number = frame_number;
+		this->frame_length = frame_length;
+		this->frame_offset = frame_offset;
+		this->packet_length = packet_length;
+	}
+
+	PacketFrameHeader(char** buf, size_t& avail) {
+		std::memcpy(data(), *buf, size());
+		*buf += size();
+		avail -= size();
+	}
+
+	char* data() {
+		return reinterpret_cast<char*>(this);
+	}
+
+	std::string string_representation() {
+		return "[VIDEO] Client ID: " +
+			std::to_string(client_id) +
+			", frame number: " +
+			std::to_string(frame_number) +
+			", frame length: " +
+			std::to_string(frame_length) +
+			", frame offset: " +
+			std::to_string(frame_offset) +
+			", packet length: " +
+			std::to_string(packet_length);
+	}
+protected:
+	PacketFrameHeader() {};
 };
 
 struct PacketHeader {
