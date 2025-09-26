@@ -28,11 +28,15 @@ struct PacketType {
 	enum Type {
 		ReadyPacket = 0,
 		FramePacket = 1,
+		RemoteClientTracksPacket = 2,
+		ControlPacket = 3,
+		TrackStatusPacket = 4,
 		TilePacket = 11,
 		AudioPacket = 21,
-		ControlPacket = 31,
-		TrackStatusPacket = 41,
-		CapturerIntrinsics = 51
+
+		CapturerIntrinsics = 51,
+		CamInfoPacket = 61,
+		DisconnectPacket = 99
 		//NumTilePacket = 5
 	};
 };

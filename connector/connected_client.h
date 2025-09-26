@@ -16,6 +16,9 @@ public:
     TrackInternal& get_track(uint32_t track_id) {
         return tracks.at(track_id);
     }
+    TrackInternal* get_track_ptr(uint32_t track_id) {
+        return &tracks.at(track_id);
+    }
 private:
     uint32_t client_id;
     std::map<uint32_t, TrackInternal> tracks;

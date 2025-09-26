@@ -60,4 +60,15 @@ public unsafe class WebRTCInvoker
     public delegate void intrinsicsUpdatedCb(UInt32 clientID, UInt32 capturerID, UInt32 capturerType, IntPtr data);
     [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
     public static extern void register_intrisics_updated_callback(intrinsicsUpdatedCb cb);
+
+    [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+    public static extern uint get_frame_size(IntPtr ptr);
+    [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr get_frame_data_ptr(IntPtr ptr);
+    [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void free_track_frame(IntPtr ptr);
+    [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr get_next_frame_for_track(IntPtr ptr);
+
+
 }

@@ -15,6 +15,9 @@ WebRTCConnection::WebRTCConnection(unsigned int port_this, unsigned int port_rem
 WebRTCConnection::~WebRTCConnection()
 {
 	disconnect();
+	std::unique_lock<std::mutex> lk(m_peer_ready);
+	connection_status = -2;
+	cv_peer_ready.notify_all();
 }
 
 int WebRTCConnection::connect() {
@@ -70,6 +73,12 @@ void WebRTCConnection::disconnect()
 {
 }
 
+int WebRTCConnection::wait_for_peer_connection() {
+	std::unique_lock<std::mutex> lk(m_peer_ready);
+	cv_peer_ready.wait(lk, [this] {return peer_ready; });
+	return connection_status;
+}
+
 void WebRTCConnection::listen_for_data() {
 	// Enable the listening thread to join
 	while (keep_working) {
@@ -92,9 +101,9 @@ void WebRTCConnection::listen_for_data() {
 		/*
 			Distinguish between different packet types:
 				0: peer is ready to receive / send data
-				1: point cloud frame
-				2: audio frame
-				3: control message
+				1: track frame
+				2: track status packet
+				3: disconnection packet
 		*/
 		switch (p_type.type) {
 		case (PacketType::ReadyPacket): {
@@ -109,6 +118,7 @@ void WebRTCConnection::listen_for_data() {
 				return;
 			}
 			lk.unlock();
+			connection_status = 1;
 			cv_peer_ready.notify_all();
 			break;
 		};
@@ -120,18 +130,18 @@ void WebRTCConnection::listen_for_data() {
 			}
 			TrackInternal& track = c->get_track(p_header.track_id);
 			TrackFrame* frame = track.get_incomplete_frame(p_header.frame_number, p_header.frame_length);
-			if(frame == nullptr) {
+			if (frame == nullptr) {
 				break;
 			}
 			bool did_insert = frame->insert(buf, p_header.frame_offset, p_header.packet_length, size);
-			if(!did_insert) {
+			if (!did_insert) {
 				break;
 			}
 			if (frame->is_complete()) {
 				track.add_frame_to_priority_queue(frame);
 			}
 		};
-		
+
 
 		case (PacketType::TrackStatusPacket): {
 			// Extract the packet header
@@ -141,6 +151,13 @@ void WebRTCConnection::listen_for_data() {
 			//}
 
 			//break;
+		};
+		case (PacketType::DisconnectPacket): {
+			// TODO Maybe move this to disconnect method and call disconnect here, also maybe add custom packet with reason for disconnection
+			std::unique_lock<std::mutex> lk(m_peer_ready);
+			connection_status = -2;
+			cv_peer_ready.notify_all();
+			break;
 		};
 		default:
 			//custom_log("listen_for_data: ERROR: unknown packet type " + to_string(p_type.type), Default, Color::Red);
@@ -165,19 +182,119 @@ ConnectedClient* WebRTCConnection::find_client(unsigned int client_id) {
     return it->second;
 }
 
-ConnectedClient* WebRTCConnection::add_client(unsigned int client_id, const std::vector<std::string>& track_ids) {
+ConnectedClient* WebRTCConnection::add_client(unsigned int client_id) {
     std::unique_lock<std::mutex> guard(m_receivers);
     auto it = clients.find(client_id);
     if (it != clients.end()) {
         return it->second;
     }
 	std::vector<uint32_t> track_ids_uint;
-	for (const auto& track_name : track_ids) {
+	for(unsigned int i = 0; i < count; i++) {
+		std::string track_name(track_ids[i]);
 		track_name_to_id[track_name] = track_id_counter;
 		track_ids_uint.push_back(track_id_counter);
 		track_id_counter++;
 	}
     ConnectedClient* client = new ConnectedClient(client_id, track_ids_uint);
     clients[client_id] = client;
+	// TODO Send track mappings to golang peer
+	size_t serialized_size = 0;
+	char* serialized = serialize_tracks_name_to_id(serialized_size);
+	send_remote_client_track_packet(serialized, (uint32_t)serialized_size);
     return client;
+}
+
+char* WebRTCConnection::serialize_tracks_name_to_id(size_t& out_size) {
+    // Calculate total size needed
+    size_t total_size = sizeof(uint32_t); // number of entries
+    for (const auto& entry : track_name_to_id) {
+        total_size += sizeof(uint32_t); // length of trackID
+        total_size += entry.first.size(); // trackID string bytes
+        total_size += sizeof(uint32_t); // internal ID
+    }
+
+    char* buffer = new char[total_size];
+    char* ptr = buffer;
+
+    // Write number of entries
+    uint32_t num_entries = static_cast<uint32_t>(track_name_to_id.size());
+    memcpy(ptr, &num_entries, sizeof(uint32_t));
+    ptr += sizeof(uint32_t);
+
+    // Write each entry
+    for (const auto& entry : track_name_to_id) {
+        uint32_t track_id_len = static_cast<uint32_t>(entry.first.size());
+        memcpy(ptr, &track_id_len, sizeof(uint32_t));
+        ptr += sizeof(uint32_t);
+
+        memcpy(ptr, entry.first.data(), track_id_len);
+        ptr += track_id_len;
+
+        uint32_t internal_id = entry.second;
+        memcpy(ptr, &internal_id, sizeof(uint32_t));
+        ptr += sizeof(uint32_t);
+    }
+
+    out_size = total_size;
+    return buffer;
+}
+
+/*
+	This function allows to send out a packet to the Golang peer. It returns the amount of bytes sent.
+*/
+int WebRTCConnection::send_packet(char* data, uint32_t size, uint32_t _packet_type) {
+	// Required parameters
+	uint32_t packet_type = _packet_type;
+	int size_sent = 0;
+
+	// Insert all data into a buffer
+	char buf_msg[BUFLEN] = { 0 };
+	memcpy(buf_msg, &packet_type, sizeof(packet_type));
+	memcpy(&buf_msg[sizeof(packet_type)], data, size);
+
+	// Send the message to the Golang peer
+	if ((size_sent = sendto(s_send, buf_msg, BUFLEN, 0, (struct sockaddr*)&si_send, slen_send)) == SOCKET_ERROR) {
+		return -1;
+	}
+
+	// Return the amount of bytes sent
+	return size_sent;
+}
+
+/*
+	This function allows to send out an audio frame to the Golang peer. It returns the amount of bytes sent.
+*/
+int WebRTCConnection::send_remote_client_track_packet(void* data, uint32_t size) {
+	if (!initialized) {
+		return -1;
+	}
+
+	// Required parameters
+	int full_size_sent = 0;
+	char* temp_d = reinterpret_cast<char*>(data);
+
+	// Make sure only one process is sending out packets
+	std::unique_lock<std::mutex> guard(m_send_data);
+
+	// Send out packets as long as needed
+	// Determine the amount of bytes to send out
+
+	// Insert all data into a buffer
+	char buf_msg[BUFLEN];
+	memcpy(buf_msg, reinterpret_cast<char*>(data), size);
+
+	// Send out the packet
+	int size_sent = send_packet(buf_msg, size, PacketType::RemoteClientTracksPacket);
+	if (size_sent < 0) {
+		guard.unlock();
+		
+		return -1;
+	}
+
+	// Update parameters
+	full_size_sent += size_sent;
+	guard.unlock();
+
+	// Return the amount of bytes sent
+	return full_size_sent;
 }

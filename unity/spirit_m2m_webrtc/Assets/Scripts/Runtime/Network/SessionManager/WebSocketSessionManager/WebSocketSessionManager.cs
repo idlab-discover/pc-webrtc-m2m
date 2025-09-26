@@ -166,7 +166,7 @@ public class WebSocketSessionManager : SessionManagerBase
     {
         ClientAddedToProviderMessage pMsg= msg.ToObject<ClientAddedToProviderMessage>();
         
-        onConnectionProviderRequested(pMsg.providerType, pMsg.providerKey, pMsg.config);
+        onConnectionProviderRequested(pMsg.providerType, pMsg.providerKey, pMsg.address, pMsg.port, pMsg.config);
         ConnectionProviderBase provider = ConnectionProviderRepository.GetProvider(pMsg.providerKey);
         if (provider == null)
         {

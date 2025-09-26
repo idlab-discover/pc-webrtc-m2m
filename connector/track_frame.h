@@ -25,6 +25,14 @@ public:
 	{
 		return current_size >= frame_length;
 	}
+	unsigned int get_frame_length()
+	{
+		return frame_length;
+	}
+	char* get_data_ptr()
+	{
+		return data.data();
+	}
 private:
 	unsigned int frame_length;
 	unsigned int current_size;

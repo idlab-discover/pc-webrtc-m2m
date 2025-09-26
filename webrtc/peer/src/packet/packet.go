@@ -8,6 +8,11 @@ type FramePacketHeader struct {
 	SeqLen    uint32 // 24
 }
 
+type FramePacket struct {
+	FramePacketHeader // 24
+	Data              [1152]byte
+}
+
 type VideoFramePacket struct {
 	FramePacketHeader        // 24
 	CapturerID        uint32 // 28

@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"goweb/peer/src/logger"
+	"goweb/peer/src/transcoder"
 	"goweb/peer/src/utils"
 
 	"github.com/gorilla/websocket"
@@ -39,7 +40,7 @@ type SessionManagerConnection struct {
 	providers       map[string]Provider
 	localClient     *ConnectedClient
 	remoteClient    map[uint]*ConnectedClient
-	transcoder      utils.Transcoder
+	transcoder      transcoder.Transcoder
 	conn            *utils.ThreadSafeWebsocket
 	providerFactory ProviderFactory
 	mut             sync.Mutex
@@ -108,7 +109,7 @@ type ReceiverTrackInfo struct {
 	providerConnection Provider
 }
 
-func NewSessionManagerConnection(managerIP string, preferredClientID uint, providersPath string, transcoder utils.Transcoder, providerFactory ProviderFactory) (*SessionManagerConnection, error) {
+func NewSessionManagerConnection(managerIP string, preferredClientID uint, providersPath string, transcoder transcoder.Transcoder, providerFactory ProviderFactory) (*SessionManagerConnection, error) {
 	logger.LogWithMessage(NameManagerConnection, logger.Creating, true, true, fmt.Sprintf("managerIP=%s preferredclientID=%d", managerIP, preferredClientID))
 	u := url.URL{
 		Scheme: "ws",

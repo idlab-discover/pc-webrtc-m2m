@@ -1,5 +1,5 @@
 #pragma once
-
+#include "webrtc_connection.h"
 #ifdef WIN32
 #define DLLExport __declspec(dllexport)
 #else
@@ -27,4 +27,8 @@ extern "C"
 	DLLExport int send_control_packet(void* data, uint32_t size);
 	DLLExport int send_intrisics_packet(void* data, uint32_t size);
 	DLLExport void wait_for_peer();
+
+	DLLExport WebRTCConnection* create_new_webrtc_connection(uint32_t port_send, uint32_t port_recv);
+	DLLExport ConnectedClient* add_client(WebRTCConnection* connection, unsigned int client_id, const char** track_ids, unsigned int count);
+	DLLExport int wait_for_peer_connection(WebRTCConnection* connection);
 }

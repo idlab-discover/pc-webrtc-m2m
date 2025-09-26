@@ -16,9 +16,11 @@ import (
 
 	"goweb/peer/src/logger"
 	"goweb/peer/src/packet"
+	"goweb/peer/src/proxy"
 	"goweb/peer/src/session_manager"
 	"goweb/peer/src/tracks/audio"
 	"goweb/peer/src/tracks/point_cloud"
+	"goweb/peer/src/transcoder"
 	"goweb/peer/src/utils"
 
 	"github.com/gorilla/websocket"
@@ -31,6 +33,7 @@ import (
 const NameSFUConnection = "SFUConnection"
 
 type SFUConnection struct {
+	ProxyConn   *proxy.ProxyConnection
 	providerKey string
 	IsReady     bool
 	Address     string
@@ -43,7 +46,7 @@ type SFUConnection struct {
 	peerConnection          *webrtc.PeerConnection
 	pendingCandidates       []*webrtc.ICECandidate
 	pendingCandidatesString []string
-	transcoder              utils.Transcoder
+	transcoder              transcoder.Transcoder
 
 	websocket *utils.ThreadSafeWebsocket
 	mut       sync.Mutex
@@ -68,10 +71,10 @@ func (t *WebRTCAudioTrack) StartSending() {
 
 type WebRTCVideoTrack struct {
 	track      *point_cloud.TrackLocalCloudRTP
-	transcoder utils.Transcoder
+	transcoder transcoder.Transcoder
 }
 
-func NewWebRTCVideoTrack(track *point_cloud.TrackLocalCloudRTP, transcoder utils.Transcoder) *WebRTCVideoTrack {
+func NewWebRTCVideoTrack(track *point_cloud.TrackLocalCloudRTP, transcoder transcoder.Transcoder) *WebRTCVideoTrack {
 	t := &WebRTCVideoTrack{
 		track:      track,
 		transcoder: transcoder,
@@ -96,7 +99,7 @@ func (t *WebRTCVideoTrack) StartSending() {
 	}()
 }
 
-func NewSFUConnection(providerKey string, videoTracks []session_manager.TrackSimple, audioTracks []session_manager.TrackSimple, transcoder utils.Transcoder) *SFUConnection {
+func NewSFUConnection(providerKey string, videoTracks []session_manager.TrackSimple, audioTracks []session_manager.TrackSimple, transcoder transcoder.Transcoder) *SFUConnection {
 	logger.LogWithMessage(NameSFUConnection, logger.CreatingProvider, true, true, fmt.Sprintf("providerKey=%s", providerKey))
 	sfu := &SFUConnection{
 		providerKey:             providerKey,
@@ -159,7 +162,11 @@ func (s *SFUConnection) connectToSFU(clientID uint, authKey string) {
 		panic(err)
 	}
 	s.websocket = &utils.ThreadSafeWebsocket{
-		conn, sync.Mutex{},
+		Conn:  conn,
+		Mutex: sync.Mutex{},
+	}
+	if s.ProxyConn != nil {
+		s.ProxyConn.WsHandler = s.websocket
 	}
 	s.startListening()
 }
@@ -326,54 +333,57 @@ func (s *SFUConnection) addOnTrackCallback() {
 		frames := make(map[uint32]uint32)
 		//prevFrame := -1
 		// TODO: make clean seperated function for audio / video so we dont constantly need to do the kind check
+		// ---------------------------------------
+		// Keep reading until error or until client request to listen to track
+		// If client decides to listen, keep reading until the frame is completed
+		// Start forwarding frames at this point
+		// ---------------------------------------
+		var internalTrackID uint32
+		for {
+			_, _, readErr := track.Read(buf)
+			if readErr != nil {
+				return
+			}
+			var p packet.FramePacket
+			bufBinary := bytes.NewBuffer(buf[20:])
+			err := binary.Read(bufBinary, binary.LittleEndian, &p)
+			if err != nil {
+				panic(err)
+			}
+			// Read the fields from the buffer into a struct
+
+			frames[p.FrameNr] += p.SeqLen
+			if frames[p.FrameNr] == p.FrameLen {
+				var exists bool
+				internalTrackID, exists = s.ProxyConn.GetInternalTrackID(track.ID())
+				if exists {
+					break
+				}
+			}
+		}
 		for {
 			_, _, readErr := track.Read(buf)
 			// TODO Implement pausing unpausing of track
 			if readErr != nil {
 				return
 			}
-			/*if *useProxyOutput {
-				if track.Kind() == webrtc.RTPCodecTypeVideo {
-					proxyConn.SendTilePacket(buf, 20)
-				} else {
-					proxyConn.SendAudioPacket(buf, 20)
-				}
-			}*/
-			if track.Kind() == webrtc.RTPCodecTypeVideo {
+			bufBinary := bytes.NewBuffer(buf[20:])
 
-				bufBinary := bytes.NewBuffer(buf[20:])
-
-				// Read the fields from the buffer into a struct
-				var p packet.VideoFramePacket
-				err := binary.Read(bufBinary, binary.LittleEndian, &p)
-				if err != nil {
-					panic(err)
-				}
-				if frames[p.FrameNr] == 0 {
-					// First packet received
-				}
-				frames[p.FrameNr] += p.SeqLen
-				if frames[p.FrameNr] == p.FrameLen && p.FrameNr%100 == 0 {
-					// Frame complete
-					fmt.Printf("WebRTCPeer: [VIDEO] %s %d Received video frame %d from client %d for camera %d and tile %d with length %d\n",
-						track.ID(), time.Now().UnixMilli(), p.FrameNr, p.ClientNr, p.CapturerID, p.TileNr, p.FrameLen)
-				}
-
-			} else {
-				bufBinary := bytes.NewBuffer(buf[20:])
-
-				// Read the fields from the buffer into a struct
-				var p packet.AudioFramePacket
-				err := binary.Read(bufBinary, binary.LittleEndian, &p)
-				if err != nil {
-					panic(err)
-				}
-				frames[p.FrameNr] += p.SeqLen
-				if frames[p.FrameNr] == p.FrameLen && p.FrameNr%100 == 0 {
-					fmt.Printf("WebRTCPeer: [AUDIO] Received audio frame %d from client %d with length %d at %d\n",
-						p.FrameNr, p.ClientNr, p.FrameLen, time.Now().UnixNano()/int64(time.Millisecond))
-				}
-
+			// Read the fields from the buffer into a struct
+			var p packet.FramePacket
+			err := binary.Read(bufBinary, binary.LittleEndian, &p)
+			if err != nil {
+				panic(err)
+			}
+			if s.ProxyConn != nil {
+				// TODO Add internal track ID mapping here
+				s.ProxyConn.SendFramePacket(internalTrackID, buf, 20)
+			}
+			frames[p.FrameNr] += p.SeqLen
+			if frames[p.FrameNr] == p.FrameLen && p.FrameNr%100 == 0 {
+				// Frame complete
+				fmt.Printf("WebRTCPeer: [VIDEO] %s %d Received video frame %d from client %d with internalTrackID %d with length %d\n",
+					track.ID(), time.Now().UnixMilli(), p.FrameNr, p.ClientNr, internalTrackID, p.FrameLen)
 			}
 
 		}

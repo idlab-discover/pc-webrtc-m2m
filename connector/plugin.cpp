@@ -9,6 +9,7 @@
 #include "plugin.h"
 #include "received_control.hpp"
 #include "capturer_intrinsics.hpp"
+#include "webrtc_connection.h"
 
 #include <chrono>
 #include <fstream>
@@ -139,6 +140,68 @@ void set_logging(char* log_directory, int _log_level) {
 }
 
 
+WebRTCConnection* create_new_webrtc_connection(uint32_t port_send, uint32_t port_recv) {
+	WebRTCConnection* c = new WebRTCConnection(port_send, port_recv);
+	int r = c->connect();
+	if (r != ConnectionSuccess) {
+		custom_log("create_new_webrtc_connection: ERROR: Failed to create WebRTC connection", Default, Color::Red);
+		return nullptr;
+	}
+	return c;
+}
+
+int wait_for_peer_connection(WebRTCConnection* connection) {
+	if (connection == nullptr) {
+		custom_log("wait_for_peer_connection: ERROR: Connection is a nullptr", Default, Color::Red);
+		return -1;
+	}
+	return connection->wait_for_peer_connection();
+}
+
+ConnectedClient* add_client(WebRTCConnection* connection, unsigned int client_id) {
+	if (connection == nullptr) {
+		custom_log("add_client: ERROR: Connection is a nullptr", Default, Color::Red);
+		return nullptr;
+	}
+	return connection->add_client(client_id);
+}
+
+TrackInternal* add_track(ConnectedClient* client, const char* track_id) {
+	if (client == nullptr) {
+		custom_log("add_track: ERROR: Client is a nullptr", Default, Color::Red);
+		return nullptr;
+	}
+	return client->add_track(track_id, capturer_id, n_tiles);
+}
+
+/*
+	This function returns the size of the next frame corresponding to a given tile. The function should be called from
+	within the Unity reader every time a new frame is desired. The resulting return value should be used to allocate the
+	required memory and call the retrieve_tile function.
+*/
+TrackFrame* get_next_frame_for_track(TrackInternal* track) {
+	return track->wait_and_pop_oldest_or_null();
+}
+// TODO We get the frame size and data ptr and convert it into a NetworkFrame in Unity
+unsigned int get_frame_size(TrackFrame* frame) {
+	if (frame == nullptr) {
+		return 0;
+	}
+	return frame->get_frame_length();
+}
+
+char* get_frame_data_ptr(TrackFrame* frame) {
+	if (frame == nullptr) {
+		return nullptr;
+	}
+	return frame->get_data_ptr();
+}
+
+void free_track_frame(TrackFrame* frame) {
+	if (frame != nullptr) {
+		delete frame;
+	}
+}
 
 /*
 	This function enables the retrieval and (if needed) the creation of a client receiver. One receivere is required

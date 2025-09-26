@@ -9,7 +9,10 @@ public:
 	~WebRTCConnection();
 	int connect();
 	void disconnect();
+	int wait_for_peer_connection();
+	ConnectedClient* add_client(unsigned int client_id);
 private:
+	int connection_status = -1;
 	unsigned int port_this;
 	unsigned int port_remote;
 	bool initialized = false;
@@ -39,8 +42,15 @@ private:
 	WSADATA wsa;
 	#endif
 
+	
 	void listen_for_data();
 	ConnectedClient* find_client(unsigned int client_id);
-	ConnectedClient* add_client(unsigned int client_id, const std::vector<std::string>& track_ids);
+	
+	
+	char* serialize_tracks_name_to_id(size_t& out_size);
+	int send_packet(char* data, uint32_t size, uint32_t _packet_type);
+	int send_remote_client_track_packet(void* data, uint32_t size);
+	
+	
 };
 
