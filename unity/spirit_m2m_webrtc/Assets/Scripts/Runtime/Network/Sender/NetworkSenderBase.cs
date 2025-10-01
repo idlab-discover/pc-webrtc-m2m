@@ -10,8 +10,8 @@ public abstract class NetworkSenderBase : IDisposable
     private readonly object _lock = new();
 
 
-    public abstract int SendVideoData(string trackID, IntPtr data, uint size);
-    public abstract int SendAudioData(IntPtr data, uint size);
+    public abstract int SendVideoData(string trackID, uint frameNr, IntPtr data, uint size);
+    public abstract int SendAudioData(uint frameNr, IntPtr data, uint size);
 
     protected abstract void disposeInternal();
     protected virtual void Dispose(bool disposing)

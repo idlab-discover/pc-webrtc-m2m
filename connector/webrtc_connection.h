@@ -11,6 +11,8 @@ public:
 	void disconnect();
 	int wait_for_peer_connection();
 	ConnectedClient* add_client(unsigned int client_id);
+	unsigned int add_track(const std::string& track_id);
+	int send_track_frame(unsigned int client_id, void* data, uint32_t size, uint32_t internal_id, uint32_t frame_nr);
 private:
 	int connection_status = -1;
 	unsigned int port_this;

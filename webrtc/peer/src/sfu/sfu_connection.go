@@ -158,7 +158,7 @@ func (s *SFUConnection) connectToSFU(clientID uint, authKey string) {
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 
 	if err != nil {
-		fmt.Printf("WebRTCPeer: NewWSHandler: ERROR: %s\n", err)
+		fmt.Printf("WebRTCPeer: NewWSHandler: using %s ERROR: %s\n", u.String(), err)
 		panic(err)
 	}
 	s.websocket = &utils.ThreadSafeWebsocket{
@@ -339,25 +339,27 @@ func (s *SFUConnection) addOnTrackCallback() {
 		// Start forwarding frames at this point
 		// ---------------------------------------
 		var internalTrackID uint32
-		for {
-			_, _, readErr := track.Read(buf)
-			if readErr != nil {
-				return
-			}
-			var p packet.FramePacket
-			bufBinary := bytes.NewBuffer(buf[20:])
-			err := binary.Read(bufBinary, binary.LittleEndian, &p)
-			if err != nil {
-				panic(err)
-			}
-			// Read the fields from the buffer into a struct
+		if s.ProxyConn != nil {
+			for {
+				_, _, readErr := track.Read(buf)
+				if readErr != nil {
+					return
+				}
+				var p packet.FramePacket
+				bufBinary := bytes.NewBuffer(buf[20:])
+				err := binary.Read(bufBinary, binary.LittleEndian, &p)
+				if err != nil {
+					panic(err)
+				}
+				// Read the fields from the buffer into a struct
 
-			frames[p.FrameNr] += p.SeqLen
-			if frames[p.FrameNr] == p.FrameLen {
-				var exists bool
-				internalTrackID, exists = s.ProxyConn.GetInternalTrackID(track.ID())
-				if exists {
-					break
+				frames[p.FrameNr] += p.SeqLen
+				if frames[p.FrameNr] == p.FrameLen {
+					var exists bool
+					internalTrackID, exists = s.ProxyConn.GetInternalTrackID(track.ID())
+					if exists {
+						break
+					}
 				}
 			}
 		}

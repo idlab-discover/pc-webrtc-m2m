@@ -92,6 +92,7 @@ public class Logger
         ProviderNotFound = 2004,
         ProviderSenderNotSupported = 2005,
         ProviderReceiverNotSupported = 2006,
+        ProviderNoFreePort = 2007,  
 
         // Client Status
         ClientAddVideoTrack = 3000,

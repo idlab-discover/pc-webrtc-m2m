@@ -4,10 +4,11 @@
 #include <cstdint>
 #include "track_internal.h"
 
+class WebRTCConnection;
 class ConnectedClient
 {
 public:
-    ConnectedClient(uint32_t client_id, const std::vector<uint32_t>& track_ids);
+    ConnectedClient(WebRTCConnection* parent, uint32_t client_id);
     ConnectedClient(const ConnectedClient&) = delete;
     ConnectedClient& operator=(const ConnectedClient&) = delete;
     uint32_t get_client_id() const { return client_id; }
@@ -19,7 +20,9 @@ public:
     TrackInternal* get_track_ptr(uint32_t track_id) {
         return &tracks.at(track_id);
     }
+    TrackInternal* add_track(const std::string& track_id);
 private:
+	WebRTCConnection* parent;
     uint32_t client_id;
     std::map<uint32_t, TrackInternal> tracks;
 };

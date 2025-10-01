@@ -24,7 +24,7 @@ public static class ConnectionProviderRepository
         foreach (var type in types)
         {
             var attr = type.GetCustomAttribute<ConnectionProviderRegisterAttribute>();
-            var ctor = type.GetConstructor(new[] { typeof(string), typeof(string), typeof(uint), typeof(JObject)});
+            var ctor = type.GetConstructor(new[] { typeof(LocalConnectedClient), typeof(ClientAddedToProviderMessage)});
             if(ctor != null)
             {
                 constructors[attr.Key.ToLower()] = ctor;
@@ -42,29 +42,29 @@ public static class ConnectionProviderRepository
         }
     }
 
-    public static ConnectionProviderBase CreateProvider(string type, string key, string ip, uint port, JObject jsonSettings)
+    public static ConnectionProviderBase CreateProvider(LocalConnectedClient localClient, ClientAddedToProviderMessage pMsg)
     {
-        Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreate, $"type={type} key={key} ip={ip} port={port}");
-        bool succes = constructors.TryGetValue(type.ToLower(), out var constructor);
+        Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreate, $"type={pMsg.providerType} key={pMsg.providerKey} ip={pMsg.address} port={pMsg.port}");
+        bool succes = constructors.TryGetValue(pMsg.providerType.ToLower(), out var constructor);
         if (!succes)
         {
-            Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreateFailed, $"type={type} key={key}");
+            Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreateFailed, $"type={pMsg.providerType} key={pMsg.providerKey}");
             return null;
         }
-        ConnectionProviderBase provider = (ConnectionProviderBase)constructor.Invoke(new object[] { key, jsonSettings });
-        Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreateSucces, $"type={type} key={key}");
-        providers.Add(key, provider);
+        ConnectionProviderBase provider = (ConnectionProviderBase)constructor.Invoke(new object[] { localClient, pMsg });
+        Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreateSucces, $"type={pMsg.providerType}  key= {pMsg.providerKey}");
+        providers.Add(pMsg.providerKey, provider);
         return provider;
     }
-    public static ConnectionProviderBase GetAndCreateIfNotExists(string type, string key, string ip, uint port, JObject jsonSettings)
+    public static ConnectionProviderBase GetAndCreateIfNotExists(LocalConnectedClient localClient, ClientAddedToProviderMessage pMsg)
     {
         lock (_lock)
         {
-            if (providers.TryGetValue(key, out var provider))
+            if (providers.TryGetValue(pMsg.providerKey, out var provider))
             {
                 return provider; 
             }
-            return CreateProvider(type, key, ip, port, jsonSettings);
+            return CreateProvider(localClient, pMsg);
         }
         
     }

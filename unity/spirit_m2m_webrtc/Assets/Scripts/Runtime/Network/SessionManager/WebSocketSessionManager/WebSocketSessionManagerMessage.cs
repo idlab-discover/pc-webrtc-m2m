@@ -41,6 +41,7 @@ public class ClientAddedToProviderMessage
 {
     public string providerKey;
     public string providerType;
+    public string providerAuthKey;
     public string address;
     public uint port;
     public JObject config;

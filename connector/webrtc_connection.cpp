@@ -37,7 +37,7 @@ int WebRTCConnection::connect() {
 	// Generic parameters
 	ULONG buf_size = 524288000;
 	// Create send socket
-	if ((s_send = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == SOCKET_ERROR) {
+	if ((s_recv = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == SOCKET_ERROR) {
 #ifdef WIN32
 		WSACleanup();
 #endif
@@ -48,13 +48,13 @@ int WebRTCConnection::connect() {
 	sockaddr_in our_address;
 	our_address.sin_family = AF_INET;
 	our_address.sin_port = htons(port_this);
-	our_address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	if (::bind(s_send, (struct sockaddr*)&our_address, sizeof(our_address)) < 0) {
+	our_address.sin_addr.s_addr = htonl(INADDR_ANY);
+	if (::bind(s_recv, (struct sockaddr*)&our_address, sizeof(our_address)) < 0) {
 		return -1;
 	}
 
 	// Set socket options
-	if (setsockopt(s_send, SOL_SOCKET, SO_RCVBUF, (char*)&buf_size, sizeof(ULONG)) < 0) {
+	if (setsockopt(s_recv, SOL_SOCKET, SO_RCVBUF, (char*)&buf_size, sizeof(ULONG)) < 0) {
 		return -1;
 	}
 	si_send.sin_family = AF_INET;
@@ -67,10 +67,14 @@ int WebRTCConnection::connect() {
 
     worker = std::thread(&WebRTCConnection::listen_for_data, this);
 	initialized = true;
+	return ConnectionSuccess;
 }
 
 void WebRTCConnection::disconnect()
 {
+	// TODO Send disconnect message to peer maybe
+	//WSACleanup();
+	closesocket(s_recv);
 }
 
 int WebRTCConnection::wait_for_peer_connection() {
@@ -112,7 +116,7 @@ void WebRTCConnection::listen_for_data() {
 			peer_ready = true;
 			char t[BUFLEN] = { 0 };
 			//custom_log("listen_for_data: connected to peer", Default, Color::Orange);
-			if (sendto(s_send, t, BUFLEN, 0, (struct sockaddr*)&si_send, slen_send) == SOCKET_ERROR) {
+			if (sendto(s_recv, t, BUFLEN, 0, (struct sockaddr*)&si_send, slen_send) == SOCKET_ERROR) {
 				//custom_log("initialize: sendto: ERROR: " + std::to_string(WSAGetLastError()), Default, Color::Red);
 				WSACleanup();
 				return;
@@ -188,21 +192,90 @@ ConnectedClient* WebRTCConnection::add_client(unsigned int client_id) {
     if (it != clients.end()) {
         return it->second;
     }
-	std::vector<uint32_t> track_ids_uint;
+	ConnectedClient* client = new ConnectedClient(this, client_id);
+	clients[client_id] = client;
+	/*std::vector<uint32_t> track_ids_uint;
 	for(unsigned int i = 0; i < count; i++) {
 		std::string track_name(track_ids[i]);
 		track_name_to_id[track_name] = track_id_counter;
 		track_ids_uint.push_back(track_id_counter);
 		track_id_counter++;
 	}
-    ConnectedClient* client = new ConnectedClient(client_id, track_ids_uint);
-    clients[client_id] = client;
+    
 	// TODO Send track mappings to golang peer
 	size_t serialized_size = 0;
 	char* serialized = serialize_tracks_name_to_id(serialized_size);
-	send_remote_client_track_packet(serialized, (uint32_t)serialized_size);
+	send_remote_client_track_packet(serialized, (uint32_t)serialized_size);*/
     return client;
 }
+
+unsigned int WebRTCConnection::add_track(const std::string& track_id)
+{
+	std::unique_lock<std::mutex> guard(m_receivers);
+	unsigned int internal_id = track_id_counter;
+	track_name_to_id[track_id] = internal_id;
+	track_id_counter++;
+	return internal_id;
+}
+
+int WebRTCConnection::send_track_frame(unsigned int client_id, void* data, uint32_t size, uint32_t internal_id, uint32_t frame_nr)
+{
+	if (!initialized) {
+		return -1;
+	}
+
+	// Required parameters
+	uint32_t buflen_nheader = BUFLEN - sizeof(PacketType) - sizeof(PacketHeader);
+	buflen_nheader = 1148; // TODO check this, pretty sure this can be bigger
+	uint32_t current_offset = 0;
+	uint32_t remaining = size;
+	int full_size_sent = 0;
+	char* temp_d = reinterpret_cast<char*>(data);
+
+	// Make sure only one process is sending out packets
+	std::unique_lock<std::mutex> guard(m_send_data);
+
+	// Send out packets as long as needed
+	while (remaining > 0 && keep_working) {
+
+		// Determine the amount of bytes to send out
+		uint32_t next_size = 0;
+		if (remaining >= buflen_nheader) {
+			next_size = buflen_nheader;
+		}
+		else {
+			next_size = remaining;
+		}
+		PacketFrameHeader frame_header {
+			client_id, internal_id, frame_nr, size, current_offset, next_size
+		};
+	
+		// Insert all data into a buffer
+		char buf_msg[BUFLEN];
+		memcpy(buf_msg, &frame_header, sizeof(frame_header));
+		memcpy(buf_msg + sizeof(frame_header), reinterpret_cast<char*>(data) + current_offset, next_size);
+
+		// Send out the packet
+		int size_sent = send_packet(buf_msg, next_size + sizeof(PacketFrameHeader), PacketType::FramePacket);
+		if (size_sent < 0) {
+			guard.unlock();
+			return -1;
+		}
+
+		// Update parameters
+		full_size_sent += size_sent;
+		current_offset += next_size;
+		remaining -= next_size;
+	}
+
+	// Release the mutex
+	guard.unlock();
+
+	// Return the amount of bytes sent
+	return full_size_sent;
+}
+
+
 
 char* WebRTCConnection::serialize_tracks_name_to_id(size_t& out_size) {
     // Calculate total size needed
@@ -253,7 +326,7 @@ int WebRTCConnection::send_packet(char* data, uint32_t size, uint32_t _packet_ty
 	memcpy(&buf_msg[sizeof(packet_type)], data, size);
 
 	// Send the message to the Golang peer
-	if ((size_sent = sendto(s_send, buf_msg, BUFLEN, 0, (struct sockaddr*)&si_send, slen_send)) == SOCKET_ERROR) {
+	if ((size_sent = sendto(s_recv, buf_msg, BUFLEN, 0, (struct sockaddr*)&si_send, slen_send)) == SOCKET_ERROR) {
 		return -1;
 	}
 

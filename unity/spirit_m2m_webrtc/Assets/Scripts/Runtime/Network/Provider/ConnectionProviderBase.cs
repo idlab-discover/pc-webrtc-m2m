@@ -42,9 +42,9 @@ public class SafeCallback
     public bool IsConnected { get; protected set; }
     private bool disposedValue;
     public readonly string ID;
-    public ConnectionProviderBase(string ID, string ip, uint port, JObject jsonSettings)
+    public ConnectionProviderBase(LocalConnectedClient localClient, ClientAddedToProviderMessage pMsg)
     {
-        this.ID = ID;
+        this.ID = pMsg.providerKey;
     }
 
     public void Connect()

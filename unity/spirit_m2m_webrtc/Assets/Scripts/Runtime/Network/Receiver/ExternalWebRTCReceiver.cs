@@ -15,6 +15,7 @@ public class ExternalWebRTCReceiver : NetworkReceiverBase
     protected override void disposeInternal()
     {
         // TODO Dispose of clientPtr and tracks
+        WebRTCInvoker.free_client(clientPtr);
     }
 
     protected override void pollAudioTrackInternal(uint clientID, OnStreamDataReceivedCb cb)
@@ -39,14 +40,13 @@ public class ExternalWebRTCReceiver : NetworkReceiverBase
                 keepWorking = false;
                 continue;
             }
-            NetworkFrameWebRTC networkFrame = new NetworkFrameWebRTC(frame);
+            ExternalWebRTCNetworkFrame networkFrame = new(frame);
             cb(networkFrame);
         }
     }
 
     public void AddTrack(ReceivingTrackInfo trackInfo)
     {
-        // TODO Add track to internal dictionary
-       // internalTrackIDs.Add(trackInfo.trackID, 0);
+       internalTracks.Add(trackInfo.trackID, WebRTCInvoker.add_client(clientPtr, trackInfo.clientID));
     }
 }

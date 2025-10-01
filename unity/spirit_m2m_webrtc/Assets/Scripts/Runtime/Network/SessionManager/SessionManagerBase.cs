@@ -168,7 +168,7 @@ public class LocalConnectedClient : ConnectedClient<LocalTrackInfo>
     }
 
     // TODO Also make it so you can send via track itself
-    public int SendVideoData(string trackID, IntPtr data, uint size)
+    public int SendVideoData(string trackID, uint frameNr, IntPtr data, uint size)
     {
   
         // TODDO probably do need to lock this tbh
@@ -190,7 +190,7 @@ public class LocalConnectedClient : ConnectedClient<LocalTrackInfo>
                 Logger.LogTrackStatus(NAME, Logger.Status.ClientTrackSenderInvalid, ClientID, trackID);
                 return -1;
             }
-            return track.Sender.SendVideoData(trackID, data, size);
+            return track.Sender.SendVideoData(trackID, frameNr, data, size);
         }
         else
         {
@@ -199,7 +199,7 @@ public class LocalConnectedClient : ConnectedClient<LocalTrackInfo>
         }
     }
 
-    public void SendAudioData(IntPtr data, uint size)
+    public void SendAudioData(uint frameNr, IntPtr data, uint size)
     {
         // TODO Implement audio sending
     }
@@ -277,13 +277,13 @@ public abstract class SessionManagerBase
 
 
     }
-    protected void onConnectionProviderRequested(string type, string key, string ip, uint port, JObject jsonSettings)
+    protected void onConnectionProviderRequested(LocalConnectedClient localClient, ClientAddedToProviderMessage pMsg)
     {
-        Logger.LogStatusWithMessage(NAME, Logger.Status.ManagerProviderRequested, $"type={type} provider={key}");
-        ConnectionProviderBase prov = ConnectionProviderRepository.CreateProvider(type, key, ip, port, jsonSettings);
+        Logger.LogStatusWithMessage(NAME, Logger.Status.ManagerProviderRequested, $"type={pMsg.providerType} provider={pMsg.providerKey}");
+        ConnectionProviderBase prov = ConnectionProviderRepository.CreateProvider(localClient, pMsg);
         if (prov == null)
         {
-            Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderNotFound, $"type={type} provider={key}");
+            Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderNotFound, $"type={pMsg.providerType} provider={pMsg.providerKey}");
             return;
         }
          _ = prov.ConnectAsync();

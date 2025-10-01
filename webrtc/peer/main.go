@@ -60,8 +60,8 @@ func main() {
 
 	preferredClientID := flag.Uint("c", 0, "Preferred client ID")
 	// DLL Command Line args
-	proxyPortThis := flag.String("p", ":0", "Port of this")
-	proxyPortDLL := flag.String("r", ":0", "Port of the DLL")
+	proxyPortThis := flag.String("r", ":0", "Port of this")
+	proxyPortDLL := flag.String("p", ":0", "Port of the DLL")
 	useProxy := flag.Bool("i", false, "Receive content from the DLL to forward over WebRTC")
 	videoTracks := flag.String("vt", "0", "Pairs of video track string ID and internal integer ID")
 	audioTracks := flag.String("at", "", "Pairs of audio track string ID and internal integer ID")

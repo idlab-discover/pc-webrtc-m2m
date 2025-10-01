@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 using static DLLLogger;
 
 public unsafe class WebRTCInvoker
@@ -61,6 +63,16 @@ public unsafe class WebRTCInvoker
     [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
     public static extern void register_intrisics_updated_callback(intrinsicsUpdatedCb cb);
 
+
+
+    [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr create_new_webrtc_connection(UInt32 portSelf, UInt32 portRemote);
+    [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void free_webrtc_connection(IntPtr ptr);
+    [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void wait_for_peer_connection(IntPtr ptr);
+    [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int send_track_frame(IntPtr ptr, IntPtr data, UInt32 size, UInt32 internalID, UInt32 frameNr);
     [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
     public static extern uint get_frame_size(IntPtr ptr);
     [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
@@ -69,6 +81,12 @@ public unsafe class WebRTCInvoker
     public static extern void free_track_frame(IntPtr ptr);
     [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
     public static extern IntPtr get_next_frame_for_track(IntPtr ptr);
+    [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr add_client(IntPtr parentPtr, uint clientID);
+    [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr free_client(IntPtr clientPtr);
+    [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr add_track(IntPtr clientPtr, string trackID);
 
 
 }

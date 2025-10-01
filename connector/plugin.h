@@ -28,7 +28,14 @@ extern "C"
 	DLLExport int send_intrisics_packet(void* data, uint32_t size);
 	DLLExport void wait_for_peer();
 
-	DLLExport WebRTCConnection* create_new_webrtc_connection(uint32_t port_send, uint32_t port_recv);
-	DLLExport ConnectedClient* add_client(WebRTCConnection* connection, unsigned int client_id, const char** track_ids, unsigned int count);
+	DLLExport WebRTCConnection* create_new_webrtc_connection(uint32_t port_this, uint32_t port_remote);
+	DLLExport void free_webrtc_connection(WebRTCConnection* conn);
+	DLLExport ConnectedClient* add_client(WebRTCConnection* connection, unsigned int client_id);
+	DLLExport void free_client(ConnectedClient* client);
+	DLLExport TrackInternal* add_track(ConnectedClient* client, const char* track_id);
+	DLLExport unsigned int get_frame_size(TrackFrame* frame);
+	DLLExport char* get_frame_data_ptr(TrackFrame* frame);
+	DLLExport void free_track_frame(TrackFrame* frame);
 	DLLExport int wait_for_peer_connection(WebRTCConnection* connection);
+	DLLExport int send_track_frame(WebRTCConnection* connection, void* data, uint32_t size, uint32_t internal_id, uint32_t frame_nr);
 }

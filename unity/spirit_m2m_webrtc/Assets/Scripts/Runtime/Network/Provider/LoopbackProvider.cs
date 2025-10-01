@@ -55,7 +55,7 @@ public class LoopbackProvider : ConnectionProviderBase, ISenderSupported, IRecei
 
 
 
-    public LoopbackProvider(string ID, string ip, uint port, JObject jsonSettings) : base(ID, ip, port, jsonSettings) { 
+    public LoopbackProvider(LocalConnectedClient localClient, ClientAddedToProviderMessage pMsg) : base(localClient, pMsg) { 
         
     }
 

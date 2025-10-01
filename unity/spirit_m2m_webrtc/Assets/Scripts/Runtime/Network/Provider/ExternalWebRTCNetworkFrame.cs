@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NetworkFrameWebRTC : NetworkFrame
+public class ExternalWebRTCNetworkFrame : NetworkFrame
 {
     private IntPtr framePtr;
-    public NetworkFrameWebRTC(IntPtr framePtr)
+    public ExternalWebRTCNetworkFrame(IntPtr framePtr)
     {
         if(framePtr == IntPtr.Zero)
         {

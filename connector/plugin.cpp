@@ -140,14 +140,29 @@ void set_logging(char* log_directory, int _log_level) {
 }
 
 
-WebRTCConnection* create_new_webrtc_connection(uint32_t port_send, uint32_t port_recv) {
-	WebRTCConnection* c = new WebRTCConnection(port_send, port_recv);
+WebRTCConnection* create_new_webrtc_connection(uint32_t port_self, uint32_t port_remote) {
+	WebRTCConnection* c = new WebRTCConnection(port_self, port_remote);
 	int r = c->connect();
 	if (r != ConnectionSuccess) {
 		custom_log("create_new_webrtc_connection: ERROR: Failed to create WebRTC connection", Default, Color::Red);
+		delete c;
 		return nullptr;
 	}
 	return c;
+}
+
+void free_webrtc_connection(WebRTCConnection* conn) {
+	if (conn != nullptr) {
+		delete conn;
+	}
+}
+
+int send_track_frame(WebRTCConnection* connection, void* data, uint32_t size, uint32_t internal_id, uint32_t frame_nr) {
+	if (connection == nullptr) {
+		custom_log("send_frame: ERROR: Connection is a nullptr", Default, Color::Red);
+		return -1;
+	}
+	return connection->send_track_frame(client_id, data, size, internal_id, frame_nr);
 }
 
 int wait_for_peer_connection(WebRTCConnection* connection) {
@@ -166,12 +181,20 @@ ConnectedClient* add_client(WebRTCConnection* connection, unsigned int client_id
 	return connection->add_client(client_id);
 }
 
+
+
+void free_client(ConnectedClient* client) {
+	if (client != nullptr) {
+		delete client;
+	}
+}
+
 TrackInternal* add_track(ConnectedClient* client, const char* track_id) {
 	if (client == nullptr) {
 		custom_log("add_track: ERROR: Client is a nullptr", Default, Color::Red);
 		return nullptr;
 	}
-	return client->add_track(track_id, capturer_id, n_tiles);
+	return client->add_track(track_id);
 }
 
 /*

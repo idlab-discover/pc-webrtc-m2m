@@ -22,6 +22,7 @@ const (
 
 // TODO seperate this into different struct. We also want to use packet type for control packets (i.e. fov)
 type RemoteInputPacketHeader struct {
+	ClientID        uint32
 	InternalTrackID uint32
 	FrameNr         uint32
 	FrameLen        uint32
@@ -87,7 +88,7 @@ func NewRemoteCapturer(internalTrackID uint32) *RemoteCapturer {
 		ready_status:      false,
 	}
 	rm.cond = sync.NewCond(&rm.mtx)
-	println("Creating remote capturer with ID", internalTrackID)
+	println("Creating remote capturer with internal ID", internalTrackID)
 	return rm
 }
 
@@ -170,16 +171,16 @@ func (pc *ProxyConnection) sendPacketWithID(b []byte, offset uint32, packet_type
 }
 
 func (pc *ProxyConnection) SetupConnection(portThis string, portDLL string) {
-	address, err := net.ResolveUDPAddr("udp", portThis)
+	address, err := net.ResolveUDPAddr("udp", "127.0.0.1:"+portThis)
 	if err != nil {
-		fmt.Printf("WebRTCPeer: ERROR: %s\n", err)
+		fmt.Printf("WebRTCPeer: ERROR 0: %s\n", err)
 		return
 	}
 
 	// Create a UDP connection
 	pc.conn, err = net.ListenUDP("udp", address)
 	if err != nil {
-		fmt.Printf("WebRTCPeer: ERROR: %s\n", err)
+		fmt.Printf("WebRTCPeer: ERROR 1: %s\n", err)
 		return
 	}
 
@@ -188,7 +189,7 @@ func (pc *ProxyConnection) SetupConnection(portThis string, portDLL string) {
 
 	pc.addr, err = net.ResolveUDPAddr("udp", addrDLL)
 	if err != nil {
-		fmt.Printf("WebRTCPeer: ERROR: %s\n", err)
+		fmt.Printf("WebRTCPeer: ERROR 2: %s\n", err)
 		return
 	}
 
@@ -199,7 +200,7 @@ func (pc *ProxyConnection) SetupConnection(portThis string, portDLL string) {
 	fmt.Println("WebRTCPeer: Waiting for a message...", portThis, pc.addr.IP.String())
 	_, pc.addr, err = pc.conn.ReadFromUDP(buffer)
 	if err != nil {
-		fmt.Printf("WebRTCPeer: ERROR: %s\n", err)
+		fmt.Printf("WebRTCPeer: ERROR 3: %s\n", err)
 		return
 	}
 

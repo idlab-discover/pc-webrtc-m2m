@@ -61,7 +61,7 @@ public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
             {
                 fixed (byte* bufferPointer = desc.Bytes)
                 {
-                   nSend = LocalClient.SendVideoData(trackID, new IntPtr(bufferPointer), (uint)desc.Bytes.Length);
+                   nSend = LocalClient.SendVideoData(trackID, desc.Header.FrameNr, new IntPtr(bufferPointer), (uint)desc.Bytes.Length);
                 }
             }
 
@@ -70,7 +70,7 @@ public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
                 keepWorking = false;
                 Debug.Log("Stop capturing");
             }
-            Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.FrameAddedToSender, LocalClient.ClientID, desc.Header.FrameNr, desc.Header.ToStringSmall());
+            Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.FrameAddedToSender, LocalClient.ClientID, desc.Header.FrameNr, desc.Header.ToStringSmall()); // TODO This is currently still using capturerID, change this to reflect it better
         }
         desc.Dispose();
     }
