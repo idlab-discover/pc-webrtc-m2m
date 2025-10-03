@@ -1,7 +1,7 @@
 {
     "address": ":8080",
     "verifyAuthKey": true,
-    "ignorePreferredClientID": true,
+    "ignorePreferredClientID": false,
     "defaultProviderConfigPath": "config/providers/general.json",
     "provisionerType": "",
     "provisionerConfigPath": "config/provisioner/local.json",

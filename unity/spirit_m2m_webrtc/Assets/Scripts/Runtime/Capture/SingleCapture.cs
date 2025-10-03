@@ -19,12 +19,12 @@ public abstract class SingleCapture : BaseCapture, ICapturePoll
    
     protected IntPtr capPtr { get; set; }
    
-    protected SingleCapture(uint fps, FrameMode frameMode, FrameCleanupSettingsEx frameCleanupSettings, CaptureType capType, CaptureHelper captureHelper) : base(capType, captureHelper)
+    protected SingleCapture(uint fps, FrameMode frameMode, FrameCleanupSettingsEx frameCleanupSettings, CaptureType capType, CaptureHelper captureHelper, bool startCaptureThread) : base(capType, captureHelper)
     {
         capPtr = Realsense2Invoker.create_new_capturer(fps, frameMode, frameCleanupSettings, capType, this.CaptureHelper.SettingsHandle.AddrOfPinnedObject());
         if (capPtr != IntPtr.Zero)
         {
-            Realsense2Invoker.start_capturing(capPtr);
+            Realsense2Invoker.start_capturing(capPtr, startCaptureThread);
         }
         CaptureHelper.FreeSettingsEx();
     }

@@ -72,7 +72,8 @@ func main() {
 	// Debug Mode Command Line args
 	managerIP := flag.String("manager", "", "IP address of the session manager instance, with port")
 	providersPath := flag.String("providers", "", "Path to JSON file containing all the preferred providers with tracks")
-
+	transcoderType := flag.String("tr", "fixed", "Type of transcoder to use (fixed, file)")
+	transcoderConfigPath := flag.String("trcfg", "", "Path to JSON file containing the configuration for the file based transcoder")
 	flag.Parse()
 	var tr transcoder.Transcoder
 	if *useProxy {
@@ -91,7 +92,14 @@ func main() {
 		)
 		sfuConn.OnFullyConnected(*preferredClientID, *sfuAuthKey, *sfuIP, *sfuPort)
 	} else {
-		tr = transcoder.NewTranscoderFixed(1000000, 30)
+		switch *transcoderType {
+		case "file":
+			tr = transcoder.NewTranscoderFile(*providersPath, *transcoderConfigPath)
+		case "fixed":
+			fallthrough
+		default:
+			tr = transcoder.NewTranscoderFixed(1000000, 30)
+		}
 		factory := sfuProviderFactory(tr)
 		smc, err := session_manager.NewSessionManagerConnection(*managerIP, *preferredClientID, *providersPath, tr, factory)
 		if err != nil {

@@ -16,7 +16,7 @@ public static class CaptureFactory
             shouldCleanupDepth = frameCleanupSettings.shouldCleanupDepth
         };
     }
-    public static SingleCapture CreateNewSingleCapture(SessionInfo sessionInfo)
+    public static SingleCapture CreateNewSingleCapture(SessionInfo sessionInfo, bool startCaptureThread=true)
     {
         FrameCleanupSettingsEx frameCleanupSettings = makeFrameCleanupEx(sessionInfo.frameCleanupSettings);
         switch (sessionInfo.capturerName.ToLower())
@@ -26,7 +26,7 @@ public static class CaptureFactory
                     string fullPath = Application.dataPath + "/" + sessionInfo.artificalConfigPath;
                     var set = JsonConvert.DeserializeObject<ArtificialSettings[]>(File.ReadAllText(fullPath));
                     if(set != null && set.Length > sessionInfo.activeCamIndex) {
-                        return new ArtificialCapture(sessionInfo.camFPS, sessionInfo.frameMode, frameCleanupSettings, set[sessionInfo.activeCamIndex]);
+                        return new ArtificialCapture(sessionInfo.camFPS, sessionInfo.frameMode, frameCleanupSettings, set[sessionInfo.activeCamIndex], startCaptureThread);
                     }
                     break;
                 }
@@ -36,7 +36,7 @@ public static class CaptureFactory
                     var set = JsonConvert.DeserializeObject<RealsenseSettings[]>(File.ReadAllText(fullPath));
                     if (set != null && set.Length > sessionInfo.activeCamIndex)
                     {
-                        return new RealsenseCapture(sessionInfo.camFPS, sessionInfo.frameMode, frameCleanupSettings, set[sessionInfo.activeCamIndex]);
+                        return new RealsenseCapture(sessionInfo.camFPS, sessionInfo.frameMode, frameCleanupSettings, set[sessionInfo.activeCamIndex], startCaptureThread);
                     }
                     break;
                 }
@@ -46,7 +46,7 @@ public static class CaptureFactory
                     var set = JsonConvert.DeserializeObject<PrerecordedKinectSettings[]>(File.ReadAllText(fullPath));
                     if (set != null && set.Length > sessionInfo.activeCamIndex)
                     {
-                        return new PrerecordedKinectCapture(sessionInfo.camFPS, sessionInfo.frameMode, frameCleanupSettings, set[sessionInfo.activeCamIndex]);
+                        return new PrerecordedKinectCapture(sessionInfo.camFPS, sessionInfo.frameMode, frameCleanupSettings, set[sessionInfo.activeCamIndex], startCaptureThread);
                     }
                     break;
                 }
@@ -55,7 +55,7 @@ public static class CaptureFactory
         return null;
     }
 
-    public static MultiCaptureSetup CreateNewMultiCapture(SessionInfo sessionInfo)
+    public static MultiCaptureSetup CreateNewMultiCapture(SessionInfo sessionInfo, bool startCaptureThread)
     {
         FrameCleanupSettingsEx frameCleanupSettings = makeFrameCleanupEx(sessionInfo.frameCleanupSettings);
         List<MultiCaptureSingleCam> captures = new List<MultiCaptureSingleCam>();
@@ -110,6 +110,6 @@ public static class CaptureFactory
             Debug.LogError("Could not create multi capturer");
             return null;
         }
-        return new MultiCaptureSetup(sessionInfo.camFPS, sessionInfo.frameMode, frameCleanupSettings, captures);
+        return new MultiCaptureSetup(sessionInfo.camFPS, sessionInfo.frameMode, frameCleanupSettings, captures, startCaptureThread);
     }
 }

@@ -9,10 +9,11 @@ public abstract class PipelineLocalPointcloudBase : PipelineLocalBase
     private System.Threading.Thread pollThread;
     protected bool keepWorking = true;
     protected abstract FrameMode FrameMode { get; }
+    protected bool startCaptureThread = true;
     public override void Init(SessionInfo sessionInfo, LocalConnectedClient localClient)
     {
         base.Init(sessionInfo, localClient);
-        capture = CaptureFactory.CreateNewMultiCapture(sessionInfo);
+        capture = CaptureFactory.CreateNewMultiCapture(sessionInfo, startCaptureThread);
         if (capture == null)
         {
             Debug.LogError("Failed to create MultiCaptureSetup");

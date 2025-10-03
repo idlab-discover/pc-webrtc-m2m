@@ -42,32 +42,7 @@ CAPTURER_SETUP_CODE RS2Capturer::init()
 CAPTURER_SETUP_CODE RS2Capturer::capture_next_frame()
 {
     try {
-		size_t n_frames = 0;
-		rs2::frameset frames;
-		while(n_frames != 2) {
-			frames = pipe.wait_for_frames();
-			n_frames = frames.size();
-		}
-		if(align_to_depth) {
-			frames = depth_align.process(frames);
-		} else {
-			frames = color_align.process(frames);
-		}
-		auto depth = frames.get_depth_frame();
-		depth = thres_filter.process(depth);
-		auto rgb = frames.get_color_frame();
-		auto temp_frame = new RS2Frame(
-			capturer_id,
-			mode,
-			width,
-			height,
-			rgb.get_bytes_per_pixel(),
-			rgb.get_stride_in_bytes(),
-			depth,
-			rgb,
-			frame_nr,
-			cleanup_settings
-		);
+		auto temp_frame = get_single_frame();
 		if(frame_ready_callback_instance != nullptr) {
 			frame_ready_callback_instance(capturer_id, temp_frame, true);
 		} else {
@@ -136,4 +111,35 @@ void* RS2Capturer::get_calibration() {
 		get_intrinsincs_from_stream(depth_profile),
 		get_intrinsincs_from_stream(color_profile)
 	};
+}
+
+Frame *RS2Capturer::get_single_frame()
+{
+	size_t n_frames = 0;
+		rs2::frameset frames;
+		while(n_frames != 2) {
+			frames = pipe.wait_for_frames();
+			n_frames = frames.size();
+		}
+		if(align_to_depth) {
+			frames = depth_align.process(frames);
+		} else {
+			frames = color_align.process(frames);
+		}
+		auto depth = frames.get_depth_frame();
+		depth = thres_filter.process(depth);
+		auto rgb = frames.get_color_frame();
+		auto temp_frame = new RS2Frame(
+			capturer_id,
+			mode,
+			width,
+			height,
+			rgb.get_bytes_per_pixel(),
+			rgb.get_stride_in_bytes(),
+			depth,
+			rgb,
+			frame_nr,
+			cleanup_settings
+		);
+		return temp_frame;
 }

@@ -11,7 +11,7 @@ using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 
 public class ArtificialCapture : SingleCapture
 {
-    public ArtificialCapture(uint fps, FrameMode frameMode, FrameCleanupSettingsEx frameCleanupSettings, ArtificialSettings captureSettings) : base(fps, frameMode, frameCleanupSettings, CaptureType.Artificial, new ArtificialCaptureHelper(captureSettings))
+    public ArtificialCapture(uint fps, FrameMode frameMode, FrameCleanupSettingsEx frameCleanupSettings, ArtificialSettings captureSettings, bool startCaptureThread) : base(fps, frameMode, frameCleanupSettings, CaptureType.Artificial, new ArtificialCaptureHelper(captureSettings), startCaptureThread)
     {
     }
 

@@ -48,9 +48,9 @@ void set_logging(char* log_directory, int _log_level) {
 	This function is responsible for capturing incoming realsense data. It is called from within a thread, which is started by the
 	initialize function. No action is required from within Unity.
 */
-void start_capturing(Capturer* capturer) {
+void start_capturing(Capturer* capturer, bool start_capture_thread) {
 	Log::custom_log("start_capturing: Starting to capture frames from single camera", Verbose, LogColor::Yellow);
-	capturer->start_capturing();
+	capturer->start_capturing(start_capture_thread);
 }
 
 /*
@@ -70,8 +70,11 @@ PointCloud* poll_next_point_cloud(Capturer* capturer) {
 }
 
 Frame* poll_next_frame(Capturer* capturer) {
-	Frame* frame = capturer->poll_next_frame();
-	return frame;
+	return capturer->poll_next_frame();
+}
+
+Frame* get_single_frame(Capturer* capturer) {
+	return capturer->get_single_frame();
 }
 
 RawFrame* poll_next_raw_frame(Capturer* capturer) {
@@ -212,12 +215,12 @@ MultiCapturer* create_new_multi_capturer(uint32_t fps,
 	return CapturerFactory::get_instance().create_multi_capturer(fps, mode, cleanup_settings, type, n_settings, capture_settings);
 }
 
-void start_capturing_multi(MultiCapturer* capturer) {
+void start_capturing_multi(MultiCapturer* capturer, bool start_capture_thread) {
 	if(capturer == nullptr) {
 		return;
 	}
 	Log::custom_log("start_capturing_multi: Starting to capture frames from multi camera", Verbose, LogColor::Yellow);
-	capturer->start_capturing();
+	capturer->start_capturing(start_capture_thread);
 }
 
 
@@ -254,6 +257,13 @@ PointCloud* poll_next_point_cloud_for_capturer(MultiCapturer* capturer, unsigned
 		return nullptr;
 	}
 	return capturer->poll_next_point_cloud_for_capturer(capturer_index);
+}
+
+PointCloud* get_single_combined_point_cloud(MultiCapturer* capturer) {
+	if(capturer == nullptr) {
+		return nullptr;
+	}
+	return capturer->get_single_combined_point_cloud();
 }
 
 PointCloud* poll_next_combined_point_cloud(MultiCapturer* capturer) {

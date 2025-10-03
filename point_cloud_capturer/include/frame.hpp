@@ -47,6 +47,7 @@ class Frame {
 
         PointCloud* get_point_cloud();
         RawFrame* get_raw_frame();
+        bool is_valid_frame() const { return is_valid; }
     protected:
         unsigned int capturer_id; // ID of the capturer that created this frame
         unsigned int frame_nr;
@@ -55,4 +56,5 @@ class Frame {
         float z_offset = 0.0;
         uint64_t timestamp;
         int64_t device_timestamp = -1; // Device timestamp, if applicable
+        bool is_valid = false;
 };

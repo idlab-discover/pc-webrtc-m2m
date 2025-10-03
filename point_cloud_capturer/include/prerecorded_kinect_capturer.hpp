@@ -68,6 +68,7 @@ class PrerecordedKinectCapturer : public Capturer {
         static void free_calibration(void* cal) {
             free_calibration_internal<KinectCalibration>(cal);
         };
+         Frame* get_single_frame();
     private:
         int64_t prev_timestamp_usec = -1;
         std::string cam_file;

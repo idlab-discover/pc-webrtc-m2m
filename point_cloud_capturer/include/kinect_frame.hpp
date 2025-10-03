@@ -86,9 +86,8 @@ class KinectFrame : public Frame {
         unsigned int get_capture_width() { return color_width;};
         unsigned int get_capture_height() { return color_height;};
         unsigned int get_raw_n_points() {return n_points;};
-        bool is_valid_frame() const { return is_valid; }
+        
     private:
-        bool is_valid = false;
         k4a_image_t depth_image;
         k4a_image_t color_image;
         k4a_capture_t capture_handle;

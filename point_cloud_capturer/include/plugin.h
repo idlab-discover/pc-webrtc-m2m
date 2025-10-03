@@ -22,12 +22,13 @@ extern "C"
 	DLLExport Capturer* create_new_capturer(uint32_t fps, 
 		FrameMode mode, FrameCleanupSettings cleanup_settings, 
 		CAPTURE_TYPE type, void* capture_settings);
-	DLLExport void start_capturing(Capturer* capturer);
+	DLLExport void start_capturing(Capturer* capturer, bool start_capture_thread);
 	DLLExport void set_capturer_frame_cleanup_settings(Capturer* capturer, 
 		FrameCleanupSettings cleanup_settings);
 	DLLExport void* get_calibration(Capturer* capturer);
 	DLLExport uint32_t get_calibration_size(Capturer* capturer);
 	//		Poll functions
+	DLLExport Frame* get_single_frame(Capturer* capturer);
 	DLLExport PointCloud* poll_next_point_cloud(Capturer* capturer);
 	DLLExport Frame* poll_next_frame(Capturer* capturer);
 	DLLExport RawFrame* poll_next_raw_frame(Capturer* capturer);
@@ -37,13 +38,14 @@ extern "C"
 	DLLExport MultiCapturer* create_new_multi_capturer(uint32_t fps, 
 		FrameMode mode, FrameCleanupSettings cleanup_settings, 
 		CAPTURE_TYPE type, unsigned int n_settings, void** capture_settings);
-	DLLExport void start_capturing_multi(MultiCapturer* capturer);
+	DLLExport void start_capturing_multi(MultiCapturer* capturer, bool start_capture_thread);
 	DLLExport void set_cleanup_settings_for_capturer(MultiCapturer* capturer, unsigned int capturerer_index, FrameCleanupSettings _cleanup_settings);
 	DLLExport void* get_calibration_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);
 	DLLExport uint32_t get_calibration_size_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);
 	DLLExport bool register_frame_ready_callback_for_capturer(MultiCapturer* capturer, unsigned int capturer_index, FrameReadyCallback cb);
 
 	//		Poll functions
+	DLLExport PointCloud* get_single_combined_point_cloud(MultiCapturer* capturer);
 	DLLExport PointCloud* poll_next_combined_point_cloud(MultiCapturer* capturer);
 	DLLExport Frame* poll_next_frame_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);
 	DLLExport PointCloud* poll_next_point_cloud_for_capturer(MultiCapturer* capturer, unsigned int capturer_index);

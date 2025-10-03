@@ -17,7 +17,7 @@ MultiCapturer::~MultiCapturer() {
     }
 }
 
-void MultiCapturer::start_capturing() {
+void MultiCapturer::start_capturing(bool start_capture_thread) {
     // Set e_timestamp for each capturer
     int64_t e_timestamp = -1;
     int64_t f_timestamp = -1;
@@ -41,8 +41,9 @@ void MultiCapturer::start_capturing() {
                 unsigned int n_frames_to_drop = (f_timestamp - capturer->get_first_frame_timestamp_usec()) / (66*1000);
                 capturer->fastforward_x_frames(n_frames_to_drop);
             }
-        
-            capturer->create_capture_worker();
+            if(start_capture_thread) {
+                capturer->create_capture_worker();
+            }
         }
     }
 }
@@ -94,4 +95,82 @@ bool MultiCapturer::register_frame_ready_callback_for_capturer(unsigned int capt
         return true;
     }
     return false;
+}
+
+PointCloud *MultiCapturer::get_single_combined_point_cloud()
+{
+    std::vector<PointCloud*> point_clouds;
+    point_clouds.reserve(capturers.size());
+    unsigned int total_points = 0;
+    for (auto& capturer : capturers) {
+        Frame* frame = capturer->get_single_frame();
+        if(frame == nullptr) {
+            continue;
+        }
+        PointCloud* pc = frame->get_point_cloud();
+        // If nullptr -> keep polling
+        if (pc != nullptr) {
+            //Log::log("Captured point cloud from capturer " + std::to_string(pc->n_points), LogColor::Green);
+            total_points += pc->n_points;
+            point_clouds.push_back(pc);
+        }
+    }
+    return combine_point_clouds(total_points, point_clouds);
+}
+
+PointCloud *MultiCapturer::poll_next_combined_point_cloud()
+{
+    std::vector<PointCloud*> point_clouds;
+    point_clouds.reserve(capturers.size());
+    unsigned int total_points = 0;
+    for (auto& capturer : capturers) {
+        PointCloud* pc = capturer->poll_next_point_cloud();
+        // If nullptr -> keep polling
+        if (pc != nullptr) {
+            //Log::log("Captured point cloud from capturer " + std::to_string(pc->n_points), LogColor::Green);
+            total_points += pc->n_points;
+            point_clouds.push_back(pc);
+        }
+    }
+    return combine_point_clouds(total_points, point_clouds);
+}
+
+PointCloud *MultiCapturer::combine_point_clouds(unsigned int total_points, const std::vector<PointCloud *> &point_clouds)
+{
+    // If all nullptr -> return
+    // Else calculate highest timestamp
+    // Poll other cameras until they get good frame with timestamp close to highest timestamp
+    // Set #frames to drop (without sleep) based on lowest timestamp
+    // If frameNr == 0 calculate s_seek
+    unsigned int frame_nr = current_frame_nr;
+    current_frame_nr++;
+    if(total_points == 0) {
+        for(auto& pc : point_clouds) {
+            if(pc != nullptr) {
+                delete pc; // Free the individual point cloud
+            }
+        }
+        return nullptr; // No point clouds captured
+    }
+    
+    PointCloud* combined_pc = new PointCloud();
+    combined_pc->n_points = total_points;
+    combined_pc->capturer_id = 0; // Set to 0 or any other identifier if needed
+    combined_pc->frame_nr = frame_nr;
+    combined_pc->timestamp = point_clouds.empty() ? 0 : point_clouds[0]->timestamp;
+    combined_pc->coords = new Vertex[combined_pc->n_points];
+    combined_pc->colors = new Color[combined_pc->n_points];
+    combined_pc->frame_pointer = nullptr; // Set to nullptr, as we don't want to free the frame pointer
+    combined_pc->delete_arrays = true; // Set to true, so we can free the arrays in the destructor
+    unsigned int current_index = 0;
+    for(auto& pc : point_clouds) {
+        if(pc != nullptr) {
+            std::copy(pc->coords, pc->coords + pc->n_points, combined_pc->coords + current_index);
+            std::copy(pc->colors, pc->colors + pc->n_points, combined_pc->colors + current_index);
+            current_index += pc->n_points;
+            delete pc; // Free the individual point cloud
+        }
+    }
+    
+    return combined_pc;
 }

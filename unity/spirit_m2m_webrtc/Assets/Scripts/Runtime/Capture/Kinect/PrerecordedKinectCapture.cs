@@ -12,7 +12,7 @@ public class PrerecordedKinectCapture : SingleCapture
 
     public KinectCalibrationEx kinectCalibrationEx;
 
-    public PrerecordedKinectCapture(uint fps, FrameMode frameMode, FrameCleanupSettingsEx frameCleanupSettings, PrerecordedKinectSettings captureSettings) : base(fps, frameMode, frameCleanupSettings, CaptureType.PrerecordedKinect, new KinectCaptureHelper(captureSettings))
+    public PrerecordedKinectCapture(uint fps, FrameMode frameMode, FrameCleanupSettingsEx frameCleanupSettings, PrerecordedKinectSettings captureSettings, bool startCaptureThread) : base(fps, frameMode, frameCleanupSettings, CaptureType.PrerecordedKinect, new KinectCaptureHelper(captureSettings), startCaptureThread)
     {
 
     }

@@ -1,9 +1,9 @@
 #include "capturer.hpp"
 #include "log.h"
-void Capturer::start_capturing()
+void Capturer::start_capturing(bool start_capture_thread)
 {
     auto code = init();
-    if(code == 0) {
+    if(code == 0 && start_capture_thread) {
         create_capture_worker();
     }
 }
@@ -11,6 +11,7 @@ void Capturer::start_capturing()
 
 void Capturer::create_capture_worker()
 {
+    capture_done = false;
     worker = std::thread(&Capturer::start_capturing_internal, this);
 }
 

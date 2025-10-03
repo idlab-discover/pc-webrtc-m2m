@@ -33,7 +33,7 @@ public static class Realsense2Invoker
       UInt32 fps, FrameMode frame_mode, FrameCleanupSettingsEx cleanup_settings, CaptureType capType, IntPtr captureSettings
     );
     [DllImport(dllName)]
-    public static extern void start_capturing(IntPtr cap);
+    public static extern void start_capturing(IntPtr cap, bool startCaptureThread);
     [DllImport(dllName)]
     public static extern void set_capturer_frame_cleanup_settings(IntPtr cap, FrameCleanupSettingsEx cleanup_settings);
     [DllImport(dllName)]
@@ -48,6 +48,8 @@ public static class Realsense2Invoker
     #endregion
 
     #region Poll functions
+    [DllImport(dllName)]
+    public static extern IntPtr poll_single_frame(IntPtr cap);
     [DllImport(dllName)]
     public static extern IntPtr poll_next_point_cloud(IntPtr cap);
     [DllImport(dllName)]
@@ -66,7 +68,7 @@ public static class Realsense2Invoker
      UInt32 fps, FrameMode frame_mode, FrameCleanupSettingsEx cleanup_settings, CaptureType capType, uint n_settings, IntPtr[] captureSettings
     );
     [DllImport(dllName)]
-    public static extern void start_capturing_multi(IntPtr cap);
+    public static extern void start_capturing_multi(IntPtr cap, bool startCaptureThread);
     [DllImport(dllName)]
     public static extern void set_cleanup_settings_for_capturer(IntPtr multi_cap, uint capturer_index, FrameCleanupSettingsEx cleanup_settings);
     [DllImport(dllName)]
@@ -79,6 +81,8 @@ public static class Realsense2Invoker
     #endregion
 
     #region Poll functions
+    [DllImport(dllName)]
+    public static extern IntPtr get_single_combined_point_cloud(IntPtr multi_cap);
     [DllImport(dllName)]
     public static extern IntPtr poll_next_combined_point_cloud(IntPtr multi_cap);
     [DllImport(dllName)]

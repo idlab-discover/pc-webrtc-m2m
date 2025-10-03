@@ -46,6 +46,7 @@ class RS2Capturer : public Capturer {
         static void free_calibration(void* cal) {
             free_calibration_internal<RealsenseCalibration>(cal);
         };
+        Frame* get_single_frame();
     private:
         rs2::pipeline pipe;
         rs2::pointcloud pc;

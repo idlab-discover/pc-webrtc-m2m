@@ -29,6 +29,7 @@ class ArtificalCapturer : public Capturer {
         static void free_calibration(void* cal) {
             free_calibration_internal<ArtificialCalibration>(cal);
         };
+        Frame* get_single_frame();
     private:
         unsigned int side_size;
         std::chrono::milliseconds interframe_delay;

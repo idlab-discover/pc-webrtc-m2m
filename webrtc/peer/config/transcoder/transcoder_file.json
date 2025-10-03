@@ -1,0 +1,4 @@
+{
+    "trackDirectory": "peer/config/transcoder/file_tracks",
+    "maxFrameNr": 10
+}

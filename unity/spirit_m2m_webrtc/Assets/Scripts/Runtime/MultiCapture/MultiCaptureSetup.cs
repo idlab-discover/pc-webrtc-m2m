@@ -15,10 +15,12 @@ public class MultiCaptureSetup : IDisposable
     private IntPtr multiCapPtr;
     private List<MultiCaptureSingleCam> capturers;
     private GCHandle frameReadyCbHandle;
+    private bool isUsingCaptureThread = false;
 
-   
-    public MultiCaptureSetup(uint fps, FrameMode frameMode, FrameCleanupSettingsEx frameCleanupSettings, List<MultiCaptureSingleCam> capturers)
+
+    public MultiCaptureSetup(uint fps, FrameMode frameMode, FrameCleanupSettingsEx frameCleanupSettings, List<MultiCaptureSingleCam> capturers, bool startCaptureThread)
     {
+        this.isUsingCaptureThread = startCaptureThread;
         this.capturers = capturers;
         CapType = capturers[0].CaptureType;
         IntPtr[] settingPtrs = new IntPtr[capturers.Count];
@@ -30,7 +32,7 @@ public class MultiCaptureSetup : IDisposable
         multiCapPtr = Realsense2Invoker.create_new_multi_capturer(fps, frameMode, frameCleanupSettings, CapType, (uint)this.capturers.Count, settingPtrs);
         if (multiCapPtr != IntPtr.Zero)
         {
-            Realsense2Invoker.start_capturing_multi(multiCapPtr);
+            Realsense2Invoker.start_capturing_multi(multiCapPtr, isUsingCaptureThread);
         } else
         {
             Debug.LogError("Failed to create MultiCaptureSetup");
@@ -47,6 +49,10 @@ public class MultiCaptureSetup : IDisposable
     public IntPtr PollNextPointCloud()
     {
         return Realsense2Invoker.poll_next_combined_point_cloud(multiCapPtr);
+    }
+    public IntPtr GetSingleCombinedPointCloud()
+    {
+        return Realsense2Invoker.get_single_combined_point_cloud(multiCapPtr);
     }
     public void SetFrameReadyCallback(Realsense2Invoker.frameReadyCallback cb)
     {

@@ -248,7 +248,7 @@ public class MultiCapturingTestRaw : MonoBehaviour
         Realsense2Invoker.set_logging("", debug);
         RawInvoker.RegisterDebugCallback(OnDebugCallbackDraco);
         RawInvoker.set_logging("", debug);
-        capture = CaptureFactory.CreateNewMultiCapture(sessionInfo);
+        capture = CaptureFactory.CreateNewMultiCapture(sessionInfo, true);
       
         DracoInvoker.initialize();
        

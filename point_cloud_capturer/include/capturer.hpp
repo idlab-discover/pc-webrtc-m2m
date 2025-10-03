@@ -108,10 +108,11 @@ class Capturer {
         virtual Frame* poll_next_frame() = 0; 
         virtual void* get_calibration() = 0;
         virtual uint32_t get_calibration_size() = 0;
+        virtual inline Frame* get_single_frame() = 0;  
         PointCloud* poll_next_point_cloud();
         RawFrame* poll_next_raw_frame();
         void set_cleanup_settings(FrameCleanupSettings _cleanup_settings) {cleanup_settings=_cleanup_settings;}
-        void start_capturing();
+        void start_capturing(bool start_capture_thread);
         void wait_for_capture_done();
         unsigned int get_capture_id() const { return capturer_id; }
         int64_t get_start_timestamp_usec() const { return s_timestamp_offset_usec; }
@@ -136,7 +137,7 @@ class Capturer {
         int64_t first_frame_timestamp_usec = -1;
         std::mutex m_capturing;
         std::condition_variable cv_capture;
-        bool capture_done = false;
+        bool capture_done = true;
         bool keep_working = false;
         FrameMode mode;
         unsigned int frame_nr = 0;
@@ -152,6 +153,7 @@ class Capturer {
         template <typename T>
         static void free_calibration_internal(void* cal) { delete static_cast<T*>(cal); };
         FrameReadyCallback frame_ready_callback_instance = nullptr; // TODO probably need to wrap this in mutex maybe
+           
     private:
         void start_capturing_internal();
 };

@@ -22,12 +22,7 @@ CAPTURER_SETUP_CODE ArtificalCapturer::capture_next_frame()
     previous_time = std::chrono::high_resolution_clock::now();
     // Need to call end here for optimisation
     timeEndPeriod(1);
-    auto temp_frame = new ArtificalFrame(
-        capturer_id,
-        mode,
-        side_size,
-        frame_nr
-    );
+    auto temp_frame = get_single_frame();
     if(frame_ready_callback_instance != nullptr) {
         frame_ready_callback_instance(capturer_id, temp_frame, true);
     } else {
@@ -43,4 +38,14 @@ Frame *ArtificalCapturer::poll_next_frame()
 }
 void* ArtificalCapturer::get_calibration() {
     return new ArtificialCalibration{side_size};
+}
+
+Frame *ArtificalCapturer::get_single_frame()
+{
+    return new ArtificalFrame(
+        capturer_id,
+        mode,
+        side_size,
+        frame_nr
+    );
 }
