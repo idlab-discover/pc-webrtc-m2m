@@ -18,21 +18,23 @@ import (
 const NameSFU = "SFU"
 
 type SFU struct {
-	settings  SFUSettings
-	address   string
-	port      uint
-	clients   map[uint]*ClientConnection
-	websocket *threadSafeWriter
-	mut       sync.Mutex
+	settings        SFUSettings
+	address         string
+	port            uint
+	clients         map[uint]*ClientConnection
+	remoteProviders map[string]ProviderConnection
+	websocket       *threadSafeWriter
+	mut             sync.Mutex
 }
 
 func NewSFU(address string, port uint) *SFU {
 	Log(NameSFU, Creating, true, true)
 	sfu := &SFU{
-		address: address,
-		port:    port,
-		clients: map[uint]*ClientConnection{},
-		mut:     sync.Mutex{},
+		address:         address,
+		port:            port,
+		clients:         map[uint]*ClientConnection{},
+		remoteProviders: map[string]ProviderConnection{},
+		mut:             sync.Mutex{},
 	}
 	Log(NameSFU, Created, true, true)
 	return sfu
@@ -67,7 +69,22 @@ func (sfu *SFU) AddClient(msg NewClientMessage) {
 	sfu.clients[msg.ClientID] = client
 }
 
+func (sfu *SFU) AddRemoteProvider(msg RemoteProviderAddedMessage, selfProviderKey string, selfAuthKey string) {
+	sfu.mut.Lock()
+	defer sfu.mut.Unlock()
+	// TODO Check if provider already exists
+	provider := CreateRemoteProvider(msg.ProviderType, msg.ProviderKey, msg.Address, msg.Port, msg.AuthKey)
+	// Call connect
+	if provider == nil {
+		fmt.Printf("SFU: AddRemoteProvider: Unknown provider type %s\n", msg.ProviderType) // TOOD Proper logging
+		return
+	}
+	provider.SetupForwarding()
+	provider.ConnectWebSocket("webrtc_sfu", selfProviderKey, selfAuthKey)
+}
+
 func (sfu *SFU) SetupSFU(settings SFUSettings) {
+	//println("Setting up SFU")
 	sfu.settings = settings
 	indexHTML, err := ioutil.ReadFile("index.html")
 	if err != nil {
@@ -82,7 +99,8 @@ func (sfu *SFU) SetupSFU(settings SFUSettings) {
 	dashboardTemplate := template.Must(template.New("").Parse(string(dashboardHTML)))
 
 	// WebSocket handler
-	http.HandleFunc("/websocket_client", sfu.websocketHandler)
+	http.HandleFunc("/websocket_client", sfu.websocketClientHandler)
+	http.HandleFunc("/websocket_provider", sfu.websocketProviderHandler)
 	http.HandleFunc("/dashboardws", websocketHandlerDashboard)
 	http.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
 		if err := dashboardTemplate.Execute(w, "ws://"+r.Host+"/dashboardws"); err != nil {
@@ -102,7 +120,7 @@ func (sfu *SFU) SetupSFU(settings SFUSettings) {
 }
 
 // Handle incoming websockets
-func (sfu *SFU) websocketHandler(w http.ResponseWriter, r *http.Request) {
+func (sfu *SFU) websocketClientHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("WebRTCSFU: webSocketHandler: Websocket handler started")
 	clientIDS := r.URL.Query().Get("clientID")
@@ -160,6 +178,55 @@ func (sfu *SFU) websocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("WebRTCSFU: webSocketHandler: Will now call signalpeerconnections again")
 
+}
+
+func (sfu *SFU) websocketProviderHandler(w http.ResponseWriter, r *http.Request) {
+	Log(NameSFU, RemoteProviderConnectionStarted, true, true)
+	providerKey := r.URL.Query().Get("providerKey")
+	if providerKey == "" {
+		fmt.Println("WebRTCSFU: webSocketHandler: No providerKey provided, returning 400")
+		http.Error(w, "No providerKey provided", http.StatusBadRequest)
+		Log(NameSFU, RemoteProviderConnectionFailed, true, true)
+		return
+	}
+	providerType := r.URL.Query().Get("providerType")
+	if providerType == "" {
+		fmt.Println("WebRTCSFU: webSocketHandler: No providerType provided, returning 400")
+		http.Error(w, "No providerType provided", http.StatusBadRequest)
+		Log(NameSFU, RemoteProviderConnectionFailed, true, true)
+		return
+	}
+	sfu.mut.Lock()
+	if _, exists := sfu.remoteProviders[providerKey]; exists {
+		fmt.Println("WebRTCSFU: webSocketHandler: Provider already connected, returning 400")
+		http.Error(w, "Provider already connected", http.StatusBadRequest)
+		Log(NameSFU, RemoteProviderConnectionFailed, true, true)
+		sfu.mut.Unlock()
+		return
+	}
+	LogWithMessage(NameSFU, RemoteProviderConnectionConnecting, true, true, fmt.Sprintf("providerKey=%s providerType=%s", providerKey, providerType))
+	provider := CreateRemoteProvider(providerType, providerKey, r.RemoteAddr, 0, "") // TODO Fix this port and address
+	provider.SetupForwarding()
+	sfu.remoteProviders[providerKey] = provider
+	sfu.mut.Unlock()
+	// TODO Verify authKey
+
+	// Upgrade HTTP request to Websocket
+	unsafeWebSocketConn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Printf("WebRTCSFU: webSocketHandler: ERROR: %s\n", err)
+		return
+	}
+
+	provider.SetupWebsocket(
+		&ThreadSafeWebsocket{
+			unsafeWebSocketConn, sync.Mutex{},
+		},
+	)
+	sfu.mut.Lock()
+	//client.SignalRenegotiation()
+	sfu.mut.Unlock()
+	LogWithMessage(NameSFU, RemoteProviderConnectionSuccess, true, true, fmt.Sprintf("providerKey=%s providerType=%s", providerKey, providerType))
 }
 
 // If someone connects => signal all PeerConnections again

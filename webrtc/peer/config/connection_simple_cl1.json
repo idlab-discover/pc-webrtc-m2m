@@ -4,7 +4,7 @@
     "providers": [
         {
             "providerType": "webrtc_sfu",
-            "providerKey": "sfu_mdc",
+            "providerKey": "sfu_mdc2",
             "providerSettings": {},
             "videoTracks": [
                 {

@@ -411,47 +411,6 @@ func (clc *ClientConnection) startListening() {
 				clc.handleSubscribeToTracksMessage(msg.Message)
 			case "SubscribeToRemoteClientsMessage":
 				clc.handleSubscribeToRemoteClientsMessage(msg.Message)
-				// answer
-				/*case 3:
-					answer := webrtc.SessionDescription{}
-					if err := json.Unmarshal(msg.Message, &answer); err != nil {
-						panic(err)
-					}
-					if err := clc.peerConnection.SetRemoteDescription(answer); err != nil {
-						panic(err)
-					}
-
-					for _, c := range clc.pendingCandidatesString {
-						if candidateErr := clc.peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: c}); candidateErr != nil {
-							panic(candidateErr)
-						}
-					}
-				// candidate
-				case 4:
-					candidate := ClientCandidate{}
-					if err := json.Unmarshal(msg.Message, &candidate); err != nil {
-						panic(err)
-					}
-					desc := clc.peerConnection.RemoteDescription()
-					if desc == nil {
-						clc.pendingCandidatesString = append(clc.pendingCandidatesString, candidate.Message)
-					} else {
-						if candidateErr := clc.peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate.Message}); candidateErr != nil {
-							panic(candidateErr)
-						}
-					}
-				// remove track
-				case 5:
-					//removeTrackforPeer(pcState, message)
-				// add track
-				case 6:
-					//addTrackforPeer(pcState, message)
-				case 7:
-					candidate := ClientCandidate{}
-					if err := json.Unmarshal(msg.Message, &candidate); err != nil {
-						panic(err)
-					}
-					clc.updateCamInfo(candidate.Message)*/
 			}
 		}
 	}()

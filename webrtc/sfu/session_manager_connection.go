@@ -46,6 +46,14 @@ type NewClientMessage struct {
 	RemoteClients     []RemoteClient `json:"remoteClients"`
 }
 
+type RemoteProviderAddedMessage struct {
+	ProviderType string `json:"providerType"`
+	ProviderKey  string `json:"providerKey"`
+	Address      string `json:"address"`
+	Port         uint   `json:"port"`
+	AuthKey      string `json:"authKey"`
+}
+
 type RemoteClient struct {
 	ClientID            uint          `json:"clientID"`
 	ReceiverAudioTracks []TrackSimple `json:"receiverAudioTracks"`
@@ -108,6 +116,10 @@ func (smc *SessionManagerConnection) StartListening() {
 				smc.handleAddTrack(msg.Message)
 			case "RemoveTrack":
 				smc.handleRemoveTrack(msg.Message)
+			case "RemoteProviderConnected":
+				smc.handleRemoteProviderConnected(msg.Message)
+			case "RemoteProviderDisconnected":
+				smc.handleRemoteProviderDisconnected(msg.Message)
 			default:
 				// Unknown message type, ignore or log
 			}
@@ -164,6 +176,19 @@ func (smc *SessionManagerConnection) handleAddTrack(payload json.RawMessage) {
 
 }
 func (smc *SessionManagerConnection) handleRemoveTrack(payload json.RawMessage) {
+
+}
+func (smc *SessionManagerConnection) handleRemoteProviderConnected(payload json.RawMessage) {
+	var msg RemoteProviderAddedMessage
+	if err := json.Unmarshal(payload, &msg); err != nil {
+		fmt.Printf("failed to unmarshal payload: %v\n", err)
+		return
+	}
+	fmt.Printf("Received RemoteProviderConnected: %+v\n", msg)
+	smc.sfu.AddRemoteProvider(msg, smc.providerKey, smc.authKey)
+
+}
+func (smc *SessionManagerConnection) handleRemoteProviderDisconnected(payload json.RawMessage) {
 
 }
 

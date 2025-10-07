@@ -45,6 +45,15 @@ const (
 	ProviderConfigReadDefaultStart uint = 4000
 	ProviderConfigReadDefaultEnd   uint = 4001
 
+	RemoteProviderConnectionStarted           uint = 5000
+	RemoteProviderConnectionFailed            uint = 5001
+	RemoteProviderConnectionConnecting        uint = 5002
+	RemoteProviderConnectionSuccess           uint = 5003
+	RemoteProviderConnectForwardingStarted    uint = 5004
+	RemoteProviderConnectForwardingFailed     uint = 5005
+	RemoteProviderConnectForwardingConnecting uint = 5006
+	RemoteProviderConnectForwardingSuccess    uint = 5007
+
 	ReceivedWSMessage uint = 7000
 
 	SFUClientConnectionChange uint = 8000

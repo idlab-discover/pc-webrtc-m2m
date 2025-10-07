@@ -8,7 +8,13 @@
     "providersToCreate": [
         {
             "type": "webrtc_sfu",
-            "key": "sfu_mdc"
+            "key": "sfu_mdc",
+            "connectedTo": ["sfu_mdc2"]
+        },
+        {
+            "type": "webrtc_sfu",
+            "key": "sfu_mdc2",
+            "connectedTo": ["sfu_mdc"]
         }
     ]
 }

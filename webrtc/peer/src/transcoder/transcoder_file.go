@@ -124,6 +124,6 @@ func (t *TranscoderFileTrack) NextFrame() []byte {
 		t.lastFrameTime = now
 	}
 	t.currentFrame = (t.currentFrame + 1) % t.maxFrameNr
-	println("Serving frame:", filename, len(data))
+	//println("Serving frame:", filename, len(data))
 	return data
 }

@@ -43,6 +43,7 @@ type ConnectionProviderMessage struct {
 	ProviderSettings json.RawMessage   `json:"providerSettings"`
 	VideoTracks      []ClientTrackInfo `json:"videoTracks"`
 	AudioTracks      []ClientTrackInfo `json:"audioTracks"`
+	ConnectedTo      []string          `json:"connectedTo"` // ProviderKeys of other providers this provider should connect to
 }
 
 type ClientTrackInfo struct {
@@ -192,7 +193,7 @@ func (clc *ClientConnection) handleJoinMessage(payload json.RawMessage) {
 	validProviderConnections := map[string]*ProviderConnection{}
 	for i := range msg.Providers {
 		provider := &msg.Providers[i]
-		pc := clc.parent.CreateProvider(provider.ProviderType, provider.ProviderKey, "", 0) // TODO Fix port + address
+		pc := clc.parent.CreateProvider(provider.ProviderType, provider.ProviderKey, "", 0, provider.ConnectedTo) // TODO Fix port + address
 		if pc == nil {
 
 			continue

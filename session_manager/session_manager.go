@@ -36,10 +36,11 @@ type SessionManagerConfig struct {
 }
 
 type SessionManagerProviderPair struct {
-	Type    string `json:"type"`
-	Key     string `json:"key"`
-	Address string `json:"address"`
-	Port    uint   `json:"port"`
+	Type        string   `json:"type"`
+	Key         string   `json:"key"`
+	Address     string   `json:"address"`
+	Port        uint     `json:"port"`
+	ConnectedTo []string `json:"connectedTo"`
 }
 
 func NewSessionManager(configPath string) *SessionManager {
@@ -69,14 +70,14 @@ func NewSessionManager(configPath string) *SessionManager {
 		mut:             sync.Mutex{},
 	}
 	for i := range config.ProvidersToCreate {
-		pro := config.ProvidersToCreate[i]
-		ses.CreateProvider(pro.Type, pro.Key, pro.Address, pro.Port)
+		proConfig := config.ProvidersToCreate[i]
+		ses.CreateProvider(proConfig.Type, proConfig.Key, proConfig.Address, proConfig.Port, proConfig.ConnectedTo)
 	}
 	Log(NameManager, Created, true, true)
 	return ses
 }
 
-func (sm *SessionManager) CreateProvider(providerType string, providerKey string, address string, port uint) *ProviderConnection {
+func (sm *SessionManager) CreateProvider(providerType string, providerKey string, address string, port uint, connectedTo []string) *ProviderConnection {
 	sm.mut.Lock()
 
 	if pc, exists := sm.providers[providerKey]; exists {
@@ -94,6 +95,15 @@ func (sm *SessionManager) CreateProvider(providerType string, providerKey string
 	}
 	pc := NewProviderConnection(sm, providerType, providerKey, address, port, authKey, config.Settings)
 	sm.providers[providerKey] = pc
+	// TODO This will have to fixed once we go for more dynamic provider connections
+	for _, otherProviderKey := range connectedTo {
+		otherProvider, exists := sm.providers[otherProviderKey]
+		if !exists {
+			continue
+		}
+		pc.AddRemoteProvider(otherProvider.ProviderType, otherProvider.ProviderKey, otherProvider.Address, otherProvider.Port, true)
+		otherProvider.AddRemoteProvider(pc.ProviderType, pc.ProviderKey, pc.Address, pc.Port, false)
+	}
 	sm.mut.Unlock()
 	sm.provisioner.CreateProvider(providerType, sm.config.Address, pc, config.ExtraCmdArgs)
 	return pc
@@ -158,7 +168,7 @@ func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.
 	var clientID uint
 
 	sm.mut.Lock()
-
+	println(!sm.config.IgnorePreferredClientID, preferredClientIDS != "", preferredClientIDS)
 	if !sm.config.IgnorePreferredClientID && preferredClientIDS != "" {
 		clientID64, err := strconv.ParseUint(preferredClientIDS, 10, 64)
 		if err != nil {
@@ -168,6 +178,9 @@ func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.
 			return
 		}
 		clientID = uint(clientID64)
+	} else {
+		clientID = sm.clientIDCounter
+		sm.clientIDCounter++
 	}
 	clOld, exists := sm.clients[clientID]
 	if exists && clOld.Status != ClientStatusCreated {
@@ -175,11 +188,7 @@ func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.
 		http.Error(w, "ClientID already in use", http.StatusBadRequest)
 		sm.mut.Unlock()
 		return
-	} else {
-		clientID = sm.clientIDCounter
-		sm.clientIDCounter++
 	}
-
 	authKey := ""
 	if sm.config.VerifyAuthKey {
 		authKey = sm.generateAuthKey() // TODO
@@ -242,6 +251,45 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 	for _, t := range addedMsg.SenderAudioTracks {
 		pcClient.AudioTracks[t.TrackID].IsConnected = true
 	}
+	// Inform connected providers about the new tracks
+	providerRemoteProviderClient := ProviderRemoteProviderClientMessage{
+		ProviderKey: pc.ProviderKey,
+		ClientID:    pcClient.ClientID,
+		VideoTracks: addedMsg.SenderVideoTracks,
+		AudioTracks: addedMsg.SenderAudioTracks,
+	}
+	for _, provider := range pc.RemoteProviders {
+		remoteProvider, exists := sm.providers[provider.ProviderKey]
+		if !exists {
+			continue
+		}
+		for _, videoTrack := range addedMsg.SenderVideoTracks {
+			provider.ForwardedVideoTracks[videoTrack.TrackID] = &ProviderTrackSimple{
+				TrackID:     videoTrack.TrackID,
+				IsConnected: false,
+			}
+		}
+		for _, audioTrack := range addedMsg.SenderAudioTracks {
+			provider.ForwardedAudioTracks[audioTrack.TrackID] = &ProviderTrackSimple{
+				TrackID:     audioTrack.TrackID,
+				IsConnected: false,
+			}
+		}
+		// -> Inform provider tracks are available at SFU X for client Z
+		// Send Message containing clientID + trackID
+		remoteProvider.websocket.WriteJSONMessageSafe("ProviderRemoteProviderClient", providerRemoteProviderClient)
+	}
+
+	// -> SFU Y will create the tracks on his side for SFU X and attached them to client Z
+	// -> SFU Y will inform SFU X that the tracks are ready and can be forwarded
+	// -> Inform clients that they can subscribe to these tracks
+	// -> Clients subscribe to tracks from SFU Y, using a "virtual client" that corresponds to SFU X
+	// ->
+	// Change this to use the client specific provider, i.e. in the case of forwarding providers
+
+	// Only send this message to the clients that are connected to this provider
+	// For the other clients the remote providers will call a "VirtualClientAddedToProvider" message
+	// which will then be used to inform the clients connected to those providers
 	msgAllClients := &ProviderTracksConnectedMessage{
 		ProviderKey: pc.ProviderKey,
 		ClientID:    pcClient.ClientID,
@@ -255,6 +303,7 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 		if pcOtherID == client.ClientID {
 			continue
 		}
+		// Find a useable provider using the connected providers list
 		otherC := sm.clients[pcOtherID]
 		otherC.websocket.WriteJSONMessageSafe("ProviderRemoteClientTracksConnected", msgAllClients)
 		msgRemoteClients = append(msgRemoteClients, RemoteClientSimple{

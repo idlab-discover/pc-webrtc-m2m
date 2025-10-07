@@ -46,34 +46,62 @@ type ProviderNewClient struct {
 	AudioTracks []*ClientTrackInfo
 }
 
+type ProviderNewRemoteProvider struct {
+	ProviderType        string `json:"providerType"`
+	ProviderKey         string `json:"providerKey"`
+	Address             string `json:"address"`
+	Port                uint   `json:"port"`
+	MakeProviderConnect bool   `json:"makeProviderConnect"`
+}
+
+type ProviderRemoteProviderClient struct {
+	ClientID    uint
+	VideoTracks map[string]*ProviderTrackSimple
+	AudioTracks map[string]*ProviderTrackSimple
+}
+
+type ProviderRemoteProvider struct {
+	ProviderType string
+	ProviderKey  string
+	Address      string
+	Port         uint
+
+	MakeProviderConnect bool
+}
+
 type ProviderConnection struct {
-	parent          *SessionManager
-	ProviderType    string
-	ProviderKey     string
-	Address         string
-	Port            uint
-	AuthKey         string
-	websocket       *ThreadSafeWebsocket
-	config          map[string]interface{}
-	Clients         map[uint]*ProviderClient
-	IsReady         bool
-	newClientBuffer []ProviderNewClient
-	mut             sync.Mutex
+	parent                  *SessionManager
+	ProviderType            string
+	ProviderKey             string
+	Address                 string
+	Port                    uint
+	AuthKey                 string
+	websocket               *ThreadSafeWebsocket
+	config                  map[string]interface{}
+	Clients                 map[uint]*ProviderClient
+	VirtualClients          map[uint]*ProviderRemoteProviderClient
+	RemoteProviders         map[string]*ProviderRemoteProvider
+	IsReady                 bool
+	newClientBuffer         []ProviderNewClient
+	newRemoteProviderBuffer []ProviderNewRemoteProvider
+	mut                     sync.Mutex
 }
 
 func NewProviderConnection(parent *SessionManager, providerType string, providerKey string, address string, port uint, authKey string, config map[string]interface{}) *ProviderConnection {
 	LogWithMessage(NameProvider, Creating, true, true, fmt.Sprintf("providerKey=%s", providerKey))
 	pro := &ProviderConnection{
-		parent:          parent,
-		ProviderType:    providerType,
-		ProviderKey:     providerKey,
-		Address:         address,
-		Port:            port,
-		AuthKey:         authKey,
-		config:          config,
-		Clients:         map[uint]*ProviderClient{},
-		newClientBuffer: []ProviderNewClient{},
-		mut:             sync.Mutex{},
+		parent:                  parent,
+		ProviderType:            providerType,
+		ProviderKey:             providerKey,
+		Address:                 address,
+		Port:                    port,
+		AuthKey:                 authKey,
+		config:                  config,
+		Clients:                 map[uint]*ProviderClient{},
+		RemoteProviders:         map[string]*ProviderRemoteProvider{},
+		newClientBuffer:         []ProviderNewClient{},
+		newRemoteProviderBuffer: []ProviderNewRemoteProvider{},
+		mut:                     sync.Mutex{},
 	}
 	Log(NameProvider, Created, true, true)
 	return pro
@@ -95,9 +123,14 @@ func (pc *ProviderConnection) SetupProvider(ws *ThreadSafeWebsocket) {
 	}
 	println("ready", len(pc.newClientBuffer))
 	pc.IsReady = true
+	// TODO Send buffer providers
+	for _, newProvider := range pc.newRemoteProviderBuffer {
+		pc._addNewRemoteProvider(newProvider.ProviderType, newProvider.ProviderKey, newProvider.Address, newProvider.Port, newProvider.MakeProviderConnect)
+	}
 	for _, newClient := range pc.newClientBuffer {
 		pc._addNewClient(newClient.ClientID, newClient.AuthKey, newClient.VideoTracks, newClient.AudioTracks)
 	}
+	pc.newRemoteProviderBuffer = pc.newRemoteProviderBuffer[:0]
 	pc.newClientBuffer = pc.newClientBuffer[:0]
 	pc.websocket.WriteJSONSafe(m)
 }
@@ -218,6 +251,13 @@ type ProviderTracksConnectedMessage struct {
 	AudioTracks []TrackSimple `json:"audioTracks"`
 }
 
+type ProviderRemoteProviderClientMessage struct {
+	ProviderKey string        `json:"providerKey"`
+	ClientID    uint          `json:"clientID"`
+	VideoTracks []TrackSimple `json:"videoTracks"`
+	AudioTracks []TrackSimple `json:"audioTracks"`
+}
+
 func (pc *ProviderConnection) handleClientAdded(payload json.RawMessage) {
 	var msg ProviderClientAddedMessage
 	if err := json.Unmarshal(payload, &msg); err != nil {
@@ -227,6 +267,55 @@ func (pc *ProviderConnection) handleClientAdded(payload json.RawMessage) {
 	fmt.Printf("Received ClientAddedMessage: %+v\n", msg)
 	// Set ProviderClient Tracks to connected
 	pc.parent.OnClientAddedToProvider(pc, msg)
+}
+
+type ProviderRemoteProviderAddedMessagage struct {
+	ProviderType string `json:"providerType"`
+	ProviderKey  string `json:"providerKey"`
+	Address      string `json:"address"`
+	Port         uint   `json:"port"`
+}
+
+func (pc *ProviderConnection) AddRemoteProvider(providerType string, providerKey string, address string, port uint, makeProviderConnect bool) {
+	pc.mut.Lock()
+	defer pc.mut.Unlock()
+	// TODO Send websocket providerAdded message
+	if !pc.IsReady {
+		// Add to buffer
+		pc.newRemoteProviderBuffer = append(pc.newRemoteProviderBuffer, ProviderNewRemoteProvider{
+			ProviderType:        providerType,
+			ProviderKey:         providerKey,
+			Address:             address,
+			Port:                port,
+			MakeProviderConnect: makeProviderConnect,
+		})
+		return
+	}
+	pc._addNewRemoteProvider(providerType, providerKey, address, port, makeProviderConnect)
+}
+
+func (pc *ProviderConnection) _addNewRemoteProvider(providerType string, providerKey string, address string, port uint, makeProviderConnect bool) {
+	pc.RemoteProviders[providerKey] = &ProviderRemoteProvider{
+		ProviderType:         providerType,
+		ProviderKey:          providerKey,
+		Address:              address,
+		Port:                 port,
+		ForwardedVideoTracks: map[string]*ProviderTrackSimple{},
+		ForwardedAudioTracks: map[string]*ProviderTrackSimple{},
+	}
+	// Only force one of the two providers to initate the connection
+	println("test")
+	if makeProviderConnect {
+		msg := ProviderRemoteProviderAddedMessagage{
+			ProviderType: providerType,
+			ProviderKey:  providerKey,
+			Address:      address,
+			Port:         port,
+		}
+		println("adding remote provider")
+		pc.websocket.WriteJSONMessageSafe("RemoteProviderConnected", msg)
+	}
+
 }
 
 func (clc *ProviderConnection) onClose() {
