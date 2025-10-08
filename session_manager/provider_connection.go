@@ -54,6 +54,26 @@ type ProviderNewRemoteProvider struct {
 	MakeProviderConnect bool   `json:"makeProviderConnect"`
 }
 
+func (pc *ProviderRemoteProviderClient) GetConnectedVideoTracks() []TrackSimple {
+	var connectedTracks []TrackSimple
+	for _, track := range pc.VideoTracks {
+		if track.IsConnected {
+			connectedTracks = append(connectedTracks, TrackSimple{TrackID: track.TrackID, IsConnected: true})
+		}
+	}
+	return connectedTracks
+}
+
+func (pc *ProviderRemoteProviderClient) GetConnectedAudioTracks() []TrackSimple {
+	var connectedTracks []TrackSimple
+	for _, track := range pc.AudioTracks {
+		if track.IsConnected {
+			connectedTracks = append(connectedTracks, TrackSimple{TrackID: track.TrackID, IsConnected: true})
+		}
+	}
+	return connectedTracks
+}
+
 type ProviderRemoteProviderClient struct {
 	ClientID    uint
 	VideoTracks map[string]*ProviderTrackSimple
@@ -61,12 +81,13 @@ type ProviderRemoteProviderClient struct {
 }
 
 type ProviderRemoteProvider struct {
-	ProviderType string
-	ProviderKey  string
-	Address      string
-	Port         uint
-
-	MakeProviderConnect bool
+	ProviderType         string
+	ProviderKey          string
+	Address              string
+	Port                 uint
+	ForwardedVideoTracks map[string]*ProviderTrackSimple
+	ForwardedAudioTracks map[string]*ProviderTrackSimple
+	MakeProviderConnect  bool
 }
 
 type ProviderConnection struct {
@@ -98,6 +119,7 @@ func NewProviderConnection(parent *SessionManager, providerType string, provider
 		AuthKey:                 authKey,
 		config:                  config,
 		Clients:                 map[uint]*ProviderClient{},
+		VirtualClients:          map[uint]*ProviderRemoteProviderClient{},
 		RemoteProviders:         map[string]*ProviderRemoteProvider{},
 		newClientBuffer:         []ProviderNewClient{},
 		newRemoteProviderBuffer: []ProviderNewRemoteProvider{},
@@ -239,6 +261,8 @@ func (clc *ProviderConnection) startListening() {
 			switch msg.MessageType {
 			case "ClientAdded":
 				clc.handleClientAdded(msg.Message)
+			case "VirtualClientAdded":
+				clc.handleVirtualClientAdded(msg.Message)
 			}
 		}
 	}()
@@ -267,6 +291,16 @@ func (pc *ProviderConnection) handleClientAdded(payload json.RawMessage) {
 	fmt.Printf("Received ClientAddedMessage: %+v\n", msg)
 	// Set ProviderClient Tracks to connected
 	pc.parent.OnClientAddedToProvider(pc, msg)
+}
+
+func (pc *ProviderConnection) handleVirtualClientAdded(payload json.RawMessage) {
+	var msg ProviderRemoteProviderClientMessage
+	if err := json.Unmarshal(payload, &msg); err != nil {
+		fmt.Printf("failed to unmarshal payload: %v\n", err)
+		return
+	}
+	fmt.Printf("Received VirtualClientAddedMessage: %+v\n", msg)
+	pc.parent.OnVirtualClientAddedToProvider(pc, msg)
 }
 
 type ProviderRemoteProviderAddedMessagage struct {

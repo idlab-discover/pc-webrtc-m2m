@@ -263,8 +263,17 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 		if !exists {
 			continue
 		}
+		remoteProvider.VirtualClients[addedMsg.ClientID] = &ProviderRemoteProviderClient{
+			ClientID:    addedMsg.ClientID,
+			VideoTracks: map[string]*ProviderTrackSimple{},
+			AudioTracks: map[string]*ProviderTrackSimple{},
+		}
 		for _, videoTrack := range addedMsg.SenderVideoTracks {
 			provider.ForwardedVideoTracks[videoTrack.TrackID] = &ProviderTrackSimple{
+				TrackID:     videoTrack.TrackID,
+				IsConnected: false,
+			}
+			remoteProvider.VirtualClients[addedMsg.ClientID].VideoTracks[videoTrack.TrackID] = &ProviderTrackSimple{
 				TrackID:     videoTrack.TrackID,
 				IsConnected: false,
 			}
@@ -274,10 +283,14 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 				TrackID:     audioTrack.TrackID,
 				IsConnected: false,
 			}
+			remoteProvider.VirtualClients[addedMsg.ClientID].AudioTracks[audioTrack.TrackID] = &ProviderTrackSimple{
+				TrackID:     audioTrack.TrackID,
+				IsConnected: false,
+			}
 		}
 		// -> Inform provider tracks are available at SFU X for client Z
 		// Send Message containing clientID + trackID
-		remoteProvider.websocket.WriteJSONMessageSafe("ProviderRemoteProviderClient", providerRemoteProviderClient)
+		remoteProvider.websocket.WriteJSONMessageSafe("AddVirtualClient", providerRemoteProviderClient)
 	}
 
 	// -> SFU Y will create the tracks on his side for SFU X and attached them to client Z
@@ -303,7 +316,6 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 		if pcOtherID == client.ClientID {
 			continue
 		}
-		// Find a useable provider using the connected providers list
 		otherC := sm.clients[pcOtherID]
 		otherC.websocket.WriteJSONMessageSafe("ProviderRemoteClientTracksConnected", msgAllClients)
 		msgRemoteClients = append(msgRemoteClients, RemoteClientSimple{
@@ -313,6 +325,15 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 			AudioTracks: pcOtherClient.GetConnectedAudioTracks(),
 		})
 	}
+	for pcOtherID, pcOtherClient := range pc.VirtualClients {
+		msgRemoteClients = append(msgRemoteClients, RemoteClientSimple{
+			ProviderKey: pc.ProviderKey,
+			ClientID:    pcOtherID,
+			VideoTracks: pcOtherClient.GetConnectedVideoTracks(),
+			AudioTracks: pcOtherClient.GetConnectedAudioTracks(),
+		})
+	}
+	// TODO Iterate over virtual clients as well?
 
 	msgToClient := ClientAddedToProviderMessage{
 		ProviderType:      pc.ProviderType,
@@ -325,6 +346,45 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 		RemoteClients:     msgRemoteClients,
 	}
 	client.websocket.WriteJSONMessageSafe("ClientAddedToProvider", msgToClient)
+
+	LogWithMessage(NameManager, ClientAddedToProvider, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
+}
+
+func (sm *SessionManager) OnVirtualClientAddedToProvider(pc *ProviderConnection, addedMsg ProviderRemoteProviderClientMessage) {
+	sm.mut.Lock()
+	defer sm.mut.Unlock()
+	pc.mut.Lock()
+	defer pc.mut.Unlock()
+	client, exists := sm.clients[addedMsg.ClientID]
+	if !exists {
+		// TODO Log
+		LogWithMessage(NameManager, InvalidClientID, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
+		return
+	}
+	pcClient := pc.VirtualClients[addedMsg.ClientID]
+	for _, t := range addedMsg.VideoTracks {
+		pcClient.VideoTracks[t.TrackID].IsConnected = true
+	}
+	for _, t := range addedMsg.AudioTracks {
+		pcClient.AudioTracks[t.TrackID].IsConnected = true
+	}
+	// TODO In the future we might need to inform connected providers here
+	// But only if they are not getting the forwarded tracks from the "main" provider
+	msgAllClients := &ProviderTracksConnectedMessage{
+		ProviderKey: pc.ProviderKey,
+		ClientID:    pcClient.ClientID,
+		VideoTracks: pcClient.GetConnectedVideoTracks(),
+		AudioTracks: pcClient.GetConnectedAudioTracks(),
+	}
+
+	// Inform remote clients that they can now subscribe to these tracks properly
+	for pcOtherID := range pc.Clients {
+		if pcOtherID == client.ClientID {
+			continue
+		}
+		otherC := sm.clients[pcOtherID]
+		otherC.websocket.WriteJSONMessageSafe("ProviderRemoteClientTracksConnected", msgAllClients)
+	}
 
 	LogWithMessage(NameManager, ClientAddedToProvider, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
 }

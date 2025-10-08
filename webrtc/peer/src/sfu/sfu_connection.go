@@ -284,7 +284,6 @@ func (s *SFUConnection) startListening() {
 				s.handleOfferMessage(msg.Message)
 			case "CandidateMessage":
 				s.handleCandidateMessage(msg.Message)
-
 			}
 		}
 	}()

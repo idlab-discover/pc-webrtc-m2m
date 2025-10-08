@@ -53,6 +53,7 @@ const (
 	RemoteProviderConnectForwardingFailed     uint = 5005
 	RemoteProviderConnectForwardingConnecting uint = 5006
 	RemoteProviderConnectForwardingSuccess    uint = 5007
+	RemoteProviderAddVirtualClient            uint = 5008
 
 	ReceivedWSMessage uint = 7000
 

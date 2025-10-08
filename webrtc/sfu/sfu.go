@@ -22,6 +22,7 @@ type SFU struct {
 	address         string
 	port            uint
 	clients         map[uint]*ClientConnection
+	virtualClients  map[uint]string
 	remoteProviders map[string]ProviderConnection
 	websocket       *threadSafeWriter
 	mut             sync.Mutex
@@ -33,6 +34,7 @@ func NewSFU(address string, port uint) *SFU {
 		address:         address,
 		port:            port,
 		clients:         map[uint]*ClientConnection{},
+		virtualClients:  map[uint]string{},
 		remoteProviders: map[string]ProviderConnection{},
 		mut:             sync.Mutex{},
 	}
@@ -73,12 +75,13 @@ func (sfu *SFU) AddRemoteProvider(msg RemoteProviderAddedMessage, selfProviderKe
 	sfu.mut.Lock()
 	defer sfu.mut.Unlock()
 	// TODO Check if provider already exists
-	provider := CreateRemoteProvider(msg.ProviderType, msg.ProviderKey, msg.Address, msg.Port, msg.AuthKey)
+	provider := CreateRemoteProvider(sfu, msg.ProviderType, msg.ProviderKey, msg.Address, msg.Port, msg.AuthKey)
 	// Call connect
 	if provider == nil {
 		fmt.Printf("SFU: AddRemoteProvider: Unknown provider type %s\n", msg.ProviderType) // TOOD Proper logging
 		return
 	}
+	sfu.remoteProviders[msg.ProviderKey] = provider
 	provider.SetupForwarding()
 	provider.ConnectWebSocket("webrtc_sfu", selfProviderKey, selfAuthKey)
 }
@@ -205,7 +208,7 @@ func (sfu *SFU) websocketProviderHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	LogWithMessage(NameSFU, RemoteProviderConnectionConnecting, true, true, fmt.Sprintf("providerKey=%s providerType=%s", providerKey, providerType))
-	provider := CreateRemoteProvider(providerType, providerKey, r.RemoteAddr, 0, "") // TODO Fix this port and address
+	provider := CreateRemoteProvider(sfu, providerType, providerKey, r.RemoteAddr, 0, "") // TODO Fix this port and address
 	provider.SetupForwarding()
 	sfu.remoteProviders[providerKey] = provider
 	sfu.mut.Unlock()
@@ -338,4 +341,65 @@ func (sfu *SFU) signalClients() {
 			break
 		}
 	}
+}
+
+func (sfu *SFU) AddVirtualClient(msg ProviderRemoteProviderClientMessage) bool {
+	sfu.mut.Lock()
+	defer sfu.mut.Unlock()
+	provider := sfu.remoteProviders[msg.ProviderKey]
+	if provider == nil {
+		fmt.Printf("SFU: AddVirtualClient: No such provider %s\n", msg.ProviderKey)
+		return false
+	}
+	sfu.virtualClients[msg.ClientID] = msg.ProviderKey
+	provider.AddVirtualClient(msg.ClientID, msg.VideoTracks, msg.AudioTracks)
+	// Alert Session Manager Virtual client was added
+	return true
+}
+
+func (sfu *SFU) SubscribeRemoteProviderToClient(provider ProviderConnection, clientID uint, videoTracks []TrackSimple, audioTracks []TrackSimple) {
+	sfu.mut.Lock()
+	defer sfu.mut.Unlock()
+	client := sfu.clients[clientID]
+	if client == nil {
+		fmt.Printf("SFU: SubscribeRemoteProviderToClient: No such client %d\n", clientID)
+		return
+	}
+	for _, t := range videoTracks {
+		track, exists := client.SenderVideoTracks[t.TrackID]
+		if !exists {
+			fmt.Printf("SFU: SubscribeRemoteProviderToClient: Client %d has no video track %s\n", clientID, t.TrackID)
+			return
+		}
+		recvTrack := &ReceiverTrack{
+			TrackID:                  track.TrackID,
+			OriginType:               "sfu",
+			OriginID:                 0, //TODO
+			SenderTrackID:            track.TrackID,
+			CorrespondingSenderTrack: track.WebRTCTrack,
+		}
+		// TODO Maybe we need to store this mapping somewhere to be able to remove it again
+		if err := provider.AddTrackFromOtherUnsafe(recvTrack); err != nil {
+			fmt.Printf("SFU: SubscribeRemoteProviderToClient: Failed to add track %s: %v\n", recvTrack.TrackID, err)
+		}
+	}
+	for _, t := range audioTracks {
+		track, exists := client.SenderAudioTracks[t.TrackID]
+		if !exists {
+			fmt.Printf("SFU: SubscribeRemoteProviderToClient: Client %d has no audio track %s\n", clientID, t.TrackID)
+			return
+		}
+		recvTrack := &ReceiverTrack{
+			TrackID:                  track.TrackID,
+			OriginType:               "sfu",
+			OriginID:                 0, //TODO
+			SenderTrackID:            track.TrackID,
+			CorrespondingSenderTrack: track.WebRTCTrack,
+		}
+		// TODO Maybe we need to store this mapping somewhere to be able to remove it again
+		if err := provider.AddTrackFromOtherUnsafe(recvTrack); err != nil {
+			fmt.Printf("SFU: SubscribeRemoteProviderToClient: Failed to add track %s: %v\n", recvTrack.TrackID, err)
+		}
+	}
+
 }

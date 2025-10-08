@@ -54,6 +54,13 @@ type RemoteProviderAddedMessage struct {
 	AuthKey      string `json:"authKey"`
 }
 
+type ProviderRemoteProviderClientMessage struct {
+	ProviderKey string        `json:"providerKey"`
+	ClientID    uint          `json:"clientID"`
+	VideoTracks []TrackSimple `json:"videoTracks"`
+	AudioTracks []TrackSimple `json:"audioTracks"`
+}
+
 type RemoteClient struct {
 	ClientID            uint          `json:"clientID"`
 	ReceiverAudioTracks []TrackSimple `json:"receiverAudioTracks"`
@@ -120,6 +127,10 @@ func (smc *SessionManagerConnection) StartListening() {
 				smc.handleRemoteProviderConnected(msg.Message)
 			case "RemoteProviderDisconnected":
 				smc.handleRemoteProviderDisconnected(msg.Message)
+			case "AddVirtualClient":
+				smc.handleVirtualClientAdded(msg.Message)
+			case "RemoveVirtualClient":
+				smc.handleVirtualClientRemoved(msg.Message)
 			default:
 				// Unknown message type, ignore or log
 			}
@@ -189,6 +200,26 @@ func (smc *SessionManagerConnection) handleRemoteProviderConnected(payload json.
 
 }
 func (smc *SessionManagerConnection) handleRemoteProviderDisconnected(payload json.RawMessage) {
+
+}
+
+func (smc *SessionManagerConnection) handleVirtualClientAdded(payload json.RawMessage) {
+	var msg ProviderRemoteProviderClientMessage
+	if err := json.Unmarshal(payload, &msg); err != nil {
+		fmt.Printf("failed to unmarshal payload: %v\n", err)
+		return
+	}
+	fmt.Printf("Received VirtualClientAdded: %+v\n", msg)
+	succes := smc.sfu.AddVirtualClient(msg)
+	if !succes {
+		fmt.Printf("Failed to add virtual client: %+v\n", msg)
+		return
+	}
+	// Alert session manager virtual client was added
+	smc.websocket.WriteJSONMessageSafe("VirtualClientAdded", msg)
+}
+
+func (smc *SessionManagerConnection) handleVirtualClientRemoved(payload json.RawMessage) {
 
 }
 

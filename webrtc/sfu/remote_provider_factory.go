@@ -4,12 +4,12 @@ import "fmt"
 
 const NameRemoteProviderFactory = "RemoteProviderFactory"
 
-func CreateRemoteProvider(proType string, providerKey string, address string, port uint, authKey string) ProviderConnection {
+func CreateRemoteProvider(parent *SFU, proType string, providerKey string, address string, port uint, authKey string) ProviderConnection {
 	LogWithMessage(NameRemoteProviderFactory, Creating, true, true, fmt.Sprintf("proType=%s providerKey=%s address=%s port=%d", proType, providerKey, address, port))
 	var Provider ProviderConnection
 	switch proType {
 	case "webrtc_sfu":
-		Provider = NewRemoteSFUConnection(providerKey, address, port, authKey)
+		Provider = NewRemoteSFUConnection(parent, providerKey, address, port, authKey)
 	default:
 		Provider = nil
 	}

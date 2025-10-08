@@ -12,6 +12,7 @@ const NameRemoteSFUConnection = "RemoteSFUConnection"
 
 type RemoteSFUConnection struct {
 	ProviderConnectionBase
+	parent                  *SFU
 	peerConnection          *webrtc.PeerConnection
 	IsNegotiating           bool
 	NeedsUpdate             bool
@@ -22,8 +23,9 @@ type RemoteSFUConnection struct {
 	pendingCandidatesString []string
 }
 
-func NewRemoteSFUConnection(providerKey string, address string, port uint, authKey string) *RemoteSFUConnection {
-	return &RemoteSFUConnection{
+func NewRemoteSFUConnection(parent *SFU, providerKey string, address string, port uint, authKey string) *RemoteSFUConnection {
+	rsfu := &RemoteSFUConnection{
+		parent:                 parent,
 		ProviderConnectionBase: NewProviderConnectionBase("sfu", providerKey, address, port, authKey),
 		SenderVideoTracks:      make(map[string]*SenderTrack),
 		SenderAudioTracks:      make(map[string]*SenderTrack),
@@ -32,6 +34,9 @@ func NewRemoteSFUConnection(providerKey string, address string, port uint, authK
 		IsNegotiating:          false,
 		NeedsUpdate:            false,
 	}
+	rsfu.specialMessageCallback = rsfu.HandleSpecialMessage
+	rsfu.subscribeToRemoteClientCallback = rsfu.HandleSubscribeToRemoteClient
+	return rsfu
 }
 
 func (rsfu *RemoteSFUConnection) SetupForwarding() error {
@@ -173,7 +178,6 @@ func (rsfu *RemoteSFUConnection) AddPeerConnectionCallbacks() {
 				fmt.Printf("WebRTCSFU: OnTrack: error during read: %s\n", err)
 				break
 			}
-
 			//go func() {
 			if _, err = trackLocal.Write(buf[:i]); err != nil {
 				fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)
@@ -181,6 +185,28 @@ func (rsfu *RemoteSFUConnection) AddPeerConnectionCallbacks() {
 			//}()
 		}
 	})
+}
+
+func (rsfu *RemoteSFUConnection) handleOfferMessage(payload json.RawMessage) {
+	offer := webrtc.SessionDescription{}
+	err := json.Unmarshal(payload, &offer)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%+v\n", offer)
+	err = rsfu.peerConnection.SetRemoteDescription(offer)
+	if err != nil {
+		panic(err)
+	}
+	answer, err := rsfu.peerConnection.CreateAnswer(nil)
+	if err != nil {
+		panic(err)
+	}
+	if err = rsfu.peerConnection.SetLocalDescription(answer); err != nil {
+		panic(err)
+	}
+
+	rsfu.websocket.WriteJSONMessageSafe("AnswerMessage", answer)
 }
 
 func (rsfu *RemoteSFUConnection) handleAnswerMessage(payload json.RawMessage) {
@@ -203,10 +229,8 @@ func (rsfu *RemoteSFUConnection) handleAnswerMessage(payload json.RawMessage) {
 	}
 	rsfu.IsNegotiating = false
 	if rsfu.NeedsUpdate {
-		println("NEED RENEGGGGG")
 		rsfu.SignalRenegotiationUnsafe()
 	} else {
-		println("DONT NEED NEEG")
 	}
 }
 
@@ -220,10 +244,167 @@ func (rsfu *RemoteSFUConnection) handleCandidateMessage(payload json.RawMessage)
 	}
 
 	if desc == nil {
+		println("desc in nil")
 		rsfu.pendingCandidatesString = append(rsfu.pendingCandidatesString, candidate)
 	} else {
+		println("adding ice")
 		if candidateErr := rsfu.peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate}); candidateErr != nil {
 			panic(candidateErr)
 		}
 	}
+}
+
+func (rsfu *RemoteSFUConnection) HandleSpecialMessage(messageType string, payload json.RawMessage) error {
+	switch messageType {
+	case "OfferMessage":
+		rsfu.handleOfferMessage(payload)
+	case "AnswerMessage":
+		rsfu.handleAnswerMessage(payload)
+	case "CandidateMessage":
+		rsfu.handleCandidateMessage(payload)
+	}
+	return nil
+}
+
+func (rsfu *RemoteSFUConnection) AddVirtualClient(clientID uint, videoTracks []TrackSimple, audioTracks []TrackSimple) error {
+	rsfu.mut.Lock()
+	defer rsfu.mut.Unlock()
+	LogWithMessage(NameRemoteSFUConnection, RemoteProviderAddVirtualClient, true, true, fmt.Sprintf("providerKey=%s clientID=%d nVideoTracks=%d nAudioTracks=%d", rsfu.providerKey, clientID, len(videoTracks), len(audioTracks)))
+	if rsfu.websocket == nil {
+		return fmt.Errorf("websocket not connected")
+	}
+	videoRTCPFeedback := []webrtc.RTCPFeedback{
+		{Type: "goog-remb", Parameter: ""},
+		{Type: "ccm", Parameter: "fir"},
+		{Type: "nack", Parameter: ""},
+		{Type: "nack", Parameter: "pli"},
+	}
+
+	codecCapability := webrtc.RTPCodecCapability{
+		MimeType:     "video/pcm",
+		ClockRate:    90000,
+		Channels:     0,
+		SDPFmtpLine:  "",
+		RTCPFeedback: videoRTCPFeedback,
+	}
+	audioCodecCapability := webrtc.RTPCodecCapability{
+		MimeType:     "audio/pcm",
+		ClockRate:    90000,
+		Channels:     0,
+		SDPFmtpLine:  "",
+		RTCPFeedback: nil,
+	}
+	for _, ts := range videoTracks {
+		if _, err := rsfu.peerConnection.AddTransceiverFromKind(webrtc.RTPCodecTypeVideo, webrtc.RTPTransceiverInit{
+			Direction: webrtc.RTPTransceiverDirectionRecvonly,
+		}); err != nil {
+			fmt.Printf("WebRTCSFU: webSocketHandler: ERROR: %s\n", err)
+			return err
+		}
+		trackLocal, err := webrtc.NewTrackLocalStaticRTP(codecCapability, ts.TrackID, ts.TrackID)
+		if err != nil {
+			panic(err)
+		}
+		rsfu.SenderVideoTracks[ts.TrackID] = &SenderTrack{
+			TrackID:      ts.TrackID,
+			trackBitrate: &TrackBitrate{},
+			WebRTCTrack:  trackLocal,
+		}
+	}
+	for _, ts := range audioTracks {
+		if _, err := rsfu.peerConnection.AddTransceiverFromKind(webrtc.RTPCodecTypeAudio, webrtc.RTPTransceiverInit{
+			Direction: webrtc.RTPTransceiverDirectionRecvonly,
+		}); err != nil {
+			fmt.Printf("WebRTCSFU: webSocketHandler: ERROR: %s\n", err)
+			return err
+		}
+		trackLocal, err := webrtc.NewTrackLocalStaticRTP(audioCodecCapability, ts.TrackID, ts.TrackID)
+		if err != nil {
+			panic(err)
+		}
+		rsfu.SenderAudioTracks[ts.TrackID] = &SenderTrack{
+			TrackID:      ts.TrackID,
+			trackBitrate: &TrackBitrate{},
+			WebRTCTrack:  trackLocal,
+		}
+	}
+
+	rsfu.websocket.WriteJSONMessageSafe("SubscribeToRemoteClient", SubscribeToTracksMessage{
+		ClientID:    clientID,
+		VideoTracks: videoTracks,
+		AudioTracks: audioTracks,
+	})
+
+	return nil
+}
+
+func (rsfu *RemoteSFUConnection) HandleSubscribeToRemoteClient(clientID uint, videoTracks []TrackSimple, audioTracks []TrackSimple) error {
+	// TODO Maybe rename this function as this should setup the forwarding
+	// Call SFU and get client connection
+	// Based on clientID and videoTracks/audioTracks
+	// Get the senderTrack and attach it
+	rsfu.mut.Lock()
+	defer rsfu.mut.Unlock()
+	rsfu.parent.SubscribeRemoteProviderToClient(rsfu, clientID, videoTracks, audioTracks)
+	// Renegotiate
+	rsfu.SignalRenegotiationUnsafe()
+	return nil
+}
+
+func (rsfu *RemoteSFUConnection) AddTrackFromOtherUnsafe(recvTrack *ReceiverTrack) error {
+	LogWithMessage(NameRemoteSFUConnection, ClientAddingTrackFromOther, true, true,
+		fmt.Sprintf("providerKey=%s trackID=%s",
+			rsfu.providerKey, recvTrack.TrackID))
+	// TODO Check if trackID appears from session manager track
+
+	if recvTrack.CorrespondingSenderTrack.Kind() == webrtc.RTPCodecTypeVideo {
+		rsfu.ReceiverVideoTracks[recvTrack.TrackID] = recvTrack
+	} else if recvTrack.CorrespondingSenderTrack.Kind() == webrtc.RTPCodecTypeAudio {
+		rsfu.ReceiverAudioTracks[recvTrack.TrackID] = recvTrack
+	}
+	println("ADDING TRACK", recvTrack.CorrespondingSenderTrack == nil)
+	fmt.Printf("TrackID=%s streamID=%s\n", recvTrack.TrackID, recvTrack.CorrespondingSenderTrack.StreamID())
+	rtpSender, err := rsfu.peerConnection.AddTrack(recvTrack.CorrespondingSenderTrack)
+
+	if err != nil {
+		println("OOPSSS")
+		// TODO error handling
+		return nil
+	}
+	recvTrack.RTPSender = rtpSender
+
+	go func() {
+		rtcpBuf := make([]byte, 1500)
+		for {
+			if _, _, err := rtpSender.Read(rtcpBuf); err != nil {
+				panic(err)
+				return
+			}
+		}
+		// TODO Handle track closure?
+	}()
+	return nil
+}
+
+func (rsfu *RemoteSFUConnection) ForwardTracksToClient(client *ClientConnection, msg SubscribeToTracksMessage, clientID uint) error {
+	rsfu.mut.Lock()
+	defer rsfu.mut.Unlock()
+	for _, t := range msg.VideoTracks {
+		track, exists := rsfu.SenderVideoTracks[t.TrackID]
+		if !exists {
+			fmt.Printf("WebRTCSFU: ForwardTracksToClient: No sender video track found for track ID %s\n", t.TrackID)
+			continue
+		}
+		// TODO Change originID to string
+		client.AddTrackFromOtherUnsafe("provider", 0, track.TrackID, track.WebRTCTrack)
+	}
+	for _, t := range msg.AudioTracks {
+		track, exists := rsfu.SenderAudioTracks[t.TrackID]
+		if !exists {
+			fmt.Printf("WebRTCSFU: ForwardTracksToClient: No sender audio track found for track ID %s\n", t.TrackID)
+			continue
+		}
+		client.AddTrackFromOtherUnsafe("provider", 0, track.TrackID, track.WebRTCTrack)
+	}
+	return nil
 }

@@ -399,7 +399,7 @@ func (clc *ClientConnection) startListening() {
 				fmt.Printf("WebRTCSFU: webSocketHandler: ReadMessage: error %w\n", err)
 				break
 			}
-			LogWithMessage(NameManagerConnection, ReceivedWSMessage, true, true,
+			LogWithMessage(NameClientConnection, ReceivedWSMessage, true, true,
 				fmt.Sprintf("origin=client clientID=%d type=%s", clc.clientID, msg.MessageType),
 			)
 			switch msg.MessageType {
@@ -503,11 +503,21 @@ func (clc *ClientConnection) handleSubscribeToRemoteClientsMessage(payload json.
 	defer clc.parent.mut.Unlock()
 	for _, sub := range msg.Clients {
 		otherC := clc.parent.clients[sub.ClientID]
-		if otherC == nil {
-			fmt.Printf("WebRTCSFU: handleSubscribeToRemoteClientsMessage: No client with ID %d found\n", sub.ClientID)
-			return
+		if otherC != nil {
+			clc.subscribeToTracks(sub, otherC)
+			continue
 		}
-		clc.subscribeToTracks(sub, otherC)
+		otherVirtualC := clc.parent.virtualClients[sub.ClientID]
+		if otherVirtualC != "" {
+			provider, exists := clc.parent.remoteProviders[otherVirtualC]
+			if exists {
+				if err := provider.ForwardTracksToClient(clc, sub, sub.ClientID); err != nil {
+					fmt.Printf("WebRTCSFU: handleSubscribeToRemoteClientsMessage: Error forwarding tracks from provider %s to clientID=%d: %s\n", otherVirtualC, clc.clientID, err)
+				}
+			} else {
+				fmt.Printf("WebRTCSFU: handleSubscribeToRemoteClientsMessage: No provider with key %s found for virtual clientID=%d\n", otherVirtualC, sub.ClientID)
+			}
+		}
 	}
 
 	fmt.Printf("WebRTCSFU: handleSubscribeToRemoteClientsMessage: Signaling renegotiation for clientID=%d\n", clc.clientID)
