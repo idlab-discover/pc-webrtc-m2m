@@ -1,11 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"goweb/shared/src/logger"
+)
 
 const NameRemoteProviderFactory = "RemoteProviderFactory"
 
 func CreateRemoteProvider(parent *SFU, proType string, providerKey string, address string, port uint, authKey string) ProviderConnection {
-	LogWithMessage(NameRemoteProviderFactory, Creating, true, true, fmt.Sprintf("proType=%s providerKey=%s address=%s port=%d", proType, providerKey, address, port))
+	logger.LogWithMessage(NameRemoteProviderFactory, logger.Creating, true, true, fmt.Sprintf("proType=%s providerKey=%s address=%s port=%d", proType, providerKey, address, port))
 	var Provider ProviderConnection
 	switch proType {
 	case "webrtc_sfu":
@@ -14,10 +17,10 @@ func CreateRemoteProvider(parent *SFU, proType string, providerKey string, addre
 		Provider = nil
 	}
 	if Provider == nil {
-		LogWithMessage(NameRemoteProviderFactory, Failed, true, true, fmt.Sprintf("proType=%s providerKey=%s", proType, providerKey))
+		logger.LogWithMessage(NameRemoteProviderFactory, logger.Failed, true, true, fmt.Sprintf("proType=%s providerKey=%s", proType, providerKey))
 		return nil
 	} else {
-		LogWithMessage(NameRemoteProviderFactory, Created, true, true, fmt.Sprintf("proType=%s providerKey=%s", proType, providerKey))
+		logger.LogWithMessage(NameRemoteProviderFactory, logger.Created, true, true, fmt.Sprintf("proType=%s providerKey=%s", proType, providerKey))
 	}
 	return Provider
 }

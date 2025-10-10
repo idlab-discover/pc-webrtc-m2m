@@ -1,0 +1,19 @@
+{
+    "preferredClientID": 2,
+    "codecMode": "mdc",
+    "providers": [
+        {
+            "providerType": "webrtc_sfu",
+            "providerKey": "sfu_mdc2",
+            "providerSettings": {},
+            "videoTracks": [
+                {
+                    "trackID": "mdc_video_0_0",
+                    "capturerType": "kinect",
+                    "trackType": "pointcloud",
+                    "trackSettings": {}
+                }
+            ]
+        }
+    ]
+}

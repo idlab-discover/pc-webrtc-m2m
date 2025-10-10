@@ -1,4 +1,4 @@
-package main
+package logger
 
 import (
 	"fmt"
@@ -15,6 +15,7 @@ var logFile *os.File
 var logName string
 var applyColor bool
 var logColor string
+var logEveryNFrames = uint(100)
 
 const (
 	// Object Status
@@ -35,12 +36,21 @@ const (
 	ProviderAlreadyExists  uint = 1002
 	CreatingProvider       uint = 1003
 	CreatedProvider        uint = 1004
+	ClientAddedToProvider  uint = 1005
 
-	ClientAddingTransceivers   uint = 2000
-	ClientAddedTransceivers    uint = 2001
-	ClientAddingTrackFromOther uint = 2002
-	ClientSignalRenegotiation  uint = 2003
-	ClientOnTrackCalled        uint = 2004
+	ClientConnectionComplete      uint = 2000
+	ClientSendingProviders        uint = 2001
+	ClientAddedSenderVideoTrack   uint = 2002
+	ClientAddedSenderAudioTrack   uint = 2003
+	ClientAddedToBufferedProvider uint = 2004
+	ClientSessionJoined           uint = 2005
+	ClientAddingTransceivers      uint = 2006
+	ClientAddedTransceivers       uint = 2007
+	ClientAddingTrackFromOther    uint = 2008
+	ClientSignalRenegotiation     uint = 2009
+	ClientOnTrackCalled           uint = 2010
+
+	RemoteClientAdded uint = 3000
 
 	ProviderConfigReadDefaultStart uint = 4000
 	ProviderConfigReadDefaultEnd   uint = 4001
@@ -55,9 +65,15 @@ const (
 	RemoteProviderConnectForwardingSuccess    uint = 5007
 	RemoteProviderAddVirtualClient            uint = 5008
 
+	FrameSending         uint = 6000
+	FrameFullySent       uint = 6001
+	FrameFirstPacketRecv uint = 6002
+	FrameFullyRecv       uint = 6003
+
 	ReceivedWSMessage uint = 7000
 
-	SFUClientConnectionChange uint = 8000
+	SFUReceivedOffer          uint = 8000
+	SFUClientConnectionChange uint = 8001
 
 	CriticalFail uint = 9999
 )
@@ -70,7 +86,7 @@ const (
 )
 
 // TODO increase buffer size and prevent automatic flushing
-func LogInit(name string, nameShort string, color string) {
+func LogInit(name string, nameShort string, color string, everyNFrames uint) {
 	logDir := filepath.Join(".", "logs")
 	if err := os.MkdirAll(logDir, 0755); err != nil {
 		fmt.Println("Failed to create log directory:", err)
@@ -86,6 +102,7 @@ func LogInit(name string, nameShort string, color string) {
 	logName = name
 	logFile = f
 	logColor = color
+	logEveryNFrames = everyNFrames
 	if logColor != "" {
 		applyColor = true
 	}
@@ -101,6 +118,13 @@ func Log(name string, status uint, writeToConsole, writeToFile bool) {
 func LogWithMessage(name string, status uint, writeToConsole, writeToFile bool, message string) {
 	if enableLogging {
 		outputString := fmt.Sprintf("id=%s status=%d %s\n", name, status, message)
+		_log(outputString, writeToConsole, writeToFile)
+	}
+}
+
+func LogFrameWithMessage(name string, status uint, writeToConsole, writeToFile bool, message string, frameNr uint) {
+	if enableLogging && (frameNr%logEveryNFrames == 0) {
+		outputString := fmt.Sprintf("id=%s status=%d ts=%d frame=%d %s\n", name, status, time.Now().UnixMilli(), frameNr, message)
 		_log(outputString, writeToConsole, writeToFile)
 	}
 }

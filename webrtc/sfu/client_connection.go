@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"goweb/shared/src/logger"
+	"goweb/shared/src/packet"
 	"strings"
 	"sync"
 
@@ -87,7 +89,7 @@ func NewClientConnection(parent *SFU, clientID uint, authKey string,
 	senderVideoTracks []SenderTrack,
 	senderAudioTracks []SenderTrack,
 ) *ClientConnection {
-	LogWithMessage(NameClientConnection, Creating, true, true, fmt.Sprintf("clientID=%d authKey=%s", clientID, authKey))
+	logger.LogWithMessage(NameClientConnection, logger.Creating, true, true, fmt.Sprintf("clientID=%d authKey=%s", clientID, authKey))
 	videoTracksMap := make(map[string]*SenderTrack)
 	audioTracksMap := make(map[string]*SenderTrack)
 
@@ -147,12 +149,12 @@ func NewClientConnection(parent *SFU, clientID uint, authKey string,
 		ReceiverAudioTracks: make(map[string]*ReceiverTrack),
 		mut:                 sync.Mutex{},
 	}
-	LogWithMessage(NameClientConnection, Created, true, true, fmt.Sprintf("clientID=%d authKey=%s", clientID, authKey))
+	logger.LogWithMessage(NameClientConnection, logger.Created, true, true, fmt.Sprintf("clientID=%d authKey=%s", clientID, authKey))
 	return cl
 }
 
 func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings) {
-	LogWithMessage(NameClientConnection, ClientAddingTransceivers, true, true,
+	logger.LogWithMessage(NameClientConnection, logger.ClientAddingTransceivers, true, true,
 		fmt.Sprintf("clientID=%d nVideoTrack=%d nAudioTracks=%d",
 			clc.clientID, len(clc.SenderVideoTracks), len(clc.SenderAudioTracks)),
 	)
@@ -201,7 +203,7 @@ func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings) {
 			return
 		}
 	}
-	LogWithMessage(NameClientConnection, ClientAddedTransceivers, true, true, fmt.Sprintf("clientID=%d", clc.clientID))
+	logger.LogWithMessage(NameClientConnection, logger.ClientAddedTransceivers, true, true, fmt.Sprintf("clientID=%d", clc.clientID))
 }
 
 func (clc *ClientConnection) SetupWebsocket(ws *ThreadSafeWebsocket) {
@@ -221,7 +223,7 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 	// If PeerConnection is closed remove it from global list
 	clc.peerConnection.OnConnectionStateChange(func(p webrtc.PeerConnectionState) {
 		// TODO Maybe inform sfu/session manager
-		LogWithMessage(NameClientConnection, SFUClientConnectionChange, true, true,
+		logger.LogWithMessage(NameClientConnection, logger.SFUClientConnectionChange, true, true,
 			fmt.Sprintf("clientID=%d state=%s", clc.clientID, p.String()))
 		switch p {
 		case webrtc.PeerConnectionStateFailed:
@@ -241,13 +243,14 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 		//	return
 		//}
 
-		LogWithMessage(NameClientConnection, ClientOnTrackCalled, true, true,
+		logger.LogWithMessage(NameClientConnection, logger.ClientOnTrackCalled, true, true,
 			fmt.Sprintf("clientID=%d trackID=%s streamID=%s", clc.clientID, t.ID(), t.StreamID()))
 		go func() {
 			rtcpBuf := make([]byte, 1500)
 			for {
 				if _, _, rtcpErr := trackReceiver.Read(rtcpBuf); rtcpErr != nil {
-					panic(rtcpErr)
+					//panic(rtcpErr)
+					// TODO Add some cleanup here
 				}
 			}
 		}()
@@ -276,6 +279,7 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 
 		//startTime := time.Now().UnixNano() // / int64(time.Millisecond)
 		//prevBucket := int64(0)
+		frames := make(map[uint32]uint32)
 		for {
 
 			buf := make([]byte, 15000)
@@ -284,7 +288,12 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 				fmt.Printf("WebRTCSFU: OnTrack: error during read: %s\n", err)
 				break
 			}
+			p := packet.BytesToFramePacketHeader(buf[20:])
 
+			frames[p.FrameNr] += p.SeqLen
+			if frames[p.FrameNr] == p.FrameLen { // Can maybe be optimized more because of the string being created for no reason
+				logger.LogFrameWithMessage(NameClientConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s", clc.clientID, t.ID()), uint(p.FrameNr))
+			}
 			/*if clc.gatherTrackStats && t.Kind() == webrtc.RTPCodecTypeVideo {
 				nextTime := time.Now().UnixNano() //
 				nsDiff := nextTime - startTime
@@ -320,7 +329,7 @@ func (clc *ClientConnection) AddTrackFromOther(originType string, originID uint,
 
 func (clc *ClientConnection) AddTrackFromOtherUnsafe(originType string, originID uint, trackID string, track *webrtc.TrackLocalStaticRTP) {
 	// No locking, must be called with caution
-	LogWithMessage(NameClientConnection, ClientAddingTrackFromOther, true, true,
+	logger.LogWithMessage(NameClientConnection, logger.ClientAddingTrackFromOther, true, true,
 		fmt.Sprintf("clientID=%d originType=%s originID=%d trackID=%s",
 			clc.clientID, originType, originID, trackID))
 	// TODO Check if trackID appears from session manager track
@@ -366,7 +375,7 @@ func (clc *ClientConnection) SignalRenegotiation() {
 }
 
 func (clc *ClientConnection) SignalRenegotiationUnsafe() {
-	LogWithMessage(NameClientConnection, ClientSignalRenegotiation, true, true, fmt.Sprintf("clientID=%d", clc.clientID))
+	logger.LogWithMessage(NameClientConnection, logger.ClientSignalRenegotiation, true, true, fmt.Sprintf("clientID=%d", clc.clientID))
 
 	if clc.websocket == nil {
 		return
@@ -399,7 +408,7 @@ func (clc *ClientConnection) startListening() {
 				fmt.Printf("WebRTCSFU: webSocketHandler: ReadMessage: error %w\n", err)
 				break
 			}
-			LogWithMessage(NameClientConnection, ReceivedWSMessage, true, true,
+			logger.LogWithMessage(NameClientConnection, logger.ReceivedWSMessage, true, true,
 				fmt.Sprintf("origin=client clientID=%d type=%s", clc.clientID, msg.MessageType),
 			)
 			switch msg.MessageType {

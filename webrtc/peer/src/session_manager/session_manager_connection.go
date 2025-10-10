@@ -8,9 +8,9 @@ import (
 	"os"
 	"sync"
 
-	"goweb/peer/src/logger"
 	"goweb/peer/src/transcoder"
 	"goweb/peer/src/utils"
+	"goweb/shared/src/logger"
 
 	"github.com/gorilla/websocket"
 )

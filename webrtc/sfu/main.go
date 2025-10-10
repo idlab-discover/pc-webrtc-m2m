@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"goweb/shared/src/logger"
 	"log"
 	"net/http"
 	"strconv"
@@ -136,8 +137,8 @@ func main() {
 		println("wrongs args")
 		return
 	}
-	LogInit(*providerKey, *providerKey, LogBlue)
-	LogWithMessage(*providerKey, Creating, true, true,
+	logger.LogInit(*providerKey, *providerKey, logger.LogBlue, 100)
+	logger.LogWithMessage(*providerKey, logger.Creating, true, true,
 		fmt.Sprintf("managerIP=%s address=%s port=%d authKey=%s",
 			*managerIP, *address, *port, *authKey))
 	settingEngine := webrtc.SettingEngine{}

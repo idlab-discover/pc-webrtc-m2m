@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"goweb/shared/src/logger"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -29,7 +30,7 @@ type SFU struct {
 }
 
 func NewSFU(address string, port uint) *SFU {
-	Log(NameSFU, Creating, true, true)
+	logger.Log(NameSFU, logger.Creating, true, true)
 	sfu := &SFU{
 		address:         address,
 		port:            port,
@@ -38,7 +39,7 @@ func NewSFU(address string, port uint) *SFU {
 		remoteProviders: map[string]ProviderConnection{},
 		mut:             sync.Mutex{},
 	}
-	Log(NameSFU, Created, true, true)
+	logger.Log(NameSFU, logger.Created, true, true)
 	return sfu
 }
 
@@ -184,30 +185,30 @@ func (sfu *SFU) websocketClientHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (sfu *SFU) websocketProviderHandler(w http.ResponseWriter, r *http.Request) {
-	Log(NameSFU, RemoteProviderConnectionStarted, true, true)
+	logger.Log(NameSFU, logger.RemoteProviderConnectionStarted, true, true)
 	providerKey := r.URL.Query().Get("providerKey")
 	if providerKey == "" {
 		fmt.Println("WebRTCSFU: webSocketHandler: No providerKey provided, returning 400")
 		http.Error(w, "No providerKey provided", http.StatusBadRequest)
-		Log(NameSFU, RemoteProviderConnectionFailed, true, true)
+		logger.Log(NameSFU, logger.RemoteProviderConnectionFailed, true, true)
 		return
 	}
 	providerType := r.URL.Query().Get("providerType")
 	if providerType == "" {
 		fmt.Println("WebRTCSFU: webSocketHandler: No providerType provided, returning 400")
 		http.Error(w, "No providerType provided", http.StatusBadRequest)
-		Log(NameSFU, RemoteProviderConnectionFailed, true, true)
+		logger.Log(NameSFU, logger.RemoteProviderConnectionFailed, true, true)
 		return
 	}
 	sfu.mut.Lock()
 	if _, exists := sfu.remoteProviders[providerKey]; exists {
 		fmt.Println("WebRTCSFU: webSocketHandler: Provider already connected, returning 400")
 		http.Error(w, "Provider already connected", http.StatusBadRequest)
-		Log(NameSFU, RemoteProviderConnectionFailed, true, true)
+		logger.Log(NameSFU, logger.RemoteProviderConnectionFailed, true, true)
 		sfu.mut.Unlock()
 		return
 	}
-	LogWithMessage(NameSFU, RemoteProviderConnectionConnecting, true, true, fmt.Sprintf("providerKey=%s providerType=%s", providerKey, providerType))
+	logger.LogWithMessage(NameSFU, logger.RemoteProviderConnectionConnecting, true, true, fmt.Sprintf("providerKey=%s providerType=%s", providerKey, providerType))
 	provider := CreateRemoteProvider(sfu, providerType, providerKey, r.RemoteAddr, 0, "") // TODO Fix this port and address
 	provider.SetupForwarding()
 	sfu.remoteProviders[providerKey] = provider
@@ -229,7 +230,7 @@ func (sfu *SFU) websocketProviderHandler(w http.ResponseWriter, r *http.Request)
 	sfu.mut.Lock()
 	//client.SignalRenegotiation()
 	sfu.mut.Unlock()
-	LogWithMessage(NameSFU, RemoteProviderConnectionSuccess, true, true, fmt.Sprintf("providerKey=%s providerType=%s", providerKey, providerType))
+	logger.LogWithMessage(NameSFU, logger.RemoteProviderConnectionSuccess, true, true, fmt.Sprintf("providerKey=%s providerType=%s", providerKey, providerType))
 }
 
 // If someone connects => signal all PeerConnections again

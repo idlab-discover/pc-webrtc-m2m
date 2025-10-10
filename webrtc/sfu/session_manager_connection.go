@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"goweb/shared/src/logger"
 	"net/url"
 	"strings"
 	"sync"
@@ -68,7 +69,7 @@ type RemoteClient struct {
 }
 
 func NewSessionManagerConnection(managerIP string, providerKey string, authKey string, sfu *SFU) (*SessionManagerConnection, error) {
-	LogWithMessage(NameManagerConnection, Creating, true, true, fmt.Sprintf("managerIP=%s providerKey=%s authKey=%s", managerIP, providerKey, authKey))
+	logger.LogWithMessage(NameManagerConnection, logger.Creating, true, true, fmt.Sprintf("managerIP=%s providerKey=%s authKey=%s", managerIP, providerKey, authKey))
 	u := url.URL{
 		Scheme: "ws",
 		Host:   managerIP,
@@ -83,7 +84,7 @@ func NewSessionManagerConnection(managerIP string, providerKey string, authKey s
 
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		Log(NameManagerConnection, Failed, true, true)
+		logger.Log(NameManagerConnection, logger.Failed, true, true)
 		return nil, fmt.Errorf("failed to connect to manager: %w", err)
 	}
 	smc := &SessionManagerConnection{
@@ -95,7 +96,7 @@ func NewSessionManagerConnection(managerIP string, providerKey string, authKey s
 		},
 		sfu: sfu,
 	}
-	Log(NameManagerConnection, Created, true, true)
+	logger.Log(NameManagerConnection, logger.Created, true, true)
 	return smc, nil
 }
 
@@ -109,7 +110,7 @@ func (smc *SessionManagerConnection) StartListening() {
 				continue // TODO Handle errors
 			}
 
-			LogWithMessage(NameManagerConnection, ReceivedWSMessage, true, true,
+			logger.LogWithMessage(NameManagerConnection, logger.ReceivedWSMessage, true, true,
 				fmt.Sprintf("origin=manager type=%s", msg.MessageType),
 			)
 			switch msg.MessageType {

@@ -3,7 +3,7 @@ package transcoder
 import (
 	"encoding/json"
 	"fmt"
-	"goweb/peer/src/logger"
+	"goweb/shared/src/logger"
 	"os"
 	"time"
 )

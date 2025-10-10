@@ -2,7 +2,7 @@ package session_manager
 
 import (
 	"fmt"
-	"goweb/peer/src/logger"
+	"goweb/shared/src/logger"
 	"sync"
 )
 

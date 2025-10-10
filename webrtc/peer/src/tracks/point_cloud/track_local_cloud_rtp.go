@@ -3,8 +3,6 @@ package point_cloud
 import (
 	"fmt"
 
-	"goweb/peer/src/transcoder"
-
 	"github.com/pion/rtp"
 	"github.com/pion/webrtc/v4"
 )
@@ -79,14 +77,13 @@ func (s *TrackLocalCloudRTP) Codec() webrtc.RTPCodecCapability {
 	return s.rtpTrack.Codec()
 }
 
-func (s *TrackLocalCloudRTP) WriteFrame(t transcoder.Transcoder, frameNr int) error {
+func (s *TrackLocalCloudRTP) WriteFrame(data []byte, frameNr int) error {
 	p := s.packetizer
 	clockRate := s.clockRate
 	if p == nil {
 		return nil
 	}
 	samples := uint32(1 * clockRate)
-	data := t.EncodeFrame(s.ID())
 
 	if data != nil {
 		packets := p.Packetize(data, samples)

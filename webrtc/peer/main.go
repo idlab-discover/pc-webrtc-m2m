@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"goweb/peer/src/logger"
 	"goweb/peer/src/proxy"
 	"goweb/peer/src/session_manager"
 	"goweb/peer/src/sfu"
 	"goweb/peer/src/timer"
 	"goweb/peer/src/transcoder"
+	"goweb/shared/src/logger"
 	"os"
 	"strconv"
 	"strings"
@@ -55,7 +55,7 @@ func main() {
 	// Only has effect on Windows
 	_ = timer.TimeBeginPeriod(1)
 	defer timer.TimeEndPeriod(1)
-	logger.LogInit("SFUPeer", "sfup", logger.LogGreen)
+	logger.LogInit("SFUPeer", "sfup", logger.LogGreen, 100)
 	// General Command Line args
 
 	preferredClientID := flag.Uint("c", 0, "Preferred client ID")

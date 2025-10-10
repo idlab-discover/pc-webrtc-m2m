@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"goweb/shared/src/logger"
+	"goweb/shared/src/packet"
 
 	"github.com/pion/interceptor"
 	"github.com/pion/webrtc/v4"
@@ -40,13 +42,13 @@ func NewRemoteSFUConnection(parent *SFU, providerKey string, address string, por
 }
 
 func (rsfu *RemoteSFUConnection) SetupForwarding() error {
-	LogWithMessage(NameRemoteSFUConnection, RemoteProviderConnectForwardingStarted, true, true, fmt.Sprintf("providerKey=%s", rsfu.providerKey))
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.RemoteProviderConnectForwardingStarted, true, true, fmt.Sprintf("providerKey=%s", rsfu.providerKey))
 	rsfu.SetupPeerConnection()
 	return nil
 }
 
 func (rsfu *RemoteSFUConnection) SetupPeerConnection() {
-	LogWithMessage(NameRemoteSFUConnection, ClientAddingTransceivers, true, true,
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.ClientAddingTransceivers, true, true,
 		fmt.Sprintf("providerKey=%s nVideoTrack=%d nAudioTracks=%d",
 			rsfu.providerKey, len(rsfu.SenderVideoTracks), len(rsfu.SenderAudioTracks)),
 	)
@@ -68,7 +70,7 @@ func (rsfu *RemoteSFUConnection) SetupPeerConnection() {
 	if err != nil {
 		panic(err)
 	}
-	LogWithMessage(NameRemoteSFUConnection, ClientAddedTransceivers, true, true, fmt.Sprintf("providerKey=%s", rsfu.providerKey))
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.ClientAddedTransceivers, true, true, fmt.Sprintf("providerKey=%s", rsfu.providerKey))
 }
 
 func (rsfu *RemoteSFUConnection) SignalRenegotiation() {
@@ -78,7 +80,7 @@ func (rsfu *RemoteSFUConnection) SignalRenegotiation() {
 }
 
 func (rsfu *RemoteSFUConnection) SignalRenegotiationUnsafe() {
-	LogWithMessage(NameRemoteSFUConnection, ClientSignalRenegotiation, true, true, fmt.Sprintf("providerKey=%s", rsfu.providerKey))
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.ClientSignalRenegotiation, true, true, fmt.Sprintf("providerKey=%s", rsfu.providerKey))
 
 	if rsfu.websocket == nil {
 		return
@@ -115,19 +117,19 @@ func (rsfu *RemoteSFUConnection) AddPeerConnectionCallbacks() {
 	// If PeerConnection is closed remove it from global list
 	rsfu.peerConnection.OnConnectionStateChange(func(p webrtc.PeerConnectionState) {
 		// TODO Maybe inform sfu/session manager
-		LogWithMessage(NameRemoteSFUConnection, SFUClientConnectionChange, true, true,
+		logger.LogWithMessage(NameRemoteSFUConnection, logger.SFUClientConnectionChange, true, true,
 			fmt.Sprintf("providerKey=%s state=%s", rsfu.providerKey, p.String()))
 		switch p {
 		case webrtc.PeerConnectionStateFailed:
 			if err := rsfu.peerConnection.Close(); err != nil {
 				fmt.Printf("WebRTCSFU: webSocketHandler: ERROR: %s\n", err)
 			}
-			LogWithMessage(NameRemoteSFUConnection, RemoteProviderConnectForwardingFailed, true, true,
+			logger.LogWithMessage(NameRemoteSFUConnection, logger.RemoteProviderConnectForwardingFailed, true, true,
 				fmt.Sprintf("providerKey=%s", rsfu.providerKey))
 		case webrtc.PeerConnectionStateClosed:
 			// Alert other clients that this client is gone
 		case webrtc.PeerConnectionStateConnected:
-			LogWithMessage(NameRemoteSFUConnection, RemoteProviderConnectForwardingSuccess, true, true,
+			logger.LogWithMessage(NameRemoteSFUConnection, logger.RemoteProviderConnectForwardingSuccess, true, true,
 				fmt.Sprintf("providerKey=%s", rsfu.providerKey))
 		}
 	})
@@ -138,7 +140,7 @@ func (rsfu *RemoteSFUConnection) AddPeerConnectionCallbacks() {
 		//	return
 		//}
 
-		LogWithMessage(NameRemoteSFUConnection, ClientOnTrackCalled, true, true,
+		logger.LogWithMessage(NameRemoteSFUConnection, logger.ClientOnTrackCalled, true, true,
 			fmt.Sprintf("providerKey=%s trackID=%s streamID=%s", rsfu.providerKey, t.ID(), t.StreamID()))
 		go func() {
 			rtcpBuf := make([]byte, 1500)
@@ -169,14 +171,21 @@ func (rsfu *RemoteSFUConnection) AddPeerConnectionCallbacks() {
 		trackLocal := senderTrack.WebRTCTrack
 		rsfu.mut.Unlock()
 
+		frames := make(map[uint32]uint32)
 		fmt.Printf("WebRTCSFU: OnTrack: Adding track %v\n", trackLocal.ID())
 		for {
 
-			buf := make([]byte, 15000)
+			buf := make([]byte, 1500)
 			i, _, err := t.Read(buf)
 			if err != nil {
 				fmt.Printf("WebRTCSFU: OnTrack: error during read: %s\n", err)
 				break
+			}
+			p := packet.BytesToFramePacketHeader(buf[20:])
+
+			frames[p.FrameNr] += p.SeqLen
+			if frames[p.FrameNr] == p.FrameLen { // Can maybe be optimized more because of the string being created for no reason
+				logger.LogFrameWithMessage(NameRemoteSFUConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("providerID=%s trackID=%s", rsfu.providerKey, t.ID()), uint(p.FrameNr))
 			}
 			//go func() {
 			if _, err = trackLocal.Write(buf[:i]); err != nil {
@@ -269,7 +278,7 @@ func (rsfu *RemoteSFUConnection) HandleSpecialMessage(messageType string, payloa
 func (rsfu *RemoteSFUConnection) AddVirtualClient(clientID uint, videoTracks []TrackSimple, audioTracks []TrackSimple) error {
 	rsfu.mut.Lock()
 	defer rsfu.mut.Unlock()
-	LogWithMessage(NameRemoteSFUConnection, RemoteProviderAddVirtualClient, true, true, fmt.Sprintf("providerKey=%s clientID=%d nVideoTracks=%d nAudioTracks=%d", rsfu.providerKey, clientID, len(videoTracks), len(audioTracks)))
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.RemoteProviderAddVirtualClient, true, true, fmt.Sprintf("providerKey=%s clientID=%d nVideoTracks=%d nAudioTracks=%d", rsfu.providerKey, clientID, len(videoTracks), len(audioTracks)))
 	if rsfu.websocket == nil {
 		return fmt.Errorf("websocket not connected")
 	}
@@ -352,7 +361,7 @@ func (rsfu *RemoteSFUConnection) HandleSubscribeToRemoteClient(clientID uint, vi
 }
 
 func (rsfu *RemoteSFUConnection) AddTrackFromOtherUnsafe(recvTrack *ReceiverTrack) error {
-	LogWithMessage(NameRemoteSFUConnection, ClientAddingTrackFromOther, true, true,
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.ClientAddingTrackFromOther, true, true,
 		fmt.Sprintf("providerKey=%s trackID=%s",
 			rsfu.providerKey, recvTrack.TrackID))
 	// TODO Check if trackID appears from session manager track

@@ -14,14 +14,14 @@ import (
 	"sync"
 	"time"
 
-	"goweb/peer/src/logger"
-	"goweb/peer/src/packet"
 	"goweb/peer/src/proxy"
 	"goweb/peer/src/session_manager"
 	"goweb/peer/src/tracks/audio"
 	"goweb/peer/src/tracks/point_cloud"
 	"goweb/peer/src/transcoder"
 	"goweb/peer/src/utils"
+	"goweb/shared/src/logger"
+	"goweb/shared/src/packet"
 
 	"github.com/gorilla/websocket"
 	"github.com/pion/interceptor"
@@ -89,9 +89,13 @@ func (t *WebRTCVideoTrack) StartSending() {
 		frameNr := 0
 		for {
 			//	println("START", time.Now().UnixMilli(), frameNr)
-			if err := t.track.WriteFrame(t.transcoder, frameNr); err != nil {
+
+			data := t.transcoder.EncodeFrame(t.track.ID())
+			logger.LogFrameWithMessage(NameSFUConnection, logger.FrameSending, true, true, fmt.Sprintf("trackID=%s", t.track.ID()), uint(frameNr))
+			if err := t.track.WriteFrame(data, frameNr); err != nil {
 				panic(err)
 			}
+			logger.LogFrameWithMessage(NameSFUConnection, logger.FrameFullySent, true, true, fmt.Sprintf("trackID=%s", t.track.ID()), uint(frameNr))
 			//	println("END", time.Now().UnixMilli(), frameNr)
 			// TODO Log the sending
 			frameNr++

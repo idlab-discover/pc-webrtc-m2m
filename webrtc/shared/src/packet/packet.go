@@ -1,11 +1,21 @@
 package packet
 
+import "unsafe"
+
 type FramePacketHeader struct {
 	ClientNr  uint32 // 8
 	FrameNr   uint32 // 12
 	FrameLen  uint32 // 16
 	SeqOffset uint32 // 20
 	SeqLen    uint32 // 24
+}
+
+func BytesToFramePacket(b []byte) *FramePacket {
+	return (*FramePacket)(unsafe.Pointer(&b[0]))
+}
+
+func BytesToFramePacketHeader(b []byte) *FramePacketHeader {
+	return (*FramePacketHeader)(unsafe.Pointer(&b[0]))
 }
 
 type FramePacket struct {

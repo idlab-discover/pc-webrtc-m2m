@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"goweb/peer/src/logger"
 	"goweb/peer/src/utils"
+	"goweb/shared/src/logger"
 	"net/url"
 	"sync"
 
@@ -47,7 +47,7 @@ func NewProviderConnectionBase(providerType string, providerKey string, address 
 }
 
 func (p *ProviderConnectionBase) ConnectWebSocket(selfProviderType string, selfProviderKey string, selfAuthKey string) error {
-	LogWithMessage(NameProviderConnectionBase, RemoteProviderConnectionConnecting, true, true, fmt.Sprintf("providerType=%s providerKey=%s address=%s port=%d", p.providerType, p.providerKey, p.address, p.port))
+	logger.LogWithMessage(NameProviderConnectionBase, logger.RemoteProviderConnectionConnecting, true, true, fmt.Sprintf("providerType=%s providerKey=%s address=%s port=%d", p.providerType, p.providerKey, p.address, p.port))
 	u := url.URL{Scheme: "ws", Host: fmt.Sprintf("%s:%d", p.address, p.port), Path: "websocket_provider"}
 	query := url.Values{}
 	query.Set("providerKey", selfProviderKey)
@@ -59,7 +59,7 @@ func (p *ProviderConnectionBase) ConnectWebSocket(selfProviderType string, selfP
 
 	if err != nil {
 		fmt.Printf("WebRTCPeer: NewWSHandler: using %s ERROR: %s\n", u.String(), err)
-		LogWithMessage(NameProviderConnectionBase, RemoteProviderConnectionFailed, true, true, fmt.Sprintf("providerType=%s providerKey=%s address=%s port=%d error=%s", p.providerType, p.providerKey, p.address, p.port, err.Error()))
+		logger.LogWithMessage(NameProviderConnectionBase, logger.RemoteProviderConnectionFailed, true, true, fmt.Sprintf("providerType=%s providerKey=%s address=%s port=%d error=%s", p.providerType, p.providerKey, p.address, p.port, err.Error()))
 		panic(err)
 	}
 	p.websocket = &ThreadSafeWebsocket{
@@ -67,7 +67,7 @@ func (p *ProviderConnectionBase) ConnectWebSocket(selfProviderType string, selfP
 		Mutex: sync.Mutex{},
 	}
 	p.startListening()
-	LogWithMessage(NameProviderConnectionBase, RemoteProviderConnectionSuccess, true, true, fmt.Sprintf("providerType=%s providerKey=%s address=%s port=%d", p.providerType, p.providerKey, p.address, p.port))
+	logger.LogWithMessage(NameProviderConnectionBase, logger.RemoteProviderConnectionSuccess, true, true, fmt.Sprintf("providerType=%s providerKey=%s address=%s port=%d", p.providerType, p.providerKey, p.address, p.port))
 	return nil
 }
 
@@ -80,7 +80,7 @@ func (p *ProviderConnectionBase) startListening() {
 				p.onClose()
 				break
 			}
-			LogWithMessage(NameProviderConnectionBase, logger.ReceivedWSMessage, true, true,
+			logger.LogWithMessage(NameProviderConnectionBase, logger.ReceivedWSMessage, true, true,
 				fmt.Sprintf("origin=provider providerType=%s providerKey=%s type=%s", p.providerKey, p.providerKey, msg.MessageType),
 			)
 			switch msg.MessageType {
