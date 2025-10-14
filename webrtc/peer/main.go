@@ -94,7 +94,7 @@ func main() {
 	} else {
 		switch *transcoderType {
 		case "file":
-			tr = transcoder.NewTranscoderFile(*providersPath, *transcoderConfigPath)
+			tr = transcoder.NewTranscoderFile(*preferredClientID, *providersPath, *transcoderConfigPath)
 		case "fixed":
 			fallthrough
 		default:

@@ -29,22 +29,26 @@ type TranscoderFileTrackIDConfig struct {
 	TrackID string `json:"trackID"`
 }
 
-func NewTranscoderFile(trackPath string, configPath string) *TranscoderFile {
-	logger.Log("TranscoderFile", logger.Creating, true, true)
+func NewTranscoderFile(preferredClientID uint, trackPath string, configPath string) *TranscoderFile {
+	logger.LogWithMessage("TranscoderFile", logger.Creating, true, true, fmt.Sprintf("trackPath=%s configPath=%s", trackPath, configPath))
 	data, err := os.ReadFile(trackPath)
 	if err != nil {
+		logger.LogWithMessage("TranscoderFile", logger.Failed, true, true, fmt.Sprintf("trackPath: %s", trackPath))
 		panic(err)
 	}
 	var trackCfg TranscoderFileTracksConfig
 	if err := json.Unmarshal(data, &trackCfg); err != nil {
+		logger.LogWithMessage("TranscoderFile", logger.Failed, true, true, fmt.Sprintf("trackPath: %s reason=marshal", trackPath))
 		panic(err)
 	}
 	dataCfg, err := os.ReadFile(configPath)
 	if err != nil {
+		logger.LogWithMessage("TranscoderFile", logger.Failed, true, true, fmt.Sprintf("configPath: %s", configPath))
 		panic(err)
 	}
 	var cfgFile TranscoderFileConfig
 	if err := json.Unmarshal(dataCfg, &cfgFile); err != nil {
+		logger.LogWithMessage("TranscoderFile", logger.Failed, true, true, fmt.Sprintf("configPath: %s reason=marshal", configPath))
 		panic(err)
 	}
 	t := &TranscoderFile{
@@ -53,7 +57,8 @@ func NewTranscoderFile(trackPath string, configPath string) *TranscoderFile {
 	for _, provider := range trackCfg.Providers {
 		for _, track := range provider.VideoTracks {
 			trackConfigPath := fmt.Sprintf("%s/%s/config.json", cfgFile.TrackDirectory, track.TrackID)
-			t.tracks[fmt.Sprintf("cl%d_%s", trackCfg.PreferredClientID, track.TrackID)] = NewTranscoderFileTrack(trackConfigPath, cfgFile.MaxFrameNr)
+			internalTrackID := fmt.Sprintf("cl%d_%s", preferredClientID, track.TrackID)
+			t.tracks[internalTrackID] = NewTranscoderFileTrack(internalTrackID, trackConfigPath, cfgFile.MaxFrameNr)
 		}
 	}
 	logger.Log("TranscoderFile", logger.Created, true, true)
@@ -83,9 +88,13 @@ type TranscoderFileTrackConfig struct {
 	FPS              uint   `json:"fps"`
 }
 
-func NewTranscoderFileTrack(path string, maxFrameNr uint) *TranscoderFileTrack {
+const NameTranscoderFileTrack = "TranscoderFileTrack"
+
+func NewTranscoderFileTrack(trackID string, path string, maxFrameNr uint) *TranscoderFileTrack {
+	logger.LogWithMessage(NameTranscoderFileTrack, logger.Creating, true, true, fmt.Sprintf("trackID=%s path=%s maxFrameNr=%d", trackID, path, maxFrameNr))
 	data, err := os.ReadFile(path)
 	if err != nil {
+		logger.LogWithMessage(NameTranscoderFileTrack, logger.Failed, true, true, fmt.Sprintf("path=%s", path))
 		panic(err)
 	}
 	var cfg TranscoderFileTrackConfig
@@ -102,7 +111,7 @@ func NewTranscoderFileTrack(path string, maxFrameNr uint) *TranscoderFileTrack {
 		sleepTime:        sleepTime,
 		maxFrameNr:       maxFrameNr,
 	}
-
+	logger.LogWithMessage(NameTranscoderFileTrack, logger.Created, true, true, fmt.Sprintf("path=%s maxFrameNr=%d fps=%d", path, maxFrameNr, cfg.FPS))
 	return f
 }
 

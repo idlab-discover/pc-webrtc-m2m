@@ -1,0 +1,47 @@
+{
+    "copyConfigs": true,
+    "controllerIP": "127.0.0.1",
+    "sessionManagerConfig": {
+        "sessionManagerIP": "127.0.0.1:9980",
+        "nodeID": "session_manager",
+        "configDirectoryToCopy": ["LOCAL PATH", "REMOTE PATH"]
+    },
+    "providers": [
+        {
+            "nodeID": "provider1",
+            "providerType": "webrtc_sfu",
+            "providerKey": "sfu_mdc",
+            "configDirectoryToCopy": ["LOCAL PATH", "REMOTE PATH"],
+            "connectedTo": ["sfu_mdc2"]
+        },
+        {
+            "nodeID": "provider2",
+            "providerType": "webrtc_sfu",
+            "providerKey": "sfu_mdc",
+            "configDirectoryToCopy": ["LOCAL PATH", "REMOTE PATH"],
+            "connectedTo": ["sfu_mdc2"]
+        }
+    ],
+    "clients": [
+        {
+            "nodeID": "client1",
+            "clientType": "webrtc",
+            "nClients": "1",
+            "transcoderDirectoryToCopy": ["runner/base_configs/client/transcoder", "base_configs/client/transcoder"],
+            "providersConfigToCopy": ["runner/base_configs/client/connection_simple_cl1.json", "base_configs/client/connection_simple_cl1.json"],
+            "transcoderConfig": "base_configs/client/transcoder/transcoder_file.json",
+            "providersConfig": "base_configs/client/connection_simple_cl1.json",
+            "transcoderType": "file"
+        },
+        {
+            "nodeID": "client2",
+            "clientType": "webrtc",
+            "nClients": "1",
+            "transcoderDirectoryToCopy": ["runner/base_configs/client/transcoder", "base_configs/client/transcoder"],
+            "providersConfigToCopy": ["runner/base_configs/client/connection_simple_cl1.json", "base_configs/client/connection_simple_cl1.json"],
+            "transcoderConfig": "base_configs/client/transcoder/transcoder_file.json",
+            "providersConfig": "base_configs/client/connection_simple_cl1.json",
+            "transcoderType": "file"
+        }
+    ]
+}

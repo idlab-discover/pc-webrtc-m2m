@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# Unit test / coverage
+.pytest_cache/
+.cache
+.coverage
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Editor directories
+.vscode/
+
+# Logs and uploads (ignore any directory named logs or uploads anywhere)
+logs/
+uploads/
+**/logs/
+**/uploads/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,5 +1,5 @@
 {
-    "address": ":8080",
+    "address": ":9980",
     "verifyAuthKey": true,
     "ignorePreferredClientID": false,
     "defaultProviderConfigPath": "config/providers/general.json",

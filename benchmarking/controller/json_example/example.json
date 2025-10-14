@@ -1,0 +1,18 @@
+{
+    "providers": [
+        {
+            "nodeID": "",
+            "providerType": "json",
+            "providerKey": "",
+            "connectedTo": []
+        }
+    ],
+    "clients": [
+        {
+            "nodeID": "",
+            "clientType": "json",
+            "nClients": "",
+            "configDirectoryToCopy": ""
+        }
+    ]
+}

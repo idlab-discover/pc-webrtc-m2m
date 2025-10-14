@@ -110,6 +110,8 @@ func (sm *SessionManager) CreateProvider(providerType string, providerKey string
 }
 
 func (sm *SessionManager) StartListening() {
+	// TODO Websocket health check
+	// TODO HTTP server for health check + metrics
 	http.HandleFunc("/websocket_provider", sm.websocketHandlerProvider)
 	http.HandleFunc("/websocket_client", sm.websocketHandlerClient)
 	http.HandleFunc("/websocket_reconnect_client", sm.websocketHandlerClient)
