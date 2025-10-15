@@ -184,6 +184,7 @@ def create_app(client_path: Path, controller_base: str, node_id: str, addresses:
         if n <= 0:
             return jsonify({"error": "nClients must be > 0"}), 400
 
+        client_counter_start = int(data.get("clientCounterStart"))
         client_type = str(data.get("clientType"))
         tr_cfg = f"uploads/{str(data.get("transcoderConfig"))}"
         prov_cfg = f"uploads/{str(data.get("providerConfig"))}"
@@ -206,9 +207,9 @@ def create_app(client_path: Path, controller_base: str, node_id: str, addresses:
             # script path so the process runs this file. If exec_path is a direct
             # executable, use it as-is.
             if exec_path == sys.executable:
-                cmd = [exec_path, sys.argv[0], "--manager", manager_ip, "--providers", prov_cfg, "--tr", tr_type, "--trcfg", tr_cfg]
+                cmd = [exec_path, sys.argv[0], "--manager", manager_ip, "--providers", prov_cfg, "--tr", tr_type, "--trcfg", tr_cfg, "-c", str(client_counter_start + i)]
             else:
-                cmd = [exec_path, "--manager", manager_ip, "--providers", prov_cfg, "--tr", tr_type, "--trcfg", tr_cfg]
+                cmd = [exec_path, "--manager", manager_ip, "--providers", prov_cfg, "--tr", tr_type, "--trcfg", tr_cfg, "-c", str(client_counter_start + i)]
 
             try:
                 # Start in background, discard stdout/stderr to avoid blocking

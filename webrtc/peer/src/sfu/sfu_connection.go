@@ -12,7 +12,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"time"
 
 	"goweb/peer/src/proxy"
 	"goweb/peer/src/session_manager"
@@ -367,28 +366,28 @@ func (s *SFUConnection) addOnTrackCallback() {
 			}
 		}
 		for {
-			_, _, readErr := track.Read(buf)
+			buf2 := make([]byte, 1500)
+			_, _, readErr := track.Read(buf2)
 			// TODO Implement pausing unpausing of track
 			if readErr != nil {
 				return
 			}
-			bufBinary := bytes.NewBuffer(buf[20:])
+			//bufBinary := bytes.NewBuffer(buf[20:])
 
 			// Read the fields from the buffer into a struct
-			var p packet.FramePacket
-			err := binary.Read(bufBinary, binary.LittleEndian, &p)
-			if err != nil {
-				panic(err)
-			}
+			p := packet.BytesToFramePacketHeader(buf2[20:])
 			if s.ProxyConn != nil {
 				// TODO Add internal track ID mapping here
 				s.ProxyConn.SendFramePacket(internalTrackID, buf, 20)
 			}
-			frames[p.FrameNr] += p.SeqLen
-			if frames[p.FrameNr] == p.FrameLen && p.FrameNr%100 == 0 {
+			if frames[p.FrameNr] == 0 {
 				// Frame complete
-				fmt.Printf("WebRTCPeer: [VIDEO] %s %d Received video frame %d from client %d with internalTrackID %d with length %d\n",
-					track.ID(), time.Now().UnixMilli(), p.FrameNr, p.ClientNr, internalTrackID, p.FrameLen)
+				logger.LogFrameWithMessage(NameSFUConnection, logger.FrameFirstPacketRecv, true, true, fmt.Sprintf("trackID=%s", track.ID()), uint(p.FrameNr))
+			}
+			frames[p.FrameNr] += p.SeqLen
+			if frames[p.FrameNr] >= p.FrameLen {
+				// Frame complete
+				logger.LogFrameWithMessage(NameSFUConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("trackID=%s", track.ID()), uint(p.FrameNr))
 			}
 
 		}

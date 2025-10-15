@@ -290,10 +290,11 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 			}
 			p := packet.BytesToFramePacketHeader(buf[20:])
 
-			frames[p.FrameNr] += p.SeqLen
-			if frames[p.FrameNr] == p.FrameLen { // Can maybe be optimized more because of the string being created for no reason
-				logger.LogFrameWithMessage(NameClientConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s", clc.clientID, t.ID()), uint(p.FrameNr))
+			if frames[p.FrameNr] == 0 { // Can maybe be optimized more because of the string being created for no reason
+				logger.LogFrameWithMessage(NameClientConnection, logger.FrameFirstPacketRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s", clc.clientID, t.ID()), uint(p.FrameNr))
 			}
+			frames[p.FrameNr] += p.SeqLen
+
 			/*if clc.gatherTrackStats && t.Kind() == webrtc.RTPCodecTypeVideo {
 				nextTime := time.Now().UnixNano() //
 				nsDiff := nextTime - startTime
@@ -309,12 +310,15 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 				trackBitrate.tempCounter += uint32(i)
 				prevBucket = msBucket
 			}*/
-
-			//go func() {
-			if _, err = trackLocal.Write(buf[:i]); err != nil {
-				fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)
+			if frames[p.FrameNr] == p.FrameLen { // Can maybe be optimized more because of the string being created for no reason
+				logger.LogFrameWithMessage(NameClientConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s", clc.clientID, t.ID()), uint(p.FrameNr))
 			}
-			//}()
+			go func() {
+				if _, err = trackLocal.Write(buf[:i]); err != nil {
+					fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)
+				}
+
+			}()
 
 		}
 	})

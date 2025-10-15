@@ -1,0 +1,53 @@
+id=TranscoderFile status=0 trackPath=uploads/base_configs/client/connection_simple_cl2.json configPath=uploads/base_configs/client/transcoder/transcoder_file.json
+id=TranscoderFileTrack status=0 trackID=cl1_mdc_video_0_0 path=uploads/base_configs/client/transcoder/file_tracks/mdc_video_0_0/config.json maxFrameNr=10
+id=TranscoderFileTrack status=1 path=uploads/base_configs/client/transcoder/file_tracks/mdc_video_0_0/config.json maxFrameNr=10 fps=30
+id=TranscoderFile status=1
+id=SessionManagerConnection status=0 managerIP=127.0.0.1:9980 preferredclientID=1
+id=SessionManagerConnection status=1
+id=SessionManagerConnection status=7000 origin=manager type=FullyConnected
+id=SessionManagerConnection status=2000 clientID=1 authKey=TODO
+id=SessionManagerConnection status=2001
+id=SessionManagerConnection status=7000 origin=manager type=SessionJoined
+id=SessionManagerConnection status=2005 codecMode=mdc defaultProvider= nProviders=1
+id=SessionManagerConnection status=7000 origin=manager type=RemoteClientAdded
+id=SessionManagerConnection status=2002 clientID=0 nTracks=1
+id=SessionManagerConnection status=2003 clientID=0 nTracks=0
+id=SessionManagerConnection status=3000 clientID=0
+id=SessionManagerConnection status=7000 origin=manager type=ClientAddedToProvider
+id=SFUConnection status=1003 providerKey=sfu_mdc
+id=SFUConnection status=1004 providerKey=sfu_mdc
+id=SFUConnection status=1005 providerKey=sfu_mdc
+id=SFUConnection status=7000 origin=sfu providerKey=sfu_mdc type=OfferMessage
+id=SFUConnection status=8001 providerKey=sfu_mdc state=connecting
+id=SFUConnection status=7000 origin=sfu providerKey=sfu_mdc type=CandidateMessage
+id=SFUConnection status=7000 origin=sfu providerKey=sfu_mdc type=OfferMessage
+id=SFUConnection status=8001 providerKey=sfu_mdc state=connected
+id=SFUConnection status=6000 ts=1760533250675 frame=0 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760533250680 frame=0 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760533253853 frame=100 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760533253976 frame=100 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760533253981 frame=100 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760533257154 frame=200 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760533257159 frame=200 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760533257275 frame=200 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760533257279 frame=200 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760533260454 frame=300 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760533260575 frame=300 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760533260581 frame=300 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760533263753 frame=400 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760533263875 frame=400 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760533263879 frame=400 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760533267054 frame=500 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760533267058 frame=500 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760533267175 frame=500 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760533267179 frame=500 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760533270354 frame=600 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760533270475 frame=600 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760533270481 frame=600 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760533273653 frame=700 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760533273657 frame=700 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760533273776 frame=700 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760533273780 frame=700 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760533276953 frame=800 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760533277076 frame=800 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760533277080 frame=800 trackID=cl1_mdc_video_0_0

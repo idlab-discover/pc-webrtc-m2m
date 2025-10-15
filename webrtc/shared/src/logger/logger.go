@@ -86,8 +86,11 @@ const (
 )
 
 // TODO increase buffer size and prevent automatic flushing
-func LogInit(name string, nameShort string, color string, everyNFrames uint) {
+func LogInit(name string, nameShort string, color string, everyNFrames uint, subDir string) {
 	logDir := filepath.Join(".", "logs")
+	if subDir != "" {
+		logDir = filepath.Join(logDir, subDir)
+	}
 	if err := os.MkdirAll(logDir, 0755); err != nil {
 		fmt.Println("Failed to create log directory:", err)
 		return

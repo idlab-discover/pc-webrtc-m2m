@@ -72,6 +72,7 @@ def receive_json():
     manager_ip = cfg.sessionManagerConfig.sessionManagerIP
     print(f"Manager IP for clients to connect to: {manager_ip}")
     clients = cfg.clients if hasattr(cfg, "clients") and cfg.clients else []
+    clientCounter = 0
     for client in clients:
         print(f"Processing client nodeID={getattr(client, 'nodeID', None)}")
         try:
@@ -98,6 +99,7 @@ def receive_json():
             transcoder_type = client.transcoderType
     
             payload = {
+                "clientCounterStart": clientCounter,
                 "nClients": nClients,
                 "clientType": client_type,
                 "transcoderConfig": transcoder_config,
@@ -107,8 +109,10 @@ def receive_json():
             }
             try:
                 print("sddsds")
+                clientCounter += nClients
                 resp = requests.post(url, json=payload, timeout=5)
                 start_results.append({
+                    "clientCounterStart": clientCounter,
                     "nodeID": node_id,
                     "address": addr,
                     "status_code": resp.status_code,
@@ -135,6 +139,7 @@ def receive_json():
     # Repeat for each iteration
 
     # Success — echo back the received object and acknowledge validation
+    # Or just dont do that and create a seperate thread and then we just manually gather the results
     resp_body = {"status": "ok", "received": data, "message": "valid configuration"}
     if start_results:
         resp_body["start_results"] = start_results

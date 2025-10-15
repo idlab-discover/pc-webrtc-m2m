@@ -126,7 +126,7 @@ type DashboardSystemResourcesMessage struct {
 //					* pcState pointer
 
 func main() {
-
+	subDir := flag.String("subDir", "", "Subdirectory for logs")
 	managerIP := flag.String("managerIP", "", "IP address of the session manager instance")
 	address := flag.String("address", "", "IP address of the session manager instance, without port")
 	port := flag.Uint("port", 0, "IP address of the session manager instance, without port")
@@ -137,7 +137,7 @@ func main() {
 		println("wrongs args")
 		return
 	}
-	logger.LogInit(*providerKey, *providerKey, logger.LogBlue, 100)
+	logger.LogInit(*providerKey, *providerKey, logger.LogBlue, 100, *subDir)
 	logger.LogWithMessage(*providerKey, logger.Creating, true, true,
 		fmt.Sprintf("managerIP=%s address=%s port=%d authKey=%s",
 			*managerIP, *address, *port, *authKey))

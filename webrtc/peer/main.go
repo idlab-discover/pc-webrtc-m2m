@@ -55,9 +55,9 @@ func main() {
 	// Only has effect on Windows
 	_ = timer.TimeBeginPeriod(1)
 	defer timer.TimeEndPeriod(1)
-	logger.LogInit("SFUPeer", "sfup", logger.LogGreen, 100)
-	// General Command Line args
 
+	// General Command Line args
+	subDir := flag.String("subDir", "", "Subdirectory for logs")
 	preferredClientID := flag.Uint("c", 0, "Preferred client ID")
 	// DLL Command Line args
 	proxyPortThis := flag.String("r", ":0", "Port of this")
@@ -75,6 +75,7 @@ func main() {
 	transcoderType := flag.String("tr", "fixed", "Type of transcoder to use (fixed, file)")
 	transcoderConfigPath := flag.String("trcfg", "", "Path to JSON file containing the configuration for the file based transcoder")
 	flag.Parse()
+	logger.LogInit("SFUPeer", fmt.Sprintf("sfup_cl%d", *preferredClientID), logger.LogGreen, 100, *subDir)
 	var tr transcoder.Transcoder
 	if *useProxy {
 		videoTracks := parseTrackIDs(*videoTracks)

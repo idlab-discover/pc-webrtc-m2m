@@ -34,13 +34,13 @@
             "transcoderType": "file"
         },
         {
-            "nodeID": "client2",
+            "nodeID": "client1",
             "clientType": "webrtc",
             "nClients": "1",
             "transcoderDirectoryToCopy": ["runner/base_configs/client/transcoder", "base_configs/client/transcoder"],
-            "providersConfigToCopy": ["runner/base_configs/client/connection_simple_cl1.json", "base_configs/client/connection_simple_cl1.json"],
+            "providersConfigToCopy": ["runner/base_configs/client/connection_simple_cl2.json", "base_configs/client/connection_simple_cl2.json"],
             "transcoderConfig": "base_configs/client/transcoder/transcoder_file.json",
-            "providersConfig": "base_configs/client/connection_simple_cl1.json",
+            "providersConfig": "base_configs/client/connection_simple_cl2.json",
             "transcoderType": "file"
         }
     ]
