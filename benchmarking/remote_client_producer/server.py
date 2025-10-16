@@ -26,9 +26,15 @@ import re
 import shutil
 import subprocess
 import time
+import zipfile
+import datetime
+import io
+import tempfile
 from flask import Flask, request, jsonify, send_from_directory, abort
 
 BASE_UPLOAD_DIR = Path(__file__).parent / "uploads"
+LOGS_DIR = Path(__file__).parent / "logs"
+ARCHIVE_DIR = Path(__file__).parent / "archived_logs"
 
 
 def parse_controller(controller: str):
@@ -226,8 +232,52 @@ def create_app(client_path: Path, controller_base: str, node_id: str, addresses:
 
         return jsonify({"status": "started", "count": len(started), "processes": [{"pid": s["pid"], "cmd": " ".join(s["cmd"]), "clientType": s["clientType"]} for s in started]})
 
+    @app.route("/download_logs", methods=["GET"])
+    def download_logs():
+        """Create a zip of all files in the local `logs` directory, return it
+        to the requester, and move the original log files to
+        `archived_logs/<timestamp>/`.
+        """
+        try:
+            logs_dir = LOGS_DIR
+            if not logs_dir.exists() or not logs_dir.is_dir():
+                return jsonify({"error": "Logs directory does not exist"}), 404
+
+            files = [p for p in logs_dir.iterdir() if p.is_file()]
+            if not files:
+                return jsonify({"error": "No logs available"}), 404
+
+            ts = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+            archive_subdir = ARCHIVE_DIR / ts
+            archive_subdir.mkdir(parents=True, exist_ok=True)
+
+            # Create zip inside the archive directory so it remains available
+            # while we move the original files into the same archive folder.
+            zip_name = f"logs_{ts}.zip"
+            zip_path = archive_subdir / zip_name
+            with zipfile.ZipFile(str(zip_path), 'w', compression=zipfile.ZIP_DEFLATED) as zf:
+                for f in files:
+                    # store only the basename in the archive
+                    zf.write(str(f), arcname=f.name)
+
+            # Move the original files into the archive folder
+            for f in files:
+                try:
+                    # If moving into same directory as zip, keep original filename
+                    shutil.move(str(f), str(archive_subdir / f.name))
+                except Exception as e:
+                    # Log and continue; do not fail the download because of one file
+                    print(f"Failed to move {f} to archive: {e}")
+
+            # Return the zip file as an attachment
+            return send_from_directory(directory=str(archive_subdir), path=zip_name, as_attachment=True)
+        except Exception as e:
+            print(f"Error while preparing logs archive: {e}")
+            return jsonify({"error": f"Internal server error: {e}"}), 500
+
     # Let Flask serve static files from client_path by letting the static route handle
     return app
+
 
 
 def main(argv: list[str] | None = None):

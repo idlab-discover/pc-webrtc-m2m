@@ -134,7 +134,7 @@ func main() {
 	authKey := flag.String("authKey", "", "Optional authentication key provider by the session manager")
 	flag.Parse()
 	if *managerIP == "" || *address == "" || *port == 0 || *providerKey == "" {
-		println("wrongs args")
+		println("wrongs args", *managerIP, *address, *port, *providerKey)
 		return
 	}
 	logger.LogInit(*providerKey, *providerKey, logger.LogBlue, 100, *subDir)

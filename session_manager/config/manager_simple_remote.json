@@ -1,6 +1,6 @@
 {
-    "address": "127.0.0.1:9980",
-    "verifyAuthKey": true,
+    "address": ":9980",
+    "verifyAuthKey": false,
     "ignorePreferredClientID": false,
     "defaultProviderConfigPath": "config/providers/general.json",
     "provisionerType": "remote",

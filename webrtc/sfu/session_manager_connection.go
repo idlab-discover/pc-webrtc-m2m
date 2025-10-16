@@ -84,7 +84,7 @@ func NewSessionManagerConnection(managerIP string, providerKey string, authKey s
 
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		logger.Log(NameManagerConnection, logger.Failed, true, true)
+		logger.LogWithMessage(NameManagerConnection, logger.Failed, true, true, fmt.Sprintf("managerIP=%s providerKey=%s authKey=%s error=%v", managerIP, providerKey, authKey, err))
 		return nil, fmt.Errorf("failed to connect to manager: %w", err)
 	}
 	smc := &SessionManagerConnection{

@@ -27,6 +27,7 @@ func main() {
 	go func() {
 		sm.StartListening()
 	}()
+	sm.CreateDefaultProviders()
 
 	println("waiting")
 	select {}

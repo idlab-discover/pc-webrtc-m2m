@@ -69,12 +69,16 @@ func NewSessionManager(configPath string) *SessionManager {
 		clients:         map[uint]*ClientConnection{},
 		mut:             sync.Mutex{},
 	}
-	for i := range config.ProvidersToCreate {
-		proConfig := config.ProvidersToCreate[i]
-		ses.CreateProvider(proConfig.Type, proConfig.Key, proConfig.Address, proConfig.Port, proConfig.ConnectedTo)
-	}
+
 	Log(NameManager, Created, true, true)
 	return ses
+}
+
+func (sm *SessionManager) CreateDefaultProviders() {
+	for i := range sm.config.ProvidersToCreate {
+		proConfig := sm.config.ProvidersToCreate[i]
+		sm.CreateProvider(proConfig.Type, proConfig.Key, proConfig.Address, proConfig.Port, proConfig.ConnectedTo)
+	}
 }
 
 func (sm *SessionManager) CreateProvider(providerType string, providerKey string, address string, port uint, connectedTo []string) *ProviderConnection {

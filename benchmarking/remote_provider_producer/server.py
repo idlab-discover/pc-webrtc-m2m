@@ -98,9 +98,9 @@ def create_app(client_path: Path, pport: int, controller_base: str, node_id: str
 
         started = []
         if exec_path == sys.executable:
-            cmd = [exec_path, sys.argv[0], "--managerIP", manager_ip, "--address", provider_addr, "--providerKey", provider_key, "--port", pport]
+            cmd = [exec_path, sys.argv[0], "--managerIP", manager_ip, "--address", provider_addr, "--providerKey", provider_key, "--port", str(pport)]
         else:
-            cmd = [exec_path, "--managerIP", manager_ip, "--address", provider_addr, "--providerKey", provider_key, "--port", pport]
+            cmd = [exec_path, "--managerIP", manager_ip, "--address", provider_addr, "--providerKey", provider_key, "--port", str(pport)]
 
         try:
             # Start in background, discard stdout/stderr to avoid blocking
@@ -112,10 +112,10 @@ def create_app(client_path: Path, pport: int, controller_base: str, node_id: str
             print("Started process:", proc_info)
             time.sleep(0.05)
         except Exception as e:
-            print(f"Failed to start process {cmd}")
+            print(f"Failed to start process {cmd} {e}")
             return jsonify({"error": f"Failed to start process {exec_path}: {e}", "started": started}), 500
 
-        return jsonify({"status": "started", "count": len(started), "processes": [{"pid": s["pid"], "cmd": " ".join(s["cmd"]), "clientType": s["clientType"]} for s in started]})
+        return jsonify({"status": "started", "address": provider_addr, "port": pport})
 
     # Let Flask serve static files from client_path by letting the static route handle
     return app

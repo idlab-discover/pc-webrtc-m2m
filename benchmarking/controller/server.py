@@ -2,8 +2,16 @@ from flask import Flask, request, jsonify
 from pathlib import Path
 import os
 import sys
+import argparse
 import requests
+import subprocess
 from werkzeug.utils import secure_filename
+import threading
+import time
+import datetime
+import zipfile
+import tempfile
+import shutil
 
 
 # Ensure repository root is on sys.path so sibling package 'shared' can be imported
@@ -20,12 +28,133 @@ app = Flask(__name__)
 # Base directory for uploads (kept inside the controller package)
 BASE_UPLOAD_DIR = Path(__file__).parent / "uploads"
 
+# Optional manager binary/path configured via CLI. Stored as a string or None.
+manager_path: str | None = None
+app.config["manager_path"] = None
+app.config["config_path"] = None
+app.config["manager_process"] = None
+
 
 # In-memory subscriptions map: nodeID -> list of addresses
 SUBSCRIPTIONS: dict[str, list[str]] = {}
 
 # In-memory provider subscriptions map: providerKey -> list of addresses
 PROVIDER_SUBSCRIPTIONS: dict[str, list[str]] = {}
+
+
+def _collect_logs_after_delay(delay_seconds: int = 10, logs_base: Path | None = None) -> None:
+    """Background worker: wait `delay_seconds`, create timestamped subdir under
+    `logs_base` (defaults to controller/logs), call /download_logs on all
+    subscribed client addresses and unzip any returned zip files into the
+    timestamped folder.
+    """
+    try:
+        time.sleep(float(delay_seconds))
+    except Exception:
+        # If sleep fails for any reason, continue to attempt collection
+        pass
+
+    if logs_base is None:
+        logs_base = Path(__file__).parent / "logs"
+    try:
+        logs_base.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        print(f"Failed to create logs base directory {logs_base}: {e}")
+        return
+
+    ts = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    target_dir = logs_base / ts
+    try:
+        target_dir.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        print(f"Failed to create timestamped logs dir {target_dir}: {e}")
+        return
+
+    # If a manager process was started by the controller, terminate it before
+    # collecting logs so it can flush and close files. Wait a short time after
+    # termination to allow OS to settle.
+    mgr_proc = app.config.get("manager_process")
+    if mgr_proc is not None:
+        try:
+            pid = getattr(mgr_proc, "pid", None)
+            print(f"Stopping manager process (pid={pid}) before collecting logs")
+            try:
+                mgr_proc.terminate()
+            except Exception:
+                # best-effort; continue to try kill below
+                pass
+            try:
+                mgr_proc.wait(timeout=5)
+                print("Manager process terminated gracefully")
+            except Exception:
+                try:
+                    print("Manager did not exit in time, killing")
+                    mgr_proc.kill()
+                    mgr_proc.wait(timeout=2)
+                except Exception:
+                    print("Failed to kill manager process or wait for exit")
+            # clear stored reference
+            app.config["manager_process"] = None
+        except Exception as e:
+            print(f"Error while stopping manager process: {e}")
+
+        # wait a short grace period after stopping manager before collecting logs
+        try:
+            time.sleep(2)
+        except Exception:
+            pass
+
+    # Snapshot subscriptions at the time of collection to avoid concurrent dict mutations
+    subs_snapshot = {k: list(v) for k, v in SUBSCRIPTIONS.items()}
+
+    for node_id, addresses in subs_snapshot.items():
+        for addr in addresses:
+            url = addr.rstrip("/") + "/download_logs"
+            print(f"Requesting logs from {node_id} @ {url}")
+            try:
+                with requests.get(url, stream=True, timeout=15) as resp:
+                    if resp.status_code != 200:
+                        print(f"Non-200 response from {url}: {resp.status_code}")
+                        continue
+
+                    # Save streamed content to a temporary file
+                    try:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as tmpf:
+                            for chunk in resp.iter_content(chunk_size=8192):
+                                if chunk:
+                                    tmpf.write(chunk)
+                            tmp_path = Path(tmpf.name)
+                    except Exception as e:
+                        print(f"Failed to write zip from {url} to temp file: {e}")
+                        continue
+
+                    # Extract into a node-specific subdirectory to avoid collisions
+                    node_target = target_dir / (str(node_id) or "unknown_node")
+                    try:
+                        node_target.mkdir(parents=True, exist_ok=True)
+                    except Exception as e:
+                        print(f"Failed to create node target dir {node_target}: {e}")
+                        try:
+                            tmp_path.unlink()
+                        except Exception:
+                            pass
+                        continue
+
+                    try:
+                        with zipfile.ZipFile(str(tmp_path), 'r') as zf:
+                            zf.extractall(path=str(node_target))
+                        print(f"Extracted logs from {url} to {node_target}")
+                    except zipfile.BadZipFile:
+                        print(f"Received invalid zip file from {url}")
+                    except Exception as e:
+                        print(f"Failed to extract zip from {url}: {e}")
+                    finally:
+                        try:
+                            tmp_path.unlink()
+                        except Exception:
+                            pass
+            except Exception as e:
+                print(f"Error while downloading logs from {url}: {e}")
 
 
 
@@ -67,6 +196,39 @@ def receive_json():
         return jsonify({"error": "config validation failed", "details": errs}), 400
     
     print_summary(cfg)
+
+    # START SESSION MANAGER HERE
+    # If a manager binary and config path were provided via CLI, start the
+    # manager in the background (pass the config using -c <config_path>).
+    manager_started_info = None
+    mgr_path = app.config.get("manager_path")
+    cfg_path = app.config.get("config_path")
+    if mgr_path:
+        if not cfg_path:
+            print("Manager path configured but no config_path provided; skipping manager start")
+            manager_started_info = {"started": False, "reason": "missing config_path"}
+        else:
+            def _start_manager_bg(mgr: str, cfgp: str):
+                try:
+                    # Use Popen so we don't block; capture output to avoid console spam
+                    popen = subprocess.Popen([mgr, "-c", cfgp], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    # store the process handle so other parts of the app can inspect/terminate it
+                    app.config["manager_process"] = popen
+                    print(f"Started manager process: {mgr} -c {cfgp} (pid={popen.pid})")
+                except Exception as e:
+                    print(f"Failed to start manager process {mgr} -c {cfgp}: {e}")
+
+            try:
+                t_mgr = threading.Thread(target=_start_manager_bg, args=(mgr_path, cfg_path), daemon=True)
+                t_mgr.start()
+                manager_started_info = {"started": True, "manager_path": mgr_path, "config_path": cfg_path}
+            except Exception as e:
+                print(f"Failed to launch background thread to start manager: {e}")
+                manager_started_info = {"started": False, "reason": str(e)}
+    else:
+        print("No manager_path configured; not starting manager process")
+        manager_started_info = {"started": False, "reason": "no manager_path configured"}
+    
 
     # Tell subscribed nodes to start their clients as specified in cfg.clients
     start_results: list[dict] = []
@@ -143,9 +305,22 @@ def receive_json():
 
     # Success — echo back the received object and acknowledge validation
     # Or just dont do that and create a seperate thread and then we just manually gather the results
+
     resp_body = {"status": "ok", "received": data, "message": "valid configuration"}
     if start_results:
         resp_body["start_results"] = start_results
+    if manager_started_info is not None:
+        resp_body["manager_start"] = manager_started_info
+    
+    # Kick off background log collection after a short delay; do not block the
+    # HTTP response. Use a daemon thread so it won't prevent process exit.
+    try:
+        t = threading.Thread(target=_collect_logs_after_delay, args=(10, None), daemon=True)
+        t.start()
+        print("Started background log collection thread (waiting 10s before download)")
+    except Exception as e:
+        print(f"Failed to start background log collection thread: {e}")
+
     return jsonify(resp_body), 200
 
 
@@ -427,4 +602,21 @@ def start_provider():
 
 if __name__ == "__main__":
     # Default host/port for local testing; change as needed
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    parser = argparse.ArgumentParser(description="Controller server")
+    parser.add_argument("--manager_path", dest="manager_path", help="Path to the server manager binary or directory", default=None)
+    parser.add_argument("--config_path", dest="config_path", help="Path to the manager config file to pass with -c", default=None)
+    parser.add_argument("--host", dest="host", help="Host to bind to", default="0.0.0.0")
+    parser.add_argument("--port", dest="port", help="Port to bind to", type=int, default=8000)
+    parser.add_argument("--debug", dest="debug", action="store_true", help="Run Flask in debug mode")
+    args = parser.parse_args()
+
+    # Store manager path in module-global and Flask config so endpoints can access it
+    if args.manager_path:
+        manager_path = str(Path(args.manager_path))
+        app.config["manager_path"] = manager_path
+        print(f"Configured manager_path: {manager_path}")
+    if args.config_path:
+        app.config["config_path"] = str(Path(args.config_path))
+        print(f"Configured config_path: {app.config.get('config_path')}")
+
+    app.run(host=args.host, port=args.port, debug=args.debug)

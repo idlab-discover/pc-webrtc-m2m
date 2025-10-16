@@ -29,8 +29,10 @@ env/
 
 # Logs and uploads (ignore any directory named logs or uploads anywhere)
 logs/
+archived_logs/
 uploads/
 **/logs/
+**/archived_logs/
 **/uploads/
 
 # OS files
