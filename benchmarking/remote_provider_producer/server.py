@@ -40,37 +40,6 @@ def parse_controller(controller: str):
     base = f"{parsed.scheme}://{host}:{port}"
     return parsed.scheme, host, port, base
 
-
-def discover_non_loopback_ips(remote_host: str, remote_port: int) -> list[str]:
-    ips: set[str] = set()
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.connect((remote_host, remote_port))
-            ips.add(s.getsockname()[0])
-    except Exception:
-        pass
-
-    try:
-        hostname = socket.gethostname()
-        for ip in socket.gethostbyname_ex(hostname)[2]:
-            if not ip.startswith("127."):
-                ips.add(ip)
-    except Exception:
-        pass
-
-    try:
-        for res in socket.getaddrinfo(socket.gethostname(), None, family=socket.AF_INET):
-            ip = res[4][0]
-            if not ip.startswith("127."):
-                ips.add(ip)
-    except Exception:
-        pass
-
-    if not ips:
-        return ["127.0.0.1"]
-    return sorted(ips)
-
-
 def post_subscription(controller_base: str, node_id: str, address: str):
     url = urllib.parse.urljoin(controller_base, "/subscribe_provider")
     payload = json.dumps({"providerKey": node_id, "address": address}).encode("utf-8")
