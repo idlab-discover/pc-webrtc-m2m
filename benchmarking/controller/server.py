@@ -24,6 +24,9 @@ BASE_UPLOAD_DIR = Path(__file__).parent / "uploads"
 # In-memory subscriptions map: nodeID -> list of addresses
 SUBSCRIPTIONS: dict[str, list[str]] = {}
 
+# In-memory provider subscriptions map: providerKey -> list of addresses
+PROVIDER_SUBSCRIPTIONS: dict[str, list[str]] = {}
+
 
 
 
@@ -146,6 +149,22 @@ def receive_json():
     return jsonify(resp_body), 200
 
 
+@app.route("/json", methods=["POST"])
+def json_echo():
+    """
+    POST /json
+    Expects: application/json body containing a JSON object (dictionary).
+    Returns 400 if no valid JSON is provided or JSON is not an object.
+    Returns 200 with an echo of the JSON on success.
+    """
+    data = request.get_json(silent=True)
+    if data is None:
+        return jsonify({"error": "Invalid or missing JSON in request body"}), 400
+    if not isinstance(data, dict):
+        return jsonify({"error": "Expected a JSON object (dictionary)"}), 400
+    return jsonify({"status": "ok", "received": data}), 200
+
+
 def _is_valid_relative_dir(rel_path: str) -> bool:
     """Return True if rel_path is a safe relative path (no absolute, no traversal).
 
@@ -219,6 +238,7 @@ def upload_file():
     # subscriber's addresses. Keep only the first address that succeeds.
     forward_results: list[dict] = []
     forwarded_to: str | None = None
+    provider_info: dict | None = None
 
     if nodeID:
         addresses = SUBSCRIPTIONS.get(nodeID, [])
@@ -289,6 +309,118 @@ def subscribe_client():
     print(f"Subscribed client {node_id} with addresses: {addresses}")
 
     return jsonify({"status": "ok", "nodeID": node_id, "addresses": addresses}), 200
+
+
+@app.route("/subscribe_provider", methods=["POST"])
+def subscribe_provider():
+    """
+    POST /subscribe_provider
+    Accepts either JSON body or form-data with fields:
+      - providerKey: string
+      - address: string
+
+    Stores the address for the providerKey in memory (deduped) and returns it.
+    """
+    data = request.get_json(silent=True)
+    if isinstance(data, dict):
+        provider_key = data.get("providerKey")
+        address = data.get("address")
+    else:
+        provider_key = request.form.get("providerKey")
+        address = request.form.get("address")
+
+    if not isinstance(provider_key, str) or not provider_key.strip():
+        return jsonify({"error": "Field 'providerKey' must be a non-empty string"}), 400
+    if not isinstance(address, str) or not address.strip():
+        return jsonify({"error": "Field 'address' must be a non-empty string"}), 400
+
+    provider_key = provider_key.strip()
+    address = address.strip()
+
+    # Insert or dedupe
+    existing = PROVIDER_SUBSCRIPTIONS.get(provider_key, [])
+    if address not in existing:
+        existing.append(address)
+    PROVIDER_SUBSCRIPTIONS[provider_key] = existing
+
+    print(f"Subscribed provider {provider_key} with address: {address}")
+
+    return jsonify({
+        "status": "ok",
+        "providerKey": provider_key,
+        "addresses": existing,
+    }), 200
+
+
+@app.route("/start_provider", methods=["POST"])
+def start_provider():
+    """
+    POST /start_provider
+    Accepts either JSON body or form-data with fields:
+      - providerKey
+      - providerType
+      - managerIP
+
+    For now, simply prints the received values and returns status ok.
+    """
+    data = request.get_json(silent=True)
+    if isinstance(data, dict):
+        provider_key = data.get("providerKey")
+        provider_type = data.get("providerType")
+        manager_ip = data.get("managerIP")
+    else:
+        provider_key = request.form.get("providerKey")
+        provider_type = request.form.get("providerType")
+        manager_ip = request.form.get("managerIP")
+
+    print(
+        f"start_provider called with providerKey={provider_key}, "
+        f"providerType={provider_type}, managerIP={manager_ip}"
+    )
+
+    # Best-effort forward to subscribed provider for this key, if any
+    forward_results: list[dict] = []
+    forwarded_to: str | None = None
+    provider_info = None
+    if isinstance(provider_key, str) and provider_key.strip():
+        addresses = PROVIDER_SUBSCRIPTIONS.get(provider_key.strip(), [])
+        for addr in list(addresses):
+            url = addr.rstrip("/") + "/start_provider"
+            payload = {
+                "providerKey": provider_key,
+                "providerType": provider_type,
+                "managerIP": manager_ip,
+            }
+            try:
+                resp = requests.post(url, json=payload, timeout=5)
+                success = 200 <= resp.status_code < 300
+                forward_results.append({
+                    "address": addr,
+                    "status_code": resp.status_code,
+                    "ok": success,
+                    "response_text": resp.text,
+                })
+                if success:
+                    # Try to parse provider fields from JSON body
+                    try:
+                        body = resp.json()
+                        prov_status = body.get("status")
+                        prov_addr = body.get("address")
+                        prov_port = body.get("port")
+                        # light validation/types
+                        if isinstance(prov_status, str) and isinstance(prov_addr, str) and isinstance(prov_port, (int, float)):
+                            provider_info = {"status": prov_status, "address": prov_addr, "port": int(prov_port)}
+                    except Exception:
+                        pass
+
+                    forwarded_to = addr
+                    # prune other addresses and keep only the successful one
+                    PROVIDER_SUBSCRIPTIONS[provider_key.strip()] = [addr]
+                    break
+            except Exception as e:
+                forward_results.append({"address": addr, "error": str(e)})
+
+    return jsonify(provider_info), 200
 
 
 if __name__ == "__main__":
