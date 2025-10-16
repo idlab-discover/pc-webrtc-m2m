@@ -381,11 +381,12 @@ def start_provider():
     # Best-effort forward to subscribed provider for this key, if any
     forward_results: list[dict] = []
     forwarded_to: str | None = None
-    provider_info = None
+    provider_info = {"status": "failed", "address": "", "port": 0}
     if isinstance(provider_key, str) and provider_key.strip():
         addresses = PROVIDER_SUBSCRIPTIONS.get(provider_key.strip(), [])
+        print(addresses)
         for addr in list(addresses):
-            url = addr.rstrip("/") + "/start_provider"
+            url = f"http://{addr.rstrip('/')}/start_provider"
             payload = {
                 "providerKey": provider_key,
                 "providerType": provider_type,
@@ -410,6 +411,7 @@ def start_provider():
                         # light validation/types
                         if isinstance(prov_status, str) and isinstance(prov_addr, str) and isinstance(prov_port, (int, float)):
                             provider_info = {"status": prov_status, "address": prov_addr, "port": int(prov_port)}
+                            return jsonify(provider_info), 200
                     except Exception:
                         pass
 
@@ -420,7 +422,7 @@ def start_provider():
             except Exception as e:
                 forward_results.append({"address": addr, "error": str(e)})
 
-    return jsonify(provider_info), 200
+    return jsonify(provider_info), 400
 
 
 if __name__ == "__main__":

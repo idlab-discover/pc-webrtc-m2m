@@ -319,7 +319,15 @@ func (s *SFUConnection) addOnTrackCallback() {
 		fmt.Printf("WebRTCPeer: MIME type %s\n", track.Codec().MimeType)
 		fmt.Printf("WebRTCPeer: Payload type %d\n", track.PayloadType())
 		fmt.Printf("WebRTCPeer: Track SSRC %d\n", track.SSRC())
-
+		go func() {
+			rtcpBuf := make([]byte, 1500)
+			for {
+				if _, _, rtcpErr := receiver.Read(rtcpBuf); rtcpErr != nil {
+					//panic(rtcpErr)
+					// TODO Add some cleanup here
+				}
+			}
+		}()
 		/*if *useProxyInput {
 			proxyConn.SendTrackStatusPacket(uint32(clientID), 0, uint32(capturerID), uint32(trackID), isVideo, true)
 		}*/

@@ -3,18 +3,13 @@
     "verifyAuthKey": true,
     "ignorePreferredClientID": false,
     "defaultProviderConfigPath": "config/providers/general.json",
-    "provisionerType": "",
-    "provisionerConfigPath": "config/provisioner/local.json",
+    "provisionerType": "remote",
+    "provisionerConfigPath": "config/provisioner/remote.json",
     "providersToCreate": [
         {
             "type": "webrtc_sfu",
             "key": "sfu_mdc",
-            "connectedTo": ["sfu_mdc2"]
-        },
-        {
-            "type": "webrtc_sfu",
-            "key": "sfu_mdc2",
-            "connectedTo": ["sfu_mdc"]
+            "connectedTo": []
         }
     ]
 }

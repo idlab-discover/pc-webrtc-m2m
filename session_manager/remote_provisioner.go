@@ -44,7 +44,7 @@ func NewRemoteProviderProvisioner(configPath string) *RemoteProviderProvisioner 
 		ControllerAddress: config.ControllerAddress,
 	}
 
-	LogWithMessage(NameRemoteProvisioner, Created, true, true, fmt.Sprintf("remoteProviders=%+v", config.RemoteProviders))
+	LogWithMessage(NameRemoteProvisioner, Created, true, true, fmt.Sprintf("controllerAddress=%+v", p.ControllerAddress))
 	return p
 }
 
