@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"goweb/shared/src/packet"
 	"testing"
+	"time"
 )
 
 var sampleFrame = func() []byte {
@@ -88,6 +89,13 @@ func BenchmarkManualFrameHeader(b *testing.B) {
 func BenchmarkUnsafeFrameHeader(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		h := *packet.BytesToFramePacketHeader(sampleFrameHeader)
+		_ = h
+	}
+}
+
+func BenchmarkGetTime(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		h := time.Now().UnixMilli()
 		_ = h
 	}
 }

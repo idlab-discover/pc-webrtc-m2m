@@ -192,8 +192,8 @@ def create_app(client_path: Path, controller_base: str, node_id: str, addresses:
 
         client_counter_start = int(data.get("clientCounterStart"))
         client_type = str(data.get("clientType"))
-        tr_cfg = f"uploads/{str(data.get("transcoderConfig"))}"
-        prov_cfg = f"uploads/{str(data.get("providerConfig"))}"
+        tr_cfg = f"uploads/{str(data.get('transcoderConfig'))}"
+        prov_cfg = f"uploads/{str(data.get('providerConfig'))}"
         tr_type = str(data.get("transcoderType"))
         manager_ip = str(data.get("managerIP"))
 

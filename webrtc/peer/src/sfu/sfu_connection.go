@@ -90,7 +90,7 @@ func (t *WebRTCVideoTrack) StartSending() {
 			//	println("START", time.Now().UnixMilli(), frameNr)
 
 			data := t.transcoder.EncodeFrame(t.track.ID())
-			logger.LogFrameWithMessage(NameSFUConnection, logger.FrameSending, true, true, fmt.Sprintf("trackID=%s", t.track.ID()), uint(frameNr))
+			logger.LogFrameWithMessage(NameSFUConnection, logger.FrameSending, true, true, fmt.Sprintf("trackID=%s frameSize=%d", t.track.ID(), len(data)), uint(frameNr))
 			if err := t.track.WriteFrame(data, frameNr); err != nil {
 				panic(err)
 			}

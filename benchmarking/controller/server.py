@@ -106,9 +106,14 @@ def _collect_logs_after_delay(delay_seconds: int = 10, logs_base: Path | None = 
 
     # Snapshot subscriptions at the time of collection to avoid concurrent dict mutations
     subs_snapshot = {k: list(v) for k, v in SUBSCRIPTIONS.items()}
+    # Snapshot provider subscriptions as well
+    prov_subs_snapshot = {k: list(v) for k, v in PROVIDER_SUBSCRIPTIONS.items()}
 
     for node_id, addresses in subs_snapshot.items():
-        for addr in addresses:
+        success = False
+        for addr in addresses: # TODO If successful dont try for other IPs 
+            if success:
+                break
             url = addr.rstrip("/") + "/download_logs"
             print(f"Requesting logs from {node_id} @ {url}")
             try:
@@ -153,8 +158,59 @@ def _collect_logs_after_delay(delay_seconds: int = 10, logs_base: Path | None = 
                             tmp_path.unlink()
                         except Exception:
                             pass
+                    success = True
             except Exception as e:
                 print(f"Error while downloading logs from {url}: {e}")
+
+    # Also collect logs from providers (providerKey -> addresses)
+    for prov_key, addresses in prov_subs_snapshot.items():
+        for addr in addresses:
+            # Providers may have provided addresses without scheme/host; try to use as-is
+            url = f"http://{addr.rstrip('/')}/download_logs"
+            print(f"Requesting provider logs for {prov_key} @ {url}")
+            try:
+                with requests.get(url, stream=True, timeout=15) as resp:
+                    if resp.status_code != 200:
+                        print(f"Non-200 response from {url}: {resp.status_code}")
+                        continue
+
+                    try:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as tmpf:
+                            for chunk in resp.iter_content(chunk_size=8192):
+                                if chunk:
+                                    tmpf.write(chunk)
+                            tmp_path = Path(tmpf.name)
+                    except Exception as e:
+                        print(f"Failed to write provider zip from {url} to temp file: {e}")
+                        continue
+
+                    # Extract into a provider-specific subdirectory under the same timestamp
+                    prov_target = target_dir / (f"provider_{str(prov_key)}")
+                    try:
+                        prov_target.mkdir(parents=True, exist_ok=True)
+                    except Exception as e:
+                        print(f"Failed to create provider target dir {prov_target}: {e}")
+                        try:
+                            tmp_path.unlink()
+                        except Exception:
+                            pass
+                        continue
+
+                    try:
+                        with zipfile.ZipFile(str(tmp_path), 'r') as zf:
+                            zf.extractall(path=str(prov_target))
+                        print(f"Extracted provider logs from {url} to {prov_target}")
+                    except zipfile.BadZipFile:
+                        print(f"Received invalid zip file from {url}")
+                    except Exception as e:
+                        print(f"Failed to extract provider zip from {url}: {e}")
+                    finally:
+                        try:
+                            tmp_path.unlink()
+                        except Exception:
+                            pass
+            except Exception as e:
+                print(f"Error while downloading provider logs from {url}: {e}")
 
 
 
@@ -229,7 +285,7 @@ def receive_json():
         print("No manager_path configured; not starting manager process")
         manager_started_info = {"started": False, "reason": "no manager_path configured"}
     
-
+    time.sleep(2)
     # Tell subscribed nodes to start their clients as specified in cfg.clients
     start_results: list[dict] = []
 

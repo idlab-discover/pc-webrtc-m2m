@@ -1,0 +1,25 @@
+{
+    "extraCmdArgs": "",
+    "settings": {
+        "useABR": true,
+        "adaptationMethod": "mdc_v1",
+        "adaptationSettings": {
+
+        },
+        "useCCs": true,
+        "ccMethod": "gcc",
+        "ccSettings": {
+            "minBitrate": 100,
+            "maxBitrate": 100,
+            "initialBitrate": 100
+        },
+        "addressAndPort": "127.0.0.1:9000",
+        "contentType": "mdc_pc",
+        "verifyAuthKey": false,
+        "nackSettings": {
+            "enabled": true,
+            "maxRetries": 5
+        },
+        "gatherTrackStats": true
+    }
+}
