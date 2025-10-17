@@ -78,6 +78,7 @@ const (
 
 	TrackMetricsReport uint = 9000
 	EstimatedBitrate   uint = 9001
+	SystemResources    uint = 9002
 	CriticalFail       uint = 9999
 )
 

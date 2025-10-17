@@ -1,6 +1,8 @@
 module goweb
 
-go 1.22
+go 1.23.0
+
+toolchain go1.24.9
 
 require (
 	github.com/gorilla/websocket v1.5.0
@@ -9,11 +11,14 @@ require (
 	github.com/pion/sdp/v3 v3.0.16
 	github.com/pion/webrtc/v4 v4.1.4
 	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
-	golang.org/x/sys v0.30.0
+	golang.org/x/sys v0.35.0
 )
 
 require (
+	github.com/ebitengine/purego v0.9.0 // indirect
+	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/pion/datachannel v1.5.10 // indirect
 	github.com/pion/dtls/v3 v3.0.7 // indirect
 	github.com/pion/ice/v4 v4.0.10 // indirect
@@ -26,7 +31,13 @@ require (
 	github.com/pion/stun/v3 v3.0.0 // indirect
 	github.com/pion/transport/v3 v3.0.7 // indirect
 	github.com/pion/turn/v4 v4.1.1 // indirect
+	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
+	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
+	github.com/shirou/gopsutil/v4 v4.25.9 // indirect
+	github.com/tklauser/go-sysconf v0.3.15 // indirect
+	github.com/tklauser/numcpus v0.10.0 // indirect
 	github.com/wlynxg/anet v0.0.5 // indirect
+	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/net v0.35.0 // indirect
 )

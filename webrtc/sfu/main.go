@@ -8,6 +8,8 @@ import (
 	"goweb/shared/src/logger"
 	"log"
 	"net/http"
+	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -18,6 +20,9 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/pion/webrtc/v4"
+	"github.com/shirou/gopsutil/host"
+	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/process"
 
 	"github.com/pion/interceptor/pkg/cc"
 )
@@ -156,6 +161,37 @@ func main() {
 		panic(err)
 	}
 	sm.StartListening()
+	go func() {
+		nCPUs, _ := cpu.Counts(true)
+		proc, _ := process.NewProcess(int32(os.Getpid()))
+		pattern := `coretemp_core(\d+)_input: (\d+(\.\d+)?)°C`
+		re := regexp.MustCompile(pattern)
+		for _ = range time.Tick(2 * time.Second) {
+			memUsage, _ := proc.MemoryInfo()
+			cpuUsage, _ := proc.CPUPercent()
+			sensors, _ := host.SensorsTemperatures()
+			cpuCounter := 0.0
+			cpuTotalTemp := 0.0
+			for _, sensor := range sensors {
+				matches := re.FindStringSubmatch(sensor.SensorKey)
+				if matches != nil {
+					cpuCounter++
+					cpuTotalTemp += sensor.Temperature
+				}
+			}
+			//t, _ := proc.Cmdline()
+			avgTempVal := 0
+			cpuUsageVal := 0
+			memUsageVal := int(memUsage.RSS / (1024 * 1024))
+			if cpuCounter != 0 {
+				avgTempVal = int(cpuTotalTemp / cpuCounter)
+			}
+			if nCPUs != 0 {
+				cpuUsageVal = int(cpuUsage / float64(nCPUs))
+			}
+			logger.LogWithMessage("SystemResources", logger.SystemResources, true, true, fmt.Sprintf("cpuUsage=%d memUsage=%d cpuTemp=%d", cpuUsageVal, memUsageVal, avgTempVal))
+		}
+	}()
 	select {}
 	//ticker := time.NewTicker(1 * time.Second)
 	//quit := make(chan struct{})
