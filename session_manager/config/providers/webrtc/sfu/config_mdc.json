@@ -2,16 +2,16 @@
     "extraCmdArgs": "",
     "settings": {
         "useABR": true,
-        "adaptationMethod": "mdc_v1",
+        "adaptationMethod": "random",
         "adaptationSettings": {
 
         },
         "useCCs": true,
         "ccMethod": "gcc",
         "ccSettings": {
-            "minBitrate": 262744320,
+            "minBitrate": 2744320,
             "maxBitrate": 262744320,
-            "initialBitrate": 262744320
+            "initialBitrate": 5744320
         },
         "addressAndPort": "127.0.0.1:9000",
         "contentType": "mdc_pc",

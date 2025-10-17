@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"goweb/shared/src/logger"
+	"goweb/shared/src/metrics"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,26 +20,30 @@ import (
 const NameSFU = "SFU"
 
 type SFU struct {
-	settings        SFUSettings
-	address         string
-	port            uint
-	clients         map[uint]*ClientConnection
-	virtualClients  map[uint]string
-	remoteProviders map[string]ProviderConnection
-	websocket       *threadSafeWriter
-	mut             sync.Mutex
+	settings            SFUSettings
+	address             string
+	port                uint
+	clients             map[uint]*ClientConnection
+	virtualClients      map[uint]string
+	remoteProviders     map[string]ProviderConnection
+	overallTrackMetrics *metrics.OverallTrackMetrics
+	qualityAdaptation   QualityAdaptation
+	websocket           *threadSafeWriter
+	mut                 sync.Mutex
 }
 
 func NewSFU(address string, port uint) *SFU {
 	logger.Log(NameSFU, logger.Creating, true, true)
 	sfu := &SFU{
-		address:         address,
-		port:            port,
-		clients:         map[uint]*ClientConnection{},
-		virtualClients:  map[uint]string{},
-		remoteProviders: map[string]ProviderConnection{},
-		mut:             sync.Mutex{},
+		address:             address,
+		port:                port,
+		clients:             map[uint]*ClientConnection{},
+		virtualClients:      map[uint]string{},
+		remoteProviders:     map[string]ProviderConnection{},
+		overallTrackMetrics: metrics.NewOverallTrackMetrics(),
+		mut:                 sync.Mutex{},
 	}
+	sfu.overallTrackMetrics.StartMeasuring()
 	logger.Log(NameSFU, logger.Created, true, true)
 	return sfu
 }
@@ -90,6 +95,8 @@ func (sfu *SFU) AddRemoteProvider(msg RemoteProviderAddedMessage, selfProviderKe
 func (sfu *SFU) SetupSFU(settings SFUSettings) {
 	//println("Setting up SFU")
 	sfu.settings = settings
+	sfu.qualityAdaptation = CreateQualityAdaptation(settings.AdaptationMethod)
+	sfu.StartPerformingQualityAdaptation()
 	indexHTML, err := ioutil.ReadFile("index.html")
 	if err != nil {
 		indexHTML = []byte("<p>WebRTCSFU, Nothing to see here, please pass along</p>")
@@ -377,7 +384,7 @@ func (sfu *SFU) SubscribeRemoteProviderToClient(provider ProviderConnection, cli
 			OriginType:               "sfu",
 			OriginID:                 0, //TODO
 			SenderTrackID:            track.TrackID,
-			CorrespondingSenderTrack: track.WebRTCTrack,
+			CorrespondingSenderTrack: track,
 		}
 		// TODO Maybe we need to store this mapping somewhere to be able to remove it again
 		if err := provider.AddTrackFromOtherUnsafe(recvTrack); err != nil {
@@ -395,7 +402,7 @@ func (sfu *SFU) SubscribeRemoteProviderToClient(provider ProviderConnection, cli
 			OriginType:               "sfu",
 			OriginID:                 0, //TODO
 			SenderTrackID:            track.TrackID,
-			CorrespondingSenderTrack: track.WebRTCTrack,
+			CorrespondingSenderTrack: track,
 		}
 		// TODO Maybe we need to store this mapping somewhere to be able to remove it again
 		if err := provider.AddTrackFromOtherUnsafe(recvTrack); err != nil {
@@ -403,4 +410,35 @@ func (sfu *SFU) SubscribeRemoteProviderToClient(provider ProviderConnection, cli
 		}
 	}
 
+}
+
+func (sfu *SFU) StartPerformingQualityAdaptation() {
+	go func() {
+		for {
+			sfu.mut.Lock()
+			output := fmt.Sprintf("ts=%d stats=[", time.Now().UnixMilli())
+			for _, client := range sfu.clients {
+				if client.BandwidthEstimator != nil {
+					targetBitrate := client.BandwidthEstimator.GetTargetBitrate()
+					avgLoss := client.BandwidthEstimator.GetStats()["averageLoss"]
+					delayBitrate := client.BandwidthEstimator.GetStats()["delayTargetBitrate"]
+					lossBitrate := client.BandwidthEstimator.GetStats()["lossTargetBitrate"]
+					extraOutput := ""
+					if sfu.qualityAdaptation != nil {
+						extraOutput = "@activeTracks=("
+						tracks := sfu.qualityAdaptation.PerformAdaptation(client, targetBitrate)
+						for _, trackID := range tracks {
+							extraOutput += fmt.Sprintf("%s@", trackID)
+						}
+						extraOutput += ")"
+					}
+					output += fmt.Sprintf("client=%d@bitrate=%d@avgLoss=%.5f@delayBitrate=%d@lossBitrate=%d%s;", client.clientID, targetBitrate, avgLoss, delayBitrate, lossBitrate, extraOutput)
+				}
+			}
+			output += "]"
+			logger.LogWithMessage(NameSFU, logger.EstimatedBitrate, true, true, output)
+			sfu.mut.Unlock()
+			time.Sleep(time.Second * 1)
+		}
+	}()
 }

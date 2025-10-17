@@ -39,6 +39,8 @@ class RootConfig:
     copyConfigs: bool = False
     controllerIP: str = "127.0.0.1"
     sessionManagerConfig: Optional[SessionManagerConfig] = None
+    nIterations: Optional[int] = 1  # New optional field for number of iterations
+    experimentDurationSeconds: Optional[int] = 60  # New optional field for duration in seconds
     providers: List[ProviderConfig] = field(default_factory=list)
     clients: List[ClientConfig] = field(default_factory=list)
 
@@ -56,6 +58,22 @@ def parse_root(d: Dict[str, Any]) -> RootConfig:
     # optional controller IP can be provided at top-level
     if "controllerIP" in d:
         rc.controllerIP = d.get("controllerIP") or rc.controllerIP
+    # optional numeric top-level fields
+    if "nIterations" in d:
+        try:
+            n = d.get("nIterations")
+            rc.nIterations = int(n) if n is not None and n != "" else rc.nIterations
+        except Exception:
+            # keep default on parse error
+            pass
+
+    if "experimentDurationSeconds" in d:
+        try:
+            ed = d.get("experimentDurationSeconds")
+            rc.experimentDurationSeconds = int(ed) if ed is not None and ed != "" else rc.experimentDurationSeconds
+        except Exception:
+            # keep default on parse error
+            pass
 
     sm = d.get("sessionManagerConfig")
     if sm:
@@ -125,6 +143,8 @@ def validate_config(cfg: RootConfig) -> List[str]:
 def print_summary(cfg: RootConfig) -> None:
     print("Parsed configuration summary:\n")
     print(f"copyConfigs: {cfg.copyConfigs}")
+    print(f"nIterations: {cfg.nIterations}")
+    print(f"experimentDurationSeconds: {cfg.experimentDurationSeconds}")
     if cfg.sessionManagerConfig:
         sm = cfg.sessionManagerConfig
         print(f"sessionManager.nodeID: {sm.nodeID}")

@@ -286,7 +286,7 @@ def main(argv: list[str] | None = None):
     parser.add_argument("controller", help="Controller address (host, host:port, or URL).")
     parser.add_argument("client_path", help="Path to the client application directory to serve.")
     parser.add_argument("node_id", nargs="?", default=None, help="Optional nodeID to advertise; if omitted a random UUID will be generated")
-    parser.add_argument("--port", type=int, default=9001, help="Port to serve the client on (default: 9001)")
+    parser.add_argument("--port", type=int, default=8081, help="Port to serve the client on (default: 8081)")
     args = parser.parse_args(argv)
 
     controller = args.controller

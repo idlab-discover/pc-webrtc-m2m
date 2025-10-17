@@ -132,12 +132,13 @@ func main() {
 	port := flag.Uint("port", 0, "IP address of the session manager instance, without port")
 	providerKey := flag.String("providerKey", "", "ID of this provider, assigned by the session manager")
 	authKey := flag.String("authKey", "", "Optional authentication key provider by the session manager")
+	enableConsoleOutput := flag.Bool("console", false, "Enable console output for logger")
 	flag.Parse()
 	if *managerIP == "" || *address == "" || *port == 0 || *providerKey == "" {
 		println("wrongs args", *managerIP, *address, *port, *providerKey)
 		return
 	}
-	logger.LogInit(*providerKey, *providerKey, logger.LogBlue, 100, *subDir)
+	logger.LogInit(*providerKey, *providerKey, logger.LogBlue, 10, *subDir, *enableConsoleOutput)
 	logger.LogWithMessage(*providerKey, logger.Creating, true, true,
 		fmt.Sprintf("managerIP=%s address=%s port=%d authKey=%s",
 			*managerIP, *address, *port, *authKey))

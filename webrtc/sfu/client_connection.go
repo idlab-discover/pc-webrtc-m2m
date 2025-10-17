@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"goweb/shared/src/logger"
+	"goweb/shared/src/metrics"
 	"goweb/shared/src/packet"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/pion/interceptor"
 	"github.com/pion/interceptor/pkg/cc"
@@ -20,6 +22,7 @@ type SenderTrack struct {
 	TrackID      string `json:"trackID"`
 	trackBitrate *TrackBitrate
 	WebRTCTrack  *webrtc.TrackLocalStaticRTP
+	trackMeter   *metrics.TrackMeter
 }
 
 type ReceiverTrack struct {
@@ -27,7 +30,7 @@ type ReceiverTrack struct {
 	OriginType               string `json:"originType"` // User, SFU etc...
 	OriginID                 uint   `json:"originID"`   // userID, SFU_ID etc...
 	SenderTrackID            string `json:"senderTrackID"`
-	CorrespondingSenderTrack *webrtc.TrackLocalStaticRTP
+	CorrespondingSenderTrack *SenderTrack
 	RTPSender                *webrtc.RTPSender
 }
 
@@ -43,7 +46,7 @@ func (rt *ReceiverTrack) Play() error {
 	if rt.RTPSender.Track() != nil {
 		return nil
 	}
-	return rt.RTPSender.ReplaceTrack(rt.CorrespondingSenderTrack)
+	return rt.RTPSender.ReplaceTrack(rt.CorrespondingSenderTrack.WebRTCTrack)
 }
 
 type TrackBitrate struct {
@@ -121,11 +124,14 @@ func NewClientConnection(parent *SFU, clientID uint, authKey string,
 		if err != nil {
 			panic(err)
 		}
+		meter := parent.overallTrackMetrics.AddTrackMeter(tempTrack.TrackID)
 		videoTracksMap[tempTrack.TrackID] = &SenderTrack{
 			TrackID:      tempTrack.TrackID,
 			trackBitrate: &TrackBitrate{}, /*TODO Make constructor*/
 			WebRTCTrack:  trackLocal,
+			trackMeter:   meter,
 		}
+
 	}
 	for i := range senderAudioTracks {
 		tempTrack := senderAudioTracks[i]
@@ -288,6 +294,7 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 				fmt.Printf("WebRTCSFU: OnTrack: error during read: %s\n", err)
 				break
 			}
+			atomic.AddUint64(&senderTrack.trackMeter.Bytes, uint64(i))
 			p := packet.BytesToFramePacketHeader(buf[20:])
 
 			if frames[p.FrameNr] == 0 { // Can maybe be optimized more because of the string being created for no reason
@@ -324,14 +331,14 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 	})
 }
 
-func (clc *ClientConnection) AddTrackFromOther(originType string, originID uint, trackID string, track *webrtc.TrackLocalStaticRTP) {
+func (clc *ClientConnection) AddTrackFromOther(originType string, originID uint, trackID string, track *SenderTrack) {
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
 	clc.AddTrackFromOtherUnsafe(originType, originID, trackID, track)
 
 }
 
-func (clc *ClientConnection) AddTrackFromOtherUnsafe(originType string, originID uint, trackID string, track *webrtc.TrackLocalStaticRTP) {
+func (clc *ClientConnection) AddTrackFromOtherUnsafe(originType string, originID uint, trackID string, track *SenderTrack) {
 	// No locking, must be called with caution
 	logger.LogWithMessage(NameClientConnection, logger.ClientAddingTrackFromOther, true, true,
 		fmt.Sprintf("clientID=%d originType=%s originID=%d trackID=%s",
@@ -342,14 +349,14 @@ func (clc *ClientConnection) AddTrackFromOtherUnsafe(originType string, originID
 		OriginType: originType,
 		OriginID:   originID,
 	}
-	if track.Kind() == webrtc.RTPCodecTypeVideo {
+	if track.WebRTCTrack.Kind() == webrtc.RTPCodecTypeVideo {
 		clc.ReceiverVideoTracks[trackID] = recvTrack
-	} else if track.Kind() == webrtc.RTPCodecTypeAudio {
+	} else if track.WebRTCTrack.Kind() == webrtc.RTPCodecTypeAudio {
 		clc.ReceiverAudioTracks[trackID] = recvTrack
 	}
 	println("ADDING TRACK", track == nil)
-	fmt.Printf("TrackID=%s streamID=%s\n", track.ID(), track.StreamID())
-	rtpSender, err := clc.peerConnection.AddTrack(track)
+	fmt.Printf("TrackID=%s streamID=%s\n", track.WebRTCTrack.ID(), track.WebRTCTrack.StreamID())
+	rtpSender, err := clc.peerConnection.AddTrack(track.WebRTCTrack)
 
 	if err != nil {
 		println("OOPSSS")
@@ -453,6 +460,9 @@ func (clc *ClientConnection) handleAnswerMessage(payload json.RawMessage) {
 		clc.SignalRenegotiationUnsafe()
 	} else {
 		println("DONT NEED NEEG")
+		for _, t := range clc.ReceiverVideoTracks {
+			t.Pause()
+		}
 	}
 }
 
@@ -558,14 +568,14 @@ func (clc *ClientConnection) subscribeToTracks(subMessage SubscribeToTracksMessa
 		if !exists {
 			continue
 		}
-		clc.AddTrackFromOtherUnsafe("client", otherClient.clientID, t.TrackID, track.WebRTCTrack)
+		clc.AddTrackFromOtherUnsafe("client", otherClient.clientID, t.TrackID, track)
 	}
 	for _, t := range subMessage.AudioTracks {
 		track, exists := otherClient.SenderAudioTracks[t.TrackID]
 		if !exists {
 			continue
 		}
-		clc.AddTrackFromOtherUnsafe("client", otherClient.clientID, t.TrackID, track.WebRTCTrack)
+		clc.AddTrackFromOtherUnsafe("client", otherClient.clientID, t.TrackID, track)
 	}
 
 }

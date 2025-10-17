@@ -18,6 +18,7 @@ type GCCSettings struct {
 func CreateBandwidthEstimator(clc *ClientConnection, sfuSettings *SFUSettings) (*cc.InterceptorFactory, error) {
 	var gccSettings GCCSettings // This marshalling should probably only happen once!
 	if err := json.Unmarshal(sfuSettings.CCSettings, &gccSettings); err != nil {
+		println("failed to unmarshal gcc settings:", err)
 		return nil, err
 	}
 	congestionController, err := cc.NewInterceptor(func() (cc.BandwidthEstimator, error) {

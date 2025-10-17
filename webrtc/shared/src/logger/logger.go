@@ -16,6 +16,7 @@ var logName string
 var applyColor bool
 var logColor string
 var logEveryNFrames = uint(100)
+var logEnableConsoleOutput = false
 
 const (
 	// Object Status
@@ -75,7 +76,9 @@ const (
 	SFUReceivedOffer          uint = 8000
 	SFUClientConnectionChange uint = 8001
 
-	CriticalFail uint = 9999
+	TrackMetricsReport uint = 9000
+	EstimatedBitrate   uint = 9001
+	CriticalFail       uint = 9999
 )
 
 const (
@@ -86,7 +89,7 @@ const (
 )
 
 // TODO increase buffer size and prevent automatic flushing
-func LogInit(name string, nameShort string, color string, everyNFrames uint, subDir string) {
+func LogInit(name string, nameShort string, color string, everyNFrames uint, subDir string, enableConsoleOutput bool) {
 	logDir := filepath.Join(".", "logs")
 	if subDir != "" {
 		logDir = filepath.Join(logDir, subDir)
@@ -96,7 +99,7 @@ func LogInit(name string, nameShort string, color string, everyNFrames uint, sub
 		return
 	}
 	timestamp := time.Now().Format("20060102_150405")
-	logPath := filepath.Join(logDir, fmt.Sprintf("%s_log_%s", nameShort, timestamp))
+	logPath := filepath.Join(logDir, fmt.Sprintf("%s_log_%s.log", nameShort, timestamp))
 	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		fmt.Println("Failed to open log file:", err)
@@ -106,6 +109,7 @@ func LogInit(name string, nameShort string, color string, everyNFrames uint, sub
 	logFile = f
 	logColor = color
 	logEveryNFrames = everyNFrames
+	logEnableConsoleOutput = enableConsoleOutput
 	if logColor != "" {
 		applyColor = true
 	}
@@ -133,7 +137,7 @@ func LogFrameWithMessage(name string, status uint, writeToConsole, writeToFile b
 }
 
 func _log(msg string, writeToConsole, writeToFile bool) {
-	if writeToConsole {
+	if writeToConsole && logEnableConsoleOutput {
 		if applyColor {
 			fmt.Printf("\033[%s[%s]: %s\033[0m", logColor, logName, msg)
 		} else {

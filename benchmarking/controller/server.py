@@ -104,6 +104,14 @@ def _collect_logs_after_delay(delay_seconds: int = 10, logs_base: Path | None = 
         except Exception:
             pass
 
+    # Move any existing log files from logs_base to the timestamped target_dir
+    for log_file in logs_base.glob("*.log"):
+        try:
+            shutil.move(str(log_file), str(target_dir / log_file.name))
+            print(f"Moved log file {log_file} to {target_dir}")
+        except Exception as e:
+            print(f"Failed to move log file {log_file}: {e}")
+    
     # Snapshot subscriptions at the time of collection to avoid concurrent dict mutations
     subs_snapshot = {k: list(v) for k, v in SUBSCRIPTIONS.items()}
     # Snapshot provider subscriptions as well
@@ -264,22 +272,16 @@ def receive_json():
             print("Manager path configured but no config_path provided; skipping manager start")
             manager_started_info = {"started": False, "reason": "missing config_path"}
         else:
-            def _start_manager_bg(mgr: str, cfgp: str):
-                try:
-                    # Use Popen so we don't block; capture output to avoid console spam
-                    popen = subprocess.Popen([mgr, "-c", cfgp], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    # store the process handle so other parts of the app can inspect/terminate it
-                    app.config["manager_process"] = popen
-                    print(f"Started manager process: {mgr} -c {cfgp} (pid={popen.pid})")
-                except Exception as e:
-                    print(f"Failed to start manager process {mgr} -c {cfgp}: {e}")
-
             try:
-                t_mgr = threading.Thread(target=_start_manager_bg, args=(mgr_path, cfg_path), daemon=True)
-                t_mgr.start()
+                # Start the manager process in the foreground so its stdout/stderr are
+                # visible in this process. We still do not wait for it to finish;
+                # store the Popen handle so other parts of the app can inspect/terminate it.
+                popen = subprocess.Popen([mgr_path, "-c", cfg_path], stdout=None, stderr=None)
+                app.config["manager_process"] = popen
+                print(f"Started manager process in foreground (pid={popen.pid}): {mgr_path} -c {cfg_path}")
                 manager_started_info = {"started": True, "manager_path": mgr_path, "config_path": cfg_path}
             except Exception as e:
-                print(f"Failed to launch background thread to start manager: {e}")
+                print(f"Failed to start manager process {mgr_path} -c {cfg_path}: {e}")
                 manager_started_info = {"started": False, "reason": str(e)}
     else:
         print("No manager_path configured; not starting manager process")
@@ -371,9 +373,9 @@ def receive_json():
     # Kick off background log collection after a short delay; do not block the
     # HTTP response. Use a daemon thread so it won't prevent process exit.
     try:
-        t = threading.Thread(target=_collect_logs_after_delay, args=(10, None), daemon=True)
+        t = threading.Thread(target=_collect_logs_after_delay, args=(cfg.experimentDurationSeconds, None), daemon=True)
         t.start()
-        print("Started background log collection thread (waiting 10s before download)")
+        print(f"Started background log collection thread (waiting {cfg.experimentDurationSeconds}s before download)")
     except Exception as e:
         print(f"Failed to start background log collection thread: {e}")
 

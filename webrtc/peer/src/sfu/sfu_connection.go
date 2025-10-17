@@ -12,6 +12,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"goweb/peer/src/proxy"
 	"goweb/peer/src/session_manager"
@@ -25,6 +26,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/pion/interceptor"
 	"github.com/pion/interceptor/pkg/nack"
+	"github.com/pion/interceptor/pkg/twcc"
 	"github.com/pion/sdp/v3"
 	"github.com/pion/webrtc/v4"
 )
@@ -235,7 +237,11 @@ func (s *SFUConnection) preparePeerConnection() {
 	if err := m.RegisterHeaderExtension(webrtc.RTPHeaderExtensionCapability{URI: sdp.TransportCCURI}, webrtc.RTPCodecTypeVideo); err != nil {
 		panic(err)
 	}
-
+	generator, err := twcc.NewSenderInterceptor(twcc.SendInterval(10 * time.Millisecond))
+	if err != nil {
+		panic(err)
+	}
+	i.Add(generator)
 	// TODO add provider settings to addclienttoprovider message so we can know if we need to do this or not
 	/*if !isDebug || !*disableGCC {
 		generator, err := twcc.NewSenderInterceptor(twcc.SendInterval(10 * time.Millisecond))

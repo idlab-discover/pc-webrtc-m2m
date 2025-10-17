@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"goweb/shared/src/packet"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -97,5 +98,19 @@ func BenchmarkGetTime(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		h := time.Now().UnixMilli()
 		_ = h
+	}
+}
+
+func BenchmarkAtomicAdd(b *testing.B) {
+	counter := uint64(0)
+	for i := 0; i < b.N; i++ {
+		atomic.AddUint64(&counter, 5)
+	}
+}
+
+func BenchmarkNormalAdd(b *testing.B) {
+	counter := uint64(0)
+	for i := 0; i < b.N; i++ {
+		counter += 5
 	}
 }

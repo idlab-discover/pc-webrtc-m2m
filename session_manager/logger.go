@@ -67,7 +67,7 @@ func LogInit(name string, nameShort string, color string) {
 		return
 	}
 	timestamp := time.Now().Format("20060102_150405")
-	logPath := filepath.Join(logDir, fmt.Sprintf("%s_log_%s", nameShort, timestamp))
+	logPath := filepath.Join(logDir, fmt.Sprintf("%s_log_%s.log", nameShort, timestamp))
 	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		fmt.Println("Failed to open log file:", err)

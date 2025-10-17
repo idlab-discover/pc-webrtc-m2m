@@ -284,7 +284,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 2
 
     cfg = parse_root(raw)
-
+    print(cfg.experimentDurationSeconds)
     # If upload requested, perform upload actions (dry-run by default)
     if args.upload:
         repo_root = script_dir.parent

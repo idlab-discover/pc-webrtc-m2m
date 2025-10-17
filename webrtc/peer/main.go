@@ -74,8 +74,9 @@ func main() {
 	providersPath := flag.String("providers", "", "Path to JSON file containing all the preferred providers with tracks")
 	transcoderType := flag.String("tr", "fixed", "Type of transcoder to use (fixed, file)")
 	transcoderConfigPath := flag.String("trcfg", "", "Path to JSON file containing the configuration for the file based transcoder")
+	enableConsoleOutput := flag.Bool("console", false, "Enable console output for logger")
 	flag.Parse()
-	logger.LogInit("SFUPeer", fmt.Sprintf("sfup_cl%d", *preferredClientID), logger.LogGreen, 100, *subDir)
+	logger.LogInit("SFUPeer", fmt.Sprintf("sfup_cl%d", *preferredClientID), logger.LogGreen, 10, *subDir, *enableConsoleOutput)
 	var tr transcoder.Transcoder
 	if *useProxy {
 		videoTracks := parseTrackIDs(*videoTracks)

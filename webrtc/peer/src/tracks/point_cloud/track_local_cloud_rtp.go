@@ -90,7 +90,7 @@ func (s *TrackLocalCloudRTP) WriteFrame(data []byte, frameNr int) error {
 		counter := 0
 		for _, p := range packets {
 
-			if err := s.rtpTrack.WriteRTP(p); err != nil {
+			if err := s.rtpTrack.WriteRTP(p); err != nil { // TODO Optimize this
 				fmt.Printf("WebRTCPeer: ERROR: %s\n", err)
 			}
 			counter += 1

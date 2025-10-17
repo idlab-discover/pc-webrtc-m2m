@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"goweb/shared/src/logger"
 	"goweb/shared/src/packet"
+	"sync/atomic"
 
 	"github.com/pion/interceptor"
 	"github.com/pion/webrtc/v4"
@@ -181,6 +182,7 @@ func (rsfu *RemoteSFUConnection) AddPeerConnectionCallbacks() {
 				fmt.Printf("WebRTCSFU: OnTrack: error during read: %s\n", err)
 				break
 			}
+			atomic.AddUint64(&senderTrack.trackMeter.Bytes, uint64(i))
 			p := packet.BytesToFramePacketHeader(buf[20:])
 
 			frames[p.FrameNr] += p.SeqLen
@@ -314,10 +316,12 @@ func (rsfu *RemoteSFUConnection) AddVirtualClient(clientID uint, videoTracks []T
 		if err != nil {
 			panic(err)
 		}
+		meter := rsfu.parent.overallTrackMetrics.AddTrackMeter(ts.TrackID)
 		rsfu.SenderVideoTracks[ts.TrackID] = &SenderTrack{
 			TrackID:      ts.TrackID,
 			trackBitrate: &TrackBitrate{},
 			WebRTCTrack:  trackLocal,
+			trackMeter:   meter,
 		}
 	}
 	for _, ts := range audioTracks {
@@ -366,14 +370,14 @@ func (rsfu *RemoteSFUConnection) AddTrackFromOtherUnsafe(recvTrack *ReceiverTrac
 			rsfu.providerKey, recvTrack.TrackID))
 	// TODO Check if trackID appears from session manager track
 
-	if recvTrack.CorrespondingSenderTrack.Kind() == webrtc.RTPCodecTypeVideo {
+	if recvTrack.CorrespondingSenderTrack.WebRTCTrack.Kind() == webrtc.RTPCodecTypeVideo {
 		rsfu.ReceiverVideoTracks[recvTrack.TrackID] = recvTrack
-	} else if recvTrack.CorrespondingSenderTrack.Kind() == webrtc.RTPCodecTypeAudio {
+	} else if recvTrack.CorrespondingSenderTrack.WebRTCTrack.Kind() == webrtc.RTPCodecTypeAudio {
 		rsfu.ReceiverAudioTracks[recvTrack.TrackID] = recvTrack
 	}
 	println("ADDING TRACK", recvTrack.CorrespondingSenderTrack == nil)
-	fmt.Printf("TrackID=%s streamID=%s\n", recvTrack.TrackID, recvTrack.CorrespondingSenderTrack.StreamID())
-	rtpSender, err := rsfu.peerConnection.AddTrack(recvTrack.CorrespondingSenderTrack)
+	fmt.Printf("TrackID=%s streamID=%s\n", recvTrack.TrackID, recvTrack.CorrespondingSenderTrack.WebRTCTrack.StreamID())
+	rtpSender, err := rsfu.peerConnection.AddTrack(recvTrack.CorrespondingSenderTrack.WebRTCTrack)
 
 	if err != nil {
 		println("OOPSSS")
@@ -405,7 +409,7 @@ func (rsfu *RemoteSFUConnection) ForwardTracksToClient(client *ClientConnection,
 			continue
 		}
 		// TODO Change originID to string
-		client.AddTrackFromOtherUnsafe("provider", 0, track.TrackID, track.WebRTCTrack)
+		client.AddTrackFromOtherUnsafe("provider", 0, track.TrackID, track)
 	}
 	for _, t := range msg.AudioTracks {
 		track, exists := rsfu.SenderAudioTracks[t.TrackID]
@@ -413,7 +417,7 @@ func (rsfu *RemoteSFUConnection) ForwardTracksToClient(client *ClientConnection,
 			fmt.Printf("WebRTCSFU: ForwardTracksToClient: No sender audio track found for track ID %s\n", t.TrackID)
 			continue
 		}
-		client.AddTrackFromOtherUnsafe("provider", 0, track.TrackID, track.WebRTCTrack)
+		client.AddTrackFromOtherUnsafe("provider", 0, track.TrackID, track)
 	}
 	return nil
 }

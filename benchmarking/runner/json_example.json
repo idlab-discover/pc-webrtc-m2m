@@ -1,6 +1,8 @@
 {
     "copyConfigs": true,
     "controllerIP": "127.0.0.1",
+    "nIterations": 1,
+    "experimentDurationSeconds": 60,
     "sessionManagerConfig": {
         "sessionManagerIP": "127.0.0.1:9980",
         "nodeID": "session_manager",
