@@ -84,6 +84,7 @@ def create_app(client_path: Path, pport: int, controller_base: str, node_id: str
         if missing:
             return jsonify({"error": f"Missing parameters: {', '.join(missing)}"}), 400
 
+        ip_filter = data.get("ipFilter")
         provider_key = str(data.get("providerKey"))
         provider_type = str(data.get("providerType"))
         manager_ip = str(data.get("managerIP"))
@@ -102,9 +103,9 @@ def create_app(client_path: Path, pport: int, controller_base: str, node_id: str
 
         started = []
         if exec_path == sys.executable:
-            cmd = [exec_path, sys.argv[0], "--managerIP", manager_ip, "--address", provider_addr, "--providerKey", provider_key, "--port", str(pport)]
+            cmd = [exec_path, sys.argv[0], "--managerIP", manager_ip, "--address", provider_addr, "--providerKey", provider_key, "--port", str(pport), "--ipFilter", ip_filter]
         else:
-            cmd = [exec_path, "--managerIP", manager_ip, "--address", provider_addr, "--providerKey", provider_key, "--port", str(pport)]
+            cmd = [exec_path, "--managerIP", manager_ip, "--address", provider_addr, "--providerKey", provider_key, "--port", str(pport), "--ipFilter", ip_filter]
 
         try:
             # Start in background, discard stdout/stderr to avoid blocking

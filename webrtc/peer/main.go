@@ -45,9 +45,9 @@ type DebugController struct {
 	startTimestamp uint64
 }
 
-func sfuProviderFactory(transcoder transcoder.Transcoder) session_manager.ProviderFactory {
+func sfuProviderFactory(transcoder transcoder.Transcoder, ipFilter string) session_manager.ProviderFactory {
 	return func(providerKey string, videoTracks []session_manager.TrackSimple, audioTracks []session_manager.TrackSimple) session_manager.Provider {
-		return sfu.NewSFUConnection(providerKey, videoTracks, audioTracks, transcoder)
+		return sfu.NewSFUConnection(providerKey, videoTracks, audioTracks, transcoder, ipFilter)
 	}
 }
 
@@ -59,6 +59,7 @@ func main() {
 	// General Command Line args
 	subDir := flag.String("subDir", "", "Subdirectory for logs")
 	preferredClientID := flag.Uint("c", 0, "Preferred client ID")
+	ipFilter := flag.String("ipFilter", "", "IP Prefix to filter on (e.g., 192.168.1.)")
 	// DLL Command Line args
 	proxyPortThis := flag.String("r", ":0", "Port of this")
 	proxyPortDLL := flag.String("p", ":0", "Port of the DLL")
@@ -102,7 +103,7 @@ func main() {
 		default:
 			tr = transcoder.NewTranscoderFixed(1000000, 30)
 		}
-		factory := sfuProviderFactory(tr)
+		factory := sfuProviderFactory(tr, *ipFilter)
 		smc, err := session_manager.NewSessionManagerConnection(*managerIP, *preferredClientID, *providersPath, tr, factory)
 		if err != nil {
 			logger.LogWithMessage(session_manager.NameManagerConnection, logger.Failed, true, true, fmt.Sprintf("error=%v", err))

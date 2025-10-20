@@ -8,6 +8,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"strings"
@@ -48,9 +49,9 @@ type SFUConnection struct {
 	pendingCandidates       []*webrtc.ICECandidate
 	pendingCandidatesString []string
 	transcoder              transcoder.Transcoder
-
-	websocket *utils.ThreadSafeWebsocket
-	mut       sync.Mutex
+	ipFilter                string
+	websocket               *utils.ThreadSafeWebsocket
+	mut                     sync.Mutex
 }
 
 type WebRTCAudioTrack struct {
@@ -104,7 +105,7 @@ func (t *WebRTCVideoTrack) StartSending() {
 	}()
 }
 
-func NewSFUConnection(providerKey string, videoTracks []session_manager.TrackSimple, audioTracks []session_manager.TrackSimple, transcoder transcoder.Transcoder) *SFUConnection {
+func NewSFUConnection(providerKey string, videoTracks []session_manager.TrackSimple, audioTracks []session_manager.TrackSimple, transcoder transcoder.Transcoder, ipFilter string) *SFUConnection {
 	logger.LogWithMessage(NameSFUConnection, logger.CreatingProvider, true, true, fmt.Sprintf("providerKey=%s", providerKey))
 	sfu := &SFUConnection{
 		providerKey:             providerKey,
@@ -113,6 +114,7 @@ func NewSFUConnection(providerKey string, videoTracks []session_manager.TrackSim
 		pendingCandidates:       []*webrtc.ICECandidate{},
 		pendingCandidatesString: []string{},
 		transcoder:              transcoder,
+		ipFilter:                ipFilter,
 		mut:                     sync.Mutex{},
 	}
 	for _, track := range videoTracks {
@@ -180,6 +182,10 @@ func (s *SFUConnection) preparePeerConnection() {
 	settingEngine := webrtc.SettingEngine{}
 	settingEngine.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
 	settingEngine.SetReceiveMTU(1500)
+
+	if s.ipFilter != "" {
+		settingEngine.SetIPFilter(s.ipFilterFunc)
+	}
 	i := &interceptor.Registry{}
 	m := &webrtc.MediaEngine{}
 	if err := m.RegisterDefaultCodecs(); err != nil {
@@ -582,3 +588,11 @@ func (s *SFUConnection) onClose() {
 	}
 
 */
+
+func (s *SFUConnection) ipFilterFunc(addr net.IP) bool {
+	logger.LogWithMessage(NameSFUConnection, logger.IPFilterCheck, true, true, fmt.Sprintf("providerKey=%s ip=%s filter=%s", s.providerKey, addr.String(), s.ipFilter))
+	if strings.HasPrefix(addr.String(), s.ipFilter) {
+		return true
+	}
+	return false
+}

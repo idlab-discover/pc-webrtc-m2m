@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"goweb/shared/src/logger"
 	"goweb/shared/src/packet"
+	"net"
+	"strings"
 	"sync/atomic"
 
 	"github.com/pion/interceptor"
@@ -65,6 +67,9 @@ func (rsfu *RemoteSFUConnection) SetupPeerConnection() {
 	settingEngine2 := webrtc.SettingEngine{}
 	settingEngine2.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
 	settingEngine2.SetReceiveMTU(1500)
+	if rsfu.parent.ipFilter != "" {
+		settingEngine2.SetIPFilter(rsfu.ipFilterFunc)
+	}
 	peerConnection, err := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine2), webrtc.WithMediaEngine(mediaEngine), webrtc.WithInterceptorRegistry(interceptorRegistry)).NewPeerConnection(webrtc.Configuration{})
 	rsfu.peerConnection = peerConnection
 	rsfu.AddPeerConnectionCallbacks()
@@ -420,4 +425,12 @@ func (rsfu *RemoteSFUConnection) ForwardTracksToClient(client *ClientConnection,
 		client.AddTrackFromOtherUnsafe("provider", 0, track.TrackID, track)
 	}
 	return nil
+}
+
+func (rsfu *RemoteSFUConnection) ipFilterFunc(addr net.IP) bool {
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.IPFilterCheck, true, true, fmt.Sprintf("providerKey=%s ip=%s filter=%s", &rsfu.providerKey, addr.String(), rsfu.parent.ipFilter))
+	if strings.HasPrefix(addr.String(), rsfu.parent.ipFilter) {
+		return true
+	}
+	return false
 }

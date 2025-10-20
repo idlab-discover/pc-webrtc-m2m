@@ -29,10 +29,11 @@ type SFU struct {
 	overallTrackMetrics *metrics.OverallTrackMetrics
 	qualityAdaptation   QualityAdaptation
 	websocket           *threadSafeWriter
+	ipFilter            string
 	mut                 sync.Mutex
 }
 
-func NewSFU(address string, port uint) *SFU {
+func NewSFU(address string, port uint, ipFilter string) *SFU {
 	logger.Log(NameSFU, logger.Creating, true, true)
 	sfu := &SFU{
 		address:             address,
@@ -41,6 +42,7 @@ func NewSFU(address string, port uint) *SFU {
 		virtualClients:      map[uint]string{},
 		remoteProviders:     map[string]ProviderConnection{},
 		overallTrackMetrics: metrics.NewOverallTrackMetrics(),
+		ipFilter:            ipFilter,
 		mut:                 sync.Mutex{},
 	}
 	sfu.overallTrackMetrics.StartMeasuring()

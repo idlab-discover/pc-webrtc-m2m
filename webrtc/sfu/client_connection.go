@@ -6,6 +6,7 @@ import (
 	"goweb/shared/src/logger"
 	"goweb/shared/src/metrics"
 	"goweb/shared/src/packet"
+	"net"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -185,6 +186,9 @@ func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings) {
 	settingEngine2 := webrtc.SettingEngine{}
 	settingEngine2.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
 	settingEngine2.SetReceiveMTU(1500)
+	if clc.parent.ipFilter != "" {
+		settingEngine2.SetIPFilter(clc.ipFilterFunc)
+	}
 	peerConnection, err := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine2), webrtc.WithMediaEngine(mediaEngine), webrtc.WithInterceptorRegistry(interceptorRegistry)).NewPeerConnection(webrtc.Configuration{})
 	clc.peerConnection = peerConnection
 	clc.AddPeerConnectionCallbacks()
@@ -647,4 +651,12 @@ func SetupDefaultMediaEngine() *webrtc.MediaEngine {
 		panic(err)
 	}
 	return mediaEngine
+}
+
+func (clc *ClientConnection) ipFilterFunc(addr net.IP) bool {
+	logger.LogWithMessage(NameClientConnection, logger.IPFilterCheck, true, true, fmt.Sprintf("clientID=%d ip=%s filter=%s", clc.clientID, addr.String(), clc.parent.ipFilter))
+	if strings.HasPrefix(addr.String(), clc.parent.ipFilter) {
+		return true
+	}
+	return false
 }

@@ -190,6 +190,7 @@ def create_app(client_path: Path, controller_base: str, node_id: str, addresses:
         if n <= 0:
             return jsonify({"error": "nClients must be > 0"}), 400
 
+        ip_filter = data.get("ipFilter")
         client_counter_start = int(data.get("clientCounterStart"))
         client_type = str(data.get("clientType"))
         tr_cfg = f"uploads/{str(data.get('transcoderConfig'))}"
@@ -213,9 +214,9 @@ def create_app(client_path: Path, controller_base: str, node_id: str, addresses:
             # script path so the process runs this file. If exec_path is a direct
             # executable, use it as-is.
             if exec_path == sys.executable:
-                cmd = [exec_path, sys.argv[0], "--manager", manager_ip, "--providers", prov_cfg, "--tr", tr_type, "--trcfg", tr_cfg, "-c", str(client_counter_start + i)]
+                cmd = [exec_path, sys.argv[0], "--manager", manager_ip, "--providers", prov_cfg, "--tr", tr_type, "--trcfg", tr_cfg, "-c", str(client_counter_start + i), "--ipFilter", ip_filter]
             else:
-                cmd = [exec_path, "--manager", manager_ip, "--providers", prov_cfg, "--tr", tr_type, "--trcfg", tr_cfg, "-c", str(client_counter_start + i)]
+                cmd = [exec_path, "--manager", manager_ip, "--providers", prov_cfg, "--tr", tr_type, "--trcfg", tr_cfg, "-c", str(client_counter_start + i), "--ipFilter", ip_filter]
 
             try:
                 # Start in background, discard stdout/stderr to avoid blocking

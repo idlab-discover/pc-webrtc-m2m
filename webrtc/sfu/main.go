@@ -138,6 +138,7 @@ func main() {
 	providerKey := flag.String("providerKey", "", "ID of this provider, assigned by the session manager")
 	authKey := flag.String("authKey", "", "Optional authentication key provider by the session manager")
 	enableConsoleOutput := flag.Bool("console", false, "Enable console output for logger")
+	ipFilter := flag.String("ipFilter", "", "IP Prefix to filter on (e.g., 192.168.1.)")
 	flag.Parse()
 	if *managerIP == "" || *address == "" || *port == 0 || *providerKey == "" {
 		println("wrongs args", *managerIP, *address, *port, *providerKey)
@@ -155,7 +156,7 @@ func main() {
 	trackLocals = map[string]*webrtc.TrackLocalStaticRTP{}
 	undesireableTracks = map[int][]string{}
 
-	sfu := NewSFU(*address, *port)
+	sfu := NewSFU(*address, *port, *ipFilter)
 	sm, err := NewSessionManagerConnection(*managerIP, *providerKey, *authKey, sfu)
 	if err != nil {
 		panic(err)

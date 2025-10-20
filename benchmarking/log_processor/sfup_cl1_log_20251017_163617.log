@@ -1,0 +1,740 @@
+id=TranscoderFile status=0 trackPath=uploads/base_configs/client/connection_simple_cl2.json configPath=uploads/base_configs/client/transcoder/transcoder_file.json
+id=TranscoderFileTrack status=0 trackID=cl1_mdc_video_0_0 path=uploads/base_configs/client/transcoder/file_tracks/mdc_video_0_0/config.json maxFrameNr=10
+id=TranscoderFileTrack status=1 path=uploads/base_configs/client/transcoder/file_tracks/mdc_video_0_0/config.json maxFrameNr=10 fps=30
+id=TranscoderFile status=1
+id=SessionManagerConnection status=0 managerIP=127.0.0.1:9980 preferredclientID=1
+id=SessionManagerConnection status=1
+id=SessionManagerConnection status=7000 origin=manager type=FullyConnected
+id=SessionManagerConnection status=2000 clientID=1 authKey=
+id=SessionManagerConnection status=2001
+id=SessionManagerConnection status=7000 origin=manager type=SessionJoined
+id=SessionManagerConnection status=2005 codecMode=mdc defaultProvider= nProviders=1
+id=SessionManagerConnection status=7000 origin=manager type=RemoteClientAdded
+id=SessionManagerConnection status=2002 clientID=0 nTracks=1
+id=SessionManagerConnection status=2003 clientID=0 nTracks=0
+id=SessionManagerConnection status=3000 clientID=0
+id=SessionManagerConnection status=7000 origin=manager type=ClientAddedToProvider
+id=SFUConnection status=1003 providerKey=sfu_mdc
+id=SFUConnection status=1004 providerKey=sfu_mdc
+id=SFUConnection status=1005 providerKey=sfu_mdc
+id=SFUConnection status=7000 origin=sfu providerKey=sfu_mdc type=OfferMessage
+id=SFUConnection status=8001 providerKey=sfu_mdc state=connecting
+id=SFUConnection status=7000 origin=sfu providerKey=sfu_mdc type=CandidateMessage
+id=SFUConnection status=7000 origin=sfu providerKey=sfu_mdc type=OfferMessage
+id=SFUConnection status=8001 providerKey=sfu_mdc state=connected
+id=SFUConnection status=6000 ts=1760711778372 frame=0 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711778373 frame=0 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711778376 frame=0 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711778379 frame=0 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711778701 frame=10 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711778703 frame=10 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711778710 frame=10 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711778713 frame=10 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711779031 frame=20 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711779032 frame=20 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711779041 frame=20 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711779046 frame=20 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711779361 frame=30 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711779362 frame=30 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711779368 frame=30 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711779373 frame=30 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711779691 frame=40 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711779692 frame=40 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711779699 frame=40 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711779702 frame=40 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711780021 frame=50 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711780022 frame=50 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711780032 frame=50 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711780035 frame=50 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711780351 frame=60 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711780352 frame=60 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711780360 frame=60 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711780361 frame=60 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711780681 frame=70 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711780682 frame=70 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711780684 frame=70 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711780685 frame=70 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711781011 frame=80 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711781012 frame=80 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711781019 frame=80 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711781022 frame=80 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711781341 frame=90 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711781342 frame=90 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711781346 frame=90 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711781348 frame=90 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711781671 frame=100 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711781672 frame=100 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711781680 frame=100 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711781682 frame=100 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711782001 frame=110 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711782002 frame=110 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711782003 frame=110 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711782004 frame=110 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711782332 frame=120 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711782332 frame=120 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711782335 frame=120 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711782336 frame=120 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711782660 frame=130 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711782663 frame=130 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711782669 frame=130 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711782677 frame=130 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711782992 frame=140 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711782996 frame=140 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711782996 frame=140 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711782999 frame=140 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711783322 frame=150 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711783326 frame=150 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711783328 frame=150 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711783334 frame=150 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711783651 frame=160 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711783653 frame=160 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711783660 frame=160 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711783666 frame=160 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711783981 frame=170 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711783982 frame=170 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711783986 frame=170 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711783989 frame=170 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711784312 frame=180 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711784312 frame=180 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711784319 frame=180 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711784324 frame=180 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711784642 frame=190 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711784646 frame=190 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711784647 frame=190 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711784650 frame=190 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711784972 frame=200 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711784975 frame=200 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711784976 frame=200 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711784978 frame=200 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711785301 frame=210 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711785302 frame=210 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711785309 frame=210 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711785314 frame=210 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711785631 frame=220 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711785633 frame=220 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711785639 frame=220 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711785644 frame=220 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711785961 frame=230 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711785962 frame=230 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711785965 frame=230 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711785965 frame=230 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711786291 frame=240 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711786292 frame=240 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711786296 frame=240 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711786304 frame=240 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711786621 frame=250 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711786622 frame=250 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711786629 frame=250 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711786632 frame=250 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711786953 frame=260 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711786956 frame=260 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711786963 frame=260 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711786965 frame=260 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711787283 frame=270 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711787285 frame=270 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711787286 frame=270 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711787289 frame=270 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711787613 frame=280 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711787616 frame=280 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711787621 frame=280 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711787628 frame=280 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711787941 frame=290 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711787943 frame=290 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711787947 frame=290 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711787953 frame=290 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711788271 frame=300 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711788272 frame=300 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711788277 frame=300 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711788281 frame=300 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711788602 frame=310 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711788605 frame=310 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711788606 frame=310 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711788611 frame=310 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711788931 frame=320 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711788932 frame=320 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711788938 frame=320 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711788943 frame=320 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711789262 frame=330 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711789263 frame=330 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711789264 frame=330 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711789271 frame=330 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711789591 frame=340 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711789592 frame=340 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711789598 frame=340 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711789607 frame=340 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711789921 frame=350 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711789922 frame=350 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711789929 frame=350 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711789929 frame=350 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711790252 frame=360 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711790252 frame=360 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711790260 frame=360 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711790265 frame=360 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711790581 frame=370 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711790583 frame=370 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711790588 frame=370 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711790594 frame=370 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711790912 frame=380 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711790912 frame=380 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711790919 frame=380 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711790921 frame=380 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711791241 frame=390 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711791242 frame=390 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711791244 frame=390 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711791254 frame=390 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711791571 frame=400 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711791572 frame=400 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711791578 frame=400 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711791584 frame=400 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711791901 frame=410 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711791902 frame=410 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711791908 frame=410 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711791910 frame=410 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711792232 frame=420 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711792236 frame=420 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711792236 frame=420 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711792242 frame=420 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711792563 frame=430 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711792566 frame=430 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711792569 frame=430 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711792576 frame=430 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711792891 frame=440 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711792892 frame=440 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711792899 frame=440 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711792902 frame=440 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711793221 frame=450 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711793222 frame=450 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711793229 frame=450 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711793236 frame=450 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711793551 frame=460 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711793553 frame=460 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711793559 frame=460 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711793565 frame=460 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711793881 frame=470 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711793882 frame=470 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711793890 frame=470 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711793893 frame=470 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711794212 frame=480 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711794216 frame=480 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711794220 frame=480 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711794226 frame=480 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711794540 frame=490 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711794543 frame=490 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711794552 frame=490 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711794559 frame=490 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711794870 frame=500 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711794872 frame=500 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711794880 frame=500 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711794881 frame=500 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711795201 frame=510 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711795202 frame=510 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711795207 frame=510 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711795216 frame=510 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711795532 frame=520 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711795534 frame=520 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711795535 frame=520 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711795537 frame=520 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711795861 frame=530 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711795863 frame=530 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711795868 frame=530 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711795876 frame=530 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711796191 frame=540 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711796192 frame=540 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711796197 frame=540 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711796199 frame=540 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711796521 frame=550 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711796522 frame=550 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711796529 frame=550 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711796530 frame=550 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711796852 frame=560 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711796853 frame=560 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711796857 frame=560 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711796865 frame=560 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711797182 frame=570 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711797182 frame=570 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711797189 frame=570 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711797197 frame=570 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711797513 frame=580 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711797516 frame=580 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711797518 frame=580 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711797523 frame=580 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711797841 frame=590 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711797842 frame=590 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711797849 frame=590 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711797852 frame=590 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711798171 frame=600 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711798172 frame=600 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711798173 frame=600 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711798175 frame=600 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711798503 frame=610 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711798505 frame=610 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711798506 frame=610 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711798512 frame=610 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711798831 frame=620 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711798833 frame=620 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711798838 frame=620 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711798843 frame=620 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711799161 frame=630 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711799162 frame=630 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711799169 frame=630 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711799172 frame=630 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711799491 frame=640 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711799492 frame=640 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711799499 frame=640 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711799504 frame=640 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711799822 frame=650 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711799824 frame=650 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711799826 frame=650 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711799827 frame=650 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711800151 frame=660 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711800152 frame=660 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711800160 frame=660 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711800165 frame=660 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711800481 frame=670 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711800482 frame=670 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711800486 frame=670 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711800494 frame=670 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711800811 frame=680 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711800812 frame=680 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711800819 frame=680 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711800823 frame=680 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711801141 frame=690 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711801142 frame=690 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711801149 frame=690 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711801151 frame=690 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711801472 frame=700 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711801476 frame=700 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711801479 frame=700 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711801486 frame=700 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711801802 frame=710 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711801805 frame=710 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711801806 frame=710 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711801815 frame=710 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711802130 frame=720 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711802132 frame=720 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711802136 frame=720 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711802141 frame=720 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711802463 frame=730 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711802466 frame=730 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711802469 frame=730 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711802477 frame=730 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711802791 frame=740 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711802792 frame=740 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711802795 frame=740 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711802801 frame=740 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711803121 frame=750 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711803122 frame=750 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711803128 frame=750 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711803132 frame=750 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711803451 frame=760 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711803453 frame=760 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711803460 frame=760 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711803467 frame=760 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711803782 frame=770 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711803786 frame=770 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711803789 frame=770 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711803795 frame=770 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711804111 frame=780 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711804112 frame=780 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711804113 frame=780 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711804114 frame=780 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711804441 frame=790 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711804442 frame=790 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711804448 frame=790 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711804455 frame=790 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711804773 frame=800 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711804776 frame=800 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711804781 frame=800 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711804789 frame=800 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711805101 frame=810 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711805102 frame=810 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711805108 frame=810 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711805113 frame=810 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711805433 frame=820 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711805436 frame=820 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711805439 frame=820 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711805446 frame=820 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711805761 frame=830 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711805762 frame=830 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711805771 frame=830 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711805775 frame=830 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711806091 frame=840 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711806093 frame=840 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711806099 frame=840 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711806103 frame=840 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711806421 frame=850 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711806422 frame=850 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711806429 frame=850 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711806431 frame=850 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711806751 frame=860 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711806752 frame=860 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711806758 frame=860 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711806764 frame=860 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711807081 frame=870 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711807082 frame=870 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711807092 frame=870 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711807095 frame=870 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711807411 frame=880 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711807412 frame=880 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711807417 frame=880 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711807419 frame=880 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711807741 frame=890 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711807742 frame=890 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711807742 frame=890 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711807743 frame=890 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711808072 frame=900 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711808076 frame=900 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711808077 frame=900 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711808080 frame=900 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711808403 frame=910 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711808404 frame=910 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711808414 frame=910 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711808416 frame=910 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711808731 frame=920 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711808732 frame=920 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711808736 frame=920 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711808738 frame=920 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711809063 frame=930 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711809063 frame=930 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711809073 frame=930 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711809078 frame=930 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711809391 frame=940 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711809392 frame=940 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711809395 frame=940 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711809396 frame=940 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711809721 frame=950 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711809722 frame=950 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711809725 frame=950 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711809725 frame=950 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711810050 frame=960 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711810053 frame=960 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711810056 frame=960 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711810064 frame=960 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711810381 frame=970 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711810382 frame=970 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711810388 frame=970 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711810392 frame=970 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711810712 frame=980 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711810715 frame=980 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711810716 frame=980 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711810717 frame=980 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711811042 frame=990 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711811049 frame=990 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711811049 frame=990 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711811054 frame=990 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711811370 frame=1000 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711811372 frame=1000 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711811376 frame=1000 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711811377 frame=1000 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711811701 frame=1010 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711811702 frame=1010 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711811708 frame=1010 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711811709 frame=1010 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711812031 frame=1020 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711812032 frame=1020 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711812034 frame=1020 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711812034 frame=1020 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711812362 frame=1030 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711812366 frame=1030 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711812371 frame=1030 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711812374 frame=1030 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711812691 frame=1040 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711812692 frame=1040 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711812697 frame=1040 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711812699 frame=1040 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711813021 frame=1050 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711813022 frame=1050 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711813025 frame=1050 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711813027 frame=1050 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711813351 frame=1060 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711813352 frame=1060 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711813354 frame=1060 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711813355 frame=1060 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711813681 frame=1070 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711813682 frame=1070 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711813688 frame=1070 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711813689 frame=1070 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711814011 frame=1080 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711814013 frame=1080 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711814014 frame=1080 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711814024 frame=1080 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711814340 frame=1090 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711814342 frame=1090 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711814344 frame=1090 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711814344 frame=1090 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711814670 frame=1100 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711814672 frame=1100 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711814676 frame=1100 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711814679 frame=1100 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711815001 frame=1110 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711815003 frame=1110 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711815004 frame=1110 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711815014 frame=1110 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711815331 frame=1120 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711815332 frame=1120 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711815338 frame=1120 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711815343 frame=1120 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711815662 frame=1130 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711815662 frame=1130 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711815669 frame=1130 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711815672 frame=1130 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711815992 frame=1140 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711815994 frame=1140 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711816004 frame=1140 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711816005 frame=1140 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711816320 frame=1150 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711816322 frame=1150 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711816329 frame=1150 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711816332 frame=1150 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711816653 frame=1160 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711816654 frame=1160 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711816656 frame=1160 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711816657 frame=1160 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711816981 frame=1170 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711816982 frame=1170 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711816984 frame=1170 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711816984 frame=1170 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711817311 frame=1180 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711817312 frame=1180 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711817319 frame=1180 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711817322 frame=1180 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711817641 frame=1190 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711817642 frame=1190 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711817647 frame=1190 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711817654 frame=1190 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711817971 frame=1200 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711817973 frame=1200 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711817980 frame=1200 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711817988 frame=1200 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711818302 frame=1210 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711818306 frame=1210 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711818309 frame=1210 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711818315 frame=1210 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711818631 frame=1220 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711818632 frame=1220 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711818639 frame=1220 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711818642 frame=1220 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711818962 frame=1230 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711818964 frame=1230 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711818974 frame=1230 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711818975 frame=1230 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711819290 frame=1240 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711819292 frame=1240 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711819298 frame=1240 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711819302 frame=1240 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711819623 frame=1250 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711819625 frame=1250 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711819626 frame=1250 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711819627 frame=1250 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711819951 frame=1260 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711819952 frame=1260 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711819957 frame=1260 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711819965 frame=1260 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711820282 frame=1270 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711820289 frame=1270 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711820289 frame=1270 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711820292 frame=1270 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711820612 frame=1280 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711820613 frame=1280 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711820619 frame=1280 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711820621 frame=1280 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711820940 frame=1290 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711820942 frame=1290 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711820944 frame=1290 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711820947 frame=1290 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711821271 frame=1300 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711821272 frame=1300 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711821279 frame=1300 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711821280 frame=1300 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711821601 frame=1310 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711821602 frame=1310 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711821614 frame=1310 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711821616 frame=1310 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711821932 frame=1320 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711821936 frame=1320 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711821937 frame=1320 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711821945 frame=1320 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711822261 frame=1330 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711822262 frame=1330 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711822268 frame=1330 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711822273 frame=1330 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711822592 frame=1340 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711822592 frame=1340 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711822598 frame=1340 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711822604 frame=1340 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711822921 frame=1350 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711822922 frame=1350 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711822927 frame=1350 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711822928 frame=1350 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711823253 frame=1360 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711823255 frame=1360 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711823256 frame=1360 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711823258 frame=1360 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711823581 frame=1370 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711823582 frame=1370 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711823586 frame=1370 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711823587 frame=1370 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711823911 frame=1380 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711823912 frame=1380 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711823920 frame=1380 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711823923 frame=1380 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711824241 frame=1390 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711824242 frame=1390 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711824249 frame=1390 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711824251 frame=1390 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711824572 frame=1400 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711824576 frame=1400 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711824576 frame=1400 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711824585 frame=1400 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711824902 frame=1410 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711824905 frame=1410 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711824906 frame=1410 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711824913 frame=1410 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711825231 frame=1420 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711825232 frame=1420 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711825239 frame=1420 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711825241 frame=1420 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711825563 frame=1430 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711825564 frame=1430 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711825567 frame=1430 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711825568 frame=1430 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711825891 frame=1440 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711825892 frame=1440 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711825894 frame=1440 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711825897 frame=1440 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711826223 frame=1450 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711826224 frame=1450 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711826234 frame=1450 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711826235 frame=1450 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711826553 frame=1460 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711826554 frame=1460 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711826556 frame=1460 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711826557 frame=1460 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711826882 frame=1470 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711826884 frame=1470 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711826894 frame=1470 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711826895 frame=1470 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711827211 frame=1480 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711827212 frame=1480 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711827214 frame=1480 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711827214 frame=1480 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711827543 frame=1490 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711827546 frame=1490 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711827546 frame=1490 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711827548 frame=1490 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711827872 frame=1500 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711827874 frame=1500 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711827876 frame=1500 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711827877 frame=1500 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711828200 frame=1510 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711828202 frame=1510 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711828203 frame=1510 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711828203 frame=1510 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711828530 frame=1520 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711828532 frame=1520 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711828536 frame=1520 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711828538 frame=1520 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711828861 frame=1530 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711828862 frame=1530 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711828868 frame=1530 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711828872 frame=1530 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711829191 frame=1540 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711829192 frame=1540 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711829199 frame=1540 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711829202 frame=1540 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711829521 frame=1550 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711829522 frame=1550 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711829528 frame=1550 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711829532 frame=1550 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711829853 frame=1560 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711829856 frame=1560 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711829857 frame=1560 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711829859 frame=1560 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711830183 frame=1570 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711830184 frame=1570 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711830185 frame=1570 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711830187 frame=1570 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711830511 frame=1580 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711830512 frame=1580 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711830514 frame=1580 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711830514 frame=1580 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711830841 frame=1590 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711830842 frame=1590 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711830844 frame=1590 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711830844 frame=1590 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711831170 frame=1600 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711831172 frame=1600 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711831172 frame=1600 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711831174 frame=1600 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711831501 frame=1610 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711831502 frame=1610 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711831508 frame=1610 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711831514 frame=1610 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711831833 frame=1620 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711831834 frame=1620 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711831835 frame=1620 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711831837 frame=1620 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711832161 frame=1630 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711832162 frame=1630 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711832163 frame=1630 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711832164 frame=1630 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711832493 frame=1640 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711832496 frame=1640 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711832502 frame=1640 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711832512 frame=1640 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711832823 frame=1650 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711832826 frame=1650 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711832826 frame=1650 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711832832 frame=1650 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711833151 frame=1660 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711833153 frame=1660 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711833160 frame=1660 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711833162 frame=1660 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711833482 frame=1670 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711833486 frame=1670 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711833487 frame=1670 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711833495 frame=1670 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711833812 frame=1680 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711833813 frame=1680 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711833816 frame=1680 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711833817 frame=1680 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711834142 frame=1690 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711834146 frame=1690 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711834148 frame=1690 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711834160 frame=1690 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711834473 frame=1700 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711834476 frame=1700 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711834483 frame=1700 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711834492 frame=1700 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711834803 frame=1710 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711834805 frame=1710 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711834805 frame=1710 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711834808 frame=1710 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711835131 frame=1720 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711835132 frame=1720 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711835136 frame=1720 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711835140 frame=1720 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711835461 frame=1730 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711835462 frame=1730 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6003 ts=1760711835462 frame=1730 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711835463 frame=1730 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711835793 frame=1740 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711835794 frame=1740 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711835804 frame=1740 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711835805 frame=1740 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711836121 frame=1750 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711836122 frame=1750 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711836124 frame=1750 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711836125 frame=1750 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711836453 frame=1760 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6002 ts=1760711836456 frame=1760 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6001 ts=1760711836462 frame=1760 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711836469 frame=1760 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711836782 frame=1770 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711836782 frame=1770 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711836790 frame=1770 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711836798 frame=1770 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6002 ts=1760711837110 frame=1780 trackID=cl0_mdc_video_0_0
+id=SFUConnection status=6000 ts=1760711837112 frame=1780 trackID=cl1_mdc_video_0_0 frameSize=233032
+id=SFUConnection status=6001 ts=1760711837118 frame=1780 trackID=cl1_mdc_video_0_0
+id=SFUConnection status=6003 ts=1760711837123 frame=1780 trackID=cl0_mdc_video_0_0

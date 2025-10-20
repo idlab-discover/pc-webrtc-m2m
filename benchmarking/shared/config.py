@@ -38,6 +38,7 @@ class ClientConfig:
 class RootConfig:
     copyConfigs: bool = False
     controllerIP: str = "127.0.0.1"
+    ipFilter: str = ""
     sessionManagerConfig: Optional[SessionManagerConfig] = None
     nIterations: Optional[int] = 1  # New optional field for number of iterations
     experimentDurationSeconds: Optional[int] = 60  # New optional field for duration in seconds
@@ -58,6 +59,8 @@ def parse_root(d: Dict[str, Any]) -> RootConfig:
     # optional controller IP can be provided at top-level
     if "controllerIP" in d:
         rc.controllerIP = d.get("controllerIP") or rc.controllerIP
+    if "ipFilter" in d:
+        rc.ipFilter = d.get("ipFilter") or rc.ipFilter
     # optional numeric top-level fields
     if "nIterations" in d:
         try:
