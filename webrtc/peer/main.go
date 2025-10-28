@@ -92,6 +92,7 @@ func main() {
 			trackMapToSlice(videoTracks),
 			trackMapToSlice(audioTracks),
 			tr,
+			*ipFilter,
 		)
 		sfuConn.OnFullyConnected(*preferredClientID, *sfuAuthKey, *sfuIP, *sfuPort)
 	} else {
