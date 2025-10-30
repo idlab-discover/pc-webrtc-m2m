@@ -199,14 +199,7 @@ def create_app(client_path: Path, controller_base: str, node_id: str, addresses:
         manager_ip = str(data.get("managerIP"))
 
         # Optional executable override
-        executable = "peer.exe"
-        if executable:
-            exec_path = f"{client_path}//{executable}"
-        else:
-            # Default: use the current Python interpreter and the same script file.
-            # Assumption: the target client can be started this way. If a different
-            # executable is needed, pass it via the optional `executable` field.
-            exec_path = sys.executable
+        exec_path = f"{client_path}"
 
         started = []
         for i in range(n):

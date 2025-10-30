@@ -91,15 +91,7 @@ def create_app(client_path: Path, pport: int, controller_base: str, node_id: str
         # Strip out the port from the address variable
         provider_addr = address.split(":")[0]
         # Optional executable override
-        executable = "sfu.exe"
-        if executable:
-            exec_path = f"{client_path}//{executable}"
-        else:
-            # Default: use the current Python interpreter and the same script file.
-            # Assumption: the target client can be start
-            # d this way. If a different
-            # executable is needed, pass it via the optional `executable` field.
-            exec_path = sys.executable
+        exec_path = f"{client_path}"
 
         started = []
         if exec_path == sys.executable:
