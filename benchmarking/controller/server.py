@@ -265,8 +265,6 @@ def receive_json():
     for p in providers:
         print(f"Configured provider: nodeID={p.nodeID}, type={p.providerType}, key={p.providerKey}")
         existing = PROVIDER_SUBSCRIPTIONS.get(p.providerKey, [])
-        if not existing:
-            continue
         PROVIDER_KEY_TO_NODE_ID[p.providerKey] = p.nodeID
 
     # START SESSION MANAGER HERE
