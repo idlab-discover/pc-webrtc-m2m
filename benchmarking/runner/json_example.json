@@ -10,14 +10,7 @@
     },
     "providers": [
         {
-            "nodeID": "provider1",
-            "providerType": "webrtc_sfu",
-            "providerKey": "sfu_mdc",
-            "configDirectoryToCopy": ["LOCAL PATH", "REMOTE PATH"],
-            "connectedTo": ["sfu_mdc2"]
-        },
-        {
-            "nodeID": "provider2",
+            "nodeID": "sfu1",
             "providerType": "webrtc_sfu",
             "providerKey": "sfu_mdc",
             "configDirectoryToCopy": ["LOCAL PATH", "REMOTE PATH"],
