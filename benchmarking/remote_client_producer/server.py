@@ -111,7 +111,7 @@ def _is_valid_relative_dir(rel_path: str) -> bool:
 
 
 def create_app(client_path: Path, controller_base: str, node_id: str, addresses: list[str]):
-    app = Flask(__name__, static_folder=str(client_path), static_url_path="")
+    app = Flask(__name__, static_url_path="")
     # Keep track of started client subprocesses for this server process
     started_processes: list[dict] = []
 
@@ -287,8 +287,8 @@ def main(argv: list[str] | None = None):
     client_path = Path(args.client_path).expanduser().resolve()
     port = args.port
 
-    if not client_path.exists() or not client_path.is_dir():
-        print(f"client_path does not exist or is not a directory: {client_path}")
+    if not client_path.exists():
+        print(f"client_path does not exist: {client_path}")
         sys.exit(2)
 
     scheme, ctrl_host, ctrl_port, ctrl_base = parse_controller(controller)

@@ -63,7 +63,7 @@ def post_subscription(controller_base: str, node_id: str, address: str):
 
 
 def create_app(client_path: Path, pport: int, controller_base: str, node_id: str, address: str):
-    app = Flask(__name__, static_folder=str(client_path), static_url_path="")
+    app = Flask(__name__, static_url_path="")
     # Keep track of started client subprocesses for this server process
     started_processes: list[dict] = []
 
@@ -175,8 +175,8 @@ def main(argv: list[str] | None = None):
     provider_path = Path(args.provider_path).expanduser().resolve()
     port = args.port
     pport = args.pport
-    if not provider_path.exists() or not provider_path.is_dir():
-        print(f"provider_path does not exist or is not a directory: {provider_path}")
+    if not provider_path.exists():
+        print(f"provider_path does not exist: {provider_path}")
         sys.exit(2)
 
     scheme, ctrl_host, ctrl_port, ctrl_base = parse_controller(controller)
