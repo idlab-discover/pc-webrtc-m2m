@@ -40,7 +40,7 @@ SUBSCRIPTIONS: dict[str, list[str]] = {}
 
 # In-memory provider subscriptions map: providerKey -> list of addresses
 PROVIDER_SUBSCRIPTIONS: dict[str, list[str]] = {}
-
+PROVIDER_KEY_TO_NODE_ID: dict[str, str] = {}
 
 def _collect_logs_after_delay(delay_seconds: int = 10, logs_base: Path | None = None) -> None:
     """Background worker: wait `delay_seconds`, create timestamped subdir under
@@ -260,6 +260,13 @@ def receive_json():
         return jsonify({"error": "config validation failed", "details": errs}), 400
     
     print_summary(cfg)
+    providers = cfg.providers if hasattr(cfg, "providers") and cfg.providers else []
+    for p in providers:
+        print(f"Configured provider: nodeID={p.nodeID}, type={p.providerType}, key={p.providerKey}")
+        existing = PROVIDER_SUBSCRIPTIONS.get(p.providerKey, [])
+        if not existing:
+            continue
+        PROVIDER_KEY_TO_NODE_ID[p.providerKey] = p.nodeID
 
     # START SESSION MANAGER HERE
     # If a manager binary and config path were provided via CLI, start the
@@ -617,7 +624,8 @@ def start_provider():
     forwarded_to: str | None = None
     provider_info = {"status": "failed", "address": "", "port": 0}
     if isinstance(provider_key, str) and provider_key.strip():
-        addresses = PROVIDER_SUBSCRIPTIONS.get(provider_key.strip(), [])
+        node_id = PROVIDER_KEY_TO_NODE_ID.get(provider_key.strip())
+        addresses = PROVIDER_SUBSCRIPTIONS.get(node_id, [])
         print("Addresses", addresses)
         for addr in list(addresses):
             url = f"http://{addr.rstrip('/')}/start_provider"
