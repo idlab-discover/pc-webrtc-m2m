@@ -17,6 +17,7 @@ class ProviderConfig:
     nodeID: str
     providerType: str
     providerKey: Optional[str] = None
+    ipFilter: str = ""
     configDirectoryToCopy: List[str] = field(default_factory=list)
     connectedTo: List[str] = field(default_factory=list)
 
@@ -38,7 +39,6 @@ class ClientConfig:
 class RootConfig:
     copyConfigs: bool = False
     controllerIP: str = "127.0.0.1"
-    ipFilter: str = ""
     sessionManagerConfig: Optional[SessionManagerConfig] = None
     nIterations: Optional[int] = 1  # New optional field for number of iterations
     experimentDurationSeconds: Optional[int] = 60  # New optional field for duration in seconds
@@ -59,8 +59,6 @@ def parse_root(d: Dict[str, Any]) -> RootConfig:
     # optional controller IP can be provided at top-level
     if "controllerIP" in d:
         rc.controllerIP = d.get("controllerIP") or rc.controllerIP
-    if "ipFilter" in d:
-        rc.ipFilter = d.get("ipFilter") or rc.ipFilter
     # optional numeric top-level fields
     if "nIterations" in d:
         try:
@@ -92,6 +90,7 @@ def parse_root(d: Dict[str, Any]) -> RootConfig:
                 nodeID=p.get("nodeID", ""),
                 providerType=p.get("providerType", ""),
                 providerKey=p.get("providerKey"),
+                ipFilter=p.get("ipFilter", ""),
                 configDirectoryToCopy=p.get("configDirectoryToCopy", []),
                 connectedTo=p.get("connectedTo", []),
             )

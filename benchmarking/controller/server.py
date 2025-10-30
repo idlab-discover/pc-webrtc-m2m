@@ -41,7 +41,7 @@ SUBSCRIPTIONS: dict[str, list[str]] = {}
 # In-memory provider subscriptions map: providerKey -> list of addresses
 PROVIDER_SUBSCRIPTIONS: dict[str, list[str]] = {}
 PROVIDER_KEY_TO_NODE_ID: dict[str, str] = {}
-
+PROVIDER_IP_FILTER: dict[str, str] = {}
 def _collect_logs_after_delay(delay_seconds: int = 10, logs_base: Path | None = None) -> None:
     """Background worker: wait `delay_seconds`, create timestamped subdir under
     `logs_base` (defaults to controller/logs), call /download_logs on all
@@ -266,6 +266,7 @@ def receive_json():
         print(f"Configured provider: nodeID={p.nodeID}, type={p.providerType}, key={p.providerKey}")
         existing = PROVIDER_SUBSCRIPTIONS.get(p.providerKey, [])
         PROVIDER_KEY_TO_NODE_ID[p.providerKey] = p.nodeID
+        PROVIDER_IP_FILTER[p.providerKey] = p.ipFilter
 
     # START SESSION MANAGER HERE
     # If a manager binary and config path were provided via CLI, start the

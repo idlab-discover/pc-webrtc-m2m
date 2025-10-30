@@ -13,6 +13,7 @@
             "nodeID": "sfu1",
             "providerType": "webrtc_sfu",
             "providerKey": "sfu_mdc",
+            "ipFilter": "192.168",
             "configDirectoryToCopy": ["LOCAL PATH", "REMOTE PATH"],
             "connectedTo": ["sfu_mdc2"]
         }
