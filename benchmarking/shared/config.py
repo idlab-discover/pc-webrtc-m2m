@@ -27,6 +27,7 @@ class ClientConfig:
     nodeID: str
     clientType: str
     nClients: Optional[int] = 1
+    ipFilter: str = ""
     transcoderDirectoryToCopy: List[str] = field(default_factory=list)
     providersConfigToCopy: List[str] = field(default_factory=list)
     # New fields parsed from JSON
@@ -108,6 +109,7 @@ def parse_root(d: Dict[str, Any]) -> RootConfig:
                 nodeID=c.get("nodeID", ""),
                 clientType=c.get("clientType", ""),
                 nClients=n_int,
+                ipFilter=c.get("ipFilter", ""),
                 transcoderDirectoryToCopy=c.get("transcoderDirectoryToCopy", []),
                 providersConfigToCopy=c.get("providersConfigToCopy", []),
                 transcoderConfig=c.get("transcoderConfig"),

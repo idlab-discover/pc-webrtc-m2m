@@ -327,7 +327,7 @@ def receive_json():
             transcoder_config = client.transcoderConfig
             provider_config = client.providersConfig
             transcoder_type = client.transcoderType
-    
+            ip_filter = client.ipFilter
             payload = {
                 "clientCounterStart": clientCounter,
                 "nClients": nClients,
@@ -336,7 +336,7 @@ def receive_json():
                 "providerConfig": provider_config,
                 "transcoderType": transcoder_type,
                 "managerIP": manager_ip,
-                "ipFilter": cfg.ipFilter,
+                "ipFilter": ip_filter,
             }
             try:
                 print("sddsds")
@@ -626,6 +626,7 @@ def start_provider():
     if isinstance(provider_key, str) and provider_key.strip():
         node_id = PROVIDER_KEY_TO_NODE_ID.get(provider_key.strip())
         addresses = PROVIDER_SUBSCRIPTIONS.get(node_id, [])
+        ip_filter = PROVIDER_IP_FILTER.get(provider_key.strip(), "")
         print("Addresses", addresses)
         for addr in list(addresses):
             url = f"http://{addr.rstrip('/')}/start_provider"
@@ -633,7 +634,7 @@ def start_provider():
                 "providerKey": provider_key,
                 "providerType": provider_type,
                 "managerIP": manager_ip,
-                "ipFilter": cfg.ipFilter,
+                "ipFilter": ipFilter,
             }
             try:
                 resp = requests.post(url, json=payload, timeout=5)
