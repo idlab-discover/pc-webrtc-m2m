@@ -261,6 +261,7 @@ def receive_json():
     
     print_summary(cfg)
     providers = cfg.providers if hasattr(cfg, "providers") and cfg.providers else []
+    print(f"Total providers in config: {len(providers)}")
     for p in providers:
         print(f"Configured provider: nodeID={p.nodeID}, type={p.providerType}, key={p.providerKey}")
         existing = PROVIDER_SUBSCRIPTIONS.get(p.providerKey, [])
