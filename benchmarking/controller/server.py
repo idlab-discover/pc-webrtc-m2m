@@ -634,7 +634,7 @@ def start_provider():
                 "providerKey": provider_key,
                 "providerType": provider_type,
                 "managerIP": manager_ip,
-                "ipFilter": ipFilter,
+                "ipFilter": ip_filter,
             }
             try:
                 resp = requests.post(url, json=payload, timeout=5)
