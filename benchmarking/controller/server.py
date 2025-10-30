@@ -618,7 +618,7 @@ def start_provider():
     provider_info = {"status": "failed", "address": "", "port": 0}
     if isinstance(provider_key, str) and provider_key.strip():
         addresses = PROVIDER_SUBSCRIPTIONS.get(provider_key.strip(), [])
-        print(addresses)
+        print("Addresses", addresses)
         for addr in list(addresses):
             url = f"http://{addr.rstrip('/')}/start_provider"
             payload = {
