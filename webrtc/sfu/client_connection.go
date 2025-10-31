@@ -331,12 +331,12 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 				completedFrame = true
 				logger.LogFrameWithMessage(NameClientConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s totalDroppedFrames=%d", clc.clientID, t.ID(), nDroppedFrames), uint(p.FrameNr))
 			}
-			go func() {
+			//go func() {
 				if _, err = trackLocal.Write(buf[:i]); err != nil {
 					fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)
 				}
 
-			}()
+			//}()
 
 		}
 	})
