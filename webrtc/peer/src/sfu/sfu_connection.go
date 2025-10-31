@@ -385,6 +385,8 @@ func (s *SFUConnection) addOnTrackCallback() {
 				}
 			}
 		}
+		completedFrame := false
+		nDroppedFrames := uint32(0)
 		for {
 			buf2 := make([]byte, 1500)
 			_, _, readErr := track.Read(buf2)
@@ -402,12 +404,17 @@ func (s *SFUConnection) addOnTrackCallback() {
 			}
 			if frames[p.FrameNr] == 0 {
 				// Frame complete
+				if !completedFrame { // Previous frame was not completed
+					nDroppedFrames++
+				}
+				completedFrame = false
 				logger.LogFrameWithMessage(NameSFUConnection, logger.FrameFirstPacketRecv, true, true, fmt.Sprintf("trackID=%s", track.ID()), uint(p.FrameNr))
 			}
 			frames[p.FrameNr] += p.SeqLen
 			if frames[p.FrameNr] >= p.FrameLen {
 				// Frame complete
-				logger.LogFrameWithMessage(NameSFUConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("trackID=%s", track.ID()), uint(p.FrameNr))
+				completedFrame = true
+				logger.LogFrameWithMessage(NameSFUConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("trackID=%s totalDroppedFrames=%d", track.ID(), nDroppedFrames), uint(p.FrameNr))
 			}
 
 		}

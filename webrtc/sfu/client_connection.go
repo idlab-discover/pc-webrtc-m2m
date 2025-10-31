@@ -290,6 +290,8 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 		//startTime := time.Now().UnixNano() // / int64(time.Millisecond)
 		//prevBucket := int64(0)
 		frames := make(map[uint32]uint32)
+		nDroppedFrames := uint32(0)
+		completedFrame := false
 		for {
 
 			buf := make([]byte, 15000)
@@ -302,6 +304,10 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 			p := packet.BytesToFramePacketHeader(buf[20:])
 
 			if frames[p.FrameNr] == 0 { // Can maybe be optimized more because of the string being created for no reason
+				if !completedFrame { // Previous frame was not completed
+					nDroppedFrames++
+				}
+				completedFrame = false
 				logger.LogFrameWithMessage(NameClientConnection, logger.FrameFirstPacketRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s", clc.clientID, t.ID()), uint(p.FrameNr))
 			}
 			frames[p.FrameNr] += p.SeqLen
@@ -322,7 +328,8 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 				prevBucket = msBucket
 			}*/
 			if frames[p.FrameNr] == p.FrameLen { // Can maybe be optimized more because of the string being created for no reason
-				logger.LogFrameWithMessage(NameClientConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s", clc.clientID, t.ID()), uint(p.FrameNr))
+				completedFrame = true
+				logger.LogFrameWithMessage(NameClientConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s totalDroppedFrames=%d", clc.clientID, t.ID(), nDroppedFrames), uint(p.FrameNr))
 			}
 			go func() {
 				if _, err = trackLocal.Write(buf[:i]); err != nil {

@@ -178,6 +178,8 @@ func (rsfu *RemoteSFUConnection) AddPeerConnectionCallbacks() {
 		rsfu.mut.Unlock()
 
 		frames := make(map[uint32]uint32)
+		completedFrame := false
+		nDroppedFrames := uint32(0)
 		fmt.Printf("WebRTCSFU: OnTrack: Adding track %v\n", trackLocal.ID())
 		for {
 
@@ -189,10 +191,16 @@ func (rsfu *RemoteSFUConnection) AddPeerConnectionCallbacks() {
 			}
 			atomic.AddUint64(&senderTrack.trackMeter.Bytes, uint64(i))
 			p := packet.BytesToFramePacketHeader(buf[20:])
-
+			if frames[p.FrameNr] == 0 { // Can maybe be optimized more because of the string being created for no reason
+				if !completedFrame { // Previous frame was not completed
+					nDroppedFrames++
+				}
+				completedFrame = false
+			}
 			frames[p.FrameNr] += p.SeqLen
 			if frames[p.FrameNr] == p.FrameLen { // Can maybe be optimized more because of the string being created for no reason
-				logger.LogFrameWithMessage(NameRemoteSFUConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("providerID=%s trackID=%s", rsfu.providerKey, t.ID()), uint(p.FrameNr))
+				completedFrame = true
+				logger.LogFrameWithMessage(NameRemoteSFUConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("providerID=%s trackID=%s totalDroppedFrames=%d", rsfu.providerKey, t.ID(), nDroppedFrames), uint(p.FrameNr))
 			}
 			//go func() {
 			if _, err = trackLocal.Write(buf[:i]); err != nil {
