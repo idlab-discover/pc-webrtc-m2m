@@ -251,6 +251,7 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 		return
 	}
 	pcClient := pc.Clients[addedMsg.ClientID]
+	pcClient.IsConnected = true
 	for _, t := range addedMsg.SenderVideoTracks {
 		pcClient.VideoTracks[t.TrackID].IsConnected = true
 	}
@@ -320,6 +321,9 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 	msgRemoteClients := []RemoteClientSimple{}
 	for pcOtherID, pcOtherClient := range pc.Clients {
 		if pcOtherID == client.ClientID {
+			continue
+		}
+		if pcOtherClient.IsConnected == false {
 			continue
 		}
 		otherC := sm.clients[pcOtherID]

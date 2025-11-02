@@ -14,6 +14,7 @@ type ProviderTrackSimple struct {
 }
 
 type ProviderClient struct {
+	IsConnected bool
 	ClientID    uint
 	VideoTracks map[string]*ProviderTrackSimple
 	AudioTracks map[string]*ProviderTrackSimple
