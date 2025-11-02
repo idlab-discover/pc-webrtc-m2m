@@ -159,7 +159,7 @@ func (clc *ClientConnection) startListening() {
 		for {
 			var msg ClientMessage
 			if err := clc.websocket.ReadJSON(&msg); err != nil {
-				fmt.Printf("SessionManager: webSocketHandler: ReadMessage: error %s\n", err.Error())
+				fmt.Printf("SessionManager: webSocketHandler: ReadMessage for client %d: error %s\n", clc.ClientID, err.Error())
 				clc.onClose()
 				break
 			}
