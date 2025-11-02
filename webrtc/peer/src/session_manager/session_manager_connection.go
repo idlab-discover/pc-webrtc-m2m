@@ -146,7 +146,7 @@ func (smc *SessionManagerConnection) StartListening() {
 		for {
 			var msg SessionManagerMessage
 			if err := smc.conn.ReadJSON(&msg); err != nil {
-				// fmt.Errorf("error reading message: %w", err)
+				fmt.Errorf("error reading message: %w", err)
 				continue // TODO Handle errors
 			}
 			logger.LogWithMessage(NameManagerConnection, logger.ReceivedWSMessage, true, true,
