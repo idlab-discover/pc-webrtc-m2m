@@ -213,7 +213,7 @@ def create_app(client_path: Path, controller_base: str, node_id: str, addresses:
 
             try:
                 # Start in background, discard stdout/stderr to avoid blocking
-                p = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                p = subprocess.Popen(cmd, stdout=subprocess.DEVNULL)
                 proc_info = {"pid": p.pid, "cmd": cmd, "clientType": client_type}
                 started_processes.append({"pid": p.pid, "cmd": cmd, "started_at": time.time(), "clientType": client_type})
                 started.append(proc_info)
