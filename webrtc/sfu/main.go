@@ -190,7 +190,7 @@ func main() {
 			if nCPUs != 0 {
 				cpuUsageVal = int(cpuUsage / float64(nCPUs))
 			}
-			logger.LogWithMessage("SystemResources", logger.SystemResources, true, true, fmt.Sprintf("cpuUsage=%d memUsage=%d cpuTemp=%d", cpuUsageVal, memUsageVal, avgTempVal))
+			logger.LogWithMessage("SystemResources", logger.SystemResources, true, true, fmt.Sprintf("ts=%d cpuUsage=%d memUsage=%d cpuTemp=%d", time.Now().UnixMilli(), cpuUsageVal, memUsageVal, avgTempVal))
 		}
 	}()
 	select {}
