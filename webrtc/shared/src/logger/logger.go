@@ -80,6 +80,7 @@ const (
 	EstimatedBitrate   uint = 9001
 	SystemResources    uint = 9002
 	IPFilterCheck      uint = 9003
+	InitStatus         uint = 9998
 	CriticalFail       uint = 9999
 )
 
@@ -115,6 +116,7 @@ func LogInit(name string, nameShort string, color string, everyNFrames uint, sub
 	if logColor != "" {
 		applyColor = true
 	}
+	LogWithMessage("Init", InitStatus, true, true, fmt.Sprintf("ts=%d", time.Now().UnixMilli()))
 }
 
 func Log(name string, status uint, writeToConsole, writeToFile bool) {
