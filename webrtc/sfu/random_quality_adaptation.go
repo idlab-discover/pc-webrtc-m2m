@@ -21,10 +21,13 @@ func (rqa *RandomQualityAdaptation) PerformAdaptation(clc *ClientConnection, tar
 	for _, k := range keys {
 		receiverTrack := clc.ReceiverVideoTracks[k]
 		senderTrack := receiverTrack.CorrespondingSenderTrack
-		if targetBitrate-int(senderTrack.trackMeter.Bytes*8) > 0 {
+		if senderTrack.trackMeter.Valid == false {
+			continue
+		}
+		if targetBitrate-int(senderTrack.trackMeter.PrevBytes*8) > 0 {
 			receiverTrack.Play()
 			adaptations = append(adaptations, k)
-			targetBitrate -= int(senderTrack.trackMeter.Bytes * 8)
+			targetBitrate -= int(senderTrack.trackMeter.PrevBytes * 8)
 		} else {
 			receiverTrack.Pause()
 		}
