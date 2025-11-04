@@ -518,6 +518,9 @@ func (clc *ClientConnection) handleSubscribeToTracksMessage(payload json.RawMess
 	}
 	clc.subscribeToTracks(msg, otherC)
 	clc.SignalRenegotiation()
+	for _, t := range clc.ReceiverVideoTracks {
+			t.Pause()
+}
 	// TODO
 	// Renegotiate SDP
 }
