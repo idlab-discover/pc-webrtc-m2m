@@ -27,26 +27,30 @@ type SenderTrack struct {
 }
 
 type ReceiverTrack struct {
+	IsPaused				 bool   
 	TrackID                  string `json:"trackID"`
 	OriginType               string `json:"originType"` // User, SFU etc...
 	OriginID                 uint   `json:"originID"`   // userID, SFU_ID etc...
 	SenderTrackID            string `json:"senderTrackID"`
 	CorrespondingSenderTrack *SenderTrack
 	RTPSender                *webrtc.RTPSender
+	PauseTrack                *webrtc.TrackLocalStaticRTP
 }
 
 // TODO Maybe better error handling is needed here
 func (rt *ReceiverTrack) Pause() error {
-	if rt.RTPSender.Track() == nil {
+	if rt.IsPaused {
 		return nil
 	}
-	return rt.RTPSender.ReplaceTrack(nil)
+	rt.IsPaused = true
+	return rt.RTPSender.ReplaceTrack(rt.PauseTrack)
 }
 
 func (rt *ReceiverTrack) Play() error {
-	if rt.RTPSender.Track() != nil {
+	if !rt.IsPaused {
 		return nil
 	}
+	rt.IsPaused = false
 	return rt.RTPSender.ReplaceTrack(rt.CorrespondingSenderTrack.WebRTCTrack)
 }
 
@@ -367,7 +371,8 @@ func (clc *ClientConnection) AddTrackFromOtherUnsafe(originType string, originID
 	}
 	println("ADDING TRACK", track == nil)
 	fmt.Printf("TrackID=%s streamID=%s\n", track.WebRTCTrack.ID(), track.WebRTCTrack.StreamID())
-	rtpSender, err := clc.peerConnection.AddTrack(track.WebRTCTrack)
+	pauseTrack, _ :=webrtc.NewTrackLocalStaticRTP(track.WebRTCTrack.Codec(), track.WebRTCTrack.ID(), track.WebRTCTrack.StreamID())
+	rtpSender, err := clc.peerConnection.AddTrack(pauseTrack)
 
 	if err != nil {
 		println("OOPSSS")
@@ -376,7 +381,7 @@ func (clc *ClientConnection) AddTrackFromOtherUnsafe(originType string, originID
 	}
 	recvTrack.CorrespondingSenderTrack = track
 	recvTrack.RTPSender = rtpSender
-
+	recvTrack.PauseTrack = pauseTrack
 	go func() {
 		rtcpBuf := make([]byte, 1500)
 		for {

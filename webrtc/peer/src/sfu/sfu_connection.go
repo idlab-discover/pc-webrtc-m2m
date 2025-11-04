@@ -89,19 +89,10 @@ func (t *WebRTCVideoTrack) StartSending() {
 	go func() {
 		println("START SENDING")
 		frameNr := 0
-
-		data := t.transcoder.EncodeFrame(t.track.ID())
-			logger.LogFrameWithMessage(NameSFUConnection, logger.FrameSending, true, true, fmt.Sprintf("trackID=%s frameSize=%d", t.track.ID(), len(data)), uint(frameNr))
-			if err := t.track.WriteFrame(data, frameNr); err != nil {
-				panic(err)
-			}
-			frameNr++
-			time.Sleep(10 * time.Second) // Simulate ~30fps
 		for {
-
 			//	println("START", time.Now().UnixMilli(), frameNr)
 
-			data = t.transcoder.EncodeFrame(t.track.ID())
+			data := t.transcoder.EncodeFrame(t.track.ID())
 			logger.LogFrameWithMessage(NameSFUConnection, logger.FrameSending, true, true, fmt.Sprintf("trackID=%s frameSize=%d", t.track.ID(), len(data)), uint(frameNr))
 			if err := t.track.WriteFrame(data, frameNr); err != nil {
 				panic(err)
