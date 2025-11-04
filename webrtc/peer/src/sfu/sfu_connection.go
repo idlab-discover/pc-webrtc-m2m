@@ -243,7 +243,7 @@ func (s *SFUConnection) preparePeerConnection() {
 	if err := m.RegisterHeaderExtension(webrtc.RTPHeaderExtensionCapability{URI: sdp.TransportCCURI}, webrtc.RTPCodecTypeVideo); err != nil {
 		panic(err)
 	}
-	generator, err := twcc.NewSenderInterceptor(twcc.SendInterval(10 * time.Millisecond))
+	generator, err := twcc.NewSenderInterceptor(twcc.SendInterval(1 * time.Millisecond))
 	if err != nil {
 		panic(err)
 	}
