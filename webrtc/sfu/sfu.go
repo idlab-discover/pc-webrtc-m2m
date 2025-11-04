@@ -430,7 +430,7 @@ func (sfu *SFU) StartPerformingQualityAdaptation() {
 						extraOutput = "@activeTracks=("
 						tracks := sfu.qualityAdaptation.PerformAdaptation(client, targetBitrate)
 						for _, trackID := range tracks {
-							extraOutput += fmt.Sprintf("%s@", trackID)
+							extraOutput += fmt.Sprintf("%s|", trackID)
 						}
 						extraOutput += ")"
 					}
