@@ -136,7 +136,7 @@ func (s *SFUConnection) OnFullyConnected(clientID uint, authKey string, address 
 	s.IsReady = true
 	s.Address = address
 	s.Port = port
-	s.preparePeerConnection()
+	s.preparePeerConnection(clientID)
 	s.connectToSFU(clientID, authKey)
 }
 
@@ -178,7 +178,7 @@ func (s *SFUConnection) connectToSFU(clientID uint, authKey string) {
 	s.startListening()
 }
 
-func (s *SFUConnection) preparePeerConnection() {
+func (s *SFUConnection) preparePeerConnection(clientID uint) {
 	settingEngine := webrtc.SettingEngine{}
 	settingEngine.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
 	settingEngine.SetReceiveMTU(1500)
@@ -278,6 +278,11 @@ func (s *SFUConnection) preparePeerConnection() {
 	}
 	for _, track := range s.senderAudioTracks {
 		s.addTrackToPeerConnection(track.track)
+	}
+	if len(s.senderVideoTracks) == 0 && len(s.senderAudioTracks) == 0 {
+		dummytrackID := fmt.Sprintf("dummytrack_%d", clientID)
+		dummyTrack, _ := webrtc.NewTrackLocalStaticRTP(codecCapability, dummytrackID, dummytrackID)
+		s.addTrackToPeerConnection(dummyTrack)
 	}
 	s.AddPeerConnectionCallbacks()
 }
