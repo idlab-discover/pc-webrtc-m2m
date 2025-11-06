@@ -42,7 +42,7 @@ SUBSCRIPTIONS: dict[str, list[str]] = {}
 PROVIDER_SUBSCRIPTIONS: dict[str, list[str]] = {}
 PROVIDER_KEY_TO_NODE_ID: dict[str, str] = {}
 PROVIDER_IP_FILTER: dict[str, str] = {}
-def _collect_logs_after_delay(delay_seconds: int = 10, logs_sub_dir: str, logs_base: Path | None = None) -> None:
+def _collect_logs_after_delay(logs_sub_dir: str,delay_seconds: int = 10, logs_base: Path | None = None) -> None:
     """Background worker: wait `delay_seconds`, create timestamped subdir under
     `logs_base` (defaults to controller/logs), call /download_logs on all
     subscribed client addresses and unzip any returned zip files into the
@@ -389,7 +389,7 @@ def receive_json():
     # Kick off background log collection after a short delay; do not block the
     # HTTP response. Use a daemon thread so it won't prevent process exit.
     try:
-        t = threading.Thread(target=_collect_logs_after_delay, args=(cfg.experimentDurationSeconds, logsSubDirectory, None), daemon=True)
+        t = threading.Thread(target=_collect_logs_after_delay, args=(logsSubDirectory, cfg.experimentDurationSeconds, None), daemon=True)
         t.start()
         print(f"Started background log collection thread (waiting {cfg.experimentDurationSeconds}s before download)")
     except Exception as e:
