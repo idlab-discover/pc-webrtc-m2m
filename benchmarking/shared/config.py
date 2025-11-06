@@ -27,12 +27,14 @@ class ClientConfig:
     nodeID: str
     clientType: str
     nClients: Optional[int] = 1
+    disableSendingForNClients: Optional[int] = 0
     ipFilter: str = ""
     transcoderDirectoryToCopy: List[str] = field(default_factory=list)
     providersConfigToCopy: List[str] = field(default_factory=list)
     # New fields parsed from JSON
     transcoderConfig: Optional[str] = None
     providersConfig: Optional[str] = None
+    providersConfigNoSending: Optional[str] = None
     transcoderType: Optional[str] = None
 
 
@@ -100,6 +102,7 @@ def parse_root(d: Dict[str, Any]) -> RootConfig:
     for c in d.get("clients", []) or []:
         # convert nClients to int if possible
         n = c.get("nClients")
+
         try:
             n_int = int(n) if n is not None and n != "" else None
         except Exception:
@@ -109,11 +112,13 @@ def parse_root(d: Dict[str, Any]) -> RootConfig:
                 nodeID=c.get("nodeID", ""),
                 clientType=c.get("clientType", ""),
                 nClients=n_int,
+                disableSendingForNClients=c.get("disableSendingForNClients", 0),
                 ipFilter=c.get("ipFilter", ""),
                 transcoderDirectoryToCopy=c.get("transcoderDirectoryToCopy", []),
                 providersConfigToCopy=c.get("providersConfigToCopy", []),
                 transcoderConfig=c.get("transcoderConfig"),
                 providersConfig=c.get("providersConfig"),
+                providersConfigNoSending=c.get("providersConfigNoSending"),
                 transcoderType=c.get("transcoderType"),
             )
         )

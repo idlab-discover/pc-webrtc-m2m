@@ -322,18 +322,22 @@ def receive_json():
             # choose the first known address for this nodeID
             addr = addresses[0]
             nClients = client.nClients
+            clientsNoSending = client.disableSendingForNClients
             url = addr.rstrip("/") + "/start_clients"
             client_type = client.clientType
             transcoder_config = client.transcoderConfig
             provider_config = client.providersConfig
+            provider_config_no_sending = client.providersConfigNoSending
             transcoder_type = client.transcoderType
             ip_filter = client.ipFilter
             payload = {
                 "clientCounterStart": clientCounter,
                 "nClients": nClients,
+                "disableSendingForNClients": clientsNoSending,
                 "clientType": client_type,
                 "transcoderConfig": transcoder_config,
                 "providerConfig": provider_config,
+                "providerConfigNoSending": provider_config_no_sending,
                 "transcoderType": transcoder_type,
                 "managerIP": manager_ip,
                 "ipFilter": ip_filter,

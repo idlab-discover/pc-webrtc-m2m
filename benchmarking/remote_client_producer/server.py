@@ -192,24 +192,29 @@ def create_app(client_path: Path, controller_base: str, node_id: str, addresses:
 
         ip_filter = data.get("ipFilter")
         client_counter_start = int(data.get("clientCounterStart"))
+        clients_no_sending = int(data.get("disableSendingForNClients", 0))
         client_type = str(data.get("clientType"))
         tr_cfg = f"uploads/{str(data.get('transcoderConfig'))}"
         prov_cfg = f"uploads/{str(data.get('providerConfig'))}"
+        prov_cfg_no_send = f"uploads/{str(data.get('providersConfigNoSending'))}"
         tr_type = str(data.get("transcoderType"))
         manager_ip = str(data.get("managerIP"))
 
         # Optional executable override
         exec_path = f"{client_path}"
-
+        no_send_start_index = n - clients_no_sending
         started = []
         for i in range(n):
             # Build command. If exec_path is the Python interpreter, we append this
             # script path so the process runs this file. If exec_path is a direct
             # executable, use it as-is.
+            actual_prov_cfg = prov_cfg
+            if i >= no_send_start_index:
+                actual_prov_cfg = prov_cfg_no_send
             if exec_path == sys.executable:
-                cmd = [exec_path, sys.argv[0], "--manager", manager_ip, "--providers", prov_cfg, "--tr", tr_type, "--trcfg", tr_cfg, "-c", str(client_counter_start + i), "--ipFilter", ip_filter]
+                cmd = [exec_path, sys.argv[0], "--manager", manager_ip, "--providers", actual_prov_cfg, "--tr", tr_type, "--trcfg", tr_cfg, "-c", str(client_counter_start + i), "--ipFilter", ip_filter]
             else:
-                cmd = [exec_path, "--manager", manager_ip, "--providers", prov_cfg, "--tr", tr_type, "--trcfg", tr_cfg, "-c", str(client_counter_start + i), "--ipFilter", ip_filter]
+                cmd = [exec_path, "--manager", manager_ip, "--providers", actual_prov_cfg, "--tr", tr_type, "--trcfg", tr_cfg, "-c", str(client_counter_start + i), "--ipFilter", ip_filter]
 
             try:
                 # Start in background, discard stdout/stderr to avoid blocking
