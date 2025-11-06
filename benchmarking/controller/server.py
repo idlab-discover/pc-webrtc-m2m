@@ -341,7 +341,7 @@ def receive_json():
                 "clientType": client_type,
                 "transcoderConfig": transcoder_config,
                 "providerConfig": provider_config,
-                "providerConfigNoSending": provider_config_no_sending,
+                "providersConfigNoSending": provider_config_no_sending,
                 "transcoderType": transcoder_type,
                 "managerIP": manager_ip,
                 "ipFilter": ip_filter,
