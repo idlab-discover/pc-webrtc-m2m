@@ -13,6 +13,8 @@ func CreateQualityAdaptation(adaptationType string) QualityAdaptation {
 	switch adaptationType {
 	case "random":
 		adaptation = NewRandomQualityAdaptation()
+	case "mdc":
+		adaptation = NewMDCQualityAdaptation()
 	default:
 		adaptation = nil
 	}
