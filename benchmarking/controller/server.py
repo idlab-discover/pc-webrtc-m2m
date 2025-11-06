@@ -42,7 +42,7 @@ SUBSCRIPTIONS: dict[str, list[str]] = {}
 PROVIDER_SUBSCRIPTIONS: dict[str, list[str]] = {}
 PROVIDER_KEY_TO_NODE_ID: dict[str, str] = {}
 PROVIDER_IP_FILTER: dict[str, str] = {}
-def _collect_logs_after_delay(delay_seconds: int = 10, logs_base: Path | None = None) -> None:
+def _collect_logs_after_delay(delay_seconds: int = 10, logs_base: Path, logs_sub_dir: str | None = None) -> None:
     """Background worker: wait `delay_seconds`, create timestamped subdir under
     `logs_base` (defaults to controller/logs), call /download_logs on all
     subscribed client addresses and unzip any returned zip files into the
@@ -63,7 +63,10 @@ def _collect_logs_after_delay(delay_seconds: int = 10, logs_base: Path | None = 
         return
 
     ts = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-    target_dir = logs_base / ts
+    target_dir = logs_base 
+    if logs_sub_dir is not None and logs_sub_dir != "":
+        target_dir = target_dir / logs_sub_dir
+    target_dir = target_dir / ts
     try:
         target_dir.mkdir(parents=True, exist_ok=True)
     except Exception as e:
@@ -300,6 +303,7 @@ def receive_json():
 
     # Best-effort extraction of manager IP from config using normal attribute access
     manager_ip = cfg.sessionManagerConfig.sessionManagerIP
+    logsSubDirectory = cfg.logsSubDirectory
     print(f"Manager IP for clients to connect to: {manager_ip}")
     clients = cfg.clients if hasattr(cfg, "clients") and cfg.clients else []
     clientCounter = 0
@@ -385,7 +389,7 @@ def receive_json():
     # Kick off background log collection after a short delay; do not block the
     # HTTP response. Use a daemon thread so it won't prevent process exit.
     try:
-        t = threading.Thread(target=_collect_logs_after_delay, args=(cfg.experimentDurationSeconds, None), daemon=True)
+        t = threading.Thread(target=_collect_logs_after_delay, args=(cfg.experimentDurationSeconds, None, logsSubDirectory), daemon=True)
         t.start()
         print(f"Started background log collection thread (waiting {cfg.experimentDurationSeconds}s before download)")
     except Exception as e:

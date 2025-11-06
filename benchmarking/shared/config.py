@@ -42,6 +42,7 @@ class ClientConfig:
 class RootConfig:
     copyConfigs: bool = False
     controllerIP: str = "127.0.0.1"
+    logsSubDirectory: Optional[str] = None  # New optional field for logs subdirectory
     sessionManagerConfig: Optional[SessionManagerConfig] = None
     nIterations: Optional[int] = 1  # New optional field for number of iterations
     experimentDurationSeconds: Optional[int] = 60  # New optional field for duration in seconds
@@ -78,7 +79,8 @@ def parse_root(d: Dict[str, Any]) -> RootConfig:
         except Exception:
             # keep default on parse error
             pass
-
+    if "logsSubDirectory" in d:
+        rc.logsSubDirectory = d.get("logsSubDirectory") or rc.logsSubDirectory
     sm = d.get("sessionManagerConfig")
     if sm:
         rc.sessionManagerConfig = SessionManagerConfig(

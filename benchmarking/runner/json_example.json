@@ -1,6 +1,7 @@
 {
     "copyConfigs": true,
     "controllerIP": "127.0.0.1",
+    "logsSubDirectory": "exp0",
     "nIterations": 1,
     "experimentDurationSeconds": 120,
     "sessionManagerConfig": {
