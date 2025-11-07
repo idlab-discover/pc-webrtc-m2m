@@ -280,6 +280,7 @@ func (s *SFUConnection) preparePeerConnection(clientID uint) {
 		s.addTrackToPeerConnection(track.track)
 	}
 	if len(s.senderVideoTracks) == 0 && len(s.senderAudioTracks) == 0 {
+		println("ADDING DUMMY TRACK")
 		dummytrackID := fmt.Sprintf("dummytrack_%d", clientID)
 		dummyTrack, _ := webrtc.NewTrackLocalStaticRTP(codecCapability, dummytrackID, dummytrackID)
 		s.addTrackToPeerConnection(dummyTrack)
