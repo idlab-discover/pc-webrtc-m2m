@@ -98,6 +98,12 @@ func (rsfu *RemoteSFUConnection) SignalRenegotiationUnsafe() {
 		return
 	}
 	rsfu.IsNegotiating = true
+	if rsfu.providerKey < rsfu.parent.providerKey {
+		if err := rsfu.websocket.WriteJSONMessageSafe("RenegMessage", nil); err != nil {
+			panic(err)
+		}
+		return
+	}
 	offer, err := rsfu.peerConnection.CreateOffer(nil)
 	if err != nil {
 		panic(err)
@@ -107,9 +113,13 @@ func (rsfu *RemoteSFUConnection) SignalRenegotiationUnsafe() {
 		panic(err)
 	}
 	//fmt.Printf("WebRTCSFU: webSocketHandler: SignalRenegotiation: Sending offer to clientID=%d %v+\n", clc.clientID, offer)
+	// Check order of providerKeys
+	// If A < B then request B to start renegotiation
 	if err = rsfu.websocket.WriteJSONMessageSafe("OfferMessage", offer); err != nil {
 		panic(err)
 	}
+	
+	
 	rsfu.NeedsUpdate = false
 }
 
@@ -221,9 +231,6 @@ func (rsfu *RemoteSFUConnection) handleOfferMessage(payload json.RawMessage) {
 	}
 	rsfu.mut.Lock()
 	defer rsfu.mut.Unlock()
-	if rsfu.providerKey < rsfu.parent.providerKey {
-		return
-	}
 	fmt.Printf("%+v\n", offer)
 	err = rsfu.peerConnection.SetRemoteDescription(offer)
 	if err != nil {
@@ -298,6 +305,8 @@ func (rsfu *RemoteSFUConnection) HandleSpecialMessage(messageType string, payloa
 		rsfu.handleAnswerMessage(payload)
 	case "CandidateMessage":
 		rsfu.handleCandidateMessage(payload)
+	case "RenegMessage":
+		rsfu.SignalRenegotiation()
 	}
 	return nil
 }
