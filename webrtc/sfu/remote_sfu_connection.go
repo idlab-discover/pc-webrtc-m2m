@@ -219,6 +219,8 @@ func (rsfu *RemoteSFUConnection) handleOfferMessage(payload json.RawMessage) {
 	if err != nil {
 		panic(err)
 	}
+	rsfu.mut.Lock()
+	defer rsfu.mut.Unlock()
 	fmt.Printf("%+v\n", offer)
 	err = rsfu.peerConnection.SetRemoteDescription(offer)
 	if err != nil {
@@ -377,11 +379,11 @@ func (rsfu *RemoteSFUConnection) HandleSubscribeToRemoteClient(clientID uint, vi
 	// Call SFU and get client connection
 	// Based on clientID and videoTracks/audioTracks
 	// Get the senderTrack and attach it
-	//rsfu.parent.mut.Lock()
+	rsfu.parent.mut.Lock()
 	//logger.LogWithMessage(NameRemoteSFUConnection, logger.MutLock, true, true, "func=HandleSubscribeToRemoteClient")
 	rsfu.mut.Lock()
 	logger.LogWithMessage(NameRemoteSFUConnection, logger.MutLock, true, true, "func=HandleSubscribeToRemoteClient")
-	//defer rsfu.parent.mut.Unlock()
+	defer rsfu.parent.mut.Unlock()
 	defer rsfu.mut.Unlock()
 	defer logger.LogWithMessage(NameRemoteSFUConnection, logger.MutUnlock, true, true, "func=HandleSubscribeToRemoteClient")
 	rsfu.parent.SubscribeRemoteProviderToClient(rsfu, clientID, videoTracks, audioTracks)
