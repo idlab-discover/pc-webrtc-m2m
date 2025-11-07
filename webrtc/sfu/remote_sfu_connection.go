@@ -423,6 +423,7 @@ func (rsfu *RemoteSFUConnection) AddTrackFromOtherUnsafe(recvTrack *ReceiverTrac
 }
 
 func (rsfu *RemoteSFUConnection) ForwardTracksToClient(client *ClientConnection, msg SubscribeToTracksMessage, clientID uint) error {
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.MutTryEnter, true, true, "func=ForwardTracksToClient")
 	rsfu.mut.Lock()
 	logger.LogWithMessage(NameRemoteSFUConnection, logger.MutLock, true, true, "func=ForwardTracksToClient")
 	defer rsfu.mut.Unlock()

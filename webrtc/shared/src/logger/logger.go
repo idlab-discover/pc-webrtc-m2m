@@ -80,8 +80,9 @@ const (
 	EstimatedBitrate   uint = 9001
 	SystemResources    uint = 9002
 	IPFilterCheck      uint = 9003
-	MutLock uint = 9004
-	MutUnlock uint = 9005
+	MutTryEnter 	  uint = 9993
+	MutLock uint = 9994
+	MutUnlock uint = 9995
 	InitStatus         uint = 9998
 	CriticalFail       uint = 9999
 )
