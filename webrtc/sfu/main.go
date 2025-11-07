@@ -156,7 +156,7 @@ func main() {
 	trackLocals = map[string]*webrtc.TrackLocalStaticRTP{}
 	undesireableTracks = map[int][]string{}
 
-	sfu := NewSFU(*address, *port, *ipFilter)
+	sfu := NewSFU(*address, *port, *ipFilter, *providerKey)
 	sm, err := NewSessionManagerConnection(*managerIP, *providerKey, *authKey, sfu)
 	if err != nil {
 		panic(err)

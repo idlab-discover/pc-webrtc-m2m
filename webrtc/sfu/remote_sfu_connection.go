@@ -221,6 +221,9 @@ func (rsfu *RemoteSFUConnection) handleOfferMessage(payload json.RawMessage) {
 	}
 	rsfu.mut.Lock()
 	defer rsfu.mut.Unlock()
+	if rsfu.providerKey < rsfu.parent.providerKey {
+		return
+	}
 	fmt.Printf("%+v\n", offer)
 	err = rsfu.peerConnection.SetRemoteDescription(offer)
 	if err != nil {
@@ -233,7 +236,8 @@ func (rsfu *RemoteSFUConnection) handleOfferMessage(payload json.RawMessage) {
 	if err = rsfu.peerConnection.SetLocalDescription(answer); err != nil {
 		panic(err)
 	}
-
+	rsfu.IsNegotiating = false
+	rsfu.NeedsUpdate = false
 	rsfu.websocket.WriteJSONMessageSafe("AnswerMessage", answer)
 }
 
