@@ -414,7 +414,9 @@ func (rsfu *RemoteSFUConnection) AddTrackFromOtherUnsafe(recvTrack *ReceiverTrac
 
 func (rsfu *RemoteSFUConnection) ForwardTracksToClient(client *ClientConnection, msg SubscribeToTracksMessage, clientID uint) error {
 	rsfu.mut.Lock()
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.MutLock, true, true, "func=ForwardTracksToClient")
 	defer rsfu.mut.Unlock()
+	defer logger.LogWithMessage(NameRemoteSFUConnection, logger.MutUnlock, true, true, "func=ForwardTracksToClient")
 	for _, t := range msg.VideoTracks {
 		track, exists := rsfu.SenderVideoTracks[t.TrackID]
 		if !exists {

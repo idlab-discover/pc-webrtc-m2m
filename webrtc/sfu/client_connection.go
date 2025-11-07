@@ -584,6 +584,7 @@ func (clc *ClientConnection) handleSubscribeToRemoteClientsMessage(payload json.
 
 func (clc *ClientConnection) subscribeToTracks(subMessage SubscribeToTracksMessage, otherClient *ClientConnection) {
 	// Prevent deadlock CL_A locks CL_B, CL_B locks CL_A, CL_A waits to lock CL_A
+	logger.LogWithMessage(NameClientConnection, logger.MutLock, true, true, fmt.Sprintf("func=subscribeToTracks clientA=%d clientB=%d", clc.clientID, otherClient.clientID))
 	if clc.clientID > otherClient.clientID {
 		clc.mut.Lock()
 		otherClient.mut.Lock()
@@ -593,7 +594,7 @@ func (clc *ClientConnection) subscribeToTracks(subMessage SubscribeToTracksMessa
 	}
 	defer clc.mut.Unlock()
 	defer otherClient.mut.Unlock()
-
+	defer logger.LogWithMessage(NameClientConnection, logger.MutUnlock, true, true, fmt.Sprintf("func=subscribeToTracks clientA=%d clientB=%d", clc.clientID, otherClient.clientID))
 	for _, t := range subMessage.VideoTracks {
 		track, exists := otherClient.SenderVideoTracks[t.TrackID]
 		if !exists {
