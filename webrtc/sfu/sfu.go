@@ -52,7 +52,9 @@ func NewSFU(address string, port uint, ipFilter string) *SFU {
 
 func (sfu *SFU) AddClient(msg NewClientMessage) {
 	sfu.mut.Lock()
+	logger.LogWithMessage(NameSFU, logger.MutLock, true, true, "func=AddClient")
 	defer sfu.mut.Unlock()
+	defer logger.LogWithMessage(NameSFU, logger.MutUnlock, true, true, "func=AddClient")
 	client := NewClientConnection(sfu, msg.ClientID, msg.AuthKey, msg.SenderVideoTracks, msg.SenderAudioTracks)
 	client.SetupPeerConnection(&sfu.settings)
 	// This will need to be changed to do it based on ReceiverVideoTracksInstead
@@ -81,7 +83,9 @@ func (sfu *SFU) AddClient(msg NewClientMessage) {
 
 func (sfu *SFU) AddRemoteProvider(msg RemoteProviderAddedMessage, selfProviderKey string, selfAuthKey string) {
 	sfu.mut.Lock()
+	logger.LogWithMessage(NameSFU, logger.MutLock, true, true, "func=AddRemoteProvider")
 	defer sfu.mut.Unlock()
+	defer logger.LogWithMessage(NameSFU, logger.MutUnlock, true, true, "func=AddRemoteProvider")
 	// TODO Check if provider already exists
 	provider := CreateRemoteProvider(sfu, msg.ProviderType, msg.ProviderKey, msg.Address, msg.Port, msg.AuthKey)
 	// Call connect
@@ -182,12 +186,14 @@ func (sfu *SFU) websocketClientHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	sfu.mut.Lock()
+	logger.LogWithMessage(NameSFU, logger.MutLock, true, true, "func=websocketClientHandler")
 	// TODO Check if this is even needed, atm we already add all tracks when new client connects
 	// Add all tracks from other clients to client
 	// If quality adaptation is enabled => unpause if needed
 	// For the first time tracks need to be added with AddTrack to get the RTPSender
 	client.SignalRenegotiation()
 	sfu.mut.Unlock()
+	logger.LogWithMessage(NameSFU, logger.MutUnlock, true, true, "func=websocketClientHandler")
 
 	fmt.Println("WebRTCSFU: webSocketHandler: Will now call signalpeerconnections again")
 
@@ -210,11 +216,13 @@ func (sfu *SFU) websocketProviderHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	sfu.mut.Lock()
+	logger.LogWithMessage(NameSFU, logger.MutLock, true, true, "func=websocketProviderHandler")
 	if _, exists := sfu.remoteProviders[providerKey]; exists {
 		fmt.Println("WebRTCSFU: webSocketHandler: Provider already connected, returning 400")
 		http.Error(w, "Provider already connected", http.StatusBadRequest)
 		logger.Log(NameSFU, logger.RemoteProviderConnectionFailed, true, true)
 		sfu.mut.Unlock()
+		logger.LogWithMessage(NameSFU, logger.MutUnlock, true, true, "func=websocketProviderHandler")
 		return
 	}
 	logger.LogWithMessage(NameSFU, logger.RemoteProviderConnectionConnecting, true, true, fmt.Sprintf("providerKey=%s providerType=%s", providerKey, providerType))
@@ -222,6 +230,7 @@ func (sfu *SFU) websocketProviderHandler(w http.ResponseWriter, r *http.Request)
 	provider.SetupForwarding()
 	sfu.remoteProviders[providerKey] = provider
 	sfu.mut.Unlock()
+	logger.LogWithMessage(NameSFU, logger.MutUnlock, true, true, "func=websocketProviderHandler")
 	// TODO Verify authKey
 
 	// Upgrade HTTP request to Websocket
@@ -355,7 +364,9 @@ func (sfu *SFU) signalClients() {
 
 func (sfu *SFU) AddVirtualClient(msg ProviderRemoteProviderClientMessage) bool {
 	sfu.mut.Lock()
+	logger.LogWithMessage(NameSFU, logger.MutLock, true, true, "func=AddVirtualClient")
 	defer sfu.mut.Unlock()
+	defer logger.LogWithMessage(NameSFU, logger.MutUnlock, true, true, "func=AddVirtualClient")
 	provider := sfu.remoteProviders[msg.ProviderKey]
 	if provider == nil {
 		fmt.Printf("SFU: AddVirtualClient: No such provider %s\n", msg.ProviderKey)
@@ -369,7 +380,9 @@ func (sfu *SFU) AddVirtualClient(msg ProviderRemoteProviderClientMessage) bool {
 
 func (sfu *SFU) SubscribeRemoteProviderToClient(provider ProviderConnection, clientID uint, videoTracks []TrackSimple, audioTracks []TrackSimple) {
 	sfu.mut.Lock()
+	logger.LogWithMessage(NameSFU, logger.MutLock, true, true, "func=SubscribeRemoteProviderToClient")
 	defer sfu.mut.Unlock()
+	defer logger.LogWithMessage(NameSFU, logger.MutUnlock, true, true, "func=SubscribeRemoteProviderToClient")
 	client := sfu.clients[clientID]
 	if client == nil {
 		fmt.Printf("SFU: SubscribeRemoteProviderToClient: No such client %d\n", clientID)
