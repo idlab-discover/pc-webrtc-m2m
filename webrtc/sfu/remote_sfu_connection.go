@@ -195,7 +195,7 @@ func (rsfu *RemoteSFUConnection) AddPeerConnectionCallbacks() {
 		fmt.Printf("WebRTCSFU: OnTrack: Adding track %v\n", trackLocal.ID())
 		for {
 
-			buf := make([]byte, 1500)
+			buf := make([]byte, 15000)
 			i, _, err := t.Read(buf)
 			if err != nil {
 				fmt.Printf("WebRTCSFU: OnTrack: error during read: %s\n", err)
