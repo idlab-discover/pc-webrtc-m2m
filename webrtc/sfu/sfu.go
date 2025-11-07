@@ -379,10 +379,10 @@ func (sfu *SFU) AddVirtualClient(msg ProviderRemoteProviderClientMessage) bool {
 }
 
 func (sfu *SFU) SubscribeRemoteProviderToClient(provider ProviderConnection, clientID uint, videoTracks []TrackSimple, audioTracks []TrackSimple) {
-	//sfu.mut.Lock()
-	//logger.LogWithMessage(NameSFU, logger.MutLock, true, true, "func=SubscribeRemoteProviderToClient")
-	//defer sfu.mut.Unlock()
-	//defer logger.LogWithMessage(NameSFU, logger.MutUnlock, true, true, "func=SubscribeRemoteProviderToClient")
+	sfu.mut.Lock()
+	logger.LogWithMessage(NameSFU, logger.MutLock, true, true, "func=SubscribeRemoteProviderToClient")
+	defer sfu.mut.Unlock()
+	defer logger.LogWithMessage(NameSFU, logger.MutUnlock, true, true, "func=SubscribeRemoteProviderToClient")
 	client := sfu.clients[clientID]
 	if client == nil {
 		fmt.Printf("SFU: SubscribeRemoteProviderToClient: No such client %d\n", clientID)
