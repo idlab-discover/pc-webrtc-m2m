@@ -216,15 +216,7 @@ def perform_uploads(cfg: RootConfig, repo_root: Path, dry_run: bool = True) -> i
             # support either a single pair [local, remote] or a flat list
             pairs: List[List[str]] = []
             pc = client.providersConfigToCopy
-            if isinstance(pc, (list, tuple)) and pc and isinstance(pc[0], (list, tuple)):
-                # already a list of pairs
-                pairs = [list(x) for x in pc]
-            elif isinstance(pc, (list, tuple)) and len(pc) >= 2 and all(isinstance(x, str) for x in pc):
-                # a single pair
-                pairs = [list(pc[:2])]
-            else:
-                print(f"Skipping providersConfigToCopy for client {client.nodeID}: unexpected format: {pc}")
-
+            pairs = [pc[i:i+2] for i in range(0, len(pc), 2)]
             for local_file, remote_target in pairs:
                 total_files += 1
                 local_path_file = (repo_root / local_file).resolve()
