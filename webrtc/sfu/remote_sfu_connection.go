@@ -81,7 +81,9 @@ func (rsfu *RemoteSFUConnection) SetupPeerConnection() {
 
 func (rsfu *RemoteSFUConnection) SignalRenegotiation() {
 	rsfu.mut.Lock()
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.MutLock, true, true, "func=SignalRenegotiation")
 	defer rsfu.mut.Unlock()
+	defer logger.LogWithMessage(NameRemoteSFUConnection, logger.MutUnlock, true, true, "func=SignalRenegotiation")
 	rsfu.SignalRenegotiationUnsafe()
 }
 
@@ -241,7 +243,9 @@ func (rsfu *RemoteSFUConnection) handleAnswerMessage(payload json.RawMessage) {
 		return
 	}
 	rsfu.mut.Lock()
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.MutLock, true, true, "func=handleAnswerMessage")
 	defer rsfu.mut.Unlock()
+	defer logger.LogWithMessage(NameRemoteSFUConnection, logger.MutUnlock, true, true, "func=handleAnswerMessage")
 	if err := rsfu.peerConnection.SetRemoteDescription(answer); err != nil {
 		panic(err)
 	}
@@ -260,7 +264,9 @@ func (rsfu *RemoteSFUConnection) handleAnswerMessage(payload json.RawMessage) {
 
 func (rsfu *RemoteSFUConnection) handleCandidateMessage(payload json.RawMessage) {
 	rsfu.mut.Lock()
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.MutLock, true, true, "func=handleCandidateMessage")
 	defer rsfu.mut.Unlock()
+	defer logger.LogWithMessage(NameRemoteSFUConnection, logger.MutUnlock, true, true, "func=handleCandidateMessage")
 	desc := rsfu.peerConnection.RemoteDescription()
 	var candidate string
 	if err := json.Unmarshal(payload, &candidate); err != nil {
@@ -292,7 +298,9 @@ func (rsfu *RemoteSFUConnection) HandleSpecialMessage(messageType string, payloa
 
 func (rsfu *RemoteSFUConnection) AddVirtualClient(clientID uint, videoTracks []TrackSimple, audioTracks []TrackSimple) error {
 	rsfu.mut.Lock()
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.MutLock, true, true, "func=AddVirtualClient")
 	defer rsfu.mut.Unlock()
+	defer logger.LogWithMessage(NameRemoteSFUConnection, logger.MutUnlock, true, true, "func=AddVirtualClient")
 	logger.LogWithMessage(NameRemoteSFUConnection, logger.RemoteProviderAddVirtualClient, true, true, fmt.Sprintf("providerKey=%s clientID=%d nVideoTracks=%d nAudioTracks=%d", rsfu.providerKey, clientID, len(videoTracks), len(audioTracks)))
 	if rsfu.websocket == nil {
 		return fmt.Errorf("websocket not connected")
@@ -370,7 +378,9 @@ func (rsfu *RemoteSFUConnection) HandleSubscribeToRemoteClient(clientID uint, vi
 	// Based on clientID and videoTracks/audioTracks
 	// Get the senderTrack and attach it
 	rsfu.mut.Lock()
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.MutLock, true, true, "func=HandleSubscribeToRemoteClient")
 	defer rsfu.mut.Unlock()
+	defer logger.LogWithMessage(NameRemoteSFUConnection, logger.MutUnlock, true, true, "func=HandleSubscribeToRemoteClient")
 	rsfu.parent.SubscribeRemoteProviderToClient(rsfu, clientID, videoTracks, audioTracks)
 	// Renegotiate
 	rsfu.SignalRenegotiationUnsafe()
