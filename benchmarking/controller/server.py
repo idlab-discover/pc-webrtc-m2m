@@ -31,7 +31,6 @@ BASE_UPLOAD_DIR = Path(__file__).parent / "uploads"
 # Optional manager binary/path configured via CLI. Stored as a string or None.
 manager_path: str | None = None
 app.config["manager_path"] = None
-app.config["config_path"] = None
 app.config["manager_process"] = None
 
 
@@ -276,7 +275,7 @@ def receive_json():
     # manager in the background (pass the config using -c <config_path>).
     manager_started_info = None
     mgr_path = app.config.get("manager_path")
-    cfg_path = app.config.get("config_path")
+    cfg_path = cfg.sessionManagerConfig.configPath
     if mgr_path:
         if not cfg_path:
             print("Manager path configured but no config_path provided; skipping manager start")
@@ -681,7 +680,6 @@ if __name__ == "__main__":
     # Default host/port for local testing; change as needed
     parser = argparse.ArgumentParser(description="Controller server")
     parser.add_argument("--manager_path", dest="manager_path", help="Path to the server manager binary or directory", default=None)
-    parser.add_argument("--config_path", dest="config_path", help="Path to the manager config file to pass with -c", default=None)
     parser.add_argument("--host", dest="host", help="Host to bind to", default="0.0.0.0")
     parser.add_argument("--port", dest="port", help="Port to bind to", type=int, default=8000)
     parser.add_argument("--debug", dest="debug", action="store_true", help="Run Flask in debug mode")
@@ -692,8 +690,5 @@ if __name__ == "__main__":
         manager_path = str(Path(args.manager_path))
         app.config["manager_path"] = manager_path
         print(f"Configured manager_path: {manager_path}")
-    if args.config_path:
-        app.config["config_path"] = str(Path(args.config_path))
-        print(f"Configured config_path: {app.config.get('config_path')}")
 
     app.run(host=args.host, port=args.port, debug=args.debug)

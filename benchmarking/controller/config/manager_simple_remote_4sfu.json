@@ -1,0 +1,30 @@
+{
+    "address": ":9980",
+    "verifyAuthKey": false,
+    "ignorePreferredClientID": false,
+    "defaultProviderConfigPath": "config/providers/general.json",
+    "provisionerType": "remote",
+    "provisionerConfigPath": "config/provisioner/remote.json",
+    "providersToCreate": [
+        {
+            "type": "webrtc_sfu",
+            "key": "sfu_mdc_multi1",
+            "connectedTo": ["sfu_mdc_multi2", "sfu_mdc_multi3", "sfu_mdc_multi4"]
+        },
+        {
+            "type": "webrtc_sfu",
+            "key": "sfu_mdc_multi2",
+            "connectedTo": ["sfu_mdc_multi1", "sfu_mdc_multi3", "sfu_mdc_multi4"]
+        },
+        {
+            "type": "webrtc_sfu",
+            "key": "sfu_mdc_multi3",
+            "connectedTo": ["sfu_mdc_multi1", "sfu_mdc_multi2", "sfu_mdc_multi4"]
+        },
+        {
+            "type": "webrtc_sfu",
+            "key": "sfu_mdc_multi4",
+            "connectedTo": ["sfu_mdc_multi1", "sfu_mdc_multi2", "sfu_mdc_multi3"]
+        }
+    ]
+}

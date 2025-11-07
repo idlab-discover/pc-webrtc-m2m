@@ -11,6 +11,7 @@ class SessionManagerConfig:
     nodeID: str
     configDirectoryToCopy: List[str] = field(default_factory=list)
     sessionManagerIP: Optional[str] = None  # New optional field for IP:port
+    configPath: Optional[str] = None  # New optional field for config path
 
 @dataclass
 class ProviderConfig:
@@ -86,7 +87,8 @@ def parse_root(d: Dict[str, Any]) -> RootConfig:
         rc.sessionManagerConfig = SessionManagerConfig(
             nodeID=sm.get("nodeID", ""),
             configDirectoryToCopy=sm.get("configDirectoryToCopy", []),
-            sessionManagerIP=sm.get("sessionManagerIP")
+            sessionManagerIP=sm.get("sessionManagerIP"),
+            configPath=sm.get("configPath"),
         )
 
     for p in d.get("providers", []) or []:
