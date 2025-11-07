@@ -7,6 +7,30 @@
     },
     {
         "providerType": "webrtc_sfu",
+        "providerKey": "sfu_mdc_multi1",
+        "isDefaultForType": true,
+        "defaultConfigPath": "config/providers/webrtc/sfu/config_mdc.json"
+    },
+    {
+        "providerType": "webrtc_sfu",
+        "providerKey": "sfu_mdc_multi2",
+        "isDefaultForType": true,
+        "defaultConfigPath": "config/providers/webrtc/sfu/config_mdc.json"
+    },
+    {
+        "providerType": "webrtc_sfu",
+        "providerKey": "sfu_mdc_multi3",
+        "isDefaultForType": true,
+        "defaultConfigPath": "config/providers/webrtc/sfu/config_mdc.json"
+    },
+    {
+        "providerType": "webrtc_sfu",
+        "providerKey": "sfu_mdc_multi4",
+        "isDefaultForType": true,
+        "defaultConfigPath": "config/providers/webrtc/sfu/config_mdc.json"
+    },
+    {
+        "providerType": "webrtc_sfu",
         "providerKey": "sfu_raw",
         "isDefaultForType": false,
         "defaultConfigPath": "config/providers/webrtc/sfu/config_raw.json"
