@@ -217,6 +217,14 @@ func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings) {
 			return
 		}
 	}
+	if len(clc.SenderVideoTracks) == 0 && len(clc.SenderAudioTracks) == 0 {
+		if _, err := peerConnection.AddTransceiverFromKind(webrtc.RTPCodecTypeVideo, webrtc.RTPTransceiverInit{
+			Direction: webrtc.RTPTransceiverDirectionRecvonly,
+		}); err != nil {
+			fmt.Printf("WebRTCSFU: webSocketHandler: ERROR: %s\n", err)
+			return
+		}
+	}
 	logger.LogWithMessage(NameClientConnection, logger.ClientAddedTransceivers, true, true, fmt.Sprintf("clientID=%d", clc.clientID))
 }
 
