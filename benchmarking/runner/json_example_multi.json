@@ -8,7 +8,7 @@
         "sessionManagerIP": "192.168.21.2:9980",
         "nodeID": "session_manager",
         "configDirectoryToCopy": ["LOCAL PATH", "REMOTE PATH"],
-        "configPath": "/users/madfruge/pc-webrtc-m2m-cpy/benchmarking/controller/config/manager_simple_remote.json"
+        "configPath": "/users/madfruge/pc-webrtc-m2m-cpy/benchmarking/controller/config/manager_simple_remote_2sfu.json"
     },
     "providers": [
         {
