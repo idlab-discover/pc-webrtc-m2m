@@ -523,7 +523,9 @@ func (clc *ClientConnection) handleSubscribeToTracksMessage(payload json.RawMess
 	}
 	fmt.Printf("Received SubscribeToTracksMessage: %+v\n", msg)
 	clc.parent.mut.Lock()
+	logger.LogWithMessage(NameClientConnection, logger.MutLock, true, true, "func=handleSubscribeToTracksMessage")
 	defer clc.parent.mut.Unlock()
+	defer logger.LogWithMessage(NameClientConnection, logger.MutUnlock, true, true, "func=handleSubscribeToTracksMessage")
 	otherC := clc.parent.clients[msg.ClientID]
 	if otherC == nil {
 		fmt.Printf("WebRTCSFU: handleSubscribeToTracksMessage: No client with ID %d found\n", msg.ClientID)
@@ -550,7 +552,9 @@ func (clc *ClientConnection) handleSubscribeToRemoteClientsMessage(payload json.
 	}
 	fmt.Printf("Received SubscribeToRemoteClientsMessage %d: %+v\n", clc.clientID, msg)
 	clc.parent.mut.Lock()
+	logger.LogWithMessage(NameClientConnection, logger.MutLock, true, true, "func=handleSubscribeToRemoteClientsMessage")
 	defer clc.parent.mut.Unlock()
+	defer logger.LogWithMessage(NameClientConnection, logger.MutUnlock, true, true, "func=handleSubscribeToRemoteClientsMessage")
 	for _, sub := range msg.Clients {
 		otherC := clc.parent.clients[sub.ClientID]
 		if otherC != nil {
