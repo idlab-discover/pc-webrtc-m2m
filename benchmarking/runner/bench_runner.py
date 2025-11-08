@@ -1,5 +1,6 @@
 import json
 import subprocess
+import time
 base_paths = ["json_example.json"]
 base_names = ["sfu1"]
 n_clients = [
@@ -28,3 +29,5 @@ for i in range(len(base_paths)):
         subprocess.run(["python", "runner.py", "--file", 
         f"{base_name}_{counter}.json", "--send-config", "--live"
         ])
+        time.sleep(exp_duration + extra_sleep)
+
