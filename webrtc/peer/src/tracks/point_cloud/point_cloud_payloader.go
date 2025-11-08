@@ -14,7 +14,7 @@ func (p *PointCloudPayloader) Payload(mtu uint16, payload []byte) (payloads [][]
 	payloadLen := uint32(len(payload))
 	payloadRemaining := payloadLen
 	for payloadRemaining > 0 {
-		currentFragmentSize := uint32(1000)
+		currentFragmentSize := uint32(1148)
 		if payloadRemaining < currentFragmentSize {
 			currentFragmentSize = payloadRemaining
 		}
