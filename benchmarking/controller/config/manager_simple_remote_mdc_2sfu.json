@@ -1,0 +1,20 @@
+{
+    "address": "192.168.21.2:9980",
+    "verifyAuthKey": false,
+    "ignorePreferredClientID": false,
+    "defaultProviderConfigPath": "config/providers/general_mdc.json",
+    "provisionerType": "remote",
+    "provisionerConfigPath": "config/provisioner/remote.json",
+    "providersToCreate": [
+        {
+            "type": "webrtc_sfu",
+            "key": "sfu_mdc_multi1",
+            "connectedTo": ["sfu_mdc_multi2"]
+        },
+        {
+            "type": "webrtc_sfu",
+            "key": "sfu_mdc_multi2",
+            "connectedTo": ["sfu_mdc_multi1"]
+        }
+    ]
+}

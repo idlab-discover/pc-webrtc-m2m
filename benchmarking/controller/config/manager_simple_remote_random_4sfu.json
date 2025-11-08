@@ -2,7 +2,7 @@
     "address": ":9980",
     "verifyAuthKey": false,
     "ignorePreferredClientID": false,
-    "defaultProviderConfigPath": "config/providers/general.json",
+    "defaultProviderConfigPath": "config/providers/general_random.json",
     "provisionerType": "remote",
     "provisionerConfigPath": "config/provisioner/remote.json",
     "providersToCreate": [

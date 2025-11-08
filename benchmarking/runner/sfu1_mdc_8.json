@@ -1,0 +1,185 @@
+{
+    "copyConfigs": true,
+    "controllerIP": "192.168.21.2",
+    "logsSubDirectory": "sfu1_cl8",
+    "nIterations": 1,
+    "experimentDurationSeconds": 30,
+    "sessionManagerConfig": {
+        "sessionManagerIP": "192.168.21.2:9980",
+        "nodeID": "session_manager",
+        "configDirectoryToCopy": [
+            "LOCAL PATH",
+            "REMOTE PATH"
+        ],
+        "configPath": "/users/madfruge/pc-webrtc-m2m-cpy/benchmarking/controller/config/manager_simple_remote_mdc.json"
+    },
+    "providers": [
+        {
+            "nodeID": "sfu1",
+            "providerType": "webrtc_sfu",
+            "providerKey": "sfu_mdc",
+            "ipFilter": "192.168.21",
+            "configDirectoryToCopy": [
+                "LOCAL PATH",
+                "REMOTE PATH"
+            ],
+            "connectedTo": [
+                "sfu_mdc2"
+            ]
+        }
+    ],
+    "clients": [
+        {
+            "nodeID": "client1",
+            "clientType": "webrtc",
+            "nClients": 1,
+            "disableSendingForNClients": 0,
+            "ipFilter": "192.168.1",
+            "transcoderDirectoryToCopy": [
+                "runner/base_configs/client/transcoder",
+                "base_configs/client/transcoder"
+            ],
+            "providersConfigToCopy": [
+                "runner/base_configs/client/connection_simple_cl2.json",
+                "base_configs/client/connection_simple_cl2.json"
+            ],
+            "transcoderConfig": "base_configs/client/transcoder/transcoder_file.json",
+            "providersConfig": "base_configs/client/connection_simple_cl2.json",
+            "providersConfigNoSending": "base_configs/client/connection_simple_no.json",
+            "transcoderType": "file"
+        },
+        {
+            "nodeID": "client2",
+            "clientType": "webrtc",
+            "nClients": 1,
+            "disableSendingForNClients": 1,
+            "ipFilter": "192.168.2",
+            "transcoderDirectoryToCopy": [
+                "runner/base_configs/client/transcoder",
+                "base_configs/client/transcoder"
+            ],
+            "providersConfigToCopy": [
+                "runner/base_configs/client/connection_simple_cl2.json",
+                "base_configs/client/connection_simple_cl2.json"
+            ],
+            "transcoderConfig": "base_configs/client/transcoder/transcoder_file.json",
+            "providersConfig": "base_configs/client/connection_simple_cl2.json",
+            "providersConfigNoSending": "base_configs/client/connection_simple_no.json",
+            "transcoderType": "file"
+        },
+        {
+            "nodeID": "client3",
+            "clientType": "webrtc",
+            "nClients": 1,
+            "disableSendingForNClients": 0,
+            "ipFilter": "192.168.3",
+            "transcoderDirectoryToCopy": [
+                "runner/base_configs/client/transcoder",
+                "base_configs/client/transcoder"
+            ],
+            "providersConfigToCopy": [
+                "runner/base_configs/client/connection_simple_cl2.json",
+                "base_configs/client/connection_simple_cl2.json"
+            ],
+            "transcoderConfig": "base_configs/client/transcoder/transcoder_file.json",
+            "providersConfig": "base_configs/client/connection_simple_cl2.json",
+            "providersConfigNoSending": "base_configs/client/connection_simple_no.json",
+            "transcoderType": "file"
+        },
+        {
+            "nodeID": "client4",
+            "clientType": "webrtc",
+            "nClients": 1,
+            "disableSendingForNClients": 1,
+            "ipFilter": "192.168.4",
+            "transcoderDirectoryToCopy": [
+                "runner/base_configs/client/transcoder",
+                "base_configs/client/transcoder"
+            ],
+            "providersConfigToCopy": [
+                "runner/base_configs/client/connection_simple_cl2.json",
+                "base_configs/client/connection_simple_cl2.json"
+            ],
+            "transcoderConfig": "base_configs/client/transcoder/transcoder_file.json",
+            "providersConfig": "base_configs/client/connection_simple_cl2.json",
+            "providersConfigNoSending": "base_configs/client/connection_simple_no.json",
+            "transcoderType": "file"
+        },
+        {
+            "nodeID": "client5",
+            "clientType": "webrtc",
+            "nClients": 1,
+            "disableSendingForNClients": 0,
+            "ipFilter": "192.168.5",
+            "transcoderDirectoryToCopy": [
+                "runner/base_configs/client/transcoder",
+                "base_configs/client/transcoder"
+            ],
+            "providersConfigToCopy": [
+                "runner/base_configs/client/connection_simple_cl2.json",
+                "base_configs/client/connection_simple_cl2.json"
+            ],
+            "transcoderConfig": "base_configs/client/transcoder/transcoder_file.json",
+            "providersConfig": "base_configs/client/connection_simple_cl2.json",
+            "providersConfigNoSending": "base_configs/client/connection_simple_no.json",
+            "transcoderType": "file"
+        },
+        {
+            "nodeID": "client6",
+            "clientType": "webrtc",
+            "nClients": 1,
+            "disableSendingForNClients": 1,
+            "ipFilter": "192.168.6",
+            "transcoderDirectoryToCopy": [
+                "runner/base_configs/client/transcoder",
+                "base_configs/client/transcoder"
+            ],
+            "providersConfigToCopy": [
+                "runner/base_configs/client/connection_simple_cl2.json",
+                "base_configs/client/connection_simple_cl2.json"
+            ],
+            "transcoderConfig": "base_configs/client/transcoder/transcoder_file.json",
+            "providersConfig": "base_configs/client/connection_simple_cl2.json",
+            "providersConfigNoSending": "base_configs/client/connection_simple_no.json",
+            "transcoderType": "file"
+        },
+        {
+            "nodeID": "client7",
+            "clientType": "webrtc",
+            "nClients": 1,
+            "disableSendingForNClients": 0,
+            "ipFilter": "192.168.7",
+            "transcoderDirectoryToCopy": [
+                "runner/base_configs/client/transcoder",
+                "base_configs/client/transcoder"
+            ],
+            "providersConfigToCopy": [
+                "runner/base_configs/client/connection_simple_cl2.json",
+                "base_configs/client/connection_simple_cl2.json"
+            ],
+            "transcoderConfig": "base_configs/client/transcoder/transcoder_file.json",
+            "providersConfig": "base_configs/client/connection_simple_cl2.json",
+            "providersConfigNoSending": "base_configs/client/connection_simple_no.json",
+            "transcoderType": "file"
+        },
+        {
+            "nodeID": "client8",
+            "clientType": "webrtc",
+            "nClients": 1,
+            "disableSendingForNClients": 1,
+            "ipFilter": "192.168.8",
+            "transcoderDirectoryToCopy": [
+                "runner/base_configs/client/transcoder",
+                "base_configs/client/transcoder"
+            ],
+            "providersConfigToCopy": [
+                "runner/base_configs/client/connection_simple_cl2.json",
+                "base_configs/client/connection_simple_cl2.json"
+            ],
+            "transcoderConfig": "base_configs/client/transcoder/transcoder_file.json",
+            "providersConfig": "base_configs/client/connection_simple_cl2.json",
+            "providersConfigNoSending": "base_configs/client/connection_simple_no.json",
+            "transcoderType": "file"
+        }
+    ]
+}
