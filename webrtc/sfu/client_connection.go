@@ -189,7 +189,7 @@ func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings) {
 	}
 	settingEngine2 := webrtc.SettingEngine{}
 	settingEngine2.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
-	settingEngine2.SetReceiveMTU(3000)
+	settingEngine2.SetReceiveMTU(5000)
 	if clc.parent.ipFilter != "" {
 		settingEngine2.SetIPFilter(clc.ipFilterFunc)
 	}
@@ -391,7 +391,7 @@ func (clc *ClientConnection) AddTrackFromOtherUnsafe(originType string, originID
 	recvTrack.RTPSender = rtpSender
 	recvTrack.PauseTrack = pauseTrack
 	go func() {
-		rtcpBuf := make([]byte, 3000)
+		rtcpBuf := make([]byte, 5000)
 		for {
 			if _, _, err := rtpSender.Read(rtcpBuf); err != nil {
 				panic(err)
