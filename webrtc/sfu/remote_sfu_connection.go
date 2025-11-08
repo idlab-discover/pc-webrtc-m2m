@@ -66,7 +66,7 @@ func (rsfu *RemoteSFUConnection) SetupPeerConnection() {
 	}
 	settingEngine2 := webrtc.SettingEngine{}
 	settingEngine2.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
-	settingEngine2.SetReceiveMTU(1500)
+	settingEngine2.SetReceiveMTU(15000)
 	if rsfu.parent.ipFilter != "" {
 		settingEngine2.SetIPFilter(rsfu.ipFilterFunc)
 	}
