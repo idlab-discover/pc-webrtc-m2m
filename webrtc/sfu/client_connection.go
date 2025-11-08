@@ -189,7 +189,7 @@ func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings) {
 	}
 	settingEngine2 := webrtc.SettingEngine{}
 	settingEngine2.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
-	settingEngine2.SetReceiveMTU(2000)
+	settingEngine2.SetReceiveMTU(1500)
 	if clc.parent.ipFilter != "" {
 		settingEngine2.SetIPFilter(clc.ipFilterFunc)
 	}
