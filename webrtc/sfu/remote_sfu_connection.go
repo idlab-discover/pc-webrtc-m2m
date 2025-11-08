@@ -66,7 +66,7 @@ func (rsfu *RemoteSFUConnection) SetupPeerConnection() {
 	}
 	settingEngine2 := webrtc.SettingEngine{}
 	settingEngine2.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
-	settingEngine2.SetReceiveMTU(1500)
+	settingEngine2.SetReceiveMTU(3000)
 	if rsfu.parent.ipFilter != "" {
 		settingEngine2.SetIPFilter(rsfu.ipFilterFunc)
 	}
@@ -428,7 +428,7 @@ func (rsfu *RemoteSFUConnection) AddTrackFromOtherUnsafe(recvTrack *ReceiverTrac
 	recvTrack.RTPSender = rtpSender
 
 	go func() {
-		rtcpBuf := make([]byte, 1500)
+		rtcpBuf := make([]byte, 3000)
 		for {
 			if _, _, err := rtpSender.Read(rtcpBuf); err != nil {
 				panic(err)
