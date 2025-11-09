@@ -320,7 +320,7 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 					nDroppedFrames++
 				}
 				completedFrame = false
-				logger.LogFrameWithMessage(NameClientConnection, logger.FrameFirstPacketRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s", clc.clientID, t.ID()), uint(p.FrameNr))
+				//logger.LogFrameWithMessage(NameClientConnection, logger.FrameFirstPacketRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s", clc.clientID, t.ID()), uint(p.FrameNr))
 			}
 			frames[p.FrameNr] += p.SeqLen
 

@@ -414,7 +414,7 @@ func (s *SFUConnection) addOnTrackCallback() {
 					nDroppedFrames++
 				}
 				completedFrame = false
-				logger.LogFrameWithMessage(NameSFUConnection, logger.FrameFirstPacketRecv, true, true, fmt.Sprintf("trackID=%s", track.ID()), uint(p.FrameNr))
+				//logger.LogFrameWithMessage(NameSFUConnection, logger.FrameFirstPacketRecv, true, true, fmt.Sprintf("trackID=%s", track.ID()), uint(p.FrameNr))
 			}
 			frames[p.FrameNr] += p.SeqLen
 			if frames[p.FrameNr] >= p.FrameLen {
