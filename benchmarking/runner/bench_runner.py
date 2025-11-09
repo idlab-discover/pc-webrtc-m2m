@@ -14,7 +14,7 @@ session_mgr_paths = [
 ]
 session_mgr_names = ["random", "mdc"]
 
-base_names = ["sfu1"]
+base_names = ["sfu1", "sfu2"]
 n_clients = [
     [1, 0, 1, 0, 1, 0, 1, 0], # 4 clients
     [1, 1, 1, 1, 1, 1, 1, 1], # 8 clients
