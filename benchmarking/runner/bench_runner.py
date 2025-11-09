@@ -39,6 +39,8 @@ n_iterations = 2
 exp_duration = 120  # in seconds
 extra_sleep = 30
 for i in range(len(base_paths)):
+    if i == 0:
+        continue
     base_name = base_names[i]
     base_path = base_paths[i]
     data = None
