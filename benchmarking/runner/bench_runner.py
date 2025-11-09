@@ -12,15 +12,27 @@ session_mgr_names = ["random", "mdc"]
 
 base_names = ["sfu1"]
 n_clients = [
-    [1, 0, 1, 0, 1, 0, 1, 0], 
-    [1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 0, 1, 0, 1, 0, 1, 0], # 4 clients
+    [1, 1, 1, 1, 1, 1, 1, 1], # 8 clients
+    [2, 1, 2, 1, 2, 1, 2, 1], # 12 clients
+    [2, 2, 2, 2, 2, 2, 2, 2], # 16 clients
+    [3, 2, 3, 2, 3, 2, 3, 2], # 20 clients
+    [3, 3, 3, 3, 3, 3, 3, 3], # 24 clients
+    [4, 3, 4, 3, 4, 3, 4, 3], # 28 clients
+    [4, 4, 4, 4, 4, 4, 4, 4]  # 32 clients
 ]
 n_no_send_clients = [
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 1, 0, 1, 0, 1, 0, 1]
+    [0, 0, 0, 0, 0, 0, 0, 0], # 4 clients
+    [0, 1, 0, 1, 0, 1, 0, 1], # 8 clients
+    [1, 1, 1, 1, 1, 1, 1, 1], # 12 clients
+    [1, 2, 1, 2, 1, 2, 1, 2], # 16 clients
+    [2, 2, 2, 2, 2, 2, 2, 2], # 20 clients
+    [2, 3, 2, 3, 2, 3, 2, 3], # 24 clients
+    [3, 3, 3, 3, 3, 3, 3, 3], # 28 clients
+    [3, 4, 3, 4, 3, 4, 3, 4]  # 32 clients
 ]
 n_iterations = 2
-exp_duration = 30  # in seconds
+exp_duration = 120  # in seconds
 extra_sleep = 30
 for i in range(len(base_paths)):
     base_name = base_names[i]
