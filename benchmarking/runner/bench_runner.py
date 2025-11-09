@@ -1,11 +1,15 @@
 import json
 import subprocess
 import time
-base_paths = ["json_example.json"]
+base_paths = ["json_example.json", "json_example_multi.json"]
 session_mgr_paths = [
     [
         "/users/madfruge/pc-webrtc-m2m-cpy/benchmarking/controller/config/manager_simple_remote_random.json",
         "/users/madfruge/pc-webrtc-m2m-cpy/benchmarking/controller/config/manager_simple_remote_mdc.json"
+    ],
+    [
+        "/users/madfruge/pc-webrtc-m2m-cpy/benchmarking/controller/config/manager_simple_remote_random_2sfu.json",
+        "/users/madfruge/pc-webrtc-m2m-cpy/benchmarking/controller/config/manager_simple_remote_mdc_2sfu.json"
     ]
 ]
 session_mgr_names = ["random", "mdc"]
