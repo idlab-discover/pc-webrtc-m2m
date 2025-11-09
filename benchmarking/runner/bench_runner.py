@@ -42,7 +42,7 @@ for i in range(len(base_paths)):
                 if j == 1:
                     client["disableSendingForNClients"] = n_no_send_clients[v][num-1]
                 counter += n_client[num-1]
-            data['logsSubDirectory'] = f"{base_name}_cl{counter}"
+            data['logsSubDirectory'] = f"{base_name}_{session_mgr_name}_cl{counter}"
             with open(f"{base_name}_{session_mgr_name}_{counter}.json", "w") as f:
                 json.dump(data, f, indent=4)  
             for k in range(n_iterations):

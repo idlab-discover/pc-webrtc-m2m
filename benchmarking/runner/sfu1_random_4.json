@@ -1,7 +1,7 @@
 {
     "copyConfigs": true,
     "controllerIP": "192.168.21.2",
-    "logsSubDirectory": "sfu1_cl4",
+    "logsSubDirectory": "sfu1_random_cl4",
     "nIterations": 1,
     "experimentDurationSeconds": 30,
     "sessionManagerConfig": {
