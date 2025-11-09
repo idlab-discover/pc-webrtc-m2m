@@ -36,7 +36,7 @@ n_no_send_clients = [
     [3, 4, 3, 4, 3, 4, 3, 4]  # 32 clients
 ]
 n_iterations = 2
-exp_duration = 120  # in seconds
+exp_duration = 360  # in seconds
 extra_sleep = 30
 for i in range(len(base_paths)):
     if i == 0:
