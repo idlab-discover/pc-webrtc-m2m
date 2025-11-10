@@ -83,10 +83,11 @@ func (sm *SessionManager) CreateDefaultProviders() {
 
 func (sm *SessionManager) CreateProvider(providerType string, providerKey string, address string, port uint, connectedTo []string) *ProviderConnection {
 	sm.mut.Lock()
-
+	LogWithMessage(NameManager, MutLock, true, true, "func=CreateProvider")
 	if pc, exists := sm.providers[providerKey]; exists {
 		Log(NameManager, ProviderAlreadyExists, true, true)
 		sm.mut.Unlock()
+		LogWithMessage(NameManager, MutUnlock, true, true, "func=CreateProvider")
 		return pc
 	}
 	authKey := ""
@@ -109,6 +110,7 @@ func (sm *SessionManager) CreateProvider(providerType string, providerKey string
 		otherProvider.AddRemoteProvider(pc.ProviderType, pc.ProviderKey, pc.Address, pc.Port, false)
 	}
 	sm.mut.Unlock()
+	LogWithMessage(NameManager, MutUnlock, true, true, "func=CreateProvider")
 	sm.provisioner.CreateProvider(providerType, sm.config.Address, pc, config.ExtraCmdArgs)
 	return pc
 }
@@ -131,8 +133,10 @@ func (sm *SessionManager) websocketHandlerProvider(w http.ResponseWriter, r *htt
 	}
 
 	sm.mut.Lock()
+	LogWithMessage(NameManager, MutLock, true, true, "func=websocketHandlerProvider")
 	provider := sm.providers[providerKey]
 	sm.mut.Unlock()
+	LogWithMessage(NameManager, MutUnlock, true, true, "func=websocketHandlerProvider")
 	if provider == nil {
 		Log(NameManager, InvalidProvider, true, true)
 		http.Error(w, "Invalid provider ID", http.StatusBadRequest)
@@ -174,6 +178,7 @@ func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.
 	var clientID uint
 	LogWithMessage(NameManager, IncomingClient, true, true, fmt.Sprintf("clientIDS=%s", preferredClientIDS))
 	sm.mut.Lock()
+	LogWithMessage(NameManager, MutLock, true, true, "func=websocketHandlerClient")
 	println(!sm.config.IgnorePreferredClientID, preferredClientIDS != "", preferredClientIDS)
 	if !sm.config.IgnorePreferredClientID && preferredClientIDS != "" {
 		clientID64, err := strconv.ParseUint(preferredClientIDS, 10, 64)
@@ -181,6 +186,7 @@ func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.
 			Log(NameManager, InvalidClientID, true, true)
 			http.Error(w, "Invalid preferredclientID", http.StatusBadRequest)
 			sm.mut.Unlock()
+			LogWithMessage(NameManager, MutUnlock, true, true, "func=websocketHandlerClient")
 			return
 		}
 		clientID = uint(clientID64)
@@ -193,6 +199,7 @@ func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.
 		Log(NameManager, ClientAlreadyExists, true, true)
 		http.Error(w, "ClientID already in use", http.StatusBadRequest)
 		sm.mut.Unlock()
+		LogWithMessage(NameManager, MutUnlock, true, true, "func=websocketHandlerClient")
 		return
 	}
 	authKey := ""
@@ -204,7 +211,7 @@ func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.
 	sm.clients[clientID] = client
 	LogWithMessage(NameManager, IncomingClient, true, true, fmt.Sprintf("clientIDS=%s clientID=%d", preferredClientIDS, clientID))
 	sm.mut.Unlock()
-
+	LogWithMessage(NameManager, MutUnlock, true, true, "func=websocketHandlerClient")
 	// Upgrade HTTP request to Websocket
 
 	unsafeWebSocketConn, err := upgrader.Upgrade(w, r, nil)
@@ -234,7 +241,9 @@ func (sm *SessionManager) generateAuthKey() string {
 
 func (sm *SessionManager) OnProviderClose(pc *ProviderConnection) {
 	sm.mut.Lock()
-	defer sm.mut.Lock()
+	LogWithMessage(NameManager, MutLock, true, true, "try e=sm func=OnProviderClose")
+	defer sm.mut.Unlock()
+	defer LogWithMessage(NameManager, MutUnlock, true, true, "e=sm func=OnProviderClose")
 	LogWithMessage(NameManager, ProviderClosed, true, true, fmt.Sprintf("providerKey=%s", pc.ProviderKey))
 	sm.provisioner.OnProviderClose(pc)
 	delete(sm.providers, pc.ProviderKey)
@@ -242,9 +251,13 @@ func (sm *SessionManager) OnProviderClose(pc *ProviderConnection) {
 
 func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedMsg ProviderClientAddedMessage) {
 	sm.mut.Lock()
+	LogWithMessage(NameManager, MutLock, true, true, "try e=sm func=OnClientAddedToProvider")
 	defer sm.mut.Unlock()
+	defer LogWithMessage(NameManager, MutUnlock, true, true, "e=sm func=OnClientAddedToProvider")
 	pc.mut.Lock()
+	LogWithMessage(NameManager, MutLock, true, true, "try e=pc func=OnClientAddedToProvider")
 	defer pc.mut.Unlock()
+	defer LogWithMessage(NameManager, MutUnlock, true, true, "e=pc func=OnClientAddedToProvider")
 	client, exists := sm.clients[addedMsg.ClientID]
 	if !exists {
 		// TODO Log
@@ -405,7 +418,9 @@ func (sm *SessionManager) OnVirtualClientAddedToProvider(pc *ProviderConnection,
 
 func (sm *SessionManager) OnClientClose(cl *ClientConnection) {
 	sm.mut.Lock()
-	defer sm.mut.Lock()
+	LogWithMessage(NameManager, MutLock, true, true, "try e=sm func=OnClientClose")
+	defer sm.mut.Unlock()
+	defer LogWithMessage(NameManager, MutUnlock, true, true, "e=sm func=OnClientClose")
 	// TODO
 	// Make sure to keep client connection semi-alive so he can reconnect
 }
