@@ -202,6 +202,7 @@ func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.
 
 	client := NewClientConnection(sm, clientID, authKey)
 	sm.clients[clientID] = client
+	LogWithMessage(NameManager, IncomingClient, true, true, fmt.Sprintf("clientIDS=%s clientID=%d", preferredClientIDS, clientID))
 	sm.mut.Unlock()
 
 	// Upgrade HTTP request to Websocket
