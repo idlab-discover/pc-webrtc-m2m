@@ -440,11 +440,11 @@ func (sfu *SFU) StartPerformingQualityAdaptation() {
 					avgLoss := client.BandwidthEstimator.GetStats()["averageLoss"]
 					delayBitrate := client.BandwidthEstimator.GetStats()["delayTargetBitrate"]
 					lossBitrate := client.BandwidthEstimator.GetStats()["lossTargetBitrate"]
-					delayMeasurement := client.BandwidthEstimator.GetStats()["delayMeasurement"]
-					delayEstimate := client.BandwidthEstimator.GetStats()["delayEstimate"]
-					delayThreshold := client.BandwidthEstimator.GetStats()["delayThreshold"]
-					usage := client.BandwidthEstimator.GetStats()["usage"]
-					state := client.BandwidthEstimator.GetStats()["state"]
+					//delayMeasurement := client.BandwidthEstimator.GetStats()["delayMeasurement"]
+					//delayEstimate := client.BandwidthEstimator.GetStats()["delayEstimate"]
+					//delayThreshold := client.BandwidthEstimator.GetStats()["delayThreshold"]
+					//usage := client.BandwidthEstimator.GetStats()["usage"]
+					//state := client.BandwidthEstimator.GetStats()["state"]
 					extraOutput := ""
 					if sfu.qualityAdaptation != nil {
 						extraOutput = "@activeTracks=("
@@ -454,13 +454,13 @@ func (sfu *SFU) StartPerformingQualityAdaptation() {
 						}
 						extraOutput += ")"
 					}
-					output += fmt.Sprintf("client=%d@bitrate=%d@avgLoss=%.5f@delayBitrate=%d@lossBitrate=%d@delayMeasurement=%.2f@delayEstimate=%.2f@delayThreshold=%.2f@usage=%s@state=%s%s;", client.clientID, targetBitrate, avgLoss, delayBitrate, lossBitrate, delayMeasurement, delayEstimate, delayThreshold, usage, state, extraOutput)
+					output += fmt.Sprintf("client=%d@bitrate=%d@avgLoss=%.5f@delayBitrate=%d%s;", client.clientID, targetBitrate, avgLoss, delayBitrate, lossBitrate, extraOutput)
 				}
 			}
 			output += "]"
 			logger.LogWithMessage(NameSFU, logger.EstimatedBitrate, true, true, output)
 			sfu.mut.Unlock()
-			time.Sleep(time.Second * 1)
+			time.Sleep(time.Millisecond * 200)
 		}
 	}()
 }

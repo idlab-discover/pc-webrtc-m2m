@@ -13,6 +13,7 @@ import (
 
 	"github.com/pion/interceptor"
 	"github.com/pion/interceptor/pkg/cc"
+	"github.com/pion/interceptor/pkg/nack"
 	"github.com/pion/sdp/v3"
 	"github.com/pion/webrtc/v4"
 )
@@ -187,6 +188,8 @@ func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings) {
 	if err := webrtc.RegisterDefaultInterceptors(mediaEngine, interceptorRegistry); err != nil {
 		panic(err)
 	}
+	res, err := nack.NewResponderInterceptor(nack.ResponderSize(32768))
+	interceptorRegistry.Add(res)
 	settingEngine2 := webrtc.SettingEngine{}
 	settingEngine2.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
 	settingEngine2.SetReceiveMTU(10000)
