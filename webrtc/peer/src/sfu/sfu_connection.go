@@ -26,7 +26,6 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/pion/interceptor"
-	"github.com/pion/interceptor/pkg/nack"
 	"github.com/pion/interceptor/pkg/twcc"
 	"github.com/pion/sdp/v3"
 	"github.com/pion/webrtc/v4"
@@ -181,7 +180,7 @@ func (s *SFUConnection) connectToSFU(clientID uint, authKey string) {
 func (s *SFUConnection) preparePeerConnection(clientID uint) {
 	settingEngine := webrtc.SettingEngine{}
 	settingEngine.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
-	settingEngine.SetReceiveMTU(15000)
+	settingEngine.SetReceiveMTU(10000)
 
 	if s.ipFilter != "" {
 		settingEngine.SetIPFilter(s.ipFilterFunc)
@@ -338,7 +337,7 @@ func (s *SFUConnection) addOnTrackCallback() {
 		fmt.Printf("WebRTCPeer: Payload type %d\n", track.PayloadType())
 		fmt.Printf("WebRTCPeer: Track SSRC %d\n", track.SSRC())
 		go func() {
-			rtcpBuf := make([]byte, 1500)
+			rtcpBuf := make([]byte, 10000)
 			for {
 				if _, _, rtcpErr := receiver.Read(rtcpBuf); rtcpErr != nil {
 					//panic(rtcpErr)
@@ -571,7 +570,7 @@ func (s *SFUConnection) addTrackToPeerConnection(track webrtc.TrackLocal) {
 	}
 
 	go func() {
-		rtcpBuf := make([]byte, 1500)
+		rtcpBuf := make([]byte, 10000)
 		for {
 			if _, _, err := rtpSender.Read(rtcpBuf); err != nil {
 				panic(err)
