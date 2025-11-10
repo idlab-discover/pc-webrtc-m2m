@@ -172,7 +172,7 @@ func (sm *SessionManager) websocketHandlerProvider(w http.ResponseWriter, r *htt
 func (sm *SessionManager) websocketHandlerClient(w http.ResponseWriter, r *http.Request) {
 	preferredClientIDS := r.URL.Query().Get("preferredClientID")
 	var clientID uint
-
+	LogWithMessage(NameManager, IncomingClient, true, true, fmt.Sprintf("clientIDS=%s", preferredClientIDS))
 	sm.mut.Lock()
 	println(!sm.config.IgnorePreferredClientID, preferredClientIDS != "", preferredClientIDS)
 	if !sm.config.IgnorePreferredClientID && preferredClientIDS != "" {
@@ -357,7 +357,7 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 	}
 	client.websocket.WriteJSONMessageSafe("ClientAddedToProvider", msgToClient)
 
-	LogWithMessage(NameManager, ClientAddedToProvider, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
+	LogWithMessage(NameManager, ClientAddedToProvider, true, true, fmt.Sprintf("type=real providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
 }
 
 func (sm *SessionManager) OnVirtualClientAddedToProvider(pc *ProviderConnection, addedMsg ProviderRemoteProviderClientMessage) {
@@ -396,7 +396,7 @@ func (sm *SessionManager) OnVirtualClientAddedToProvider(pc *ProviderConnection,
 		otherC.websocket.WriteJSONMessageSafe("ProviderRemoteClientTracksConnected", msgAllClients)
 	}
 
-	LogWithMessage(NameManager, ClientAddedToProvider, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
+	LogWithMessage(NameManager, ClientAddedToProvider, true, true, fmt.Sprintf("type=virtual providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
 }
 
 func (sm *SessionManager) OnClientClose(cl *ClientConnection) {

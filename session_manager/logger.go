@@ -39,10 +39,11 @@ const (
 	AddingClientToProvider       uint = 1006
 	AddingClientToProviderBuffer uint = 1007
 
-	InvalidClientID       uint = 1000
-	InvalidClientAuthKey  uint = 1001
-	ClientAlreadyExists   uint = 1002
-	ClientAddedToProvider uint = 1003
+	InvalidClientID       uint = 2000
+	InvalidClientAuthKey  uint = 2001
+	ClientAlreadyExists   uint = 2002
+	ClientAddedToProvider uint = 2003
+	IncomingClient 		uint = 2004
 
 	ProviderConfigReadDefaultStart uint = 4000
 	ProviderConfigReadDefaultEnd   uint = 4001
