@@ -50,6 +50,8 @@ const (
 
 	ReceivedWSMessage uint = 7000
 
+	MutLock  uint = 8000
+	MutUnlock uint = 8001
 	CriticalFail uint = 9999
 )
 

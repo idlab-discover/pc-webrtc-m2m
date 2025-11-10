@@ -362,8 +362,10 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 
 func (sm *SessionManager) OnVirtualClientAddedToProvider(pc *ProviderConnection, addedMsg ProviderRemoteProviderClientMessage) {
 	sm.mut.Lock()
+	LogWithMessage(NameManager, MutLock, true, true, "e=sm func=OnVirtualClientAddedToProvider")
 	defer sm.mut.Unlock()
 	pc.mut.Lock()
+	LogWithMessage(NameManager, MutLock, true, true, "e=pc func=OnVirtualClientAddedToProvider")
 	defer pc.mut.Unlock()
 	client, exists := sm.clients[addedMsg.ClientID]
 	if !exists {
