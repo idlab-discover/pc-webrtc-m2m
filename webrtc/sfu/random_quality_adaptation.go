@@ -10,6 +10,7 @@ func NewRandomQualityAdaptation() *RandomQualityAdaptation {
 }
 func (rqa *RandomQualityAdaptation) PerformAdaptation(clc *ClientConnection, targetBitrate int) []string {
 	// Implement random quality adaptation logic here
+	targetBitrate = int(float64(targetBitrate) * 0.85)
 	keys := make([]string, 0, len(clc.ReceiverVideoTracks))
 	for k := range clc.ReceiverVideoTracks {
 		keys = append(keys, k)
