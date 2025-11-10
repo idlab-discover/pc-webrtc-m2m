@@ -236,8 +236,8 @@ func (s *SFUConnection) preparePeerConnection(clientID uint) {
 		panic(err)
 	}
 
-	responder, _ := nack.NewResponderInterceptor()
-	i.Add(responder)
+	//responder, _ := nack.NewResponderInterceptor()
+	//i.Add(responder)
 
 	m.RegisterFeedback(webrtc.RTCPFeedback{Type: webrtc.TypeRTCPFBTransportCC}, webrtc.RTPCodecTypeVideo)
 	if err := m.RegisterHeaderExtension(webrtc.RTPHeaderExtensionCapability{URI: sdp.TransportCCURI}, webrtc.RTPCodecTypeVideo); err != nil {
@@ -257,8 +257,8 @@ func (s *SFUConnection) preparePeerConnection(clientID uint) {
 		i.Add(generator)
 	}*/
 
-	nackGenerator, _ := nack.NewGeneratorInterceptor()
-	i.Add(nackGenerator)
+	//nackGenerator, _ := nack.NewGeneratorInterceptor()
+	//i.Add(nackGenerator)
 
 	peerConnection, err := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine), webrtc.WithInterceptorRegistry(i), webrtc.WithMediaEngine(m)).NewPeerConnection(webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
