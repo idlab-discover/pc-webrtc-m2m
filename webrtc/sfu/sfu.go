@@ -454,7 +454,7 @@ func (sfu *SFU) StartPerformingQualityAdaptation() {
 						}
 						extraOutput += ")"
 					}
-					output += fmt.Sprintf("client=%d@bitrate=%d@avgLoss=%.5f@delayBitrate=%d%s;", client.clientID, targetBitrate, avgLoss, delayBitrate, lossBitrate, extraOutput)
+					output += fmt.Sprintf("client=%d@bitrate=%d@avgLoss=%.5f@delayBitrate=%d@lossBitrate=%d%s;", client.clientID, targetBitrate, avgLoss, delayBitrate, lossBitrate, extraOutput)
 				}
 			}
 			output += "]"

@@ -188,7 +188,7 @@ func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings) {
 	if err := webrtc.RegisterDefaultInterceptors(mediaEngine, interceptorRegistry); err != nil {
 		panic(err)
 	}
-	res, err := nack.NewResponderInterceptor(nack.ResponderSize(32768))
+	res, err := nack.NewResponderInterceptor()
 	interceptorRegistry.Add(res)
 	settingEngine2 := webrtc.SettingEngine{}
 	settingEngine2.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
