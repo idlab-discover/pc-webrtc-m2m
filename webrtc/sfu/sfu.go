@@ -460,7 +460,7 @@ func (sfu *SFU) StartPerformingQualityAdaptation() {
 			output += "]"
 			logger.LogWithMessage(NameSFU, logger.EstimatedBitrate, true, true, output)
 			sfu.mut.Unlock()
-			time.Sleep(time.Millisecond * 1000)
+			time.Sleep(time.Millisecond * 200)
 		}
 	}()
 }
