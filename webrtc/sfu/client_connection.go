@@ -398,8 +398,9 @@ func (clc *ClientConnection) AddTrackFromOtherUnsafe(originType string, originID
 		rtcpBuf := make([]byte, 10000)
 		for {
 			if _, _, err := rtpSender.Read(rtcpBuf); err != nil {
-				//panic(err)
+				//
 				println("RTCP READ ERROR:", err.Error(), clc.clientID, trackID)
+				panic(err)
 				return
 			}
 		}
