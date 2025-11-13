@@ -276,6 +276,7 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 				if _, _, rtcpErr := trackReceiver.Read(rtcpBuf); rtcpErr != nil {
 					//panic(rtcpErr)
 					// TODO Add some cleanup here
+					print(rtcpErr.Error())
 				}
 			}
 		}()
