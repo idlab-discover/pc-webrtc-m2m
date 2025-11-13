@@ -106,8 +106,9 @@ func (smc *SessionManagerConnection) StartListening() {
 			var msg SessionManagerMessage
 
 			if err := smc.websocket.ReadJSON(&msg); err != nil {
+				panic(err)
 				//fmt.Printf("error reading message: %v\n", err)
-				continue // TODO Handle errors
+				//continue // TODO Handle errors
 			}
 
 			logger.LogWithMessage(NameManagerConnection, logger.ReceivedWSMessage, true, true,
