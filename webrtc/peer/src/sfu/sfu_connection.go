@@ -181,7 +181,7 @@ func (s *SFUConnection) preparePeerConnection(clientID uint) {
 	settingEngine := webrtc.SettingEngine{}
 	settingEngine.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
 	settingEngine.SetReceiveMTU(10000)
-
+	settingEngine.SetICETimeouts(60*time.Second, 60*time.Second, 60*time.Second)
 	if s.ipFilter != "" {
 		settingEngine.SetIPFilter(s.ipFilterFunc)
 	}

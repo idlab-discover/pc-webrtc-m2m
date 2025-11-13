@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/pion/interceptor"
 	"github.com/pion/interceptor/pkg/cc"
@@ -193,6 +194,7 @@ func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings) {
 	settingEngine2 := webrtc.SettingEngine{}
 	settingEngine2.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
 	settingEngine2.SetReceiveMTU(10000)
+	settingEngine2.SetICETimeouts(60*time.Second, 60*time.Second, 60*time.Second)
 	if clc.parent.ipFilter != "" {
 		settingEngine2.SetIPFilter(clc.ipFilterFunc)
 	}
