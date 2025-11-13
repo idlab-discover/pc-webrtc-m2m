@@ -38,9 +38,17 @@ func (o *OverallTrackMetrics) StartMeasuring() {
 			output := fmt.Sprintf("ts=%d stats=[", time.Now().UnixMilli())
 			for trackID, meter := range o.bitrateMeters {
 				output += fmt.Sprintf("trackID=%s@bitrate=%dbps;", trackID, meter.Bytes*8)
+				if(meter.Bytes == 0){
+					meter.Valid = false
+					meter.WasValidPrevious = false
+				} else {
+					if meter.WasValidPrevious {
+						meter.Valid = true
+					}
+					meter.WasValidPrevious = true
+				}
 				atomic.StoreUint64(&meter.PrevBytes, meter.Bytes)
 				atomic.SwapUint64(&meter.Bytes, 0)
-				meter.Valid = true
 			}
 			output += "]"
 			logger.LogWithMessage("OverallTrackMetrics", logger.TrackMetricsReport, true, true, output)
