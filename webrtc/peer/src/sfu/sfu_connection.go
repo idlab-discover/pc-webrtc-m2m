@@ -397,6 +397,9 @@ func (s *SFUConnection) addOnTrackCallback() {
 			_, _, readErr := track.Read(buf2)
 			// TODO Implement pausing unpausing of track
 			if readErr != nil {
+				logger.LogWithMessage(NameSFUConnection, logger.CriticalFail, true, true,
+					fmt.Sprintf("trackID=%s error=%s", track.ID(), readErr.Error()),
+				)
 				return
 			}
 			//bufBinary := bytes.NewBuffer(buf[20:])
