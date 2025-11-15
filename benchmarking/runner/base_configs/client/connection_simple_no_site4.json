@@ -1,0 +1,12 @@
+{
+    "preferredClientID": 1,
+    "codecMode": "mdc",
+    "providers": [
+        {
+            "providerType": "webrtc_sfu",
+            "providerKey": "sfu_mdc_multi4",
+            "providerSettings": {},
+            "videoTracks": []
+        }
+    ]
+}
