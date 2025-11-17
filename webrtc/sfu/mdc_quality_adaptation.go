@@ -102,7 +102,7 @@ func (mqa *MDCQualityAdaptation) PerformAdaptation(clc *ClientConnection, target
 	rand.Shuffle(len(keys), func(i, j int) {
 		keys[i], keys[j] = keys[j], keys[i]
 	})
-	for i := range mqa.qualities[1:] {
+	for i := 1; i < len(mqa.qualities); i++ {
 		if totalUsedBitrate < uint64(targetBitrate) {
 			break
 		}
