@@ -120,9 +120,12 @@ func (mqa *MDCQualityAdaptation) PerformAdaptation(clc *ClientConnection, target
 		}
 	}
 	for _, client := range clients {
-		for _, desc := range mqa.qualities[client.selectedQuality] {
-			client.tracks[desc].shouldPlay = true
+		if client.selectedQuality > -1 {
+			for _, desc := range mqa.qualities[client.selectedQuality] {
+				client.tracks[desc].shouldPlay = true
+			}
 		}
+		
 		for _, track := range client.tracks {
 			if track.shouldPlay {
 				track.webrtcTrack.Play()
