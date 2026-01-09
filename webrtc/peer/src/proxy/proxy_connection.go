@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+const NameProxyConnection = "ProxyConnection"
+
 const (
 	ReadyPacketType        uint32 = 0
 	FramePacketType        uint32 = 1
@@ -328,7 +330,7 @@ func (pc *ProxyConnection) SendCapturerIntrinsicsPacket(clientID uint32, cameraI
 	pc.sendPacket(b, 0, CapturerIntrinsicsType)
 }
 
-func (pc *ProxyConnection) NextFrame(internalTrackID uint32) []byte {
+func (pc *ProxyConnection) NextFrame(internalTrackID uint32) (uint32, []byte) {
 	isNextFrameReady := false
 	remoteCapturer := pc.remote_capturers[internalTrackID]
 	for !isNextFrameReady {
@@ -358,7 +360,7 @@ func (pc *ProxyConnection) NextFrame(internalTrackID uint32) []byte {
 	// Do we still need frame counter? Seems more logical to use the actual frame nr
 	remoteCapturer.mtx.Unlock()
 	//pc.m.HighPriorityUnlock()
-	return data
+	return frameNr, data
 }
 
 func (pc *ProxyConnection) GetInternalTrackID(trackID string) (uint32, bool) {

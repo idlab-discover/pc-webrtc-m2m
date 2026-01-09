@@ -1,5 +1,8 @@
 {
     "managerIP": "127.0.0.1:8080",
     "preferredClientID": 0,
-    "selectedCodecMode": "mdc"
+    "selectedCodecMode": "mdc",
+    "startNewManager": true,
+    "managerProvisionerIP": "127.0.0.1:9999",
+    "managerProvisionerConfigPath": "/config/session/websocket_create.json"
 }

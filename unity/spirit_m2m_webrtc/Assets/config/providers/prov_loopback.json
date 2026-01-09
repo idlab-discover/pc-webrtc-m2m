@@ -2,8 +2,8 @@
     "defaultProvider": "loopback",
     "providers": [
         {
-            "key": "loopback",
-            "type": "loopback",
+            "providerKey": "loopback",
+            "providerType": "loopback",
             "providerSettings": {
                 "name": "Loopback Provider",
                 "description": "A loopback provider for testing purposes"

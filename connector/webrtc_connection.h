@@ -14,11 +14,12 @@ public:
 	unsigned int add_track(const std::string& track_id);
 	int send_track_frame(unsigned int client_id, void* data, uint32_t size, uint32_t internal_id, uint32_t frame_nr);
 private:
+	bool is_listening_for_data;
 	int connection_status = -1;
 	unsigned int port_this;
 	unsigned int port_remote;
 	bool initialized = false;
-	std::thread worker;
+	std::jthread worker;
 	sockaddr_in si_send;
 	SOCKET s_send;
 	int slen_send = sizeof(si_send);
@@ -34,6 +35,7 @@ private:
 	std::mutex m_recv_control;
 	std::mutex m_peer_ready;
 	std::condition_variable cv_peer_ready;
+	std::condition_variable cv_listening_for_data;
 	bool peer_ready = false;
 	std::map<uint32_t, ConnectedClient*> clients;
 	std::map<std::string, uint32_t> track_name_to_id;

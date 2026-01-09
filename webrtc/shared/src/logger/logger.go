@@ -73,16 +73,24 @@ const (
 
 	ReceivedWSMessage uint = 7000
 
-	SFUReceivedOffer          uint = 8000
-	SFUClientConnectionChange uint = 8001
+	SFUReceivedOffer                    uint = 8000
+	SFUClientConnectionChange           uint = 8001
+	SFUOnTrackCalled                    uint = 8002
+	SFUAddingAudioTrack                 uint = 8003
+	SFUAddingVideoTrack                 uint = 8004
+	SFUAddAudioTrackCompleted           uint = 8005
+	SFUAddVideoTrackCompleted           uint = 8006
+	SFUPreparingPeerConnection          uint = 8007
+	SFUPreparingPeerConnectionCompleted uint = 8008
+	SFUPeerConnectionAddingTracks       uint = 8009
 
 	TrackMetricsReport uint = 9000
 	EstimatedBitrate   uint = 9001
 	SystemResources    uint = 9002
 	IPFilterCheck      uint = 9003
-	MutTryEnter 	  uint = 9993
-	MutLock uint = 9994
-	MutUnlock uint = 9995
+	MutTryEnter        uint = 9993
+	MutLock            uint = 9994
+	MutUnlock          uint = 9995
 	InitStatus         uint = 9998
 	CriticalFail       uint = 9999
 )

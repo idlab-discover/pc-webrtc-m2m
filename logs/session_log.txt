@@ -1,9 +1,557 @@
-id=MDCEncodingQueue ts=1759502597687 status=Creating
-id=MDCEncodingQueue ts=1759502597690 status=Created
-id=PipelineLocalPointcloudMDC ts=1759502597720 status=EndEncodingPC clientID=0 ts_frame=1759502597693 capturer_id=0 frameNr=0 descriptionNr=2 codecType=0 totalNumberOfPoints=116253
-id=PipelineLocalPointcloudMDC ts=1759502597720 status=EndEncodingPC clientID=0 ts_frame=1759502597693 capturer_id=0 frameNr=0 descriptionNr=1 codecType=0 totalNumberOfPoints=116253
-id=PipelineLocalPointcloudMDC ts=1759502597722 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=2
-id=PipelineLocalPointcloudMDC ts=1759502597722 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=1
-id=PipelineLocalPointcloudMDC ts=1759502597730 status=EndEncodingPC clientID=0 ts_frame=1759502597693 capturer_id=0 frameNr=0 descriptionNr=0 codecType=0 totalNumberOfPoints=116253
-id=PipelineLocalPointcloudMDC ts=1759502597731 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=0
-id=PipelineLocalPointcloudMDC ts=1759502598099 status=EndEncodingPC clientID=0 ts_frame=1759502598078 capturer_id=0 frameNr=10 descriptionNr=2 codecType=0 totalNumberOfPoints=115864
+id=SessionManagerRepository ts=1767964299165 status=FactoryCreate type=websocket configPath=/config/session/websocket.json
+id=SessionManagerRepository ts=1767964299230 status=FactoryCreateSucces type=websocket configPath=/config/session/websocket.json
+id=WebSocketSessionManager ts=1767964301291 status=ManagerReadyToConnect
+id=WebSocketSessionManager ts=1767964301301 status=ManagerConnectionStart
+id=WebSocketSessionManager ts=1767964301343 status=ManagerConnectionSuccess
+id=CodecModeRepository ts=1767964301413 status=FactoryCreate type=mdc
+id=CodecModeRepository ts=1767964301413 status=FactoryCreateSucces type=mdc
+id=MDCCodecMode ts=1767964301419 status=GatheringTrackInfo samplingPercantages=[60|25|15] maxCompletePointCount=1000000
+id=MDCCodecMode ts=1767964301420 status=NewTrackDiscovered trackID=mdc_0_0 supportedCodecs=[draco] samplingPercentage=60
+id=MDCCodecMode ts=1767964301420 status=NewTrackDiscovered trackID=mdc_0_1 supportedCodecs=[draco] samplingPercentage=25
+id=MDCCodecMode ts=1767964301420 status=NewTrackDiscovered trackID=mdc_0_2 supportedCodecs=[draco] samplingPercentage=15
+id=WebSocketSessionManager ts=1767964301422 status=ManagerSessionCreating sessionName=Loopback_Session
+id=WebSocketSessionManager ts=1767964301440 status=ManagerSessionJoined
+id=LocalConnectedClient ts=1767964301442 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_1 provider=sfu_mdc
+id=LocalConnectedClient ts=1767964301442 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_0 provider=sfu_mdc
+id=LocalConnectedClient ts=1767964301442 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_2 provider=sfu_mdc
+id=WebSocketSessionManager ts=1767964301453 status=ManagerProviderRequested type=webrtc_sfu provider=sfu_mdc
+id=MultiCaptureSetup ts=1767964301461 status=Creating fps=15 frameMode=RealData nCaptures=2 startCaptureThread=True
+id=ConnectionProviderRepository ts=1767964301508 status=FactoryCreate type=webrtc_sfu key=sfu_mdc ip=127.0.0.1 port=8011
+id=ExternalWebRTCProvider ts=1767964301515 status=Creating portSelf=9000 portRemote=9001
+id=ExternalWebRTCProvider ts=1767964301565 status=Created
+id=ConnectionProviderRepository ts=1767964301565 status=FactoryCreateSucces type=webrtc_sfu  key=sfu_mdc
+id=ExternalWebRTCProvider ts=1767964301567 status=ProviderConnectionStart mode=async
+id=ExternalWebRTCProvider ts=1767964301567 status=ProviderConnectionStart
+id=MultiCaptureSetup ts=1767964302343 status=Created
+id=MDCEncodingQueue ts=1767964302343 status=Creating
+id=MDCEncodingQueue ts=1767964302352 status=Created
+id=PipelineLocalPointcloudMDC ts=1767964302366 status=EndEncodingPC clientID=0 ts_frame=1767964302335 capturer_id=0 frameNr=0 descriptionNr=2 codecType=0 totalNumberOfPoints=116253
+id=PipelineLocalPointcloudMDC ts=1767964302367 status=EndEncodingPC clientID=0 ts_frame=1767964302335 capturer_id=0 frameNr=0 descriptionNr=1 codecType=0 totalNumberOfPoints=116253
+id=PipelineLocalPointcloudMDC ts=1767964302369 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964302370 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964302378 status=EndEncodingPC clientID=0 ts_frame=1767964302335 capturer_id=0 frameNr=0 descriptionNr=0 codecType=0 totalNumberOfPoints=116253
+id=PipelineLocalPointcloudMDC ts=1767964302381 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964303029 status=EndEncodingPC clientID=0 ts_frame=1767964303007 capturer_id=0 frameNr=10 descriptionNr=2 codecType=0 totalNumberOfPoints=115864
+id=PipelineLocalPointcloudMDC ts=1767964303030 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=10 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964303033 status=EndEncodingPC clientID=0 ts_frame=1767964303007 capturer_id=0 frameNr=10 descriptionNr=1 codecType=0 totalNumberOfPoints=115864
+id=PipelineLocalPointcloudMDC ts=1767964303034 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=10 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964303043 status=EndEncodingPC clientID=0 ts_frame=1767964303007 capturer_id=0 frameNr=10 descriptionNr=0 codecType=0 totalNumberOfPoints=115864
+id=PipelineLocalPointcloudMDC ts=1767964303046 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=10 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964303702 status=EndEncodingPC clientID=0 ts_frame=1767964303679 capturer_id=0 frameNr=20 descriptionNr=2 codecType=0 totalNumberOfPoints=115232
+id=PipelineLocalPointcloudMDC ts=1767964303703 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=20 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964303705 status=EndEncodingPC clientID=0 ts_frame=1767964303679 capturer_id=0 frameNr=20 descriptionNr=1 codecType=0 totalNumberOfPoints=115232
+id=PipelineLocalPointcloudMDC ts=1767964303706 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=20 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964303715 status=EndEncodingPC clientID=0 ts_frame=1767964303679 capturer_id=0 frameNr=20 descriptionNr=0 codecType=0 totalNumberOfPoints=115232
+id=PipelineLocalPointcloudMDC ts=1767964303718 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=20 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964304370 status=EndEncodingPC clientID=0 ts_frame=1767964304351 capturer_id=0 frameNr=30 descriptionNr=2 codecType=0 totalNumberOfPoints=115663
+id=PipelineLocalPointcloudMDC ts=1767964304371 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=30 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964304374 status=EndEncodingPC clientID=0 ts_frame=1767964304351 capturer_id=0 frameNr=30 descriptionNr=1 codecType=0 totalNumberOfPoints=115663
+id=PipelineLocalPointcloudMDC ts=1767964304376 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=30 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964304383 status=EndEncodingPC clientID=0 ts_frame=1767964304351 capturer_id=0 frameNr=30 descriptionNr=0 codecType=0 totalNumberOfPoints=115663
+id=PipelineLocalPointcloudMDC ts=1767964304386 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=30 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964305041 status=EndEncodingPC clientID=0 ts_frame=1767964305022 capturer_id=0 frameNr=40 descriptionNr=2 codecType=0 totalNumberOfPoints=122683
+id=PipelineLocalPointcloudMDC ts=1767964305042 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=40 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964305045 status=EndEncodingPC clientID=0 ts_frame=1767964305022 capturer_id=0 frameNr=40 descriptionNr=1 codecType=0 totalNumberOfPoints=122683
+id=PipelineLocalPointcloudMDC ts=1767964305047 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=40 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964305056 status=EndEncodingPC clientID=0 ts_frame=1767964305022 capturer_id=0 frameNr=40 descriptionNr=0 codecType=0 totalNumberOfPoints=122683
+id=PipelineLocalPointcloudMDC ts=1767964305059 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=40 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964305710 status=EndEncodingPC clientID=0 ts_frame=1767964305694 capturer_id=0 frameNr=50 descriptionNr=2 codecType=0 totalNumberOfPoints=112547
+id=PipelineLocalPointcloudMDC ts=1767964305710 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=50 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964305712 status=EndEncodingPC clientID=0 ts_frame=1767964305694 capturer_id=0 frameNr=50 descriptionNr=1 codecType=0 totalNumberOfPoints=112547
+id=PipelineLocalPointcloudMDC ts=1767964305713 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=50 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964305722 status=EndEncodingPC clientID=0 ts_frame=1767964305694 capturer_id=0 frameNr=50 descriptionNr=0 codecType=0 totalNumberOfPoints=112547
+id=PipelineLocalPointcloudMDC ts=1767964305724 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=50 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964306381 status=EndEncodingPC clientID=0 ts_frame=1767964306367 capturer_id=0 frameNr=60 descriptionNr=2 codecType=0 totalNumberOfPoints=112849
+id=PipelineLocalPointcloudMDC ts=1767964306382 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=60 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964306385 status=EndEncodingPC clientID=0 ts_frame=1767964306367 capturer_id=0 frameNr=60 descriptionNr=1 codecType=0 totalNumberOfPoints=112849
+id=PipelineLocalPointcloudMDC ts=1767964306387 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=60 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964306393 status=EndEncodingPC clientID=0 ts_frame=1767964306367 capturer_id=0 frameNr=60 descriptionNr=0 codecType=0 totalNumberOfPoints=112849
+id=PipelineLocalPointcloudMDC ts=1767964306395 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=60 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964307052 status=EndEncodingPC clientID=0 ts_frame=1767964307035 capturer_id=0 frameNr=70 descriptionNr=2 codecType=0 totalNumberOfPoints=113596
+id=PipelineLocalPointcloudMDC ts=1767964307053 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=70 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964307054 status=EndEncodingPC clientID=0 ts_frame=1767964307035 capturer_id=0 frameNr=70 descriptionNr=1 codecType=0 totalNumberOfPoints=113596
+id=PipelineLocalPointcloudMDC ts=1767964307054 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=70 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964307065 status=EndEncodingPC clientID=0 ts_frame=1767964307035 capturer_id=0 frameNr=70 descriptionNr=0 codecType=0 totalNumberOfPoints=113596
+id=PipelineLocalPointcloudMDC ts=1767964307067 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=70 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964307725 status=EndEncodingPC clientID=0 ts_frame=1767964307707 capturer_id=0 frameNr=80 descriptionNr=2 codecType=0 totalNumberOfPoints=113870
+id=PipelineLocalPointcloudMDC ts=1767964307726 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=80 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964307728 status=EndEncodingPC clientID=0 ts_frame=1767964307707 capturer_id=0 frameNr=80 descriptionNr=1 codecType=0 totalNumberOfPoints=113870
+id=PipelineLocalPointcloudMDC ts=1767964307731 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=80 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964307739 status=EndEncodingPC clientID=0 ts_frame=1767964307707 capturer_id=0 frameNr=80 descriptionNr=0 codecType=0 totalNumberOfPoints=113870
+id=PipelineLocalPointcloudMDC ts=1767964307743 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=80 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964308395 status=EndEncodingPC clientID=0 ts_frame=1767964308377 capturer_id=0 frameNr=90 descriptionNr=2 codecType=0 totalNumberOfPoints=113136
+id=PipelineLocalPointcloudMDC ts=1767964308395 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=90 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964308398 status=EndEncodingPC clientID=0 ts_frame=1767964308377 capturer_id=0 frameNr=90 descriptionNr=1 codecType=0 totalNumberOfPoints=113136
+id=PipelineLocalPointcloudMDC ts=1767964308399 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=90 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964308407 status=EndEncodingPC clientID=0 ts_frame=1767964308377 capturer_id=0 frameNr=90 descriptionNr=0 codecType=0 totalNumberOfPoints=113136
+id=PipelineLocalPointcloudMDC ts=1767964308411 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=90 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964309066 status=EndEncodingPC clientID=0 ts_frame=1767964309047 capturer_id=0 frameNr=100 descriptionNr=2 codecType=0 totalNumberOfPoints=122221
+id=PipelineLocalPointcloudMDC ts=1767964309067 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=100 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964309069 status=EndEncodingPC clientID=0 ts_frame=1767964309047 capturer_id=0 frameNr=100 descriptionNr=1 codecType=0 totalNumberOfPoints=122221
+id=PipelineLocalPointcloudMDC ts=1767964309071 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=100 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964309082 status=EndEncodingPC clientID=0 ts_frame=1767964309047 capturer_id=0 frameNr=100 descriptionNr=0 codecType=0 totalNumberOfPoints=122221
+id=PipelineLocalPointcloudMDC ts=1767964309085 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=100 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964309735 status=EndEncodingPC clientID=0 ts_frame=1767964309717 capturer_id=0 frameNr=110 descriptionNr=2 codecType=0 totalNumberOfPoints=116894
+id=PipelineLocalPointcloudMDC ts=1767964309736 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=110 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964309737 status=EndEncodingPC clientID=0 ts_frame=1767964309717 capturer_id=0 frameNr=110 descriptionNr=1 codecType=0 totalNumberOfPoints=116894
+id=PipelineLocalPointcloudMDC ts=1767964309739 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=110 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964309749 status=EndEncodingPC clientID=0 ts_frame=1767964309717 capturer_id=0 frameNr=110 descriptionNr=0 codecType=0 totalNumberOfPoints=116894
+id=PipelineLocalPointcloudMDC ts=1767964309753 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=110 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964310403 status=EndEncodingPC clientID=0 ts_frame=1767964310386 capturer_id=0 frameNr=120 descriptionNr=2 codecType=0 totalNumberOfPoints=118868
+id=PipelineLocalPointcloudMDC ts=1767964310403 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=120 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964310407 status=EndEncodingPC clientID=0 ts_frame=1767964310386 capturer_id=0 frameNr=120 descriptionNr=1 codecType=0 totalNumberOfPoints=118868
+id=PipelineLocalPointcloudMDC ts=1767964310409 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=120 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964310418 status=EndEncodingPC clientID=0 ts_frame=1767964310386 capturer_id=0 frameNr=120 descriptionNr=0 codecType=0 totalNumberOfPoints=118868
+id=PipelineLocalPointcloudMDC ts=1767964310423 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=120 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964311076 status=EndEncodingPC clientID=0 ts_frame=1767964311059 capturer_id=0 frameNr=130 descriptionNr=2 codecType=0 totalNumberOfPoints=117349
+id=PipelineLocalPointcloudMDC ts=1767964311077 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=130 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964311078 status=EndEncodingPC clientID=0 ts_frame=1767964311059 capturer_id=0 frameNr=130 descriptionNr=1 codecType=0 totalNumberOfPoints=117349
+id=PipelineLocalPointcloudMDC ts=1767964311081 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=130 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964311090 status=EndEncodingPC clientID=0 ts_frame=1767964311059 capturer_id=0 frameNr=130 descriptionNr=0 codecType=0 totalNumberOfPoints=117349
+id=PipelineLocalPointcloudMDC ts=1767964311094 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=130 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964311745 status=EndEncodingPC clientID=0 ts_frame=1767964311729 capturer_id=0 frameNr=140 descriptionNr=2 codecType=0 totalNumberOfPoints=115517
+id=PipelineLocalPointcloudMDC ts=1767964311745 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=140 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964311749 status=EndEncodingPC clientID=0 ts_frame=1767964311729 capturer_id=0 frameNr=140 descriptionNr=1 codecType=0 totalNumberOfPoints=115517
+id=PipelineLocalPointcloudMDC ts=1767964311750 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=140 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964311757 status=EndEncodingPC clientID=0 ts_frame=1767964311729 capturer_id=0 frameNr=140 descriptionNr=0 codecType=0 totalNumberOfPoints=115517
+id=PipelineLocalPointcloudMDC ts=1767964311760 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=140 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964312415 status=EndEncodingPC clientID=0 ts_frame=1767964312400 capturer_id=0 frameNr=150 descriptionNr=2 codecType=0 totalNumberOfPoints=115813
+id=PipelineLocalPointcloudMDC ts=1767964312416 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=150 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964312417 status=EndEncodingPC clientID=0 ts_frame=1767964312400 capturer_id=0 frameNr=150 descriptionNr=1 codecType=0 totalNumberOfPoints=115813
+id=PipelineLocalPointcloudMDC ts=1767964312418 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=150 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964312429 status=EndEncodingPC clientID=0 ts_frame=1767964312400 capturer_id=0 frameNr=150 descriptionNr=0 codecType=0 totalNumberOfPoints=115813
+id=PipelineLocalPointcloudMDC ts=1767964312432 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=150 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964313091 status=EndEncodingPC clientID=0 ts_frame=1767964313073 capturer_id=0 frameNr=160 descriptionNr=2 codecType=0 totalNumberOfPoints=117013
+id=PipelineLocalPointcloudMDC ts=1767964313092 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=160 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964313095 status=EndEncodingPC clientID=0 ts_frame=1767964313073 capturer_id=0 frameNr=160 descriptionNr=1 codecType=0 totalNumberOfPoints=117013
+id=PipelineLocalPointcloudMDC ts=1767964313096 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=160 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964313107 status=EndEncodingPC clientID=0 ts_frame=1767964313073 capturer_id=0 frameNr=160 descriptionNr=0 codecType=0 totalNumberOfPoints=117013
+id=PipelineLocalPointcloudMDC ts=1767964313110 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=160 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964313761 status=EndEncodingPC clientID=0 ts_frame=1767964313745 capturer_id=0 frameNr=170 descriptionNr=2 codecType=0 totalNumberOfPoints=118599
+id=PipelineLocalPointcloudMDC ts=1767964313762 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=170 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964313765 status=EndEncodingPC clientID=0 ts_frame=1767964313745 capturer_id=0 frameNr=170 descriptionNr=1 codecType=0 totalNumberOfPoints=118599
+id=PipelineLocalPointcloudMDC ts=1767964313766 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=170 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964313775 status=EndEncodingPC clientID=0 ts_frame=1767964313745 capturer_id=0 frameNr=170 descriptionNr=0 codecType=0 totalNumberOfPoints=118599
+id=PipelineLocalPointcloudMDC ts=1767964313777 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=170 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964314434 status=EndEncodingPC clientID=0 ts_frame=1767964314418 capturer_id=0 frameNr=180 descriptionNr=2 codecType=0 totalNumberOfPoints=85367
+id=PipelineLocalPointcloudMDC ts=1767964314434 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=180 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964314436 status=EndEncodingPC clientID=0 ts_frame=1767964314418 capturer_id=0 frameNr=180 descriptionNr=1 codecType=0 totalNumberOfPoints=85367
+id=PipelineLocalPointcloudMDC ts=1767964314437 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=180 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964314445 status=EndEncodingPC clientID=0 ts_frame=1767964314418 capturer_id=0 frameNr=180 descriptionNr=0 codecType=0 totalNumberOfPoints=85367
+id=PipelineLocalPointcloudMDC ts=1767964314447 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=180 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964315108 status=EndEncodingPC clientID=0 ts_frame=1767964315090 capturer_id=0 frameNr=190 descriptionNr=2 codecType=0 totalNumberOfPoints=97938
+id=PipelineLocalPointcloudMDC ts=1767964315109 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=190 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964315112 status=EndEncodingPC clientID=0 ts_frame=1767964315090 capturer_id=0 frameNr=190 descriptionNr=1 codecType=0 totalNumberOfPoints=97938
+id=PipelineLocalPointcloudMDC ts=1767964315114 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=190 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964315123 status=EndEncodingPC clientID=0 ts_frame=1767964315090 capturer_id=0 frameNr=190 descriptionNr=0 codecType=0 totalNumberOfPoints=97938
+id=PipelineLocalPointcloudMDC ts=1767964315126 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=190 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964315777 status=EndEncodingPC clientID=0 ts_frame=1767964315760 capturer_id=0 frameNr=200 descriptionNr=2 codecType=0 totalNumberOfPoints=103384
+id=PipelineLocalPointcloudMDC ts=1767964315779 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=200 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964315780 status=EndEncodingPC clientID=0 ts_frame=1767964315760 capturer_id=0 frameNr=200 descriptionNr=1 codecType=0 totalNumberOfPoints=103384
+id=PipelineLocalPointcloudMDC ts=1767964315782 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=200 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964315790 status=EndEncodingPC clientID=0 ts_frame=1767964315760 capturer_id=0 frameNr=200 descriptionNr=0 codecType=0 totalNumberOfPoints=103384
+id=PipelineLocalPointcloudMDC ts=1767964315794 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=200 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964316448 status=EndEncodingPC clientID=0 ts_frame=1767964316430 capturer_id=0 frameNr=210 descriptionNr=2 codecType=0 totalNumberOfPoints=101758
+id=PipelineLocalPointcloudMDC ts=1767964316449 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=210 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964316451 status=EndEncodingPC clientID=0 ts_frame=1767964316430 capturer_id=0 frameNr=210 descriptionNr=1 codecType=0 totalNumberOfPoints=101758
+id=PipelineLocalPointcloudMDC ts=1767964316452 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=210 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964316462 status=EndEncodingPC clientID=0 ts_frame=1767964316430 capturer_id=0 frameNr=210 descriptionNr=0 codecType=0 totalNumberOfPoints=101758
+id=PipelineLocalPointcloudMDC ts=1767964316465 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=210 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964317115 status=EndEncodingPC clientID=0 ts_frame=1767964317100 capturer_id=0 frameNr=220 descriptionNr=2 codecType=0 totalNumberOfPoints=87870
+id=PipelineLocalPointcloudMDC ts=1767964317116 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=220 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964317118 status=EndEncodingPC clientID=0 ts_frame=1767964317100 capturer_id=0 frameNr=220 descriptionNr=1 codecType=0 totalNumberOfPoints=87870
+id=PipelineLocalPointcloudMDC ts=1767964317119 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=220 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964317126 status=EndEncodingPC clientID=0 ts_frame=1767964317100 capturer_id=0 frameNr=220 descriptionNr=0 codecType=0 totalNumberOfPoints=87870
+id=PipelineLocalPointcloudMDC ts=1767964317129 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=220 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964317788 status=EndEncodingPC clientID=0 ts_frame=1767964317771 capturer_id=0 frameNr=230 descriptionNr=2 codecType=0 totalNumberOfPoints=121342
+id=PipelineLocalPointcloudMDC ts=1767964317790 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=230 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964317791 status=EndEncodingPC clientID=0 ts_frame=1767964317771 capturer_id=0 frameNr=230 descriptionNr=1 codecType=0 totalNumberOfPoints=121342
+id=PipelineLocalPointcloudMDC ts=1767964317792 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=230 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964317802 status=EndEncodingPC clientID=0 ts_frame=1767964317771 capturer_id=0 frameNr=230 descriptionNr=0 codecType=0 totalNumberOfPoints=121342
+id=PipelineLocalPointcloudMDC ts=1767964317806 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=230 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964318460 status=EndEncodingPC clientID=0 ts_frame=1767964318441 capturer_id=0 frameNr=240 descriptionNr=2 codecType=0 totalNumberOfPoints=119207
+id=PipelineLocalPointcloudMDC ts=1767964318461 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=240 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964318464 status=EndEncodingPC clientID=0 ts_frame=1767964318441 capturer_id=0 frameNr=240 descriptionNr=1 codecType=0 totalNumberOfPoints=119207
+id=PipelineLocalPointcloudMDC ts=1767964318465 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=240 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964318474 status=EndEncodingPC clientID=0 ts_frame=1767964318441 capturer_id=0 frameNr=240 descriptionNr=0 codecType=0 totalNumberOfPoints=119207
+id=PipelineLocalPointcloudMDC ts=1767964318477 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=240 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964319132 status=EndEncodingPC clientID=0 ts_frame=1767964319114 capturer_id=0 frameNr=250 descriptionNr=2 codecType=0 totalNumberOfPoints=117271
+id=PipelineLocalPointcloudMDC ts=1767964319133 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=250 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964319135 status=EndEncodingPC clientID=0 ts_frame=1767964319114 capturer_id=0 frameNr=250 descriptionNr=1 codecType=0 totalNumberOfPoints=117271
+id=PipelineLocalPointcloudMDC ts=1767964319136 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=250 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964319147 status=EndEncodingPC clientID=0 ts_frame=1767964319114 capturer_id=0 frameNr=250 descriptionNr=0 codecType=0 totalNumberOfPoints=117271
+id=PipelineLocalPointcloudMDC ts=1767964319151 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=250 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964319798 status=EndEncodingPC clientID=0 ts_frame=1767964319783 capturer_id=0 frameNr=260 descriptionNr=2 codecType=0 totalNumberOfPoints=113577
+id=PipelineLocalPointcloudMDC ts=1767964319800 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=260 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964319802 status=EndEncodingPC clientID=0 ts_frame=1767964319783 capturer_id=0 frameNr=260 descriptionNr=1 codecType=0 totalNumberOfPoints=113577
+id=PipelineLocalPointcloudMDC ts=1767964319803 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=260 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964319811 status=EndEncodingPC clientID=0 ts_frame=1767964319783 capturer_id=0 frameNr=260 descriptionNr=0 codecType=0 totalNumberOfPoints=113577
+id=PipelineLocalPointcloudMDC ts=1767964319814 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=260 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964320472 status=EndEncodingPC clientID=0 ts_frame=1767964320457 capturer_id=0 frameNr=270 descriptionNr=2 codecType=0 totalNumberOfPoints=108001
+id=PipelineLocalPointcloudMDC ts=1767964320474 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=270 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964320476 status=EndEncodingPC clientID=0 ts_frame=1767964320457 capturer_id=0 frameNr=270 descriptionNr=1 codecType=0 totalNumberOfPoints=108001
+id=PipelineLocalPointcloudMDC ts=1767964320477 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=270 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964320485 status=EndEncodingPC clientID=0 ts_frame=1767964320457 capturer_id=0 frameNr=270 descriptionNr=0 codecType=0 totalNumberOfPoints=108001
+id=PipelineLocalPointcloudMDC ts=1767964320488 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=270 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964321145 status=EndEncodingPC clientID=0 ts_frame=1767964321127 capturer_id=0 frameNr=280 descriptionNr=2 codecType=0 totalNumberOfPoints=108793
+id=PipelineLocalPointcloudMDC ts=1767964321146 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=280 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964321148 status=EndEncodingPC clientID=0 ts_frame=1767964321127 capturer_id=0 frameNr=280 descriptionNr=1 codecType=0 totalNumberOfPoints=108793
+id=PipelineLocalPointcloudMDC ts=1767964321148 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=280 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964321160 status=EndEncodingPC clientID=0 ts_frame=1767964321127 capturer_id=0 frameNr=280 descriptionNr=0 codecType=0 totalNumberOfPoints=108793
+id=PipelineLocalPointcloudMDC ts=1767964321163 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=280 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964321815 status=EndEncodingPC clientID=0 ts_frame=1767964321799 capturer_id=0 frameNr=290 descriptionNr=2 codecType=0 totalNumberOfPoints=100658
+id=PipelineLocalPointcloudMDC ts=1767964321816 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=290 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964321819 status=EndEncodingPC clientID=0 ts_frame=1767964321799 capturer_id=0 frameNr=290 descriptionNr=1 codecType=0 totalNumberOfPoints=100658
+id=PipelineLocalPointcloudMDC ts=1767964321820 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=290 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964321828 status=EndEncodingPC clientID=0 ts_frame=1767964321799 capturer_id=0 frameNr=290 descriptionNr=0 codecType=0 totalNumberOfPoints=100658
+id=PipelineLocalPointcloudMDC ts=1767964321830 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=290 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964322488 status=EndEncodingPC clientID=0 ts_frame=1767964322472 capturer_id=0 frameNr=300 descriptionNr=2 codecType=0 totalNumberOfPoints=115654
+id=PipelineLocalPointcloudMDC ts=1767964322490 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=300 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964322491 status=EndEncodingPC clientID=0 ts_frame=1767964322472 capturer_id=0 frameNr=300 descriptionNr=1 codecType=0 totalNumberOfPoints=115654
+id=PipelineLocalPointcloudMDC ts=1767964322492 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=300 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964322504 status=EndEncodingPC clientID=0 ts_frame=1767964322472 capturer_id=0 frameNr=300 descriptionNr=0 codecType=0 totalNumberOfPoints=115654
+id=PipelineLocalPointcloudMDC ts=1767964322507 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=300 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964323160 status=EndEncodingPC clientID=0 ts_frame=1767964323143 capturer_id=0 frameNr=310 descriptionNr=2 codecType=0 totalNumberOfPoints=113494
+id=PipelineLocalPointcloudMDC ts=1767964323161 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=310 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964323164 status=EndEncodingPC clientID=0 ts_frame=1767964323143 capturer_id=0 frameNr=310 descriptionNr=1 codecType=0 totalNumberOfPoints=113494
+id=PipelineLocalPointcloudMDC ts=1767964323165 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=310 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964323175 status=EndEncodingPC clientID=0 ts_frame=1767964323143 capturer_id=0 frameNr=310 descriptionNr=0 codecType=0 totalNumberOfPoints=113494
+id=PipelineLocalPointcloudMDC ts=1767964323178 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=310 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964323830 status=EndEncodingPC clientID=0 ts_frame=1767964323812 capturer_id=0 frameNr=320 descriptionNr=2 codecType=0 totalNumberOfPoints=106213
+id=PipelineLocalPointcloudMDC ts=1767964323831 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=320 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964323832 status=EndEncodingPC clientID=0 ts_frame=1767964323812 capturer_id=0 frameNr=320 descriptionNr=1 codecType=0 totalNumberOfPoints=106213
+id=PipelineLocalPointcloudMDC ts=1767964323833 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=320 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964323844 status=EndEncodingPC clientID=0 ts_frame=1767964323812 capturer_id=0 frameNr=320 descriptionNr=0 codecType=0 totalNumberOfPoints=106213
+id=PipelineLocalPointcloudMDC ts=1767964323846 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=320 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964324500 status=EndEncodingPC clientID=0 ts_frame=1767964324483 capturer_id=0 frameNr=330 descriptionNr=2 codecType=0 totalNumberOfPoints=105500
+id=PipelineLocalPointcloudMDC ts=1767964324501 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=330 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964324503 status=EndEncodingPC clientID=0 ts_frame=1767964324483 capturer_id=0 frameNr=330 descriptionNr=1 codecType=0 totalNumberOfPoints=105500
+id=PipelineLocalPointcloudMDC ts=1767964324503 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=330 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964324514 status=EndEncodingPC clientID=0 ts_frame=1767964324483 capturer_id=0 frameNr=330 descriptionNr=0 codecType=0 totalNumberOfPoints=105500
+id=PipelineLocalPointcloudMDC ts=1767964324517 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=330 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964325169 status=EndEncodingPC clientID=0 ts_frame=1767964325153 capturer_id=0 frameNr=340 descriptionNr=2 codecType=0 totalNumberOfPoints=113770
+id=PipelineLocalPointcloudMDC ts=1767964325170 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=340 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964325173 status=EndEncodingPC clientID=0 ts_frame=1767964325153 capturer_id=0 frameNr=340 descriptionNr=1 codecType=0 totalNumberOfPoints=113770
+id=PipelineLocalPointcloudMDC ts=1767964325177 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=340 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964325188 status=EndEncodingPC clientID=0 ts_frame=1767964325153 capturer_id=0 frameNr=340 descriptionNr=0 codecType=0 totalNumberOfPoints=113770
+id=PipelineLocalPointcloudMDC ts=1767964325196 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=340 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964325842 status=EndEncodingPC clientID=0 ts_frame=1767964325824 capturer_id=0 frameNr=350 descriptionNr=2 codecType=0 totalNumberOfPoints=130737
+id=PipelineLocalPointcloudMDC ts=1767964325844 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=350 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964325846 status=EndEncodingPC clientID=0 ts_frame=1767964325824 capturer_id=0 frameNr=350 descriptionNr=1 codecType=0 totalNumberOfPoints=130737
+id=PipelineLocalPointcloudMDC ts=1767964325847 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=350 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964325858 status=EndEncodingPC clientID=0 ts_frame=1767964325824 capturer_id=0 frameNr=350 descriptionNr=0 codecType=0 totalNumberOfPoints=130737
+id=PipelineLocalPointcloudMDC ts=1767964325862 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=350 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964326512 status=EndEncodingPC clientID=0 ts_frame=1767964326493 capturer_id=0 frameNr=360 descriptionNr=2 codecType=0 totalNumberOfPoints=134641
+id=PipelineLocalPointcloudMDC ts=1767964326514 status=EndEncodingPC clientID=0 ts_frame=1767964326493 capturer_id=0 frameNr=360 descriptionNr=1 codecType=0 totalNumberOfPoints=134641
+id=PipelineLocalPointcloudMDC ts=1767964326514 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=360 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964326515 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=360 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964326524 status=EndEncodingPC clientID=0 ts_frame=1767964326493 capturer_id=0 frameNr=360 descriptionNr=0 codecType=0 totalNumberOfPoints=134641
+id=PipelineLocalPointcloudMDC ts=1767964326526 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=360 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964327180 status=EndEncodingPC clientID=0 ts_frame=1767964327162 capturer_id=0 frameNr=370 descriptionNr=2 codecType=0 totalNumberOfPoints=124179
+id=PipelineLocalPointcloudMDC ts=1767964327181 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=370 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964327184 status=EndEncodingPC clientID=0 ts_frame=1767964327162 capturer_id=0 frameNr=370 descriptionNr=1 codecType=0 totalNumberOfPoints=124179
+id=PipelineLocalPointcloudMDC ts=1767964327186 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=370 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964327196 status=EndEncodingPC clientID=0 ts_frame=1767964327162 capturer_id=0 frameNr=370 descriptionNr=0 codecType=0 totalNumberOfPoints=124179
+id=PipelineLocalPointcloudMDC ts=1767964327199 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=370 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964327851 status=EndEncodingPC clientID=0 ts_frame=1767964327833 capturer_id=0 frameNr=380 descriptionNr=2 codecType=0 totalNumberOfPoints=122029
+id=PipelineLocalPointcloudMDC ts=1767964327853 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=380 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964327855 status=EndEncodingPC clientID=0 ts_frame=1767964327833 capturer_id=0 frameNr=380 descriptionNr=1 codecType=0 totalNumberOfPoints=122029
+id=PipelineLocalPointcloudMDC ts=1767964327857 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=380 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964327867 status=EndEncodingPC clientID=0 ts_frame=1767964327833 capturer_id=0 frameNr=380 descriptionNr=0 codecType=0 totalNumberOfPoints=122029
+id=PipelineLocalPointcloudMDC ts=1767964327870 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=380 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964328520 status=EndEncodingPC clientID=0 ts_frame=1767964328504 capturer_id=0 frameNr=390 descriptionNr=2 codecType=0 totalNumberOfPoints=115112
+id=PipelineLocalPointcloudMDC ts=1767964328522 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=390 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964328524 status=EndEncodingPC clientID=0 ts_frame=1767964328504 capturer_id=0 frameNr=390 descriptionNr=1 codecType=0 totalNumberOfPoints=115112
+id=PipelineLocalPointcloudMDC ts=1767964328525 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=390 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964328534 status=EndEncodingPC clientID=0 ts_frame=1767964328504 capturer_id=0 frameNr=390 descriptionNr=0 codecType=0 totalNumberOfPoints=115112
+id=PipelineLocalPointcloudMDC ts=1767964328537 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=390 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964329190 status=EndEncodingPC clientID=0 ts_frame=1767964329175 capturer_id=0 frameNr=400 descriptionNr=2 codecType=0 totalNumberOfPoints=102084
+id=PipelineLocalPointcloudMDC ts=1767964329191 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=400 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964329193 status=EndEncodingPC clientID=0 ts_frame=1767964329175 capturer_id=0 frameNr=400 descriptionNr=1 codecType=0 totalNumberOfPoints=102084
+id=PipelineLocalPointcloudMDC ts=1767964329194 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=400 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964329202 status=EndEncodingPC clientID=0 ts_frame=1767964329175 capturer_id=0 frameNr=400 descriptionNr=0 codecType=0 totalNumberOfPoints=102084
+id=PipelineLocalPointcloudMDC ts=1767964329204 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=400 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964329860 status=EndEncodingPC clientID=0 ts_frame=1767964329845 capturer_id=0 frameNr=410 descriptionNr=2 codecType=0 totalNumberOfPoints=97797
+id=PipelineLocalPointcloudMDC ts=1767964329861 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=410 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964329864 status=EndEncodingPC clientID=0 ts_frame=1767964329845 capturer_id=0 frameNr=410 descriptionNr=1 codecType=0 totalNumberOfPoints=97797
+id=PipelineLocalPointcloudMDC ts=1767964329865 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=410 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964329872 status=EndEncodingPC clientID=0 ts_frame=1767964329845 capturer_id=0 frameNr=410 descriptionNr=0 codecType=0 totalNumberOfPoints=97797
+id=PipelineLocalPointcloudMDC ts=1767964329875 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=410 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964330533 status=EndEncodingPC clientID=0 ts_frame=1767964330516 capturer_id=0 frameNr=420 descriptionNr=2 codecType=0 totalNumberOfPoints=95317
+id=PipelineLocalPointcloudMDC ts=1767964330533 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=420 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964330535 status=EndEncodingPC clientID=0 ts_frame=1767964330516 capturer_id=0 frameNr=420 descriptionNr=1 codecType=0 totalNumberOfPoints=95317
+id=PipelineLocalPointcloudMDC ts=1767964330537 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=420 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964330545 status=EndEncodingPC clientID=0 ts_frame=1767964330516 capturer_id=0 frameNr=420 descriptionNr=0 codecType=0 totalNumberOfPoints=95317
+id=PipelineLocalPointcloudMDC ts=1767964330547 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=420 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964331199 status=EndEncodingPC clientID=0 ts_frame=1767964331184 capturer_id=0 frameNr=430 descriptionNr=2 codecType=0 totalNumberOfPoints=109918
+id=PipelineLocalPointcloudMDC ts=1767964331200 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=430 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964331202 status=EndEncodingPC clientID=0 ts_frame=1767964331184 capturer_id=0 frameNr=430 descriptionNr=1 codecType=0 totalNumberOfPoints=109918
+id=PipelineLocalPointcloudMDC ts=1767964331203 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=430 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964331211 status=EndEncodingPC clientID=0 ts_frame=1767964331184 capturer_id=0 frameNr=430 descriptionNr=0 codecType=0 totalNumberOfPoints=109918
+id=PipelineLocalPointcloudMDC ts=1767964331217 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=430 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964331873 status=EndEncodingPC clientID=0 ts_frame=1767964331854 capturer_id=0 frameNr=440 descriptionNr=2 codecType=0 totalNumberOfPoints=129366
+id=PipelineLocalPointcloudMDC ts=1767964331874 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=440 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964331876 status=EndEncodingPC clientID=0 ts_frame=1767964331854 capturer_id=0 frameNr=440 descriptionNr=1 codecType=0 totalNumberOfPoints=129366
+id=PipelineLocalPointcloudMDC ts=1767964331877 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=440 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964331888 status=EndEncodingPC clientID=0 ts_frame=1767964331854 capturer_id=0 frameNr=440 descriptionNr=0 codecType=0 totalNumberOfPoints=129366
+id=PipelineLocalPointcloudMDC ts=1767964331891 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=440 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964332549 status=EndEncodingPC clientID=0 ts_frame=1767964332525 capturer_id=0 frameNr=450 descriptionNr=1 codecType=0 totalNumberOfPoints=140198
+id=PipelineLocalPointcloudMDC ts=1767964332550 status=EndEncodingPC clientID=0 ts_frame=1767964332525 capturer_id=0 frameNr=450 descriptionNr=2 codecType=0 totalNumberOfPoints=140198
+id=PipelineLocalPointcloudMDC ts=1767964332550 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=450 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964332551 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=450 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964332560 status=EndEncodingPC clientID=0 ts_frame=1767964332525 capturer_id=0 frameNr=450 descriptionNr=0 codecType=0 totalNumberOfPoints=140198
+id=PipelineLocalPointcloudMDC ts=1767964332563 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=450 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964333215 status=EndEncodingPC clientID=0 ts_frame=1767964333197 capturer_id=0 frameNr=460 descriptionNr=2 codecType=0 totalNumberOfPoints=125242
+id=PipelineLocalPointcloudMDC ts=1767964333217 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=460 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964333219 status=EndEncodingPC clientID=0 ts_frame=1767964333197 capturer_id=0 frameNr=460 descriptionNr=1 codecType=0 totalNumberOfPoints=125242
+id=PipelineLocalPointcloudMDC ts=1767964333221 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=460 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964333232 status=EndEncodingPC clientID=0 ts_frame=1767964333197 capturer_id=0 frameNr=460 descriptionNr=0 codecType=0 totalNumberOfPoints=125242
+id=PipelineLocalPointcloudMDC ts=1767964333235 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=460 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964333885 status=EndEncodingPC clientID=0 ts_frame=1767964333870 capturer_id=0 frameNr=470 descriptionNr=2 codecType=0 totalNumberOfPoints=111871
+id=PipelineLocalPointcloudMDC ts=1767964333885 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=470 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964333888 status=EndEncodingPC clientID=0 ts_frame=1767964333870 capturer_id=0 frameNr=470 descriptionNr=1 codecType=0 totalNumberOfPoints=111871
+id=PipelineLocalPointcloudMDC ts=1767964333890 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=470 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964333899 status=EndEncodingPC clientID=0 ts_frame=1767964333870 capturer_id=0 frameNr=470 descriptionNr=0 codecType=0 totalNumberOfPoints=111871
+id=PipelineLocalPointcloudMDC ts=1767964333901 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=470 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964334558 status=EndEncodingPC clientID=0 ts_frame=1767964334541 capturer_id=0 frameNr=480 descriptionNr=2 codecType=0 totalNumberOfPoints=109979
+id=PipelineLocalPointcloudMDC ts=1767964334559 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=480 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964334561 status=EndEncodingPC clientID=0 ts_frame=1767964334541 capturer_id=0 frameNr=480 descriptionNr=1 codecType=0 totalNumberOfPoints=109979
+id=PipelineLocalPointcloudMDC ts=1767964334562 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=480 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964334574 status=EndEncodingPC clientID=0 ts_frame=1767964334541 capturer_id=0 frameNr=480 descriptionNr=0 codecType=0 totalNumberOfPoints=109979
+id=PipelineLocalPointcloudMDC ts=1767964334578 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=480 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964335235 status=EndEncodingPC clientID=0 ts_frame=1767964335212 capturer_id=0 frameNr=490 descriptionNr=2 codecType=0 totalNumberOfPoints=131862
+id=PipelineLocalPointcloudMDC ts=1767964335236 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=490 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964335236 status=EndEncodingPC clientID=0 ts_frame=1767964335212 capturer_id=0 frameNr=490 descriptionNr=1 codecType=0 totalNumberOfPoints=131862
+id=PipelineLocalPointcloudMDC ts=1767964335237 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=490 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964335252 status=EndEncodingPC clientID=0 ts_frame=1767964335212 capturer_id=0 frameNr=490 descriptionNr=0 codecType=0 totalNumberOfPoints=131862
+id=PipelineLocalPointcloudMDC ts=1767964335257 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=490 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964335903 status=EndEncodingPC clientID=0 ts_frame=1767964335882 capturer_id=0 frameNr=500 descriptionNr=2 codecType=0 totalNumberOfPoints=136024
+id=PipelineLocalPointcloudMDC ts=1767964335903 status=EndEncodingPC clientID=0 ts_frame=1767964335882 capturer_id=0 frameNr=500 descriptionNr=1 codecType=0 totalNumberOfPoints=136024
+id=PipelineLocalPointcloudMDC ts=1767964335906 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=500 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964335908 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=500 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964335917 status=EndEncodingPC clientID=0 ts_frame=1767964335882 capturer_id=0 frameNr=500 descriptionNr=0 codecType=0 totalNumberOfPoints=136024
+id=PipelineLocalPointcloudMDC ts=1767964335920 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=500 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964336575 status=EndEncodingPC clientID=0 ts_frame=1767964336553 capturer_id=0 frameNr=510 descriptionNr=1 codecType=0 totalNumberOfPoints=142623
+id=PipelineLocalPointcloudMDC ts=1767964336576 status=EndEncodingPC clientID=0 ts_frame=1767964336553 capturer_id=0 frameNr=510 descriptionNr=2 codecType=0 totalNumberOfPoints=142623
+id=PipelineLocalPointcloudMDC ts=1767964336577 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=510 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964336578 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=510 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964336587 status=EndEncodingPC clientID=0 ts_frame=1767964336553 capturer_id=0 frameNr=510 descriptionNr=0 codecType=0 totalNumberOfPoints=142623
+id=PipelineLocalPointcloudMDC ts=1767964336590 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=510 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964337240 status=EndEncodingPC clientID=0 ts_frame=1767964337223 capturer_id=0 frameNr=520 descriptionNr=2 codecType=0 totalNumberOfPoints=128310
+id=PipelineLocalPointcloudMDC ts=1767964337241 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=520 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964337241 status=EndEncodingPC clientID=0 ts_frame=1767964337223 capturer_id=0 frameNr=520 descriptionNr=1 codecType=0 totalNumberOfPoints=128310
+id=PipelineLocalPointcloudMDC ts=1767964337243 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=520 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964337255 status=EndEncodingPC clientID=0 ts_frame=1767964337223 capturer_id=0 frameNr=520 descriptionNr=0 codecType=0 totalNumberOfPoints=128310
+id=PipelineLocalPointcloudMDC ts=1767964337259 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=520 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964337915 status=EndEncodingPC clientID=0 ts_frame=1767964337894 capturer_id=0 frameNr=530 descriptionNr=1 codecType=0 totalNumberOfPoints=150042
+id=PipelineLocalPointcloudMDC ts=1767964337915 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=530 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964337919 status=EndEncodingPC clientID=0 ts_frame=1767964337894 capturer_id=0 frameNr=530 descriptionNr=2 codecType=0 totalNumberOfPoints=150042
+id=PipelineLocalPointcloudMDC ts=1767964337921 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=530 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964337929 status=EndEncodingPC clientID=0 ts_frame=1767964337894 capturer_id=0 frameNr=530 descriptionNr=0 codecType=0 totalNumberOfPoints=150042
+id=PipelineLocalPointcloudMDC ts=1767964337933 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=530 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964338585 status=EndEncodingPC clientID=0 ts_frame=1767964338566 capturer_id=0 frameNr=540 descriptionNr=2 codecType=0 totalNumberOfPoints=130918
+id=PipelineLocalPointcloudMDC ts=1767964338587 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=540 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964338588 status=EndEncodingPC clientID=0 ts_frame=1767964338566 capturer_id=0 frameNr=540 descriptionNr=1 codecType=0 totalNumberOfPoints=130918
+id=PipelineLocalPointcloudMDC ts=1767964338589 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=540 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964338598 status=EndEncodingPC clientID=0 ts_frame=1767964338566 capturer_id=0 frameNr=540 descriptionNr=0 codecType=0 totalNumberOfPoints=130918
+id=PipelineLocalPointcloudMDC ts=1767964338601 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=540 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964339256 status=EndEncodingPC clientID=0 ts_frame=1767964339235 capturer_id=0 frameNr=550 descriptionNr=2 codecType=0 totalNumberOfPoints=132144
+id=PipelineLocalPointcloudMDC ts=1767964339257 status=EndEncodingPC clientID=0 ts_frame=1767964339235 capturer_id=0 frameNr=550 descriptionNr=1 codecType=0 totalNumberOfPoints=132144
+id=PipelineLocalPointcloudMDC ts=1767964339257 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=550 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964339259 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=550 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964339272 status=EndEncodingPC clientID=0 ts_frame=1767964339235 capturer_id=0 frameNr=550 descriptionNr=0 codecType=0 totalNumberOfPoints=132144
+id=PipelineLocalPointcloudMDC ts=1767964339275 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=550 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964339928 status=EndEncodingPC clientID=0 ts_frame=1767964339906 capturer_id=0 frameNr=560 descriptionNr=1 codecType=0 totalNumberOfPoints=146978
+id=PipelineLocalPointcloudMDC ts=1767964339931 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=560 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964339932 status=EndEncodingPC clientID=0 ts_frame=1767964339906 capturer_id=0 frameNr=560 descriptionNr=2 codecType=0 totalNumberOfPoints=146978
+id=PipelineLocalPointcloudMDC ts=1767964339933 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=560 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964339941 status=EndEncodingPC clientID=0 ts_frame=1767964339906 capturer_id=0 frameNr=560 descriptionNr=0 codecType=0 totalNumberOfPoints=146978
+id=PipelineLocalPointcloudMDC ts=1767964339944 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=560 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964340597 status=EndEncodingPC clientID=0 ts_frame=1767964340576 capturer_id=0 frameNr=570 descriptionNr=1 codecType=0 totalNumberOfPoints=159615
+id=PipelineLocalPointcloudMDC ts=1767964340600 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=570 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964340605 status=EndEncodingPC clientID=0 ts_frame=1767964340576 capturer_id=0 frameNr=570 descriptionNr=2 codecType=0 totalNumberOfPoints=159615
+id=PipelineLocalPointcloudMDC ts=1767964340606 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=570 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964340610 status=EndEncodingPC clientID=0 ts_frame=1767964340576 capturer_id=0 frameNr=570 descriptionNr=0 codecType=0 totalNumberOfPoints=159615
+id=PipelineLocalPointcloudMDC ts=1767964340613 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=570 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964341273 status=EndEncodingPC clientID=0 ts_frame=1767964341247 capturer_id=0 frameNr=580 descriptionNr=1 codecType=0 totalNumberOfPoints=201756
+id=PipelineLocalPointcloudMDC ts=1767964341274 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=580 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964341283 status=EndEncodingPC clientID=0 ts_frame=1767964341247 capturer_id=0 frameNr=580 descriptionNr=0 codecType=0 totalNumberOfPoints=201756
+id=PipelineLocalPointcloudMDC ts=1767964341286 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=580 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964341293 status=EndEncodingPC clientID=0 ts_frame=1767964341247 capturer_id=0 frameNr=580 descriptionNr=2 codecType=0 totalNumberOfPoints=201756
+id=PipelineLocalPointcloudMDC ts=1767964341296 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=580 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964341935 status=EndEncodingPC clientID=0 ts_frame=1767964341916 capturer_id=0 frameNr=590 descriptionNr=2 codecType=0 totalNumberOfPoints=134812
+id=PipelineLocalPointcloudMDC ts=1767964341936 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=590 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964341938 status=EndEncodingPC clientID=0 ts_frame=1767964341916 capturer_id=0 frameNr=590 descriptionNr=1 codecType=0 totalNumberOfPoints=134812
+id=PipelineLocalPointcloudMDC ts=1767964341939 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=590 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964341951 status=EndEncodingPC clientID=0 ts_frame=1767964341916 capturer_id=0 frameNr=590 descriptionNr=0 codecType=0 totalNumberOfPoints=134812
+id=PipelineLocalPointcloudMDC ts=1767964341953 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=590 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964342608 status=EndEncodingPC clientID=0 ts_frame=1767964342589 capturer_id=0 frameNr=600 descriptionNr=2 codecType=0 totalNumberOfPoints=123501
+id=PipelineLocalPointcloudMDC ts=1767964342609 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=600 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964342611 status=EndEncodingPC clientID=0 ts_frame=1767964342589 capturer_id=0 frameNr=600 descriptionNr=1 codecType=0 totalNumberOfPoints=123501
+id=PipelineLocalPointcloudMDC ts=1767964342612 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=600 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964342623 status=EndEncodingPC clientID=0 ts_frame=1767964342589 capturer_id=0 frameNr=600 descriptionNr=0 codecType=0 totalNumberOfPoints=123501
+id=PipelineLocalPointcloudMDC ts=1767964342627 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=600 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964343280 status=EndEncodingPC clientID=0 ts_frame=1767964343260 capturer_id=0 frameNr=610 descriptionNr=1 codecType=0 totalNumberOfPoints=165090
+id=PipelineLocalPointcloudMDC ts=1767964343282 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=610 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964343288 status=EndEncodingPC clientID=0 ts_frame=1767964343260 capturer_id=0 frameNr=610 descriptionNr=2 codecType=0 totalNumberOfPoints=165090
+id=PipelineLocalPointcloudMDC ts=1767964343292 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=610 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964343294 status=EndEncodingPC clientID=0 ts_frame=1767964343260 capturer_id=0 frameNr=610 descriptionNr=0 codecType=0 totalNumberOfPoints=165090
+id=PipelineLocalPointcloudMDC ts=1767964343296 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=610 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964343953 status=EndEncodingPC clientID=0 ts_frame=1767964343932 capturer_id=0 frameNr=620 descriptionNr=1 codecType=0 totalNumberOfPoints=131764
+id=PipelineLocalPointcloudMDC ts=1767964343953 status=EndEncodingPC clientID=0 ts_frame=1767964343932 capturer_id=0 frameNr=620 descriptionNr=2 codecType=0 totalNumberOfPoints=131764
+id=PipelineLocalPointcloudMDC ts=1767964343954 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=620 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964343955 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=620 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964343970 status=EndEncodingPC clientID=0 ts_frame=1767964343932 capturer_id=0 frameNr=620 descriptionNr=0 codecType=0 totalNumberOfPoints=131764
+id=PipelineLocalPointcloudMDC ts=1767964343972 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=620 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964344616 status=EndEncodingPC clientID=0 ts_frame=1767964344603 capturer_id=0 frameNr=630 descriptionNr=2 codecType=0 totalNumberOfPoints=76966
+id=PipelineLocalPointcloudMDC ts=1767964344616 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=630 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964344618 status=EndEncodingPC clientID=0 ts_frame=1767964344603 capturer_id=0 frameNr=630 descriptionNr=1 codecType=0 totalNumberOfPoints=76966
+id=PipelineLocalPointcloudMDC ts=1767964344619 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=630 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964344626 status=EndEncodingPC clientID=0 ts_frame=1767964344603 capturer_id=0 frameNr=630 descriptionNr=0 codecType=0 totalNumberOfPoints=76966
+id=PipelineLocalPointcloudMDC ts=1767964344628 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=630 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964345306 status=EndEncodingPC clientID=0 ts_frame=1767964345277 capturer_id=0 frameNr=640 descriptionNr=1 codecType=0 totalNumberOfPoints=150369
+id=PipelineLocalPointcloudMDC ts=1767964345308 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=640 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964345309 status=EndEncodingPC clientID=0 ts_frame=1767964345277 capturer_id=0 frameNr=640 descriptionNr=2 codecType=0 totalNumberOfPoints=150369
+id=PipelineLocalPointcloudMDC ts=1767964345311 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=640 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964345316 status=EndEncodingPC clientID=0 ts_frame=1767964345277 capturer_id=0 frameNr=640 descriptionNr=0 codecType=0 totalNumberOfPoints=150369
+id=PipelineLocalPointcloudMDC ts=1767964345319 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=640 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964345971 status=EndEncodingPC clientID=0 ts_frame=1767964345947 capturer_id=0 frameNr=650 descriptionNr=1 codecType=0 totalNumberOfPoints=182859
+id=PipelineLocalPointcloudMDC ts=1767964345973 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=650 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964345981 status=EndEncodingPC clientID=0 ts_frame=1767964345947 capturer_id=0 frameNr=650 descriptionNr=0 codecType=0 totalNumberOfPoints=182859
+id=PipelineLocalPointcloudMDC ts=1767964345983 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=650 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964345985 status=EndEncodingPC clientID=0 ts_frame=1767964345947 capturer_id=0 frameNr=650 descriptionNr=2 codecType=0 totalNumberOfPoints=182859
+id=PipelineLocalPointcloudMDC ts=1767964345988 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=650 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964346674 status=EndEncodingPC clientID=0 ts_frame=1767964346653 capturer_id=0 frameNr=660 descriptionNr=1 codecType=0 totalNumberOfPoints=178887
+id=PipelineLocalPointcloudMDC ts=1767964346676 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=660 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964346685 status=EndEncodingPC clientID=0 ts_frame=1767964346653 capturer_id=0 frameNr=660 descriptionNr=2 codecType=0 totalNumberOfPoints=178887
+id=PipelineLocalPointcloudMDC ts=1767964346687 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=660 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964346687 status=EndEncodingPC clientID=0 ts_frame=1767964346653 capturer_id=0 frameNr=660 descriptionNr=0 codecType=0 totalNumberOfPoints=178887
+id=PipelineLocalPointcloudMDC ts=1767964346690 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=660 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964347452 status=EndEncodingPC clientID=0 ts_frame=1767964347430 capturer_id=0 frameNr=670 descriptionNr=1 codecType=0 totalNumberOfPoints=148137
+id=PipelineLocalPointcloudMDC ts=1767964347453 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=670 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964347454 status=EndEncodingPC clientID=0 ts_frame=1767964347430 capturer_id=0 frameNr=670 descriptionNr=2 codecType=0 totalNumberOfPoints=148137
+id=PipelineLocalPointcloudMDC ts=1767964347456 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=670 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964347465 status=EndEncodingPC clientID=0 ts_frame=1767964347430 capturer_id=0 frameNr=670 descriptionNr=0 codecType=0 totalNumberOfPoints=148137
+id=PipelineLocalPointcloudMDC ts=1767964347467 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=670 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964348223 status=EndEncodingPC clientID=0 ts_frame=1767964348203 capturer_id=0 frameNr=680 descriptionNr=1 codecType=0 totalNumberOfPoints=168587
+id=PipelineLocalPointcloudMDC ts=1767964348226 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=680 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964348234 status=EndEncodingPC clientID=0 ts_frame=1767964348203 capturer_id=0 frameNr=680 descriptionNr=2 codecType=0 totalNumberOfPoints=168587
+id=PipelineLocalPointcloudMDC ts=1767964348236 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=680 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964348237 status=EndEncodingPC clientID=0 ts_frame=1767964348203 capturer_id=0 frameNr=680 descriptionNr=0 codecType=0 totalNumberOfPoints=168587
+id=PipelineLocalPointcloudMDC ts=1767964348240 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=680 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964349002 status=EndEncodingPC clientID=0 ts_frame=1767964348978 capturer_id=0 frameNr=690 descriptionNr=1 codecType=0 totalNumberOfPoints=181331
+id=PipelineLocalPointcloudMDC ts=1767964349003 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=690 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964349015 status=EndEncodingPC clientID=0 ts_frame=1767964348978 capturer_id=0 frameNr=690 descriptionNr=2 codecType=0 totalNumberOfPoints=181331
+id=PipelineLocalPointcloudMDC ts=1767964349015 status=EndEncodingPC clientID=0 ts_frame=1767964348978 capturer_id=0 frameNr=690 descriptionNr=0 codecType=0 totalNumberOfPoints=181331
+id=PipelineLocalPointcloudMDC ts=1767964349017 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=690 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964349019 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=690 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964349764 status=EndEncodingPC clientID=0 ts_frame=1767964349751 capturer_id=0 frameNr=700 descriptionNr=2 codecType=0 totalNumberOfPoints=69094
+id=PipelineLocalPointcloudMDC ts=1767964349765 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=700 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964349766 status=EndEncodingPC clientID=0 ts_frame=1767964349751 capturer_id=0 frameNr=700 descriptionNr=1 codecType=0 totalNumberOfPoints=69094
+id=PipelineLocalPointcloudMDC ts=1767964349767 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=700 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964349772 status=EndEncodingPC clientID=0 ts_frame=1767964349751 capturer_id=0 frameNr=700 descriptionNr=0 codecType=0 totalNumberOfPoints=69094
+id=PipelineLocalPointcloudMDC ts=1767964349774 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=700 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964350542 status=EndEncodingPC clientID=0 ts_frame=1767964350529 capturer_id=0 frameNr=710 descriptionNr=2 codecType=0 totalNumberOfPoints=25192
+id=PipelineLocalPointcloudMDC ts=1767964350542 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=710 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964350542 status=EndEncodingPC clientID=0 ts_frame=1767964350529 capturer_id=0 frameNr=710 descriptionNr=1 codecType=0 totalNumberOfPoints=25192
+id=PipelineLocalPointcloudMDC ts=1767964350542 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=710 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964350545 status=EndEncodingPC clientID=0 ts_frame=1767964350529 capturer_id=0 frameNr=710 descriptionNr=0 codecType=0 totalNumberOfPoints=25192
+id=PipelineLocalPointcloudMDC ts=1767964350545 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=710 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964351315 status=EndEncodingPC clientID=0 ts_frame=1767964351306 capturer_id=0 frameNr=720 descriptionNr=2 codecType=0 totalNumberOfPoints=25732
+id=PipelineLocalPointcloudMDC ts=1767964351316 status=EndEncodingPC clientID=0 ts_frame=1767964351306 capturer_id=0 frameNr=720 descriptionNr=1 codecType=0 totalNumberOfPoints=25732
+id=PipelineLocalPointcloudMDC ts=1767964351316 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=720 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964351317 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=720 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964351319 status=EndEncodingPC clientID=0 ts_frame=1767964351306 capturer_id=0 frameNr=720 descriptionNr=0 codecType=0 totalNumberOfPoints=25732
+id=PipelineLocalPointcloudMDC ts=1767964351320 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=720 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964352096 status=EndEncodingPC clientID=0 ts_frame=1767964352087 capturer_id=0 frameNr=730 descriptionNr=2 codecType=0 totalNumberOfPoints=27487
+id=PipelineLocalPointcloudMDC ts=1767964352097 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=730 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964352097 status=EndEncodingPC clientID=0 ts_frame=1767964352087 capturer_id=0 frameNr=730 descriptionNr=1 codecType=0 totalNumberOfPoints=27487
+id=PipelineLocalPointcloudMDC ts=1767964352098 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=730 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964352101 status=EndEncodingPC clientID=0 ts_frame=1767964352087 capturer_id=0 frameNr=730 descriptionNr=0 codecType=0 totalNumberOfPoints=27487
+id=PipelineLocalPointcloudMDC ts=1767964352101 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=730 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964352881 status=EndEncodingPC clientID=0 ts_frame=1767964352870 capturer_id=0 frameNr=740 descriptionNr=2 codecType=0 totalNumberOfPoints=26902
+id=PipelineLocalPointcloudMDC ts=1767964352882 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=740 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964352882 status=EndEncodingPC clientID=0 ts_frame=1767964352870 capturer_id=0 frameNr=740 descriptionNr=1 codecType=0 totalNumberOfPoints=26902
+id=PipelineLocalPointcloudMDC ts=1767964352882 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=740 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964352884 status=EndEncodingPC clientID=0 ts_frame=1767964352870 capturer_id=0 frameNr=740 descriptionNr=0 codecType=0 totalNumberOfPoints=26902
+id=PipelineLocalPointcloudMDC ts=1767964352885 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=740 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964353655 status=EndEncodingPC clientID=0 ts_frame=1767964353644 capturer_id=0 frameNr=750 descriptionNr=2 codecType=0 totalNumberOfPoints=38558
+id=PipelineLocalPointcloudMDC ts=1767964353655 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=750 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964353656 status=EndEncodingPC clientID=0 ts_frame=1767964353644 capturer_id=0 frameNr=750 descriptionNr=1 codecType=0 totalNumberOfPoints=38558
+id=PipelineLocalPointcloudMDC ts=1767964353656 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=750 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964353660 status=EndEncodingPC clientID=0 ts_frame=1767964353644 capturer_id=0 frameNr=750 descriptionNr=0 codecType=0 totalNumberOfPoints=38558
+id=PipelineLocalPointcloudMDC ts=1767964353661 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=750 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964354436 status=EndEncodingPC clientID=0 ts_frame=1767964354424 capturer_id=0 frameNr=760 descriptionNr=2 codecType=0 totalNumberOfPoints=55226
+id=PipelineLocalPointcloudMDC ts=1767964354437 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=760 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964354437 status=EndEncodingPC clientID=0 ts_frame=1767964354424 capturer_id=0 frameNr=760 descriptionNr=1 codecType=0 totalNumberOfPoints=55226
+id=PipelineLocalPointcloudMDC ts=1767964354439 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=760 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964354442 status=EndEncodingPC clientID=0 ts_frame=1767964354424 capturer_id=0 frameNr=760 descriptionNr=0 codecType=0 totalNumberOfPoints=55226
+id=PipelineLocalPointcloudMDC ts=1767964354445 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=760 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964355216 status=EndEncodingPC clientID=0 ts_frame=1767964355203 capturer_id=0 frameNr=770 descriptionNr=2 codecType=0 totalNumberOfPoints=74497
+id=PipelineLocalPointcloudMDC ts=1767964355218 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=770 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964355219 status=EndEncodingPC clientID=0 ts_frame=1767964355203 capturer_id=0 frameNr=770 descriptionNr=1 codecType=0 totalNumberOfPoints=74497
+id=PipelineLocalPointcloudMDC ts=1767964355220 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=770 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964355227 status=EndEncodingPC clientID=0 ts_frame=1767964355203 capturer_id=0 frameNr=770 descriptionNr=0 codecType=0 totalNumberOfPoints=74497
+id=PipelineLocalPointcloudMDC ts=1767964355229 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=770 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964355993 status=EndEncodingPC clientID=0 ts_frame=1767964355979 capturer_id=0 frameNr=780 descriptionNr=2 codecType=0 totalNumberOfPoints=74553
+id=PipelineLocalPointcloudMDC ts=1767964355993 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=780 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964355994 status=EndEncodingPC clientID=0 ts_frame=1767964355979 capturer_id=0 frameNr=780 descriptionNr=1 codecType=0 totalNumberOfPoints=74553
+id=PipelineLocalPointcloudMDC ts=1767964355995 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=780 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964356001 status=EndEncodingPC clientID=0 ts_frame=1767964355979 capturer_id=0 frameNr=780 descriptionNr=0 codecType=0 totalNumberOfPoints=74553
+id=PipelineLocalPointcloudMDC ts=1767964356003 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=780 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964356769 status=EndEncodingPC clientID=0 ts_frame=1767964356757 capturer_id=0 frameNr=790 descriptionNr=2 codecType=0 totalNumberOfPoints=75991
+id=PipelineLocalPointcloudMDC ts=1767964356770 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=790 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964356772 status=EndEncodingPC clientID=0 ts_frame=1767964356757 capturer_id=0 frameNr=790 descriptionNr=1 codecType=0 totalNumberOfPoints=75991
+id=PipelineLocalPointcloudMDC ts=1767964356773 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=790 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964356780 status=EndEncodingPC clientID=0 ts_frame=1767964356757 capturer_id=0 frameNr=790 descriptionNr=0 codecType=0 totalNumberOfPoints=75991
+id=PipelineLocalPointcloudMDC ts=1767964356783 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=790 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964357547 status=EndEncodingPC clientID=0 ts_frame=1767964357533 capturer_id=0 frameNr=800 descriptionNr=2 codecType=0 totalNumberOfPoints=75824
+id=PipelineLocalPointcloudMDC ts=1767964357547 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=800 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964357549 status=EndEncodingPC clientID=0 ts_frame=1767964357533 capturer_id=0 frameNr=800 descriptionNr=1 codecType=0 totalNumberOfPoints=75824
+id=PipelineLocalPointcloudMDC ts=1767964357550 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=800 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964357555 status=EndEncodingPC clientID=0 ts_frame=1767964357533 capturer_id=0 frameNr=800 descriptionNr=0 codecType=0 totalNumberOfPoints=75824
+id=PipelineLocalPointcloudMDC ts=1767964357558 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=800 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964358326 status=EndEncodingPC clientID=0 ts_frame=1767964358311 capturer_id=0 frameNr=810 descriptionNr=2 codecType=0 totalNumberOfPoints=84367
+id=PipelineLocalPointcloudMDC ts=1767964358327 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=810 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964358329 status=EndEncodingPC clientID=0 ts_frame=1767964358311 capturer_id=0 frameNr=810 descriptionNr=1 codecType=0 totalNumberOfPoints=84367
+id=PipelineLocalPointcloudMDC ts=1767964358330 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=810 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964358337 status=EndEncodingPC clientID=0 ts_frame=1767964358311 capturer_id=0 frameNr=810 descriptionNr=0 codecType=0 totalNumberOfPoints=84367
+id=PipelineLocalPointcloudMDC ts=1767964358339 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=810 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964359118 status=EndEncodingPC clientID=0 ts_frame=1767964359089 capturer_id=0 frameNr=820 descriptionNr=2 codecType=0 totalNumberOfPoints=71745
+id=PipelineLocalPointcloudMDC ts=1767964359118 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=820 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964359121 status=EndEncodingPC clientID=0 ts_frame=1767964359089 capturer_id=0 frameNr=820 descriptionNr=1 codecType=0 totalNumberOfPoints=71745
+id=PipelineLocalPointcloudMDC ts=1767964359121 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=820 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964359127 status=EndEncodingPC clientID=0 ts_frame=1767964359089 capturer_id=0 frameNr=820 descriptionNr=0 codecType=0 totalNumberOfPoints=71745
+id=PipelineLocalPointcloudMDC ts=1767964359129 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=820 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964359880 status=EndEncodingPC clientID=0 ts_frame=1767964359867 capturer_id=0 frameNr=830 descriptionNr=2 codecType=0 totalNumberOfPoints=76725
+id=PipelineLocalPointcloudMDC ts=1767964359880 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=830 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964359882 status=EndEncodingPC clientID=0 ts_frame=1767964359867 capturer_id=0 frameNr=830 descriptionNr=1 codecType=0 totalNumberOfPoints=76725
+id=PipelineLocalPointcloudMDC ts=1767964359883 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=830 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964359890 status=EndEncodingPC clientID=0 ts_frame=1767964359867 capturer_id=0 frameNr=830 descriptionNr=0 codecType=0 totalNumberOfPoints=76725
+id=PipelineLocalPointcloudMDC ts=1767964359892 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=830 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964360660 status=EndEncodingPC clientID=0 ts_frame=1767964360646 capturer_id=0 frameNr=840 descriptionNr=2 codecType=0 totalNumberOfPoints=76494
+id=PipelineLocalPointcloudMDC ts=1767964360661 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=840 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964360663 status=EndEncodingPC clientID=0 ts_frame=1767964360646 capturer_id=0 frameNr=840 descriptionNr=1 codecType=0 totalNumberOfPoints=76494
+id=PipelineLocalPointcloudMDC ts=1767964360664 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=840 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964360670 status=EndEncodingPC clientID=0 ts_frame=1767964360646 capturer_id=0 frameNr=840 descriptionNr=0 codecType=0 totalNumberOfPoints=76494
+id=PipelineLocalPointcloudMDC ts=1767964360673 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=840 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964361341 status=EndEncodingPC clientID=0 ts_frame=1767964361328 capturer_id=0 frameNr=850 descriptionNr=2 codecType=0 totalNumberOfPoints=85425
+id=PipelineLocalPointcloudMDC ts=1767964361341 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=850 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964361344 status=EndEncodingPC clientID=0 ts_frame=1767964361328 capturer_id=0 frameNr=850 descriptionNr=1 codecType=0 totalNumberOfPoints=85425
+id=PipelineLocalPointcloudMDC ts=1767964361344 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=850 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964361350 status=EndEncodingPC clientID=0 ts_frame=1767964361328 capturer_id=0 frameNr=850 descriptionNr=0 codecType=0 totalNumberOfPoints=85425
+id=PipelineLocalPointcloudMDC ts=1767964361352 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=850 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964362015 status=EndEncodingPC clientID=0 ts_frame=1767964361999 capturer_id=0 frameNr=860 descriptionNr=2 codecType=0 totalNumberOfPoints=112051
+id=PipelineLocalPointcloudMDC ts=1767964362016 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=860 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1767964362017 status=EndEncodingPC clientID=0 ts_frame=1767964361999 capturer_id=0 frameNr=860 descriptionNr=1 codecType=0 totalNumberOfPoints=112051
+id=PipelineLocalPointcloudMDC ts=1767964362018 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=860 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1767964362027 status=EndEncodingPC clientID=0 ts_frame=1767964361999 capturer_id=0 frameNr=860 descriptionNr=0 codecType=0 totalNumberOfPoints=112051
+id=PipelineLocalPointcloudMDC ts=1767964362029 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=860 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1767964362119 status=Destroying clientID=0
+id=PipelineLocalPointcloudMDC ts=1767964362120 status=Destroyed clientID=0
+id=WebSocketSessionManager ts=1767964362120 status=ManagerDisconnecting
+id=ExternalWebRTCProvider ts=1767964362120 status=Disposing
+id=MultiCaptureSetup ts=1767964362142 status=Disposing
+id=ExternalWebRTCProvider ts=1767964362222 status=Disposed
+id=WebSocketSessionManager ts=1767964362222 status=ManagerDisconnected
+id=MultiCaptureSetup ts=1767964362595 status=Disposed

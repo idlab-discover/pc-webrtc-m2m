@@ -12,7 +12,7 @@ void Capturer::start_capturing(bool start_capture_thread)
 void Capturer::create_capture_worker()
 {
     capture_done = false;
-    worker = std::thread(&Capturer::start_capturing_internal, this);
+    worker = std::jthread(&Capturer::start_capturing_internal, this);
 }
 
 void Capturer::start_capturing_internal() {
@@ -33,9 +33,7 @@ void Capturer::start_capturing_internal() {
 
 void Capturer::wait_for_capture_done() {
     std::unique_lock lk(m_capturing);
-	cv_capture.wait(lk, [this] { return capture_done; });
-    if (worker.joinable())
-        worker.join();
+	cv_capture.wait(lk, [this] { return this->capture_done; });
 }
 
 

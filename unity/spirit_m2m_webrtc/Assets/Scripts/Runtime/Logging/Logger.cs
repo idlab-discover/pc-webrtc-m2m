@@ -83,6 +83,9 @@ public class Logger
         ManagerSessionLeft = 1034,
         ManagerSessionRejoined = 1035,
         ManagerSessionClosed = 1036,
+        ManagerReadyToConnect = 1040,
+        ManagerDisconnecting = 1041,
+        ManagerDisconnected = 1042,
 
         // ConnectionProvider Status
         ProviderConnectionStart = 2000,
@@ -112,6 +115,11 @@ public class Logger
         // TrackInfo Status
         GatheringTrackInfo = 4000,
         NewTrackDiscovered = 4001,
+
+        // NetworkReceiver / Sender
+        ReceiverStartPollVideoTrack = 5000,
+        ReceiverVideoDataSet = 5001,
+        ReceiverWaitingForNextFrame = 5002,
 
         // Misc Status
         FactoryCreate = 8000,
@@ -183,7 +191,10 @@ public class Logger
             nextFlush = DateTime.Now.AddMilliseconds(loggerSettings.flushInterval);
         }
     }
-
+    public static void SetFlushAll()
+    {
+        loggerSettings.flushInterval = 0;
+    }
     #region Conditional Logging
     private static string LogCommon(string name, Logger.Status status)
     {

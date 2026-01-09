@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class LoopbackReceiver : NetworkReceiverBase
 {
+    protected override string NAME => "LoopbackReceiver";
     public readonly uint ClientID;
     private readonly LoopbackProvider provider;
     private bool keepWorking = true;
@@ -40,6 +41,7 @@ public class LoopbackReceiver : NetworkReceiverBase
         lock (_lock)
         {
             bool succes = videoTracks.TryGetValue(trackID, out var t);
+            Debug.Log($"LoopbackReceiver: Setting video track data for trackID {trackID}, success: {succes}");
             if (!succes)
             {
                 return;
@@ -88,6 +90,7 @@ public class LoopbackReceiver : NetworkReceiverBase
                 return;
             }
             t = new();
+            Debug.Log($"LoopbackReceiver: Created new LoopbackTrack for trackID {trackID}");
             videoTracks.Add(trackID, t);
         }
         while (keepWorking)
@@ -96,8 +99,10 @@ public class LoopbackReceiver : NetworkReceiverBase
             {
                 while (!t.NextFrameReady)
                 {
+                    
                     Monitor.Wait(t._lock);
                 }
+                
                 t.NextFrameReady = false; // Reset the flag
                 if (keepWorking)
                 {

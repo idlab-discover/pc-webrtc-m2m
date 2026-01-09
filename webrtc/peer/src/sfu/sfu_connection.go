@@ -87,19 +87,19 @@ func (t *WebRTCVideoTrack) StartSending() {
 
 	go func() {
 		println("START SENDING")
-		frameNr := 0
+		//frameNr := 0
 		for {
 			//	println("START", time.Now().UnixMilli(), frameNr)
 
-			data := t.transcoder.EncodeFrame(t.track.ID())
+			frameNr, data := t.transcoder.EncodeFrame(t.track.ID())
 			logger.LogFrameWithMessage(NameSFUConnection, logger.FrameSending, true, true, fmt.Sprintf("trackID=%s frameSize=%d", t.track.ID(), len(data)), uint(frameNr))
-			if err := t.track.WriteFrame(data, frameNr); err != nil {
+			if err := t.track.WriteFrame(data, int(frameNr)); err != nil {
 				panic(err)
 			}
 			logger.LogFrameWithMessage(NameSFUConnection, logger.FrameFullySent, true, true, fmt.Sprintf("trackID=%s", t.track.ID()), uint(frameNr))
 			//	println("END", time.Now().UnixMilli(), frameNr)
 			// TODO Log the sending
-			frameNr++
+			//frameNr++
 		}
 	}()
 }
@@ -178,6 +178,7 @@ func (s *SFUConnection) connectToSFU(clientID uint, authKey string) {
 }
 
 func (s *SFUConnection) preparePeerConnection(clientID uint) {
+	logger.LogWithMessage(NameSFUConnection, logger.SFUPreparingPeerConnection, true, true, fmt.Sprintf("providerKey=%s clientID=%d", s.providerKey, clientID))
 	settingEngine := webrtc.SettingEngine{}
 	settingEngine.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
 	settingEngine.SetReceiveMTU(10000)
@@ -272,6 +273,7 @@ func (s *SFUConnection) preparePeerConnection(clientID uint) {
 	s.peerConnection = peerConnection
 
 	// Add sender tracks
+	logger.LogWithMessage(NameSFUConnection, logger.SFUPeerConnectionAddingTracks, true, true, fmt.Sprintf("providerKey=%s clientID=%d nVideoTracks=%d nAudioTracks=%d", s.providerKey, clientID, len(s.senderVideoTracks), len(s.senderAudioTracks)))
 	for _, track := range s.senderVideoTracks {
 		s.addTrackToPeerConnection(track.track)
 	}
@@ -285,6 +287,7 @@ func (s *SFUConnection) preparePeerConnection(clientID uint) {
 		s.addTrackToPeerConnection(dummyTrack)
 	}
 	s.AddPeerConnectionCallbacks()
+	logger.LogWithMessage(NameSFUConnection, logger.SFUPreparingPeerConnectionCompleted, true, true, fmt.Sprintf("providerKey=%s clientID=%d", s.providerKey, clientID))
 }
 
 func (s *SFUConnection) startListening() {
@@ -333,6 +336,9 @@ func (s *SFUConnection) addOnICECandidateCallback() {
 
 func (s *SFUConnection) addOnTrackCallback() {
 	s.peerConnection.OnTrack(func(track *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
+		logger.LogWithMessage(NameSFUConnection, logger.SFUOnTrackCalled, true, true,
+			fmt.Sprintf("providerKey=%s trackID=%s kind=%s", s.providerKey, track.ID(), track.Kind().String()),
+		)
 		fmt.Printf("WebRTCPeer: MIME type %s\n", track.Codec().MimeType)
 		fmt.Printf("WebRTCPeer: Payload type %d\n", track.PayloadType())
 		fmt.Printf("WebRTCPeer: Track SSRC %d\n", track.SSRC())
@@ -422,7 +428,7 @@ func (s *SFUConnection) addOnTrackCallback() {
 			if frames[p.FrameNr] >= p.FrameLen {
 				// Frame complete
 				completedFrame = true
-				logger.LogFrameWithMessage(NameSFUConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("trackID=%s totalDroppedFrames=%d", track.ID(), nDroppedFrames), uint(p.FrameNr))
+				logger.LogFrameWithMessage(NameSFUConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("trackID=%s frameSize=%d totalDroppedFrames=%d", track.ID(), p.FrameLen, nDroppedFrames), uint(p.FrameNr))
 			}
 
 		}
@@ -521,6 +527,7 @@ func (s *SFUConnection) StartPollingAudioTracks(trackIDs []string) {
 }
 
 func (s *SFUConnection) AddAudioTrack(trackID string) {
+	logger.LogWithMessage(NameSFUConnection, logger.SFUAddingAudioTrack, true, true, fmt.Sprintf("providerKey=%s trackID=%s", s.providerKey, trackID))
 	s.mut.Lock()
 	defer s.mut.Unlock()
 	// TODO Add client id to track ID here, maybe
@@ -536,10 +543,11 @@ func (s *SFUConnection) AddAudioTrack(trackID string) {
 		panic(err)
 	}
 	s.senderAudioTracks[trackID] = NewWebRTCAudioTrack(audioTrack)
-
+	logger.LogWithMessage(NameSFUConnection, logger.SFUAddAudioTrackCompleted, true, true, fmt.Sprintf("providerKey=%s trackID=%s", s.providerKey, trackID))
 }
 
 func (s *SFUConnection) AddVideoTrack(trackID string) {
+	logger.LogWithMessage(NameSFUConnection, logger.SFUAddingVideoTrack, true, true, fmt.Sprintf("providerKey=%s trackID=%s", s.providerKey, trackID))
 	s.mut.Lock()
 	defer s.mut.Unlock()
 	videoRTCPFeedback := []webrtc.RTCPFeedback{
@@ -561,7 +569,7 @@ func (s *SFUConnection) AddVideoTrack(trackID string) {
 		panic(err)
 	}
 	s.senderVideoTracks[trackID] = NewWebRTCVideoTrack(videoTrack, s.transcoder)
-
+	logger.LogWithMessage(NameSFUConnection, logger.SFUAddVideoTrackCompleted, true, true, fmt.Sprintf("providerKey=%s trackID=%s", s.providerKey, trackID))
 }
 
 func (s *SFUConnection) addTrackToPeerConnection(track webrtc.TrackLocal) {

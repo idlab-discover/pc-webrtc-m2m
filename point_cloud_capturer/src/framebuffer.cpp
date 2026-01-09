@@ -3,6 +3,10 @@
 void FrameBuffer::add_to_buffer(Frame* frame)
 {
     std::unique_lock lock(m);
+    if(is_stopped) {
+        delete frame;
+        return;
+    }
     while(frames.size() >= max_size) {
         delete frames.front();
         frames.pop();

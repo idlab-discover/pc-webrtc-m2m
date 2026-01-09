@@ -32,7 +32,7 @@ public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
         IntPtr frame = capture.PollNextPointCloud();
         if (frame != IntPtr.Zero)
         {
-            uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
+           // uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
             //Debug.Log($"Number of points: {nPoints}");
             encodingQueue.EncodePointCloud(frame);
         } 

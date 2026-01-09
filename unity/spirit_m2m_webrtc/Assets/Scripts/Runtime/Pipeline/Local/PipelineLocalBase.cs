@@ -12,7 +12,9 @@ public abstract class PipelineLocalBase : MonoBehaviour
     }
     void OnDestroy()
     {
-        cleanup();    
+        Logger.LogStatusWithMessage(NAME, Logger.Status.Destroying, $"clientID={LocalClient.ClientID}");
+        cleanup();
+        Logger.LogStatusWithMessage(NAME, Logger.Status.Destroyed, $"clientID={LocalClient.ClientID}");
     }
     protected virtual void cleanup()
     {

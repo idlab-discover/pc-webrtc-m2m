@@ -99,6 +99,8 @@ func main() {
 		switch *transcoderType {
 		case "file":
 			tr = transcoder.NewTranscoderFile(*preferredClientID, *providersPath, *transcoderConfigPath)
+		case "spectator":
+			tr = transcoder.NewTranscoderSpectator()
 		case "fixed":
 			fallthrough
 		default:

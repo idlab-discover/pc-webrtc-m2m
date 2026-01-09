@@ -9,9 +9,9 @@
         "useCCs": true,
         "ccMethod": "gcc",
         "ccSettings": {
-            "minBitrate": 2744320,
+            "minBitrate": 262744320,
             "maxBitrate": 262744320,
-            "initialBitrate": 5744320
+            "initialBitrate": 262744320
         },
         "addressAndPort": "127.0.0.1:9000",
         "contentType": "mdc_pc",

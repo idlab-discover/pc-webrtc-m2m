@@ -99,11 +99,12 @@ CAPTURER_SETUP_CODE PrerecordedKinectCapturer::capture_next_frame_internal()
 {
     bool found_valid_frame = false;
     auto frame_ready_callback_copy = frame_ready_callback_instance; // Prevents the use of a potentially invalidated callback during the loop
-    while (!found_valid_frame) {
+    while (!found_valid_frame && keep_working) {
         auto temp_frame = get_single_frame();
         if(temp_frame == nullptr) {
             return CAPTURER_SETUP_CODE::CameraDisconnected;
         }
+        found_valid_frame = temp_frame->is_valid_frame();
         if(frame_ready_callback_copy != nullptr) {
             frame_ready_callback_copy(capturer_id, temp_frame, temp_frame->is_valid_frame());    
         } else {

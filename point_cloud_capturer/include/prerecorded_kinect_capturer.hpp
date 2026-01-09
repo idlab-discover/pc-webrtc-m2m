@@ -41,7 +41,7 @@ class PrerecordedKinectCapturer : public Capturer {
         } catch(...) {
             
         };
-        ~PrerecordedKinectCapturer() {
+        virtual ~PrerecordedKinectCapturer() {
             if(camera_handle != nullptr) {
                 k4a_playback_close(camera_handle);
             }

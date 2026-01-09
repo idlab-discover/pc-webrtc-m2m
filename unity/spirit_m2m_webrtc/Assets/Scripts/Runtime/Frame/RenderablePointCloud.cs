@@ -29,4 +29,8 @@ public abstract class RenderablePointCloud
         Array.Resize(ref Points, Points.Length + (int)size);
         Array.Resize(ref Colors, Colors.Length + (int)size);
     }
+    public override string ToString()
+    {
+        return $"targetTimestamp={TargetTimestamp} totalPoints={TotalPoints} Quality={Quality}";
+    }
 }

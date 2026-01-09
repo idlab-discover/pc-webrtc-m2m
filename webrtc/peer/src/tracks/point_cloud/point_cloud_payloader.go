@@ -33,7 +33,6 @@ func (p *PointCloudPayloader) Payload(mtu uint16, payload []byte) (payloads [][]
 		payloadDataOffset += currentFragmentSize
 		payloadRemaining -= currentFragmentSize
 	}
-	p.frameCounter++
 	return payloads
 }
 

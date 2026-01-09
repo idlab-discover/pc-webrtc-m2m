@@ -16,13 +16,20 @@ public class LoopbackSessionManager : SessionManagerBase
         //OnSessionCreated += createLoopbackUsers;
         OnConnectedToSession += parseSessionJoined;
         OnNewClientConnected += startTracksForRemote;
+        isReadyToConnect = true;
+
     }
     private void startTracksForRemote(RemoteConnectedClient client, string settings)
     {
-        client.GetReceivingTracks().ForEach(track =>
+        LoopbackProvider provider = (LoopbackProvider) ConnectionProviderRepository.GetProvider("loopback");
+        if (provider == null)
         {
-            track.status = TrackStatus.Started;
-        });
+            Debug.LogWarning($"[THIS SHOULD NEVER HAPPEN] Provider loopback not found");
+            return; // Provider not found, skip
+        }
+        client.SetAllTracksNetworkReceiver(provider as IReceiverSupported);
+        client.StartAllTracks();
+        client.GetReceivingTracks().ForEach(t => provider.SubscribeClientToTrack(client.ClientID, t.trackID));
     }
     public override void AddAudioTrack()
     {
@@ -61,6 +68,7 @@ public class LoopbackSessionManager : SessionManagerBase
             foreach(var t in p.videoTracks)
             {
                 t.providerKey = "loopback";
+                t.trackID = $"cl{joinMessage.preferredClientID}_{t.trackID}";
                 provMessage.videoTracks.Add(t);
             }   
         }
@@ -80,7 +88,7 @@ public class LoopbackSessionManager : SessionManagerBase
                 clientMessage.receivingTracks.Add(new()
                 {
                     providerKey = "loopback",
-                    trackID = t.trackID,
+                    trackID = $"cl{c.clientID}_{t.trackID}",
                     //pipelineSettings =
                 });
             }
@@ -96,17 +104,31 @@ public class LoopbackSessionManager : SessionManagerBase
     }
     private void parseSessionJoined(LocalConnectedClient client, string json)
     {
-      
-       // Debug.Log(json);
+        // Debug.Log(json);
         //SessionConnectionMessage message = SessionConnectionMessage.CreateFromJSON(json);
         // Add providers
-
+        onConnectionProviderRequested(LocalClient, new ClientAddedToProviderMessage
+        {
+            providerKey = "loopback",
+            providerType = "loopback",
+            address= "none",
+            port = 0,
+        });
+        LoopbackProvider provider = (LoopbackProvider) ConnectionProviderRepository.GetProvider("loopback");
+        if (provider == null)
+        {
+            Debug.LogWarning($"Provider loopback not found");
+            return; // Provider not found, skip
+        }
+        provider.LocalClientID = client.ClientID;
+        LocalClient.SetAllTracksSender(provider as ISenderSupported);
+        LocalClient.StartAllTracks();
+        provider.AddLocalTracks(LocalClient.GetReceivingTracks().Select(t => t.trackID).ToList());
     }
 
-    public override void DisconnectFromSession()
+    protected override void disconnectFromSessionInternal()
     {
-        
-        throw new System.NotImplementedException();
+        IsConnected = false;
     }
 
     protected override void connectToSessionManagerInternal()

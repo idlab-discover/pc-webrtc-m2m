@@ -9,6 +9,7 @@ using UnityEngine.UIElements;
 
 public class MultiCaptureSetup : IDisposable
 {
+    private const string NAME = "MultiCaptureSetup";
     public uint NumberOfCapturers { get { return (uint)capturers.Count; } }
     public CaptureType CapType { get; private set; }
     protected bool disposedValue;
@@ -20,6 +21,7 @@ public class MultiCaptureSetup : IDisposable
 
     public MultiCaptureSetup(uint fps, FrameMode frameMode, FrameCleanupSettingsEx frameCleanupSettings, List<MultiCaptureSingleCam> capturers, bool startCaptureThread)
     {
+        Logger.LogStatusWithMessage(NAME, Logger.Status.Creating, $"fps={fps} frameMode={frameMode} nCaptures={capturers.Count} startCaptureThread={startCaptureThread}");
         this.isUsingCaptureThread = startCaptureThread;
         this.capturers = capturers;
         CapType = capturers[0].CaptureType;
@@ -44,6 +46,7 @@ public class MultiCaptureSetup : IDisposable
                 capturers[i].FreeHelperSettingsHandle();
             }
         settingPtrsHandle.Free();
+        Logger.LogStatus(NAME, Logger.Status.Created);
     }
 
     public IntPtr PollNextPointCloud()
@@ -99,8 +102,11 @@ public class MultiCaptureSetup : IDisposable
     public void Dispose()
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Logger.LogStatus(NAME, Logger.Status.Disposing);
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+        Logger.LogStatus(NAME, Logger.Status.Disposed);
+        Debug.Log("Disposed MultiCaptureSetup");
     }
 
     #endregion

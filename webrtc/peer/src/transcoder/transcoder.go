@@ -3,10 +3,11 @@ package transcoder
 import "time"
 
 type Transcoder interface {
-	EncodeFrame(string) []byte
+	EncodeFrame(string) (uint32, []byte)
 }
 
 type TranscoderFixed struct {
+	frameCounter  uint32
 	bitrate       uint
 	fps           uint
 	lastFrameTime time.Time
@@ -15,10 +16,10 @@ type TranscoderFixed struct {
 
 func NewTranscoderFixed(bitrate uint, fps uint) *TranscoderFixed {
 	interval := time.Duration(1000.0/float64(fps)) * time.Millisecond
-	return &TranscoderFixed{bitrate: bitrate, fps: fps, lastFrameTime: time.Now(), sleepTime: interval}
+	return &TranscoderFixed{frameCounter: 0, bitrate: bitrate, fps: fps, lastFrameTime: time.Now(), sleepTime: interval}
 }
 
-func (t *TranscoderFixed) EncodeFrame(trackID string) []byte {
+func (t *TranscoderFixed) EncodeFrame(trackID string) (uint32, []byte) {
 	now := time.Now()
 	nextFrameTime := t.lastFrameTime.Add(t.sleepTime)
 	sleepDuration := nextFrameTime.Sub(now)
@@ -29,7 +30,9 @@ func (t *TranscoderFixed) EncodeFrame(trackID string) []byte {
 		// If we're behind, reset to now to avoid drift
 		t.lastFrameTime = now
 	}
-	return make([]byte, t.bitrate/t.fps/8)
+	tempCounter := t.frameCounter
+	t.frameCounter++
+	return tempCounter, make([]byte, t.bitrate/t.fps/8)
 }
 
 /*type TranscoderRemote struct {

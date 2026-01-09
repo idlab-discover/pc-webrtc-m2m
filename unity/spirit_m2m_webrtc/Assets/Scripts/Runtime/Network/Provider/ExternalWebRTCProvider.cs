@@ -31,6 +31,7 @@ public class ExternalWebRTCProvider : ConnectionProviderBase, ISenderSupported, 
             Logger.LogStatus(NAME, Logger.Status.ProviderNoFreePort);
             return;
         }
+
         _portRemote = portRemote.Value;
         _portSelf = portSelf.Value;
         Logger.LogStatusWithMessage(NAME, Logger.Status.Creating, $"portSelf={_portSelf} portRemote={_portRemote}");
@@ -45,7 +46,8 @@ public class ExternalWebRTCProvider : ConnectionProviderBase, ISenderSupported, 
         sender = new ExternalWebRTCSender(ptr, pMsg.senderVideoTracks, pMsg.senderAudioTracks); // TODO This will eventually need to be dynamic
         peerProcess = new Process();
         peerProcess.StartInfo.FileName = Application.dataPath + "/peer/peer.exe"; // TODO Read this from config file, maybe add to session config pairs of {providerType, configPath}
-        peerProcess.StartInfo.Arguments = $"-i -c {localConnectedClient.ClientID} -p {_portSelf} -r {_portRemote} --vt {sender.VideoTracksString} --sfuKey {pMsg.providerKey} " +
+        peerProcess.StartInfo.Arguments = $"-i -c {localConnectedClient.ClientID} -p {_portSelf} -r {_portRemote} " +
+            $"--vt {sender.VideoTracksString} --sfuKey {pMsg.providerKey} " +
             $"--sfuIP {pMsg.address} --sfuPort {pMsg.port} --sfuAuth TODO";
         UnityEngine.Debug.Log($"-i -c {localConnectedClient.ClientID} -p {_portSelf} -r {_portRemote} --vt {sender.VideoTracksString} --at {sender.AudioTracksString} --sfuKey {pMsg.providerKey} " +
             $"--sfuIP {pMsg.address} --sfuPort {pMsg.port} --sfuAuth TODO");
@@ -92,6 +94,11 @@ public class ExternalWebRTCProvider : ConnectionProviderBase, ISenderSupported, 
         {
             WebRTCInvoker.free_webrtc_connection(ptr);
             ptr = IntPtr.Zero;
+        }
+        if(peerProcess != null && !peerProcess.HasExited)
+        {
+            peerProcess.Kill();
+            peerProcess = null;
         }
     }
 

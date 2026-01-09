@@ -123,6 +123,7 @@ PointCloud *MultiCapturer::poll_next_combined_point_cloud()
     std::vector<PointCloud*> point_clouds;
     point_clouds.reserve(capturers.size());
     unsigned int total_points = 0;
+
     for (auto& capturer : capturers) {
         PointCloud* pc = capturer->poll_next_point_cloud();
         // If nullptr -> keep polling

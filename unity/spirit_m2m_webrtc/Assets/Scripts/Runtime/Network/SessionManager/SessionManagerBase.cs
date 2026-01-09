@@ -74,6 +74,19 @@ public abstract class ConnectedClient<TTrackInfo> where TTrackInfo : ReceivingTr
         CodecMode = codecMode;
         receivingTracks = new();
     }
+
+    public void StartAllTracks()
+    {
+        lock (_lock)
+        {
+            foreach (var track in receivingTracks.Values)
+            {
+                track.status = TrackStatus.Started;
+            }
+        }
+    }
+    
+
     // TODO maybe keep track of active tracks here
     public void AddVideoTrack(TTrackInfo track)
     {
@@ -154,6 +167,16 @@ public class LocalConnectedClient : ConnectedClient<LocalTrackInfo>
     public LocalConnectedClient(uint clientID, string codecMode) : base(clientID, codecMode)
     {
     }
+    public void SetAllTracksSender(ISenderSupported sender)
+    {
+        lock (_lock)
+        {
+            foreach (var track in receivingTracks.Values)
+            {
+                track.SetSender(sender.GetSender(track));
+            }
+        }
+    }
     public void SetTracksNetworkSender(List<TrackSimple> tracks, ISenderSupported sender)
     {
         lock (_lock) {
@@ -212,6 +235,16 @@ public class RemoteConnectedClient : ConnectedClient<RemoteTrackInfo>
     {
     }
 
+    public void SetAllTracksNetworkReceiver(IReceiverSupported receiver)
+    {
+        lock (_lock)
+        {
+            foreach (var track in receivingTracks.Values)
+            {
+                track.SetReceiver(receiver.GetReceiver(track, ClientID));
+            }
+        }
+    }
     public void SetTracksNetworkReceiver(List<TrackSimple> tracks, IReceiverSupported receiver)
     {
         lock (_lock)
@@ -232,6 +265,7 @@ public abstract class SessionManagerBase
 {
     protected abstract string NAME { get; }
 
+    public delegate void ReadyToConnectCallback();
     public delegate void ConnectionToSessionManagerCallback();
     public delegate void SessionCreatedCallback();
     public delegate void ConnectedToSessionCallback(LocalConnectedClient client, string sessionInfo);
@@ -239,6 +273,7 @@ public abstract class SessionManagerBase
     public delegate void NewClientConnectedCallback(RemoteConnectedClient client, string clientSettings);
     public delegate void ClientDisconnectedCallback(RemoteConnectedClient client);
 
+    public event ReadyToConnectCallback OnReadyToConnect;
     public event ConnectionToSessionManagerCallback OnConnectedToSessionManager;
     public event SessionCreatedCallback OnSessionCreated;
     public event ConnectedToSessionCallback OnConnectedToSession;
@@ -250,9 +285,11 @@ public abstract class SessionManagerBase
     public LocalConnectedClient LocalClient;
     public Dictionary<uint, RemoteConnectedClient> ConnectedClients = new();
     public bool IsConnected { get; protected set; }
-
+    protected bool isReadyToConnect = false;
+    private bool readyToConnectCalled = false;
     public string SessionID { get; protected set; }
     // OnConnectedCb
+    private List<ConnectionProviderBase> createdProviders = new();
 
     public void ConnectToSessionManager()
     {
@@ -286,7 +323,8 @@ public abstract class SessionManagerBase
             Logger.LogStatusWithMessage(NAME, Logger.Status.ProviderNotFound, $"type={pMsg.providerType} provider={pMsg.providerKey}");
             return;
         }
-         _ = prov.ConnectAsync();
+        createdProviders.Add(prov);
+        _ = prov.ConnectAsync();
        
 
     }
@@ -353,7 +391,18 @@ public abstract class SessionManagerBase
     }
     public abstract void CreateNewSession(string name, JoinSessionMessage joinMessage, string sessionConfig);
     public abstract void ConnectToSession(string name, JoinSessionMessage joinMessage);
-    public abstract void DisconnectFromSession();
+    public void DisconnectFromSession()
+    {
+        Logger.LogStatus(NAME, Logger.Status.ManagerDisconnecting);
+        disconnectFromSessionInternal();
+        foreach (var prov in createdProviders)
+        {
+            prov.Dispose();
+        }
+        Logger.LogStatus(NAME, Logger.Status.ManagerDisconnected);
+        
+    }
+    protected abstract void disconnectFromSessionInternal();
     public abstract void AddVideoTrack(ReceivingTrackInfo track);
     public abstract void AddAudioTrack();
 
@@ -400,5 +449,24 @@ public abstract class SessionManagerBase
         Logger.LogStatus(NAME, Logger.Status.ManagerSessionCreated);
         OnSessionCreated?.Invoke();
         onConnectedToSession(assignedClientID, connectMessage, sessionInfo);
+    }
+
+    public void CheckIfReadyToConnect()
+    {
+        lock (_lock)
+        {
+            if (isReadyToConnect && !readyToConnectCalled)
+            {
+                onReadyToConnect();
+                return;
+            }
+        }
+    }
+    private void onReadyToConnect()
+    {
+        Logger.LogStatus(NAME, Logger.Status.ManagerReadyToConnect);
+        readyToConnectCalled = true;
+        OnReadyToConnect?.Invoke();
+        
     }
 }

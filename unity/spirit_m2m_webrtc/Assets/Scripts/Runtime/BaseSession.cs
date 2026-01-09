@@ -61,6 +61,13 @@ public class BaseSession : MonoBehaviour
         sessionManager.OnConnectedToSessionManager += connectedToSessionManagerCallback;
         sessionManager.OnSessionCreated += sessionCreatedCallback;
         sessionManager.OnConnectedToSession += connectedToSessionCallback;
+        sessionManager.OnReadyToConnect += ReadyToConnect;
+        sessionManager.CheckIfReadyToConnect();
+        
+    }
+
+    public void ReadyToConnect()
+    {
         _ = sessionManager.ConnectToSessionManagerAsync();
     }
 
@@ -288,7 +295,11 @@ public class BaseSession : MonoBehaviour
         }
         
     }
-
+    private void OnApplicationQuit()
+    {
+        Debug.Log("Application quitting, flushing logs");
+        Logger.SetFlushAll();
+    }
     // TODO
     private Dictionary<string, CodecModeTrack> collectTrackInfo()
     {

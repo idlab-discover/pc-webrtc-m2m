@@ -34,9 +34,9 @@ public class LoopbackProvider : ConnectionProviderBase, ISenderSupported, IRecei
         public bool NextFrameReady;
         public void SetFrame(IntPtr data, uint size)
         {
-            lock(_lock) { 
+            lock(_lock) {
                 NextFrame = new LoopbackFrame(data, size);
-                NextFrameReady = true;
+                NextFrameReady = true;  
                 Monitor.Pulse(_lock);
             }
         }
@@ -52,14 +52,36 @@ public class LoopbackProvider : ConnectionProviderBase, ISenderSupported, IRecei
     private readonly object _lock = new object();
     private LoopbackSender sender;
     private Dictionary<uint, LoopbackReceiver> receivers = new(); // In general you dont want to do this but we need it to implement the loopback mechanism
-
-
+    private Dictionary<string, List<(uint, string)>> subscribedClients = new();
+    public uint LocalClientID;
 
     public LoopbackProvider(LocalConnectedClient localClient, ClientAddedToProviderMessage pMsg) : base(localClient, pMsg) { 
         
     }
 
     public override bool IsReady() => true;
+
+    public void AddLocalTracks(List<string> trackIDs)
+    {
+        lock(_lock)
+        {
+            foreach (string trackID in trackIDs)
+            {
+                subscribedClients[trackID] = new List<(uint, string)>();
+            }
+        }
+    }
+    public void SubscribeClientToTrack(uint clientID, string trackID)
+    {
+        lock(_lock)
+        {
+            string originID = $"cl{LocalClientID}_{trackID.Substring(trackID.IndexOf("_") + 1)}";
+            if (subscribedClients.TryGetValue(originID, out var clients))
+            {
+                clients.Add((clientID, trackID));
+            }
+        }
+    }
 
     public void AddReceiver(LoopbackReceiver receiver)
     {
@@ -79,9 +101,14 @@ public class LoopbackProvider : ConnectionProviderBase, ISenderSupported, IRecei
     {
         lock (_lock)
         {
-            foreach (var r in receivers.Values)
+            List<(uint, string)> clients = subscribedClients[trackID];
+            foreach ((uint id, string remoteTrackID) client in clients)
             {
-                r.SetVideoTrackData(trackID, data, size);
+                UnityEngine.Debug.Log($"LoopbackProvider: Sending video data for trackID {trackID} to clientID {client.id}");
+                if (receivers.TryGetValue(client.id, out var receiver))
+                {
+                    receiver.SetVideoTrackData(client.remoteTrackID, data, size);
+                }
             }
         }
     }

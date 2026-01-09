@@ -104,7 +104,7 @@ class Capturer {
         }
         virtual CAPTURER_SETUP_CODE init() = 0;
         virtual CAPTURER_SETUP_CODE capture_next_frame() = 0;
-        virtual void stop() { frame_buffer.stop_buffer(); keep_working=false; if(worker.joinable()) worker.join(); };
+        virtual void stop() { frame_buffer.stop_buffer(); keep_working=false; };
         virtual Frame* poll_next_frame() = 0; 
         virtual void* get_calibration() = 0;
         virtual uint32_t get_calibration_size() = 0;
@@ -143,7 +143,7 @@ class Capturer {
         unsigned int frame_nr = 0;
         unsigned int fps;
         FrameBuffer frame_buffer;
-        std::thread worker;
+        std::jthread worker;
         FrameCleanupSettings cleanup_settings {
             .blackout_block_size=1,
             .should_apply_depth_filter=false,

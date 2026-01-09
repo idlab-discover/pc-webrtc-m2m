@@ -65,15 +65,18 @@ func NewTranscoderFile(preferredClientID uint, trackPath string, configPath stri
 	return t
 }
 
-func (t *TranscoderFile) EncodeFrame(trackID string) []byte {
+func (t *TranscoderFile) EncodeFrame(trackID string) (uint32, []byte) {
 	track, ok := t.tracks[trackID]
 	if !ok {
-		return nil
+		return 0, nil
 	}
-	return track.NextFrame()
+	tempFrameCounter := track.frameCounter
+	track.frameCounter++
+	return tempFrameCounter, track.NextFrame()
 }
 
 type TranscoderFileTrack struct {
+	frameCounter     uint32
 	configPath       string
 	contentDirectory string
 	maxFrameNr       uint
@@ -105,6 +108,7 @@ func NewTranscoderFileTrack(trackID string, path string, maxFrameNr uint) *Trans
 	sleepTime := time.Duration(1000.0/float64(cfg.FPS)) * time.Millisecond
 
 	f := &TranscoderFileTrack{
+		frameCounter:     0,
 		configPath:       path,
 		contentDirectory: cfg.ContentDirectory,
 		fps:              cfg.FPS,

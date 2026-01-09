@@ -1,9 +1,12 @@
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -28,8 +31,43 @@ public class WebSocketSessionManager : SessionManagerBase
     public WebSocketSessionManager(string configPath) : base()
     {
         config = WebSocketSessionManagerConfig.CreateFromJSON(Application.dataPath + configPath);
-        Debug.Log("WebSocketSessionManagerConfig loaded: " + config.managerIP + " preferredClientID: " + config.preferredClientID);
+        Debug.Log($"WebSocketSessionManagerConfig loaded: IP={config.managerIP} PrefID={config.preferredClientID} " +
+            $"StartManager={config.startNewManager} ProvIP={config.managerProvisionerIP} StartCfg={config.managerProvisionerConfigPath}");
+        if (config.startNewManager && config.managerProvisionerIP != "")
+        {
+            _ = startSessionManagerInstance();
+           
+        } else
+        {
+            isReadyToConnect = true;
+        }
+    }
 
+     private async Task startSessionManagerInstance()
+    {
+        using var client = new HttpClient();
+
+        var url = $"http://{config.managerProvisionerIP}/start";
+
+        WebSocketSessionManagerCreate startConfig = WebSocketSessionManagerCreate.CreateFromJSON(Application.dataPath + config.managerProvisionerConfigPath);
+        startConfig.address = config.managerIP;
+        // TODO Maybe do something with the config
+        string json = JsonConvert.SerializeObject(startConfig);
+
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        Debug.Log($"Starting new Session Manager via {url}");
+        HttpResponseMessage response = await client.PostAsync(url, content);
+        Debug.Log($"Reponse code: {response.StatusCode}");
+        if(response.IsSuccessStatusCode)
+        {
+            Debug.Log("Session Manager started successfully.");
+            isReadyToConnect = true;
+            CheckIfReadyToConnect();
+        }
+        else
+        {
+            Debug.LogError("Failed to start Session Manager.");
+        }
     }
 
     public override void AddAudioTrack()
@@ -93,10 +131,9 @@ public class WebSocketSessionManager : SessionManagerBase
         }
         catch (Exception ex)
         {
-            Debug.LogError("Exception: " + ex.Message);
+            Debug.LogError($"Server URI {serverUri} Exception: {ex.Message}");
         }
     }
-
 
     // Method to start the listener thread
     private void startListenerTask()
@@ -250,7 +287,11 @@ public class WebSocketSessionManager : SessionManagerBase
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", ct);
+                    if(ws.State == WebSocketState.Open)
+                    {
+                        await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", ct);
+                    }
+                        
                     return null;
                 }
 
@@ -264,14 +305,16 @@ public class WebSocketSessionManager : SessionManagerBase
         }
     }
 
-    public override void DisconnectFromSession()
+    protected override void disconnectFromSessionInternal()
     {
         // Probably doesnt have to be async as it is called when Session GO is destroyed
         if (ws != null && ws.State == WebSocketState.Open)
         {
             listenerCts.Cancel();
             //  ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None).GetAwaiter().GetResult();
+            //ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None).GetAwaiter().GetResult(); // Maybe change this to make it proper async? Might cause problems with unity flow though
         }
+        IsConnected = false;
     }
 
 

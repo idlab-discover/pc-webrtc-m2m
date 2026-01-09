@@ -137,7 +137,13 @@ public class SafeCallback
     public void Dispose()
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Logger.LogStatus(NAME, Logger.Status.Disposing);
+        if(IsConnected)
+        {
+            Disconnect();
+        }
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+        Logger.LogStatus(NAME, Logger.Status.Disposed);
     }
 }

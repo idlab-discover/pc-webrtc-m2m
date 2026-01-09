@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 
 public class ExternalWebRTCReceiver : NetworkReceiverBase
 {
+    protected override string NAME => "ExternalWebRTCReceiver";
     private IntPtr clientPtr;
     private Dictionary<string, IntPtr> internalTracks = new();
     public ExternalWebRTCReceiver(IntPtr clientPtr)

@@ -9,6 +9,7 @@ using UnityEngine;
 
 public abstract class NetworkReceiverBase : IDisposable
 {
+    protected abstract string NAME { get; }
     public bool IsValid { get; protected set; }
     private bool disposedValue;
     protected readonly object _lock = new();
@@ -18,6 +19,7 @@ public abstract class NetworkReceiverBase : IDisposable
 
     public void StartPollVideoTrack(uint clientID, string trackID, OnStreamDataReceivedCb cb)
     {
+        Logger.LogStatusWithMessage(NAME, Logger.Status.ReceiverStartPollVideoTrack, $"clientID={clientID}, trackID={trackID}");
         Thread worker;
         lock (_lock)
         {

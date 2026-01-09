@@ -52,7 +52,7 @@ public static class ConnectionProviderRepository
             return null;
         }
         ConnectionProviderBase provider = (ConnectionProviderBase)constructor.Invoke(new object[] { localClient, pMsg });
-        Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreateSucces, $"type={pMsg.providerType}  key= {pMsg.providerKey}");
+        Logger.LogStatusWithMessage(NAME, Logger.Status.FactoryCreateSucces, $"type={pMsg.providerType}  key={pMsg.providerKey}");
         providers.Add(pMsg.providerKey, provider);
         return provider;
     }

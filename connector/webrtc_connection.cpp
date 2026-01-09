@@ -65,7 +65,7 @@ int WebRTCConnection::connect() {
 	inet_pton(AF_INET, "127.0.0.1", &si_send.sin_addr.s_addr);
 #endif
 
-    worker = std::thread(&WebRTCConnection::listen_for_data, this);
+    worker = std::jthread(&WebRTCConnection::listen_for_data, this);
 	initialized = true;
 	return ConnectionSuccess;
 }
@@ -74,17 +74,34 @@ void WebRTCConnection::disconnect()
 {
 	// TODO Send disconnect message to peer maybe
 	//WSACleanup();
+	keep_working = false;
 	closesocket(s_recv);
+	std::unique_lock<std::mutex> lk_recv(m_recv_data);
+	std::unique_lock<std::mutex> guard(m_send_data);
+	
+	if (initialized) {
+#ifdef WIN32
+		WSACleanup();
+#endif
+	}
+	initialized = false;
+	std::unique_lock<std::mutex> lk_peer(m_peer_ready);
+	cv_peer_ready.notify_all();
+	cv_listening_for_data.wait(lk_recv, [this] {return !is_listening_for_data; });
+	
 }
 
 int WebRTCConnection::wait_for_peer_connection() {
 	std::unique_lock<std::mutex> lk(m_peer_ready);
-	cv_peer_ready.wait(lk, [this] {return peer_ready; });
+	cv_peer_ready.wait(lk, [this] {return peer_ready || !initialized; });
 	return connection_status;
 }
 
 void WebRTCConnection::listen_for_data() {
 	// Enable the listening thread to join
+	std::unique_lock<std::mutex> lk_lst(m_recv_data);
+	is_listening_for_data = true;
+	lk_lst.unlock();
 	while (keep_working) {
 
 		// Make sure only one process is listening to the socket
@@ -95,6 +112,9 @@ void WebRTCConnection::listen_for_data() {
 
 		if ((size = recvfrom(s_recv, buf, BUFLEN, 0, NULL, NULL)) == SOCKET_ERROR) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			continue;
+		}
+		if (size == 0) {
 			continue;
 		}
 		//custom_log("listen_for_data: recvfrom: got " + std::to_string(size) + " bytes", Debug);
@@ -175,6 +195,10 @@ void WebRTCConnection::listen_for_data() {
 		// Release the mutex
 		guard.unlock();
 	}
+	std::unique_lock<std::mutex> lk_lst2(m_recv_data);
+	is_listening_for_data = false;
+	lk_lst2.unlock();
+	cv_listening_for_data.notify_all();
 }
 
 ConnectedClient* WebRTCConnection::find_client(unsigned int client_id) {
@@ -220,6 +244,7 @@ unsigned int WebRTCConnection::add_track(const std::string& track_id)
 
 int WebRTCConnection::send_track_frame(unsigned int client_id, void* data, uint32_t size, uint32_t internal_id, uint32_t frame_nr)
 {
+	std::unique_lock<std::mutex> guard(m_send_data);
 	if (!initialized) {
 		return -1;
 	}
@@ -233,7 +258,7 @@ int WebRTCConnection::send_track_frame(unsigned int client_id, void* data, uint3
 	char* temp_d = reinterpret_cast<char*>(data);
 
 	// Make sure only one process is sending out packets
-	std::unique_lock<std::mutex> guard(m_send_data);
+	
 
 	// Send out packets as long as needed
 	while (remaining > 0 && keep_working) {
