@@ -31,6 +31,7 @@ struct PacketType {
 		RemoteClientTracksPacket = 2,
 		ControlPacket = 3,
 		TrackStatusPacket = 4,
+
 		TilePacket = 11,
 		AudioPacket = 21,
 

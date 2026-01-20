@@ -37,7 +37,7 @@
         "flushInterval": 100,
         "pointCloud": {
             "limitLogging": true,
-            "everyNFrames": 10
+            "everyNFrames": 100
         },
         "audio": {
             "limitLogging": true,

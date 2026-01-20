@@ -21,6 +21,7 @@ type ClientConnection struct {
 	ClientID          uint
 	AuthKey           string
 	CodecMode         string
+	PipelineType      string
 	websocket         *ThreadSafeWebsocket
 	config            map[string]interface{}
 	IsReady           bool
@@ -119,9 +120,12 @@ func (clc *ClientConnection) SetupClient(ws *ThreadSafeWebsocket) {
 }
 
 type RemoteClientMessage struct {
-	ClientID    uint              `json:"clientID"`
-	VideoTracks []ClientTrackInfo `json:"videoTracks"`
-	AudioTracks []ClientTrackInfo `json:"audioTracks"`
+	ClientID       uint              `json:"clientID"`
+	CodecMode      string            `json:"codecMode"`
+	ClientSettings string            `json:"clientSettings"`
+	PipelineType   string            `json:"pipelineType"`
+	VideoTracks    []ClientTrackInfo `json:"videoTracks"`
+	AudioTracks    []ClientTrackInfo `json:"audioTracks"`
 }
 
 func (clc *ClientConnection) AddRemoteClient(remoteClient *ClientConnection) {
@@ -148,6 +152,7 @@ func (clc *ClientConnection) AddRemoteClientUnsafe(remoteClient *ClientConnectio
 	}
 	rmMsg := RemoteClientMessage{
 		ClientID:    remoteClient.ClientID,
+		CodecMode:   remoteClient.CodecMode,
 		VideoTracks: videoTracks,
 		AudioTracks: audioTracks,
 	}
@@ -188,7 +193,9 @@ func (clc *ClientConnection) handleJoinMessage(payload json.RawMessage) {
 	fmt.Printf("Received JoinSessionMessage: %+v\n", msg)
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
+	clc.CodecMode = msg.CodecMode
 
+	// Validate providers
 	validProviders := []ConnectionProviderMessage{}
 	validProviderConnections := map[string]*ProviderConnection{}
 	for i := range msg.Providers {

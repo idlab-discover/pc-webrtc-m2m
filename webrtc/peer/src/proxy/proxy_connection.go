@@ -7,7 +7,6 @@ import (
 	"goweb/peer/src/utils"
 	"net"
 	"sync"
-	"time"
 )
 
 const NameProxyConnection = "ProxyConnection"
@@ -117,6 +116,8 @@ func (rc *RemoteCapturer) addFrameContent(p RemoteInputPacketHeader, buffer []by
 	}
 }
 
+type OnSubscribeToTracksReceived func(clientID uint32, videoTrackIDs []string, audioTrackIDs []string)
+
 type ProxyConnection struct {
 	addr *net.UDPAddr
 	conn *net.UDPConn
@@ -128,18 +129,21 @@ type ProxyConnection struct {
 	rm_client_mutex      sync.Mutex
 
 	WsHandler *utils.ThreadSafeWebsocket
+
+	OnSubscribeToTracksReceived OnSubscribeToTracksReceived
 }
 
 type SetupCallback func(int)
 
 func NewProxyConnection() *ProxyConnection {
 	return &ProxyConnection{
-		addr:             nil,
-		conn:             nil,
-		m:                utils.NewPriorityPreferenceLock(),
-		remote_capturers: make(map[uint32]*RemoteCapturer), // Video and audio
-		send_mutex:       sync.Mutex{},
-		WsHandler:        nil,
+		addr:                 nil,
+		conn:                 nil,
+		m:                    utils.NewPriorityPreferenceLock(),
+		remote_capturers:     make(map[uint32]*RemoteCapturer), // Video and audio
+		remote_client_tracks: map[string]uint32{},
+		send_mutex:           sync.Mutex{},
+		WsHandler:            nil,
 	}
 }
 
@@ -250,12 +254,21 @@ func (pc *ProxyConnection) StartListening(nTracks uint32) {
 			} else if ptype == RemoteClientTracksType {
 				pc.rm_client_mutex.Lock()
 				bufBinary := bytes.NewBuffer(buffer[4:])
-				var nEntries uint32
-				err := binary.Read(bufBinary, binary.LittleEndian, &nEntries)
+				var clientID uint32
+				err := binary.Read(bufBinary, binary.LittleEndian, &clientID)
 				if err != nil {
 					fmt.Printf("WebRTCPeer: Error: %s\n", err)
 					return
 				}
+				var nEntries uint32
+				err = binary.Read(bufBinary, binary.LittleEndian, &nEntries)
+				if err != nil {
+					fmt.Printf("WebRTCPeer: Error: %s\n", err)
+					return
+				}
+				println("Received subscription for", nEntries, "tracks for client", clientID)
+				videoIDs := make([]string, 0)
+				audioIDs := make([]string, 0)
 				for i := uint32(0); i < nEntries; i++ {
 					var trackIDLen uint32
 					err := binary.Read(bufBinary, binary.LittleEndian, &trackIDLen)
@@ -276,10 +289,21 @@ func (pc *ProxyConnection) StartListening(nTracks uint32) {
 						fmt.Printf("WebRTCPeer: Error: %s\n", err)
 						return
 					}
+					var isVideo bool
+					err = binary.Read(bufBinary, binary.LittleEndian, &isVideo)
+					if err != nil {
+						fmt.Printf("WebRTCPeer: Error: %s\n", err)
+						return
+					}
+					if isVideo {
+						videoIDs = append(videoIDs, string(trackID))
+					} else {
+						audioIDs = append(audioIDs, string(trackID))
+					}
 					pc.remote_client_tracks[string(trackID)] = internalTrackID
-					println("Mapping remote track", string(trackID), "to internal ID", internalTrackID)
+					println("Mapping remote track", string(trackID), "to internal ID", internalTrackID, "isVideo:", isVideo)
 				}
-
+				pc.OnSubscribeToTracksReceived(clientID, videoIDs, audioIDs)
 				pc.rm_client_mutex.Unlock()
 			}
 		}
@@ -352,8 +376,8 @@ func (pc *ProxyConnection) NextFrame(internalTrackID uint32) (uint32, []byte) {
 	data := remoteCapturer.complete_frame.fileData
 	frameNr := remoteCapturer.complete_frame.frameNr
 	if frameNr%10 == 0 {
-		fmt.Printf("WebRTCPeer: [VIDEO] Sending out frame %d of internalTrackID %d with size %d at %d\n",
-			frameNr, internalTrackID, remoteCapturer.complete_frame.fileLen, time.Now().UnixNano()/int64(time.Millisecond))
+		//fmt.Printf("WebRTCPeer: [VIDEO] Sending out frame %d of internalTrackID %d with size %d at %d\n",
+		//	frameNr, internalTrackID, remoteCapturer.complete_frame.fileLen, time.Now().UnixNano()/int64(time.Millisecond))
 	}
 	remoteCapturer.ready_status = false
 	//remoteCapturer.complete_tiles[tile] = remoteCapturer.complete_tiles[tile][:0] // Clear the complete tile buffer for this tile

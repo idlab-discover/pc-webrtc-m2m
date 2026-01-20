@@ -11,9 +11,11 @@ public abstract class PipelineRemotePointcloudBase : PipelineRemoteBase
 
     public override void Init(SessionInfo sessionInfo, RemoteConnectedClient client)
     {
+        Logger.LogStatusClient(NAME, Logger.Status.Initializing, client.ClientID);
         base.Init(sessionInfo, client);
         this.playbackBuffer = new PointCloudBuffer(sessionInfo.playbackBufferSettings, 0, 30);
         pointCloudRendererPrefab.Init(client.ClientID);
+        Logger.LogStatusClient(NAME, Logger.Status.Initialized, client.ClientID);
     }
 
     private void Update()

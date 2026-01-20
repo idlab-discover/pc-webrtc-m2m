@@ -11,7 +11,8 @@ public:
 	void disconnect();
 	int wait_for_peer_connection();
 	ConnectedClient* add_client(unsigned int client_id);
-	unsigned int add_track(const std::string& track_id);
+	unsigned int add_track(const std::string& track_id, bool is_video);
+	std::vector<unsigned int> add_tracks(unsigned int client_id, char* const* track_ids, uint8_t* is_video, size_t count);
 	int send_track_frame(unsigned int client_id, void* data, uint32_t size, uint32_t internal_id, uint32_t frame_nr);
 private:
 	bool is_listening_for_data;
@@ -54,6 +55,8 @@ private:
 	char* serialize_tracks_name_to_id(size_t& out_size);
 	int send_packet(char* data, uint32_t size, uint32_t _packet_type);
 	int send_remote_client_track_packet(void* data, uint32_t size);
+
+	void write_u32_le(char*& buffer, uint32_t value);
 	
 	
 };

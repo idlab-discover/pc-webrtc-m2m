@@ -50,6 +50,7 @@ const (
 	ClientAddingTrackFromOther    uint = 2008
 	ClientSignalRenegotiation     uint = 2009
 	ClientOnTrackCalled           uint = 2010
+	ClientInvalidTrack            uint = 2011
 
 	RemoteClientAdded uint = 3000
 
@@ -83,6 +84,7 @@ const (
 	SFUPreparingPeerConnection          uint = 8007
 	SFUPreparingPeerConnectionCompleted uint = 8008
 	SFUPeerConnectionAddingTracks       uint = 8009
+	SFUInvalidTrack                     uint = 8010
 
 	TrackMetricsReport uint = 9000
 	EstimatedBitrate   uint = 9001
@@ -123,7 +125,7 @@ func LogInit(name string, nameShort string, color string, everyNFrames uint, sub
 	logFile = f
 	logColor = color
 	logEveryNFrames = everyNFrames
-	logEnableConsoleOutput = enableConsoleOutput
+	logEnableConsoleOutput = false
 	if logColor != "" {
 		applyColor = true
 	}

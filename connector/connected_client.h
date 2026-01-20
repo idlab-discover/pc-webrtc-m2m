@@ -20,7 +20,8 @@ public:
     TrackInternal* get_track_ptr(uint32_t track_id) {
         return &tracks.at(track_id);
     }
-    TrackInternal* add_track(const std::string& track_id);
+    TrackInternal* add_track(const std::string& track_id, bool is_video);
+    TrackInternal** add_tracks(char* const* track_ids, uint8_t* is_video, size_t count); // Maybe change this to normal strings?
 private:
 	WebRTCConnection* parent;
     uint32_t client_id;

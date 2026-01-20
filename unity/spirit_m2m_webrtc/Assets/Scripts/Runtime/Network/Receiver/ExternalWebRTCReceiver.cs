@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -46,8 +47,43 @@ public class ExternalWebRTCReceiver : NetworkReceiverBase
         }
     }
 
-    public void AddTrack(ReceivingTrackInfo trackInfo)
+    public void AddTrack(RemoteTrackInfo trackInfo)
     {
-       internalTracks.Add(trackInfo.trackID, WebRTCInvoker.add_client(clientPtr, trackInfo.clientID));
+       internalTracks.Add(trackInfo.trackID, WebRTCInvoker.add_track(clientPtr, trackInfo.trackID));
+    }
+    public void AddTracks(List<RemoteTrackInfo> trackInfos)
+    {
+        Logger.LogStatusWithMessage(NAME, Logger.Status.ReceiverAddVideoTracks, $"nTracks={trackInfos.Count}");
+        string[] trackIDs = new string[trackInfos.Count];
+        byte[] isVideo = new byte[trackInfos.Count];
+        for (int i = 0; i < trackInfos.Count; i++)
+        {
+            trackIDs[i] = trackInfos[i].trackID;
+            isVideo[i] = trackInfos[i].isVideo ? (byte)1 : (byte)0;
+        }
+        Logger.LogStatus(NAME, Logger.Status.DebugTest);
+        IntPtr internalPtrs = IntPtr.Zero;
+        try 
+        {
+            internalPtrs = WebRTCInvoker.add_tracks(clientPtr, trackIDs, isVideo, (uint)trackIDs.Length); // This will automatically cause the peer to subscribe to them
+        }
+        catch (Exception e)
+        {
+            Logger.LogStatusWithMessage(NAME, Logger.Status.DebugTest, $"Exception while logging track IDs: {e.Message}");
+            return;
+        }
+        if(internalPtrs == IntPtr.Zero)
+        {
+            Logger.LogStatusWithMessage(NAME, Logger.Status.IntPtrZero, $"func=AddTracks validClientPtr={clientPtr != IntPtr.Zero}");
+            return;
+        }
+        Logger.LogStatus(NAME, Logger.Status.DebugTest);
+        for(int i = 0; i < trackInfos.Count; i++)
+        {
+            IntPtr trackPtr = Marshal.ReadIntPtr(internalPtrs, i * IntPtr.Size);
+            internalTracks.Add(trackInfos[i].trackID, trackPtr);
+            Logger.LogStatusWithMessage(NAME, Logger.Status.ReceiverAdddedInternalVideoTrack, $"i={i} trackID={trackInfos[i].trackID} validPtr={trackPtr != IntPtr.Zero}");
+        }
+        Logger.LogStatus(NAME, Logger.Status.ReceiverAddedVideoTracks);
     }
 }

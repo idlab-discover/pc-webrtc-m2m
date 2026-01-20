@@ -85,10 +85,11 @@ public class LoopbackSessionManager : SessionManagerBase
             };
             foreach (var t in c.loopbackTracks)
             {
-                clientMessage.receivingTracks.Add(new()
+                clientMessage.videoTracks.Add(new()
                 {
                     providerKey = "loopback",
                     trackID = $"cl{c.clientID}_{t.trackID}",
+                    isVideo = true,
                     //pipelineSettings =
                 });
             }

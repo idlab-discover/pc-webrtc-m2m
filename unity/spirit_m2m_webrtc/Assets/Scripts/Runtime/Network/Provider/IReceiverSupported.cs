@@ -4,5 +4,6 @@ using UnityEngine;
 
 public interface IReceiverSupported
 {
-    public NetworkReceiverBase GetReceiver(ReceivingTrackInfo track, uint clientID);
+    public NetworkReceiverBase GetReceiver(RemoteTrackInfo track, uint clientID);
+    public NetworkReceiverBase GetReceiverForTrackList(List<RemoteTrackInfo> tracks, uint clientID);
 }

@@ -144,7 +144,7 @@ public class LoopbackProvider : ConnectionProviderBase, ISenderSupported, IRecei
         return sender;
     }
 
-    public NetworkReceiverBase GetReceiver(ReceivingTrackInfo track, uint clientID)
+    public NetworkReceiverBase GetReceiver(RemoteTrackInfo track, uint clientID)
     {
         if(receivers.TryGetValue(clientID, out var receiver))
         {
@@ -159,5 +159,9 @@ public class LoopbackProvider : ConnectionProviderBase, ISenderSupported, IRecei
             }
             return receiver;
         }
+    }
+    public NetworkReceiverBase GetReceiverForTrackList(List<RemoteTrackInfo> tracks, uint clientID)
+    {
+        return GetReceiver(null, clientID); // We dont need the track anyway for loopback
     }
 }

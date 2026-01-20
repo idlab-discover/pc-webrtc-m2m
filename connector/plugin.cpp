@@ -189,12 +189,26 @@ void free_client(ConnectedClient* client) {
 	}
 }
 
-TrackInternal* add_track(ConnectedClient* client, const char* track_id) {
+TrackInternal* add_track(ConnectedClient* client, const char* track_id, bool is_video) {
 	if (client == nullptr) {
 		custom_log("add_track: ERROR: Client is a nullptr", Default, Color::Red);
 		return nullptr;
 	}
-	return client->add_track(track_id);
+	return client->add_track(track_id, is_video);
+}
+
+TrackInternal** add_tracks(ConnectedClient* client, char* const* track_ids, uint8_t* is_video, size_t count) {
+	if (client == nullptr) {
+		custom_log("add_tracks: ERROR: Client is a nullptr", Default, Color::Red);
+		return nullptr;
+	}
+	return client->add_tracks(track_ids, is_video, count);
+}
+
+void free_add_tracks_helper(TrackInternal** track_helper) {
+	if (track_helper != nullptr) {
+		delete[] track_helper;
+	}
 }
 
 /*

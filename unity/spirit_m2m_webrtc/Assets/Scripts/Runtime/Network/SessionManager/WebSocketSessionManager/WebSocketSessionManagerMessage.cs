@@ -63,6 +63,27 @@ public class RemoteClientSimple
     public List<TrackSimple> videoTracks = new();
     public List<TrackSimple> audioTracks = new();
 }
+
+[System.Serializable]
+public class RemoteClientMessage
+{
+    public uint clientID;
+    public List<ReceivingTrackInfo> videoTracks = new();
+    public List<ReceivingTrackInfo> audioTracks = new();
+}
+
+[System.Serializable]
+public class ClientTrackInfo
+{
+    public uint clientID;
+    public string providerKey;
+    public string trackID;
+    public string capturerType;
+    public string trackType;
+    public JObject trackSettings;
+    public bool isConnected;
+}
+
 /*
  type ClientAddedToProviderMessage struct {
 	ProviderType      string                 `json:"providerType"`

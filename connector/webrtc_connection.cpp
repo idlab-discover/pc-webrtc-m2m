@@ -233,13 +233,57 @@ ConnectedClient* WebRTCConnection::add_client(unsigned int client_id) {
     return client;
 }
 
-unsigned int WebRTCConnection::add_track(const std::string& track_id)
+unsigned int WebRTCConnection::add_track(const std::string& track_id, bool is_video)
 {
 	std::unique_lock<std::mutex> guard(m_receivers);
 	unsigned int internal_id = track_id_counter;
 	track_name_to_id[track_id] = internal_id;
 	track_id_counter++;
 	return internal_id;
+}
+
+std::vector<unsigned int> WebRTCConnection::add_tracks(unsigned int client_id, char* const* track_ids, uint8_t* is_video, size_t count) {
+	std::unique_lock<std::mutex> guard_recv(m_receivers);
+	std::vector<uint32_t> track_ids_uint;
+	for (unsigned int i = 0; i < count; i++) {
+		std::string track_name(track_ids[i]);
+		track_name_to_id[track_name] = track_id_counter;
+		track_ids_uint.push_back(track_id_counter);
+		track_id_counter++;
+	}
+	guard_recv.unlock();
+	std::unique_lock<std::mutex> guard_send(m_receivers);
+
+	// TODO Send track mappings to golang 
+	size_t total_len = sizeof(client_id) + sizeof(count); // To save client ID and count
+	std::vector<uint32_t> id_lengths;
+	id_lengths.reserve(count);
+	for (unsigned int i = 0; i < count; i++) {
+		uint32_t len = static_cast<uint32_t>(strlen(track_ids[i]));
+		id_lengths.push_back(len);
+		total_len += sizeof(len); // To save the length of each track ID
+		total_len += len; // Data of track ID
+		total_len += sizeof(uint32_t); // To save internal ID
+		total_len += sizeof(bool); // To save if video or audio
+
+	}
+	std::vector<char> data_to_send(total_len);
+	char* data_ptr = data_to_send.data();
+	write_u32_le(data_ptr, 1);
+	write_u32_le(data_ptr, static_cast<uint32_t>(count));
+	for (unsigned int i = 0; i < count; i++) {
+		write_u32_le(data_ptr, id_lengths[i]);
+		memcpy(data_ptr, track_ids[i], id_lengths[i]); // Track ID data
+		data_ptr += id_lengths[i];
+		uint32_t internal_id = track_name_to_id[std::string(track_ids[i])];
+		write_u32_le(data_ptr, internal_id);
+		bool is_vid = is_video[i] != 0;
+		memcpy(data_ptr, &is_vid, sizeof(bool));
+		data_ptr += sizeof(bool);
+	}
+
+	send_packet(data_to_send.data(), total_len, PacketType::RemoteClientTracksPacket); // TODO Fill in data and size
+	return track_ids_uint;
 }
 
 int WebRTCConnection::send_track_frame(unsigned int client_id, void* data, uint32_t size, uint32_t internal_id, uint32_t frame_nr)
@@ -334,6 +378,7 @@ char* WebRTCConnection::serialize_tracks_name_to_id(size_t& out_size) {
     }
 
     out_size = total_size;
+
     return buffer;
 }
 
@@ -395,4 +440,13 @@ int WebRTCConnection::send_remote_client_track_packet(void* data, uint32_t size)
 
 	// Return the amount of bytes sent
 	return full_size_sent;
+}
+
+void WebRTCConnection::write_u32_le(char*& buffer, uint32_t value)
+{
+	buffer[0] = static_cast<char>(value & 0xFF);
+	buffer[1] = static_cast<char>((value >> 8) & 0xFF);
+	buffer[2] = static_cast<char>((value >> 16) & 0xFF);
+	buffer[3] = static_cast<char>((value >> 24) & 0xFF);
+	buffer += sizeof(uint32_t);
 }

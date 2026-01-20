@@ -29,7 +29,9 @@ public class ConnectedClientMessage
     public string codecMode;
     public string clientSettings;
     public string pipelineType;
-    public List<ReceivingTrackInfo> receivingTracks = new();
+    // public List<ReceivingTrackInfo> receivingTracks = new();
+    public List<ReceivingTrackInfo> videoTracks = new();
+    public List<ReceivingTrackInfo> audioTracks = new();
 }
 
 public enum TrackStatus
@@ -49,6 +51,7 @@ public class ReceivingTrackInfo
     public string trackID;
     public string capturerType;
     public string trackType; // Raw, PointCloud etc...
+    public bool isVideo = true;
     public JObject trackSettings;
 
     [NonSerialized]

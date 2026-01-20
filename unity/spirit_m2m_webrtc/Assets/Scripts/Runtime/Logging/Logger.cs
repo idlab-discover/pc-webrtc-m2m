@@ -18,6 +18,8 @@ public class Logger
         Disposing = 4,
         Disposed = 5,
         Failed = 6,
+        Initializing = 7,
+        Initialized = 8,
 
         // Encoding Status
         StartEncodingRaw = 100,
@@ -86,6 +88,8 @@ public class Logger
         ManagerReadyToConnect = 1040,
         ManagerDisconnecting = 1041,
         ManagerDisconnected = 1042,
+        ManagerClientNotFound = 1043,
+        ManagerProviderNotFound = 1044,
 
         // ConnectionProvider Status
         ProviderConnectionStart = 2000,
@@ -111,6 +115,10 @@ public class Logger
         ClientTrackReceiverInvalid = 3010,
         ClientTrackReceiverNotReady = 3011,
         ClientTrackNotStarted = 3012,
+        ClientSettingTrackStatus = 3013,
+        ClientTrackStatusSet = 3014,
+        ClientSettingTrackReceiver = 3015,
+        ClientTrackReceiverSet = 3016,
 
         // TrackInfo Status
         GatheringTrackInfo = 4000,
@@ -120,6 +128,9 @@ public class Logger
         ReceiverStartPollVideoTrack = 5000,
         ReceiverVideoDataSet = 5001,
         ReceiverWaitingForNextFrame = 5002,
+        ReceiverAddVideoTracks = 5003,
+        ReceiverAddedVideoTracks = 5004,
+        ReceiverAdddedInternalVideoTrack = 5005,
 
         // Misc Status
         FactoryCreate = 8000,
@@ -130,6 +141,10 @@ public class Logger
         EndRawColorCopy = 9001,
         EnterLock = 9002,
         ExitLock = 9003,
+        WSMessageReceive = 9004,
+        WSProviderRemoteClientTracksConnected = 9005,
+        IntPtrZero = 9006,
+        DebugTest = 9999,
     }
     public static long Time => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
@@ -225,6 +240,13 @@ public class Logger
     {
         Log(LogCommonClient(name, status, clientID));
     }
+
+    [Conditional("ENABLE_LOGGING")]
+    public static void LogStatusClientWithMessage(string name, Logger.Status status, uint clientID, string message)
+    {
+        Log($"{LogCommonClient(name, status, clientID)} {message}");
+    }
+
     [Conditional("ENABLE_LOGGING")]
     public static void LogStatusClientAndCapturer(string name, Logger.Status status, uint clientID, uint capturerID)
     {

@@ -21,7 +21,7 @@ type ProviderClient struct {
 }
 
 func (pc *ProviderClient) GetConnectedVideoTracks() []TrackSimple {
-	var connectedTracks []TrackSimple
+	connectedTracks := []TrackSimple{}
 	for _, track := range pc.VideoTracks {
 		if track.IsConnected {
 			connectedTracks = append(connectedTracks, TrackSimple{TrackID: track.TrackID, IsConnected: true})
@@ -31,7 +31,7 @@ func (pc *ProviderClient) GetConnectedVideoTracks() []TrackSimple {
 }
 
 func (pc *ProviderClient) GetConnectedAudioTracks() []TrackSimple {
-	var connectedTracks []TrackSimple
+	connectedTracks := []TrackSimple{}
 	for _, track := range pc.AudioTracks {
 		if track.IsConnected {
 			connectedTracks = append(connectedTracks, TrackSimple{TrackID: track.TrackID, IsConnected: true})
@@ -56,7 +56,7 @@ type ProviderNewRemoteProvider struct {
 }
 
 func (pc *ProviderRemoteProviderClient) GetConnectedVideoTracks() []TrackSimple {
-	var connectedTracks []TrackSimple
+	connectedTracks := []TrackSimple{}
 	for _, track := range pc.VideoTracks {
 		if track.IsConnected {
 			connectedTracks = append(connectedTracks, TrackSimple{TrackID: track.TrackID, IsConnected: true})
@@ -66,7 +66,7 @@ func (pc *ProviderRemoteProviderClient) GetConnectedVideoTracks() []TrackSimple 
 }
 
 func (pc *ProviderRemoteProviderClient) GetConnectedAudioTracks() []TrackSimple {
-	var connectedTracks []TrackSimple
+	connectedTracks := []TrackSimple{}
 	for _, track := range pc.AudioTracks {
 		if track.IsConnected {
 			connectedTracks = append(connectedTracks, TrackSimple{TrackID: track.TrackID, IsConnected: true})

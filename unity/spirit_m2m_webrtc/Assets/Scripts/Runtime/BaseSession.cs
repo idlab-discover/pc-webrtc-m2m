@@ -127,6 +127,7 @@ public class BaseSession : MonoBehaviour
                             capturerType = sessionInfo.capturerName, /*TODO CHANGE THIS TO BE MORE DYNAMIC*/
                             trackType = track.mode,
                             trackSettings = track.trackSettings,
+                            isVideo = true,
                         });
 
                     }
@@ -161,6 +162,7 @@ public class BaseSession : MonoBehaviour
                         capturerType = sessionInfo.capturerName, /*TODO CHANGE THIS TO BE MORE DYNAMIC*/
                         trackType = t.Value.mode,
                         trackSettings = t.Value.trackSettings,
+                        isVideo = true,
                     });
                 }
             }

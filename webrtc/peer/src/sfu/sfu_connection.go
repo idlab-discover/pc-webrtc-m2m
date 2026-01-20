@@ -48,6 +48,7 @@ type SFUConnection struct {
 	pendingCandidates       []*webrtc.ICECandidate
 	pendingCandidatesString []string
 	transcoder              transcoder.Transcoder
+	isLoopbackTranscoder    bool
 	ipFilter                string
 	websocket               *utils.ThreadSafeWebsocket
 	mut                     sync.Mutex
@@ -154,6 +155,22 @@ func (s *SFUConnection) SubscribeToRemoteClientTracks(clients []session_manager.
 	})
 }
 
+func (s *SFUConnection) SubscribeToRemoteClientTracksString(clientID uint32, videoTrackIDs []string, audioTrackIDs []string) {
+	remoteClient := session_manager.RemoteClientSimple{
+		ClientID:    uint(clientID),
+		VideoTracks: make([]session_manager.TrackSimple, len(videoTrackIDs)),
+		AudioTracks: make([]session_manager.TrackSimple, len(audioTrackIDs)),
+	}
+	for i, trackID := range videoTrackIDs {
+		println("Subscribing to remote video track", i, trackID)
+		remoteClient.VideoTracks[i] = session_manager.TrackSimple{TrackID: trackID}
+	}
+	for i, trackID := range audioTrackIDs {
+		remoteClient.AudioTracks[i] = session_manager.TrackSimple{TrackID: trackID}
+	}
+	s.SubscribeToRemoteClientTracks([]session_manager.RemoteClientSimple{remoteClient})
+}
+
 func (s *SFUConnection) connectToSFU(clientID uint, authKey string) {
 	u := url.URL{Scheme: "ws", Host: fmt.Sprintf("%s:%d", s.Address, s.Port), Path: "websocket_client"}
 	query := url.Values{}
@@ -173,6 +190,7 @@ func (s *SFUConnection) connectToSFU(clientID uint, authKey string) {
 	}
 	if s.ProxyConn != nil {
 		s.ProxyConn.WsHandler = s.websocket
+		s.ProxyConn.OnSubscribeToTracksReceived = s.SubscribeToRemoteClientTracksString
 	}
 	s.startListening()
 }
@@ -342,6 +360,11 @@ func (s *SFUConnection) addOnTrackCallback() {
 		fmt.Printf("WebRTCPeer: MIME type %s\n", track.Codec().MimeType)
 		fmt.Printf("WebRTCPeer: Payload type %d\n", track.PayloadType())
 		fmt.Printf("WebRTCPeer: Track SSRC %d\n", track.SSRC())
+		var lpCapturer *transcoder.LoopbackCapturer
+		loopbackTrans, valid := s.transcoder.(*transcoder.TranscoderLoopback)
+		if valid {
+			lpCapturer = loopbackTrans.GetLoopbackCapturerForTrack(track.ID())
+		}
 		go func() {
 			rtcpBuf := make([]byte, 10000)
 			for {
@@ -398,8 +421,9 @@ func (s *SFUConnection) addOnTrackCallback() {
 		}
 		completedFrame := false
 		nDroppedFrames := uint32(0)
+		buf2 := make([]byte, 1500)
 		for {
-			buf2 := make([]byte, 1500)
+
 			_, _, readErr := track.Read(buf2)
 			// TODO Implement pausing unpausing of track
 			if readErr != nil {
@@ -414,7 +438,11 @@ func (s *SFUConnection) addOnTrackCallback() {
 			p := packet.BytesToFramePacketHeader(buf2[20:])
 			if s.ProxyConn != nil {
 				// TODO Add internal track ID mapping here
+				//internalTrackID += 1
 				s.ProxyConn.SendFramePacket(internalTrackID, buf, 20)
+			}
+			if lpCapturer != nil {
+				lpCapturer.InsertFrameData(p.FrameNr, buf2[20:], p.FrameLen)
 			}
 			if frames[p.FrameNr] == 0 {
 				// Frame complete

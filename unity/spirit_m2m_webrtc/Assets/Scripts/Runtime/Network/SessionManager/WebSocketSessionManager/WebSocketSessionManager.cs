@@ -150,6 +150,7 @@ public class WebSocketSessionManager : SessionManagerBase
                         break;
                     // TODO: Handle received message (e.g., dispatch to Unity main thread, parse, etc.)
                    Debug.Log($"WebSocket received: {msg.messageType}");
+                    Logger.LogStatusWithMessage(NAME, Logger.Status.WSMessageReceive, $"type={msg.messageType}");
                     switch (msg.messageType)
                     {
                         case "FullyConnected":
@@ -165,6 +166,16 @@ public class WebSocketSessionManager : SessionManagerBase
                         case "ClientAddedToProvider": 
                             {
                                 handleClientAddedToProvider(msg.message);
+                                break;
+                            }
+                        case "RemoteClientAdded":
+                            {
+                                handleRemoteClientAdded(msg.message);
+                                break;
+                            }
+                        case "ProviderRemoteClientTracksConnected":
+                            {
+                                handleProviderRemoteClientTracksConnected(msg.message);
                                 break;
                             }
                     }
@@ -243,6 +254,38 @@ public class WebSocketSessionManager : SessionManagerBase
             cClient.SetVideoTracksStatus(remoteClient.videoTracks, TrackStatus.Started);
         }
     }
+
+    private void handleRemoteClientAdded(JObject msg)
+    {
+        ConnectedClientMessage cMsg = msg.ToObject<ConnectedClientMessage>();
+        onNewClientConnected(cMsg);
+    }
+
+    private void handleProviderRemoteClientTracksConnected(JObject msg)
+    {
+        ProviderTracksConnectedMessage pMsg = msg.ToObject<ProviderTracksConnectedMessage>();
+        Logger.LogStatusWithMessage(NAME, Logger.Status.WSProviderRemoteClientTracksConnected, $"clientID={pMsg.clientID} " +
+            $"providerKey={pMsg.providerKey} nVideoTracks={pMsg.videoTracks.Count} nAudioTracks={pMsg.audioTracks.Count}");
+        // Communicate with provider to set tracks as connected
+        // Set Tracks as connected => remote client tracks set to ready
+        // Subscribe to tracks using provider
+
+        if (!ConnectedClients.TryGetValue(pMsg.clientID, out var rClient))
+        {
+            Logger.LogStatusWithMessage(NAME, Logger.Status.ManagerClientNotFound, $"type=RemoteClientTracks clientID={pMsg.clientID}");
+            return;
+        }
+        ConnectionProviderBase provider = ConnectionProviderRepository.GetProvider(pMsg.providerKey);
+        if (provider == null)
+        {
+            Logger.LogStatusWithMessage(NAME, Logger.Status.ManagerProviderNotFound, $"type=RemoteClientTracks providerKey={pMsg.providerKey}");
+            return; // Provider not found, skip
+        }
+        rClient.SetVideoTracksStatus(pMsg.videoTracks, TrackStatus.Started);
+        rClient.SetTracksNetworkReceiver(pMsg.videoTracks, (provider as IReceiverSupported)); // TODO Merge audio and video tracks first
+
+    }
+
     private void sendJSONMessage(string messageType, object messageObj)
     {
         // Serialize the message object to JSON

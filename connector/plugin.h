@@ -32,7 +32,9 @@ extern "C"
 	DLLExport void free_webrtc_connection(WebRTCConnection* conn);
 	DLLExport ConnectedClient* add_client(WebRTCConnection* connection, unsigned int client_id);
 	DLLExport void free_client(ConnectedClient* client);
-	DLLExport TrackInternal* add_track(ConnectedClient* client, const char* track_id);
+	DLLExport TrackInternal* add_track(ConnectedClient* client, const char* track_id, bool is_video);
+	DLLExport TrackInternal** add_tracks(ConnectedClient* client, char* const* track_ids, uint8_t* is_video, size_t count);
+	DLLExport void free_add_tracks_helper(TrackInternal** track_helper);
 	DLLExport unsigned int get_frame_size(TrackFrame* frame);
 	DLLExport char* get_frame_data_ptr(TrackFrame* frame);
 	DLLExport void free_track_frame(TrackFrame* frame);

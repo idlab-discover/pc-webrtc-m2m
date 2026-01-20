@@ -120,6 +120,7 @@ public abstract class ConnectedClient<TTrackInfo> where TTrackInfo : ReceivingTr
     }
     public void SetVideoTracksStatus(List<TrackSimple> tracks, TrackStatus status)
     {
+        Logger.LogStatusWithMessage(NAME, Logger.Status.ClientSettingTrackStatus, $"clientID={ClientID} nTracks={tracks.Count} status={status}");
         lock (_lock)
         {
             foreach (var t in tracks)
@@ -133,6 +134,7 @@ public abstract class ConnectedClient<TTrackInfo> where TTrackInfo : ReceivingTr
                
             }
         }
+        Logger.LogStatusWithMessage(NAME, Logger.Status.ClientTrackStatusSet, $"clientID={ClientID} nTracks={tracks.Count} status={status}");
     }
     public void AddAudioTrack(string provider)
     {
@@ -247,17 +249,27 @@ public class RemoteConnectedClient : ConnectedClient<RemoteTrackInfo>
     }
     public void SetTracksNetworkReceiver(List<TrackSimple> tracks, IReceiverSupported receiver)
     {
+        Logger.LogStatusWithMessage(NAME, Logger.Status.ClientSettingTrackReceiver, $"clientID={ClientID} nTracks={tracks.Count}");
         lock (_lock)
         {
+
+            List<RemoteTrackInfo> trackInfos = new();
             foreach (var t in tracks)
             {
                 if (!receivingTracks.TryGetValue(t.trackID, out var track))
                 {
+                    Logger.LogStatusWithMessage(NAME, Logger.Status.ClientTrackNotFound, $"func=SetTracksNetworkReceiver trackID={t.trackID}");
                     continue; // Track not found
                 }
-                track.SetReceiver(receiver.GetReceiver(track, ClientID));
+                trackInfos.Add(track);
+            }
+            NetworkReceiverBase recv = receiver.GetReceiverForTrackList(trackInfos, ClientID);
+            foreach (var t in trackInfos)
+            {
+                t.SetReceiver(recv);
             }
         }
+        Logger.LogStatusWithMessage(NAME, Logger.Status.ClientTrackReceiverSet, $"clientID={ClientID} nTracks={tracks.Count}");
     }
 }
 
@@ -336,7 +348,7 @@ public abstract class SessionManagerBase
     }
     protected void onNewClientConnected(ConnectedClientMessage c)
     {
-        Logger.LogStatusClient(NAME, Logger.Status.ManagerClientConnected, c.clientID);
+        Logger.LogStatusClientWithMessage(NAME, Logger.Status.ManagerClientConnected, c.clientID, $"codecMode={c.codecMode} nVideoTracks={c.videoTracks.Count} nAudioTracks={c.audioTracks.Count}");
         RemoteConnectedClient client;
         
         lock (_lock)
@@ -351,7 +363,7 @@ public abstract class SessionManagerBase
             ConnectedClients[c.clientID] = client;
         }
         
-        foreach (var t in c.receivingTracks)
+        foreach (var t in c.videoTracks)
         {
             client.AddVideoTrack(new RemoteTrackInfo
             {

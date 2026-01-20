@@ -29,14 +29,14 @@ type SenderTrack struct {
 }
 
 type ReceiverTrack struct {
-	IsPaused				 bool   
+	IsPaused                 bool
 	TrackID                  string `json:"trackID"`
 	OriginType               string `json:"originType"` // User, SFU etc...
 	OriginID                 uint   `json:"originID"`   // userID, SFU_ID etc...
 	SenderTrackID            string `json:"senderTrackID"`
 	CorrespondingSenderTrack *SenderTrack
 	RTPSender                *webrtc.RTPSender
-	PauseTrack                *webrtc.TrackLocalStaticRTP
+	PauseTrack               *webrtc.TrackLocalStaticRTP
 }
 
 // TODO Maybe better error handling is needed here
@@ -350,9 +350,9 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 				logger.LogFrameWithMessage(NameClientConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s totalDroppedFrames=%d", clc.clientID, t.ID(), nDroppedFrames), uint(p.FrameNr))
 			}
 			//go func() {
-				if _, err = trackLocal.Write(buf[:i]); err != nil {
-					fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)
-				}
+			if _, err = trackLocal.Write(buf[:i]); err != nil {
+				fmt.Printf("WebRTCSFU: OnTrack: error during write: %s\n", err)
+			}
 
 			//}()
 
@@ -385,7 +385,7 @@ func (clc *ClientConnection) AddTrackFromOtherUnsafe(originType string, originID
 	}
 	println("ADDING TRACK", track == nil)
 	fmt.Printf("TrackID=%s streamID=%s\n", track.WebRTCTrack.ID(), track.WebRTCTrack.StreamID())
-	pauseTrack, _ :=webrtc.NewTrackLocalStaticRTP(track.WebRTCTrack.Codec(), track.WebRTCTrack.ID(), track.WebRTCTrack.StreamID())
+	pauseTrack, _ := webrtc.NewTrackLocalStaticRTP(track.WebRTCTrack.Codec(), track.WebRTCTrack.ID(), track.WebRTCTrack.StreamID())
 	rtpSender, err := clc.peerConnection.AddTrack(pauseTrack)
 
 	if err != nil {
@@ -542,8 +542,8 @@ func (clc *ClientConnection) handleSubscribeToTracksMessage(payload json.RawMess
 	clc.subscribeToTracks(msg, otherC)
 	clc.SignalRenegotiation()
 	for _, t := range clc.ReceiverVideoTracks {
-			t.Pause()
-}
+		t.Pause()
+	}
 	// TODO
 	// Renegotiate SDP
 }
@@ -606,6 +606,7 @@ func (clc *ClientConnection) subscribeToTracks(subMessage SubscribeToTracksMessa
 	for _, t := range subMessage.VideoTracks {
 		track, exists := otherClient.SenderVideoTracks[t.TrackID]
 		if !exists {
+			logger.LogWithMessage(NameClientConnection, logger.ClientInvalidTrack, true, true, fmt.Sprintf("func=subscribeToTracks clientA=%d clientB=%d trackID=%s", clc.clientID, otherClient.clientID, t.TrackID))
 			continue
 		}
 		clc.AddTrackFromOtherUnsafe("client", otherClient.clientID, t.TrackID, track)

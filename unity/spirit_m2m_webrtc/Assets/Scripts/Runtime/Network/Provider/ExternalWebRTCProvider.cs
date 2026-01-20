@@ -102,18 +102,31 @@ public class ExternalWebRTCProvider : ConnectionProviderBase, ISenderSupported, 
         }
     }
 
-    public NetworkReceiverBase GetReceiver(ReceivingTrackInfo track, uint clientID)
+    public NetworkReceiverBase GetReceiver(RemoteTrackInfo track, uint clientID) // Ideally we dont want to use this one, the list one is much better and tested
     {
-        return null;
         if (!receivers.TryGetValue(clientID, out var receiver))
         {
-            receiver = new ExternalWebRTCReceiver(WebRTCInvoker.add_client(System.IntPtr.Zero, clientID));
+            receiver = new ExternalWebRTCReceiver(WebRTCInvoker.add_client(ptr, clientID));
             lock (_lock)
             {
                 receivers[clientID] = receiver;
             }
         }
         receiver.AddTrack(track);
+        return receiver;
+    }
+    public NetworkReceiverBase GetReceiverForTrackList(List<RemoteTrackInfo> tracks, uint clientID)
+    {
+        if (!receivers.TryGetValue(clientID, out var receiver))
+        {
+            Logger.LogStatusWithMessage(NAME, Logger.Status.DebugTest, $"func=GetReceiverForTrackList clientID={clientID}");
+            receiver = new ExternalWebRTCReceiver(WebRTCInvoker.add_client(ptr, clientID));
+            lock (_lock)
+            {
+                receivers[clientID] = receiver;
+            }
+        }
+        receiver.AddTracks(tracks);
         return receiver;
     }
 
