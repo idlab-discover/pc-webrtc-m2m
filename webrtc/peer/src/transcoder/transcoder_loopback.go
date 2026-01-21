@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"goweb/shared/src/logger"
+	"goweb/shared/src/packet"
 	"os"
 	"strings"
 	"sync"
@@ -101,24 +102,24 @@ func (t *TranscoderLoopback) GetLoopbackCapturerForTrack(trackID string) *Loopba
 	return track
 }
 
-func (t *LoopbackCapturer) InsertFrameData(frameNr uint32, data []byte, fileLen uint32) {
+func (t *LoopbackCapturer) InsertFrameData(header *packet.FramePacketHeader, data []byte) {
 	t.mtx.Lock()
 	defer t.mtx.Unlock()
-	loopbackFrame, ok := t.incomplete_frames[frameNr]
+	loopbackFrame, ok := t.incomplete_frames[header.FrameNr]
 	if !ok {
 		loopbackFrame = &LoopbackFrame{
-			frameNr:    frameNr,
+			frameNr:    header.FrameNr,
 			currentLen: 0,
-			fileLen:    fileLen,
-			fileData:   make([]byte, fileLen),
+			fileLen:    header.FrameLen,
+			fileData:   make([]byte, header.FrameLen),
 		}
-		t.incomplete_frames[frameNr] = loopbackFrame
+		t.incomplete_frames[header.FrameNr] = loopbackFrame
 	}
-	copy(loopbackFrame.fileData[loopbackFrame.currentLen:], data)
-	loopbackFrame.currentLen += uint32(len(data))
+	copy(loopbackFrame.fileData[header.SeqOffset:], data[20:20+header.SeqLen])
+	loopbackFrame.currentLen += header.SeqLen
 	if loopbackFrame.currentLen >= loopbackFrame.fileLen {
 		t.complete_frame = loopbackFrame
-		delete(t.incomplete_frames, frameNr)
+		delete(t.incomplete_frames, header.FrameNr)
 		t.ready_status = true
 		t.cond.Signal()
 	}

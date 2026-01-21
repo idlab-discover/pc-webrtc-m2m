@@ -164,6 +164,7 @@ void WebRTCConnection::listen_for_data() {
 			if (frame->is_complete()) {
 				track.add_frame_to_priority_queue(frame);
 			}
+			break;
 		};
 
 
@@ -294,8 +295,8 @@ int WebRTCConnection::send_track_frame(unsigned int client_id, void* data, uint3
 	}
 
 	// Required parameters
-	uint32_t buflen_nheader = BUFLEN - sizeof(PacketType) - sizeof(PacketHeader);
-	buflen_nheader = 1148; // TODO check this, pretty sure this can be bigger
+	uint32_t buflen_nheader = BUFLEN - sizeof(PacketType) - sizeof(PacketFrameHeader);
+	buflen_nheader = 1152; // TODO check this, pretty sure this can be bigger
 	uint32_t current_offset = 0;
 	uint32_t remaining = size;
 	int full_size_sent = 0;
@@ -316,7 +317,7 @@ int WebRTCConnection::send_track_frame(unsigned int client_id, void* data, uint3
 			next_size = remaining;
 		}
 		PacketFrameHeader frame_header {
-			client_id, internal_id, frame_nr, size, current_offset, next_size
+			internal_id, client_id, frame_nr, size, current_offset, next_size
 		};
 	
 		// Insert all data into a buffer

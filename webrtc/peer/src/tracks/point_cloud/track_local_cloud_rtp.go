@@ -15,6 +15,7 @@ type TrackLocalCloudRTP struct {
 	rtpTrack   *webrtc.TrackLocalStaticRTP
 	clockRate  float64
 	payloader  *PointCloudPayloader
+	clientID   uint32
 }
 
 // NewTrackLocalStaticSample returns a TrackLocalStaticSample
@@ -41,6 +42,7 @@ func (s *TrackLocalCloudRTP) Bind(t webrtc.TrackLocalContext) (webrtc.RTPCodecPa
 		return codec, nil
 	}
 	s.payloader = NewPointCloudPayloader()
+	s.payloader.clientID = s.clientID
 	s.sequencer = rtp.NewRandomSequencer()
 	s.packetizer = rtp.NewPacketizer(
 		1200, // Not MTU but ok
@@ -99,4 +101,11 @@ func (s *TrackLocalCloudRTP) WriteFrame(data []byte, frameNr int) error {
 		}
 	}
 	return nil
+}
+
+func (s *TrackLocalCloudRTP) SetClientID(id uint32) {
+	s.clientID = id
+	if s.payloader != nil {
+		s.payloader.clientID = id
+	}
 }

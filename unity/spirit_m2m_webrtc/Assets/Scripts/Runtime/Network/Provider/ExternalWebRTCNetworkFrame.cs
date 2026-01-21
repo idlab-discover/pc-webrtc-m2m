@@ -15,6 +15,10 @@ public class ExternalWebRTCNetworkFrame : NetworkFrame
         this.framePtr = framePtr;
         this.Size = WebRTCInvoker.get_frame_size(framePtr);
         this.DataPtr = WebRTCInvoker.get_frame_data_ptr(framePtr);
+        if (this.DataPtr == IntPtr.Zero)
+        {
+            throw new ArgumentException("frameDataPtr cannot be null");
+        }
     }
     protected override void disposeInternal()
     {

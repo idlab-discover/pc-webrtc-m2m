@@ -23,12 +23,12 @@ const (
 
 // TODO seperate this into different struct. We also want to use packet type for control packets (i.e. fov)
 type RemoteInputPacketHeader struct {
-	ClientID        uint32
-	InternalTrackID uint32
-	FrameNr         uint32
-	FrameLen        uint32
-	FrameOffset     uint32
-	PacketLen       uint32
+	InternalTrackID uint32 // 4
+	ClientID        uint32 // 8
+	FrameNr         uint32 // 12
+	FrameLen        uint32 // 16
+	FrameOffset     uint32 // 20
+	PacketLen       uint32 // 24
 }
 
 // TODO Refactor this
@@ -98,6 +98,7 @@ func (rc *RemoteCapturer) addFrameContent(p RemoteInputPacketHeader, buffer []by
 	defer rc.mtx.Unlock()
 	incomplete_frame, exists := rc.incomplete_frames[p.FrameNr]
 	if !exists {
+		//fmt.Println("Creating new incomplete frame for frameNr", p.FrameNr, "with length", p.FrameLen, " and internalID", p.InternalTrackID, " for clientID", p.ClientID)
 		incomplete_frame = &RemoteFrame{
 			frameNr:    p.FrameNr,
 			currentLen: 0,
@@ -106,7 +107,7 @@ func (rc *RemoteCapturer) addFrameContent(p RemoteInputPacketHeader, buffer []by
 		}
 		rc.incomplete_frames[p.FrameNr] = incomplete_frame
 	}
-	copy(incomplete_frame.fileData[p.FrameOffset:p.FrameOffset+p.PacketLen], buffer[32:32+p.PacketLen])
+	copy(incomplete_frame.fileData[p.FrameOffset:p.FrameOffset+p.PacketLen], buffer[28:28+p.PacketLen])
 	incomplete_frame.currentLen = incomplete_frame.currentLen + p.PacketLen
 	if incomplete_frame.currentLen == incomplete_frame.fileLen {
 		rc.complete_frame = incomplete_frame
@@ -231,7 +232,7 @@ func (pc *ProxyConnection) StartListening(nTracks uint32) {
 			_, _, _ = pc.conn.ReadFromUDP(buffer)
 			ptype := binary.LittleEndian.Uint32(buffer[:4])
 			if ptype == FramePacketType {
-				bufBinary := bytes.NewBuffer(buffer[4:32])
+				bufBinary := bytes.NewBuffer(buffer[4:28])
 				var p RemoteInputPacketHeader
 				err := binary.Read(bufBinary, binary.LittleEndian, &p) // TODO: make sure we check endianess of system here and use that instead!
 				if err != nil {

@@ -34,6 +34,7 @@ import (
 const NameSFUConnection = "SFUConnection"
 
 type SFUConnection struct {
+	clientID    uint32
 	ProxyConn   *proxy.ProxyConnection
 	providerKey string
 	IsReady     bool
@@ -105,9 +106,10 @@ func (t *WebRTCVideoTrack) StartSending() {
 	}()
 }
 
-func NewSFUConnection(providerKey string, videoTracks []session_manager.TrackSimple, audioTracks []session_manager.TrackSimple, transcoder transcoder.Transcoder, ipFilter string) *SFUConnection {
+func NewSFUConnection(clientID uint32, providerKey string, videoTracks []session_manager.TrackSimple, audioTracks []session_manager.TrackSimple, transcoder transcoder.Transcoder, ipFilter string) *SFUConnection {
 	logger.LogWithMessage(NameSFUConnection, logger.CreatingProvider, true, true, fmt.Sprintf("providerKey=%s", providerKey))
 	sfu := &SFUConnection{
+		clientID:                clientID,
 		providerKey:             providerKey,
 		senderVideoTracks:       map[string]*WebRTCVideoTrack{},
 		senderAudioTracks:       map[string]*WebRTCAudioTrack{},
@@ -413,6 +415,7 @@ func (s *SFUConnection) addOnTrackCallback() {
 				if frames[p.FrameNr] == p.FrameLen {
 					var exists bool
 					internalTrackID, exists = s.ProxyConn.GetInternalTrackID(track.ID())
+					fmt.Println("Got internal track ID", internalTrackID, "for track", track.ID())
 					if exists {
 						break
 					}
@@ -439,10 +442,10 @@ func (s *SFUConnection) addOnTrackCallback() {
 			if s.ProxyConn != nil {
 				// TODO Add internal track ID mapping here
 				//internalTrackID += 1
-				s.ProxyConn.SendFramePacket(internalTrackID, buf, 20)
+				s.ProxyConn.SendFramePacket(internalTrackID, buf2, 20)
 			}
 			if lpCapturer != nil {
-				lpCapturer.InsertFrameData(p.FrameNr, buf2[20:], p.FrameLen)
+				lpCapturer.InsertFrameData(p, buf2[20:])
 			}
 			if frames[p.FrameNr] == 0 {
 				// Frame complete
@@ -596,6 +599,7 @@ func (s *SFUConnection) AddVideoTrack(trackID string) {
 	if err != nil {
 		panic(err)
 	}
+	videoTrack.SetClientID(s.clientID)
 	s.senderVideoTracks[trackID] = NewWebRTCVideoTrack(videoTrack, s.transcoder)
 	logger.LogWithMessage(NameSFUConnection, logger.SFUAddVideoTrackCompleted, true, true, fmt.Sprintf("providerKey=%s trackID=%s", s.providerKey, trackID))
 }

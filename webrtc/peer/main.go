@@ -46,8 +46,8 @@ type DebugController struct {
 }
 
 func sfuProviderFactory(transcoder transcoder.Transcoder, ipFilter string) session_manager.ProviderFactory {
-	return func(providerKey string, videoTracks []session_manager.TrackSimple, audioTracks []session_manager.TrackSimple) session_manager.Provider {
-		return sfu.NewSFUConnection(providerKey, videoTracks, audioTracks, transcoder, ipFilter)
+	return func(clientID uint32, providerKey string, videoTracks []session_manager.TrackSimple, audioTracks []session_manager.TrackSimple) session_manager.Provider {
+		return sfu.NewSFUConnection(clientID, providerKey, videoTracks, audioTracks, transcoder, ipFilter)
 	}
 }
 
@@ -88,6 +88,7 @@ func main() {
 		proxyConn.SetupConnection(*proxyPortThis, *proxyPortDLL)
 		proxyConn.StartListening((uint32(len(videoTracks) + len(audioTracks))))
 		sfuConn := sfu.NewSFUConnection(
+			uint32(*preferredClientID),
 			*sfuProviderKey,
 			trackMapToSlice(videoTracks),
 			trackMapToSlice(audioTracks),

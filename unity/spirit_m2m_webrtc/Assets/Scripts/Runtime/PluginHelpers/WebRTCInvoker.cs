@@ -82,6 +82,8 @@ public unsafe class WebRTCInvoker
     [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
     public static extern IntPtr get_next_frame_for_track(IntPtr ptr);
     [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr stop_track(IntPtr ptr);
+    [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
     public static extern IntPtr add_client(IntPtr parentPtr, uint clientID);
     [DllImport("WebRTCConnector", CallingConvention = CallingConvention.Cdecl)]
     public static extern IntPtr free_client(IntPtr clientPtr);

@@ -5,6 +5,7 @@ import "encoding/binary"
 // AV1Payloader payloads AV1 packets
 type PointCloudPayloader struct {
 	frameCounter uint32
+	clientID     uint32
 }
 
 // Payload fragments a AV1 packet across one or more byte arrays
@@ -14,20 +15,20 @@ func (p *PointCloudPayloader) Payload(mtu uint16, payload []byte) (payloads [][]
 	payloadLen := uint32(len(payload))
 	payloadRemaining := payloadLen
 	for payloadRemaining > 0 {
-		currentFragmentSize := uint32(1148)
+		currentFragmentSize := uint32(1152)
 		if payloadRemaining < currentFragmentSize {
 			currentFragmentSize = payloadRemaining
 		}
-		buf := make([]byte, currentFragmentSize+24)
+		buf := make([]byte, currentFragmentSize+20)
 		//	binary.LittleEndian.PutUint32(buf[0:], TilePacketType)
-		binary.LittleEndian.PutUint32(buf[0:], 0)
+		binary.LittleEndian.PutUint32(buf[0:], p.clientID) // client id
 		binary.LittleEndian.PutUint32(buf[4:], p.frameCounter)
 		binary.LittleEndian.PutUint32(buf[8:], payloadLen)
 		binary.LittleEndian.PutUint32(buf[12:], payloadDataOffset)
 		binary.LittleEndian.PutUint32(buf[16:], currentFragmentSize)
-		binary.LittleEndian.PutUint32(buf[20:], 0)
+		//binary.LittleEndian.PutUint32(buf[20:], 0)
 
-		copy(buf[24:], payload[payloadDataOffset:(payloadDataOffset+currentFragmentSize)])
+		copy(buf[20:], payload[payloadDataOffset:(payloadDataOffset+currentFragmentSize)])
 
 		payloads = append(payloads, buf)
 		payloadDataOffset += currentFragmentSize
@@ -37,5 +38,5 @@ func (p *PointCloudPayloader) Payload(mtu uint16, payload []byte) (payloads [][]
 }
 
 func NewPointCloudPayloader() *PointCloudPayloader {
-	return &PointCloudPayloader{0}
+	return &PointCloudPayloader{0, 0}
 }

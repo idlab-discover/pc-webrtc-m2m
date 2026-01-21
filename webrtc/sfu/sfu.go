@@ -31,7 +31,7 @@ type SFU struct {
 	websocket           *threadSafeWriter
 	ipFilter            string
 	mut                 sync.Mutex
-	providerKey string
+	providerKey         string
 }
 
 func NewSFU(address string, port uint, ipFilter string, providerKey string) *SFU {
@@ -54,9 +54,9 @@ func NewSFU(address string, port uint, ipFilter string, providerKey string) *SFU
 
 func (sfu *SFU) AddClient(msg NewClientMessage) {
 	sfu.mut.Lock()
-	logger.LogWithMessage(NameSFU, logger.MutLock, true, true, "func=AddClient")
+	logger.LogWithMessage(NameSFU, logger.MutLock, true, true, fmt.Sprintf("func=AddClient clientID=%d", msg.ClientID))
 	defer sfu.mut.Unlock()
-	defer logger.LogWithMessage(NameSFU, logger.MutUnlock, true, true, "func=AddClient")
+	defer logger.LogWithMessage(NameSFU, logger.MutUnlock, true, true, fmt.Sprintf("func=AddClient clientID=%d", msg.ClientID))
 	client := NewClientConnection(sfu, msg.ClientID, msg.AuthKey, msg.SenderVideoTracks, msg.SenderAudioTracks)
 	client.SetupPeerConnection(&sfu.settings)
 	// This will need to be changed to do it based on ReceiverVideoTracksInstead

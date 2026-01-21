@@ -20,7 +20,7 @@ type Provider interface {
 	SubscribeToRemoteClientTracks(clients []RemoteClientSimple)
 	// Add other methods needed by session_manager
 }
-type ProviderFactory func(providerKey string, videoTracks []TrackSimple, audioTracks []TrackSimple) Provider
+type ProviderFactory func(clientID uint32, oviderKey string, videoTracks []TrackSimple, audioTracks []TrackSimple) Provider
 
 const NameManagerConnection = "SessionManagerConnection"
 
@@ -213,7 +213,7 @@ func (smc *SessionManagerConnection) handleClientAddedToProvider(payload json.Ra
 	defer smc.mut.Unlock()
 	// TODO maybe change this by using track info from client
 	// i.e. use trackID from message to collect real tracks from smc.localClient
-	conn := smc.providerFactory(msg.ProviderKey, msg.SenderVideoTracks, msg.SenderAudioTracks)
+	conn := smc.providerFactory(uint32(smc.clientID), msg.ProviderKey, msg.SenderVideoTracks, msg.SenderAudioTracks)
 	smc.providers[msg.ProviderKey] = conn
 
 	conn.OnFullyConnected(smc.clientID, smc.authKey, msg.Address, msg.Port)

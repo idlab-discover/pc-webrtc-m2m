@@ -43,22 +43,22 @@ struct PacketType {
 };
 
 struct PacketFrameHeader {
-	uint32_t client_id;
-	uint32_t track_id;
-	uint32_t frame_number;
-	uint32_t frame_length;
-	uint32_t frame_offset;
-	uint32_t packet_length;
+	uint32_t track_id; // 4
+	uint32_t client_id; // 8
+	uint32_t frame_number; // 12
+	uint32_t frame_length; // 16
+	uint32_t frame_offset; // 20
+	uint32_t packet_length; // 24
 
 
 	static constexpr auto size() {
 		return sizeof(struct PacketFrameHeader);
 	}
 
-	PacketFrameHeader(uint32_t client_id, uint32_t track_id, uint32_t frame_number,
+	PacketFrameHeader(uint32_t track_id, uint32_t client_id, uint32_t frame_number,
 		uint32_t frame_length, uint32_t frame_offset, uint32_t packet_length) {
-		this->client_id = client_id;
 		this->track_id = track_id;
+		this->client_id = client_id;
 		this->frame_number = frame_number;
 		this->frame_length = frame_length;
 		this->frame_offset = frame_offset;

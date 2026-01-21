@@ -13,10 +13,19 @@ public class ExternalWebRTCReceiver : NetworkReceiverBase
     public ExternalWebRTCReceiver(IntPtr clientPtr)
     {
         this.clientPtr = clientPtr;
+        IsValid = clientPtr != IntPtr.Zero;
     }
     protected override void disposeInternal()
     {
         // TODO Dispose of clientPtr and tracks
+        foreach(var t in internalTracks)
+        {
+            if(t.Value != IntPtr.Zero)
+            {
+                Logger.LogStatusWithMessage(NAME, Logger.Status.WebRTCStoppingTrack, $"trackID={t.Key}");
+                WebRTCInvoker.stop_track(t.Value);
+            }
+        }
         WebRTCInvoker.free_client(clientPtr);
     }
 
@@ -31,20 +40,30 @@ public class ExternalWebRTCReceiver : NetworkReceiverBase
         bool exists = internalTracks.TryGetValue(trackID, out IntPtr internalTrack);
         if(!exists)
         {
-            Logger.LogStatusWithMessage("", Logger.Status.ClientTrackNotFound, $"trackID={trackID}");
+            Logger.LogStatusWithMessage(NAME, Logger.Status.ClientTrackNotFound, $"trackID={trackID}");
             return;
         }
+        if(internalTrack == IntPtr.Zero)
+        {
+            Logger.LogStatusWithMessage(NAME, Logger.Status.IntPtrZero, $"func=pollVideoTrackInternal clientID={clientID}, trackID={trackID}");
+            return;
+        }
+        Logger.LogStatusWithMessage(NAME, Logger.Status.DebugTest, $"func=pollVideoTrackInternal state=started clientID={clientID}, trackID={trackID}");
         while (keepWorking)
         {
             IntPtr frame = WebRTCInvoker.get_next_frame_for_track(internalTrack);
-            if(frame == null)
+            if(frame == IntPtr.Zero)
             {
+                Logger.LogStatusWithMessage(NAME, Logger.Status.DebugTest, $"func=pollVideoTrackInternal state=stopped clientID={clientID}, trackID={trackID}");
                 keepWorking = false;
                 continue;
             }
+            
             ExternalWebRTCNetworkFrame networkFrame = new(frame);
+            //Logger.LogStatusWithMessage(NAME, Logger.Status.DebugTest, $"func=pollVideoTrackInternal state=nFrame size={networkFrame.Size} clientID={clientID}, trackID={trackID}");
             cb(networkFrame);
         }
+        Logger.LogStatusWithMessage(NAME, Logger.Status.DebugTest, $"func=pollVideoTrackInternal state=ended clientID={clientID}, trackID={trackID}");
     }
 
     public void AddTrack(RemoteTrackInfo trackInfo)
@@ -83,6 +102,10 @@ public class ExternalWebRTCReceiver : NetworkReceiverBase
             IntPtr trackPtr = Marshal.ReadIntPtr(internalPtrs, i * IntPtr.Size);
             internalTracks.Add(trackInfos[i].trackID, trackPtr);
             Logger.LogStatusWithMessage(NAME, Logger.Status.ReceiverAdddedInternalVideoTrack, $"i={i} trackID={trackInfos[i].trackID} validPtr={trackPtr != IntPtr.Zero}");
+        }
+        foreach(var t in trackInfos)
+        {
+            t.SetReceiver(this);
         }
         Logger.LogStatus(NAME, Logger.Status.ReceiverAddedVideoTracks);
     }

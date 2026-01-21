@@ -219,6 +219,9 @@ void free_add_tracks_helper(TrackInternal** track_helper) {
 TrackFrame* get_next_frame_for_track(TrackInternal* track) {
 	return track->wait_and_pop_oldest_or_null();
 }
+void stop_track(TrackInternal* track) {
+	track->stop_track();
+}
 // TODO We get the frame size and data ptr and convert it into a NetworkFrame in Unity
 unsigned int get_frame_size(TrackFrame* frame) {
 	if (frame == nullptr) {

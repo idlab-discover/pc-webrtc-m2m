@@ -145,6 +145,8 @@ public class Logger
         WSProviderRemoteClientTracksConnected = 9005,
         IntPtrZero = 9006,
         DebugTest = 9999,
+
+        WebRTCStoppingTrack = 10000,
     }
     public static long Time => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 

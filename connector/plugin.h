@@ -34,6 +34,8 @@ extern "C"
 	DLLExport void free_client(ConnectedClient* client);
 	DLLExport TrackInternal* add_track(ConnectedClient* client, const char* track_id, bool is_video);
 	DLLExport TrackInternal** add_tracks(ConnectedClient* client, char* const* track_ids, uint8_t* is_video, size_t count);
+	DLLExport TrackFrame* get_next_frame_for_track(TrackInternal* track);
+	DLLExport void stop_track(TrackInternal* track);
 	DLLExport void free_add_tracks_helper(TrackInternal** track_helper);
 	DLLExport unsigned int get_frame_size(TrackFrame* frame);
 	DLLExport char* get_frame_data_ptr(TrackFrame* frame);
