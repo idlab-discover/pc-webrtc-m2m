@@ -167,7 +167,7 @@ public class PCReceiver : MonoBehaviour
                     DecodedPointCloudData pcData;
                     if (!inProgessFrames.TryGetValue(descriptionFrameNr, out pcData))
                     {
-                        int nTotalPointsInFrame = BitConverter.ToInt32(messageBuffer, 4);
+                        int nTotalPointsInFrame = BitConverter.ToInt32(messageBuffer, 12);
                         pcData = new DecodedPointCloudData(descriptionFrameNr, nTotalPointsInFrame, NDescriptions, activeDescriptions, timestamp);
                         inProgessFrames.Add(descriptionFrameNr, pcData);
                     }
@@ -207,7 +207,7 @@ public class PCReceiver : MonoBehaviour
                     {
                         if(descriptionFrameNr % 10 == 0)
                         {
-                            Debug.Log($"Frame {descriptionFrameNr} completed, last compl= {lastCompletedFrameNr}");
+                            Debug.Log($"Frame {descriptionFrameNr} completed with quality {pcData.Quality} with nPoints={pcData.NPoints}, last compl= {lastCompletedFrameNr}");
                         }
                        
                         inProgessFrames.Remove(descriptionFrameNr);
