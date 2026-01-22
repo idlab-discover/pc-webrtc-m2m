@@ -30,7 +30,6 @@ public class MDCPointCloudReceiverSingle
                Logger.SetFlushAll();
                Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.StartDecodingPC, clientID, header.FrameNr, header.ToString());
                DecodedMDCDescription description = new(header, true);
-               Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.EndDecodingPC, clientID, header.FrameNr, header.ToStringSmall());
                frame.Dispose(); // TODO Make it so it can also not be disposed
                Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.EndDecodingPC, clientID, header.FrameNr, header.ToStringSmall());
                lock (_lock)

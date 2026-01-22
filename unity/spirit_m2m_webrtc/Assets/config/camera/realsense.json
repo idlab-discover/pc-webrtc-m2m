@@ -1,0 +1,9 @@
+[
+    {
+        "width": 848,
+        "height": 480,
+        "minDist": 0.0,
+        "maxDist": 1.5,
+        "alignToDepth": false
+    }
+]

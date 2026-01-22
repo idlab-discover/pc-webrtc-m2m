@@ -61,6 +61,7 @@ public class Logger
         FrameDestroyed = 406,
         FrameReceived = 407,
         FrameAddedToSender = 408,
+        FrameReadyToRender = 409,
 
         // RawConverter Status
         StartRawConversion = 500,

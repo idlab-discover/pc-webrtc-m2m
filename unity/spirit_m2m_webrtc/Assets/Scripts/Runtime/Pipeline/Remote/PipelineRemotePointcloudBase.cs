@@ -23,7 +23,7 @@ public abstract class PipelineRemotePointcloudBase : PipelineRemoteBase
         RenderablePointCloud completedFrame = playbackBuffer.CheckForCompletedFrames();
         if (completedFrame != null)
         {
-            Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.EndEncodingPC, RemoteClient.ClientID, completedFrame.FrameNr, completedFrame.ToString());
+            Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.FrameReadyToRender, RemoteClient.ClientID, completedFrame.FrameNr, completedFrame.ToString());
             pointCloudRendererPrefab.SetPointCloud(completedFrame);
         } 
     }

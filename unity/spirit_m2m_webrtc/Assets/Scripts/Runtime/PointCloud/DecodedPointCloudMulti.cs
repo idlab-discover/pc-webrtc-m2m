@@ -21,11 +21,15 @@ public class DecodedPointCloudMulti : RenderablePointCloud
                 }
                 return s.IsCompleted;
             });
+            /*int completedCount = Singles.Values.Sum((s) => {
+                return s.IsCompleted ? 1 : 0;
+            }); ;*/
             return c1;
         }
     }
     public DecodedPointCloudMulti(uint nCapturers, ulong targetTimestamp, uint frameNr, uint totalPoints) : base(targetTimestamp, frameNr, totalPoints)
     {
+        Debug.Log($"NCapturers: {nCapturers}");
         NCapturers = nCapturers;
         ActualPoints = 0;
     }
@@ -40,6 +44,7 @@ public class DecodedPointCloudMulti : RenderablePointCloud
     {
         lock (_lock)
         {
+            //Debug.Log("[MULTI] Added single from capturerID: " + single.CapturerID + " frameNr: " + single.FrameNr + " nPoints: " + single.NPoints + " with nCapturers: " + NCapturers);
             Singles[single.CapturerID] = single;
         }
     }
@@ -62,7 +67,7 @@ public class DecodedPointCloudMulti : RenderablePointCloud
                     ActualPoints++;
                 }
             }
-            Debug.Log("[MULTI] Added " + FrameNr + " total: " + ActualPoints);
+            //Debug.Log("[MULTI] Added " + FrameNr + " total: " + ActualPoints);
             TotalPoints = ActualPoints;
         }
     }

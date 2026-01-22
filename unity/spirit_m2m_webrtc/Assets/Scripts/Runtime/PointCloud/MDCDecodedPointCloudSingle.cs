@@ -20,6 +20,7 @@ public class MDCDecodedPointCloudSingle : DecodedPointCloudSingle
             currentNDescriptions++;
             if(currentNDescriptions == nDescriptions)
             {
+                Parent.Quality = (uint)(((float)Parent.ActualPoints / NPoints) *100); // TODO Update this for multiple singles
                 IsCompleted = true;
             }
            
