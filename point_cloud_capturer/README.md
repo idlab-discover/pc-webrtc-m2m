@@ -3,10 +3,10 @@ This repository contains the code to build a library that can be used in a Unity
 
 Certain parts of the Kinect code is based on / inspired by [cwi_kinect](https://github.com/cwi-dis/cwipc_kinect).
 
-You can also find an example on how to use the library in Unity at: [ExampleCamera](https://github.com/idlab-discover/pc-webrtc-m2m/blob/prod/unity/spirit_m2m_webrtc/Examples/SimpleCamera.md)
+You can also find an example on how to use the library in Unity at: [ExampleCamera](../unity/spirit_m2m_webrtc/Examples/SimpleCamera.md)
 
 ## Building
-This repository uses CMake to build the library. For Windows you can use the following command to generate the solution. If you don't want to build the library yourself you can also use a [prebuilt version](https://github.com/idlab-discover/pc-webrtc-m2m/blob/prod/unity/spirit_m2m_webrtc/Assets/Plugins/spirit_idlab_realsense.dll).
+This repository uses CMake to build the library. For Windows you can use the following command to generate the solution. If you don't want to build the library yourself you can also use a [prebuilt version](../unity/spirit_m2m_webrtc/Assets/Plugins/spirit_idlab_realsense.dll).
 
  ```cpp
  cmake -G "Visual Studio 17 2022" -A x64 -S . -B "x64" -DBUILD_SHARED_LIBS=ON -DCMAKE_CONFIGURATION_TYPES=Release
