@@ -1,4 +1,4 @@
-:warning: This is the current version of our many-to-many volumetric streaming pipeline, if you want to make use of the new version (which is still in development),  you will have to the [prod](https://github.com/idlab-discover/pc-webrtc-m2m/tree/prod) branch.
+:warning: This is the current version of our many-to-many volumetric streaming pipeline, if you want to make use of the new version (which is still in development),  you will have to the [dev](https://github.com/idlab-discover/pc-webrtc-m2m/tree/dev) branch.
 
 # Many-to-many WebRTC-based point cloud video conferencing
 
