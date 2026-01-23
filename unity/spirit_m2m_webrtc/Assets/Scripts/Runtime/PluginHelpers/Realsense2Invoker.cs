@@ -98,6 +98,14 @@ public static class Realsense2Invoker
     #region Point cloud functions
     [DllImport(dllName)]
     public static extern uint get_point_cloud_size(IntPtr pc);
+    [DllImport(dllName)]
+    public static extern UInt64 get_point_cloud_timestamp(IntPtr pc);
+    [DllImport(dllName)]
+    public static extern UInt32 get_point_cloud_frame_nr(IntPtr pc);
+    [DllImport(dllName)]
+    public static extern IntPtr get_point_cloud_pos(IntPtr pc);
+    [DllImport(dllName)]
+    public static extern IntPtr get_point_cloud_col(IntPtr pc);
     #endregion
 
     #region Frame functions

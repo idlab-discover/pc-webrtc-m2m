@@ -159,12 +159,21 @@ public class Logger
     private static bool isInited;
     public static void Init(LoggerSettings _loggerSettings)
     {
-
         if(_loggerSettings.logPath == null || _loggerSettings.logPath == "")
         {
             isInited = false;
             return;
         }
+
+        // If log path does not exist, do not init logging
+        string directory = Path.GetDirectoryName(_loggerSettings.logPath);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        {
+            UnityEngine.Debug.LogWarning($"Logger: Log directory does not exist: {directory}. Logging is disabled.");
+            isInited = false;
+            return;
+        }
+
         loggerSettings = _loggerSettings;
         FilePath = loggerSettings.logPath;
         if (loggerSettings.appendTimestampToPath)
@@ -178,8 +187,6 @@ public class Logger
         isInited = true;
 
         RawInvoker.set_logging_settings(loggerSettings.pointCloud.limitLogging, loggerSettings.pointCloud.everyNFrames);
-
-
     }
     public static void Log(string message, bool writeToSocket=false)
     {

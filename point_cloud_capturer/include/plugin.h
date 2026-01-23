@@ -55,6 +55,10 @@ extern "C"
 
 	// Point cloud functions
 	DLLExport size_t get_point_cloud_size(PointCloud* pc);
+	DLLExport uint64_t get_point_cloud_timestamp(PointCloud* pc);
+	DLLExport unsigned int get_point_cloud_frame_nr(PointCloud* pc);
+	DLLExport Vertex* get_point_cloud_pos(PointCloud* pc);
+	DLLExport Color* get_point_cloud_col(PointCloud* pc);
 
 	// Frame functions
 	DLLExport size_t get_frame_size(Frame* pc);

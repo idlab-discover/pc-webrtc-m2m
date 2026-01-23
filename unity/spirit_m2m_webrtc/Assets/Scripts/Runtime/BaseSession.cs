@@ -190,7 +190,7 @@ public class BaseSession : MonoBehaviour
         mainThreadActions.Enqueue(() =>
         {
             PipelineLocalPrefabFactory.registeredPrefabs.TryGetValue(client.CodecMode, out var prefab);
-            if (prefab == null)
+            if (prefab == null) 
             {
                 Debug.LogError($"No prefab found for codec mode {client.CodecMode}");
                 return;

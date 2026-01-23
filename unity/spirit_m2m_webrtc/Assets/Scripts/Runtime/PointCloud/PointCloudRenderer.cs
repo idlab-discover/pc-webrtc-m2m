@@ -57,6 +57,7 @@ public class PointCloudRenderer : MonoBehaviour
         );
       
         currentMesh.UploadMeshData(true);
+        Debug.Log($"[PointCloudRenderer] Setting mesh with {dec.TotalPoints} points {currentQualityIndex} {meshFilters.Count}");
         meshFilters[(int)currentQualityIndex].mesh = currentMesh;
         Logger.LogPCFrameStatusLimited(NAME, Logger.Status.FrameRendered, clientID, 0, dec.FrameNr);
     }

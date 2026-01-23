@@ -85,6 +85,27 @@ size_t get_point_cloud_size(PointCloud* frame) {
 	if(frame == nullptr) return 0;
 	return frame->n_points;
 }
+
+uint64_t get_point_cloud_timestamp(PointCloud* pc) {
+	if(pc == nullptr) return 0;
+	return pc->timestamp;
+}
+
+unsigned int get_point_cloud_frame_nr(PointCloud* pc) {
+	if(pc == nullptr) return 0;
+	return pc->frame_nr;
+}
+
+Vertex* get_point_cloud_pos(PointCloud* pc) {
+	if(pc == nullptr) return nullptr;
+	return pc->coords;
+}
+
+Color* get_point_cloud_col(PointCloud* pc) {
+	if(pc == nullptr) return nullptr;
+	return pc->colors;
+}
+
 size_t get_frame_size(Frame* frame) {
 	if (frame == nullptr) return 0;
 	return frame->get_frame_size();
@@ -293,12 +314,6 @@ void free_multi_capturer(MultiCapturer* capturer) {
 		delete capturer;
 	}
 }
-
-
-
-
-
-
 
 
 
