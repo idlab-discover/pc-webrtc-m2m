@@ -17,7 +17,7 @@ After this you will to open the generated solution, change the build type to `Re
 
 
 ## Usage
-The library contains two types of a capturers, a basic capturer for a single camera and a multi capturer when using multiple camera's (this one currently only has support for recorded Kinect camera files but can also be with a single Realsense camera).
+The library contains two types of a capturers, a basic capturer for a single camera and a multi capturer when using multiple camera's (this one currently only has support for recorded Kinect camera files but can also be with a single Realsense camera). Also has the option to read ply files.
 
 ### Basic Capturer
 You will first have to create a new capturer using the following function:
@@ -33,7 +33,7 @@ Arguments:
 |----------|-------------|
 | `FrameMode` | Can either be 0 (RealData), 1 (RawData). You can use this to determine if the capturer should automatically convert the data into a point cloud (RealData) or if you want to do this manually (RawData) |
 | `FrameCleanupSettings` | A struct containing `unsigned int blackout_block_size`, `bool should_apply_depth_filter`, `bool should_cleanup_depth` and `bool should_blackout`. You can use this struct to automatically remove pixels from the raw depth/color images that are too far away. To improve color encoding efficiency pixels, will only set to black if all pixels in grid of `blackout_block_size` are all too far away. The parameter `should_cleanup_depth` is very experimental and should be put to false.
-| `CAPTURE_TYPE` | Can either be 0 (artificial), 1 (Realsense), 2 (PrerecordedRealsense), 3 (Kinect), 4 (PrerecordedKinect), and allows you to set which types of cameras you are using, with artificial being a cube that requires no cameras. At the moment only 0, 1 and 4 should be used.
+| `CAPTURE_TYPE` | Can either be 0 (artificial), 1 (Realsense), 2 (PrerecordedRealsense), 3 (Kinect), 4 (PrerecordedKinect), 5 (Ply Files), and allows you to set which types of cameras you are using, with artificial being a cube that requires no cameras. At the moment only 0, 1 and 4 should be used.
 | `capture_settings` | This is a pointer to a struct containing settings that are specific to a certain type of cameras. The different types of settings are listed below.
 
 ##### Artificial
@@ -59,6 +59,11 @@ Arguments:
 | `float radius` | Currently does nothing, but will be used in the future to remove specific points |
 | `float trafo[4][4]` | Array containing the rotational data of the camera, used to stitch the data over several cameras together (e.g., as seen in [certain datasets](https://www.dis.cwi.nl/cwipc-sxr-dataset/downloads/) |
 | `char cam_file[256]`| Path to the captured camera data |
+
+##### Ply Files (🚧Needs better parser though)
+| Variable | Description |
+|----------|-------------|
+| `char directory_path[256]`| Path to the directory containing the .ply files. |
 
 Be sure to free the capturer once you are done.
 
