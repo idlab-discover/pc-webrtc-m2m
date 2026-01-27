@@ -93,6 +93,8 @@ The returned pointer can the be used with the following functions:
 | `unsigned int get_point_cloud_frame_nr`| Returns the frame number of the point cloud. |
 | `Vertex* get_point_cloud_pos` | Returns a pointer to the array containing the position of each point. A `Vertex` a struct with `float x, y, z`. However, you can also just treat the array as an array of floats containing 3xNPoints. |
 | `Color* get_point_cloud_col` | Returns a pointer to the array containing the color of each point. Similar to how the positions work but with `Color` being a struct of `uint8_t r, g, b` |
+| `PointCloud* downsample_pc_random(PointCloud* pc, unsigned int max_points, bool create_new_pc)` | Downsamples the point cloud to a specific number of points. Can either choose to create a new point cloud (ensuring the current pointer remains valid) or overwrite the positions/colors from the old one. |
+| `bool save_pc_to_ply(const char* file_path, PointCloud* pc)` | Saves the point cloud to a binary .ply file. |
 | `void free_point_cloud` | Once you are done with the point cloud you should call this function or you will have memory leaks! |
 
 #### Polling a frame
