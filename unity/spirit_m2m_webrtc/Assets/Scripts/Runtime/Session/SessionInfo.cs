@@ -34,6 +34,7 @@ public class SessionInfo
     public string artificalConfigPath = "config/camera/artificial.json";
     public string realsenseConfigPath = "config/camera/realsense.json";
     public string prerecordedKinectConfigPath = "config/camera/prerecKinect.json";
+    public string plyFilesConfigPath = "config/camera/plyfiles.json";
     public string providersConfigPath = "config/providers/prov.json";
     //public ArtificialSettings artificialSettings;
     //public RealsenseSettings realsenseSettings;
@@ -180,4 +181,12 @@ public class LoggerSettingsAudio
 {
     public bool limitLogging = true; // Limits it to everyNFrames
     public uint everyNFrames = 100;
+}
+
+[System.Serializable]
+public class MicSettings
+{
+    public bool usePrerecorded; // If true, deviceName links to the a file
+    public string deviceName;
+    public string audioProcessor; // FMOD, Unity, WWise
 }

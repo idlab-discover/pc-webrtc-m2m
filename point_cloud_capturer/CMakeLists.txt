@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
+include(FetchContent)
 
 # Define the project name and the type of project
 project(spirit_idlab_realsense LANGUAGES CXX)
@@ -29,6 +30,14 @@ set_target_properties(spirit_idlab_realsense PROPERTIES
     SOVERSION ${spirit_idlab_realsense_VERSION_MAJOR}
 )
 
+FetchContent_Declare(
+  fast_float
+  GIT_REPOSITORY https://github.com/fastfloat/fast_float.git
+  GIT_TAG tags/v8.2.2
+  GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(fast_float)
+
+
 # Set the CMake module path to find the custom FindREALSENSE2.cmake
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeFiles")
 
@@ -41,5 +50,6 @@ target_link_libraries(spirit_idlab_realsense ${REALSENSE2_LIBRARIES})
 target_link_libraries(spirit_idlab_realsense ${k4a_LIBRARY} ${k4arecord_LIBRARY})
 
 target_link_libraries(spirit_idlab_realsense winmm.lib)
+target_link_libraries(spirit_idlab_realsense fast_float)
 # Include REALSENSE2 directories
-include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/kinect ${CMAKE_SOURCE_DIR}/include/multi_capturer ${k4a_INCLUDE_DIR} ${REALSENSE2_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/kinect ${CMAKE_SOURCE_DIR}/include/multi_capturer ${k4a_INCLUDE_DIR} ${REALSENSE2_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include/external/plywoot ${CMAKE_SOURCE_DIR}/include/multi_capturer/external/plywoot/plywoot)

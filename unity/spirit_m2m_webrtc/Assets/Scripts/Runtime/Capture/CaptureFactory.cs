@@ -50,6 +50,16 @@ public static class CaptureFactory
                     }
                     break;
                 }
+            case "plyfiles":
+                {
+                    string fullPath = Application.dataPath + "/" + sessionInfo.plyFilesConfigPath;
+                    var set = JsonConvert.DeserializeObject<PlyFilesSettings[]>(File.ReadAllText(fullPath));
+                    if (set != null && set.Length > sessionInfo.activeCamIndex)
+                    {
+                        return new PlyFilesCapturer(sessionInfo.camFPS, sessionInfo.frameMode, frameCleanupSettings, set[sessionInfo.activeCamIndex], startCaptureThread);
+                    }
+                    break;
+                }
         }
         Debug.LogError("Could not create single capturer");
         return null;
@@ -100,6 +110,20 @@ public static class CaptureFactory
                         if (f != null)
                         {
                             captures.Add(new MultiCaptureSinglePrerecKinect(f));
+                        }
+                    }
+                    break;
+                }
+            case "plyfiles":
+                {
+                    string fullPath = Application.dataPath + "/" + sessionInfo.plyFilesConfigPath;
+                    var set = JsonConvert.DeserializeObject<PlyFilesSettings[]>(File.ReadAllText(fullPath));
+                    for (int i = 0; i < set.Length; i++)
+                    {
+                        var f = set[i];
+                        if (f != null)
+                        {
+                            captures.Add(new MultiSinglePlyFiles(f));
                         }
                     }
                     break;

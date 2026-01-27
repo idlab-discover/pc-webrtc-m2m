@@ -9,6 +9,8 @@ public abstract class PipelineLocalBase : MonoBehaviour
     public virtual void Init(SessionInfo sessionInfo, LocalConnectedClient localClient)
     {
         LocalClient = localClient;
+        // Check session if mic is enabled
+        // If it is -> Add Audio Pipeline to this GameObject
     }
     void OnDestroy()
     {

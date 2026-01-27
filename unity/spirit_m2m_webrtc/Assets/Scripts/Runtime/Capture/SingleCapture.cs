@@ -12,6 +12,7 @@ public enum CaptureType
     PrerecordedRealsense = 2,
     Kinect = 3,
     PrerecordedKinect = 4,
+    PlyFiles = 5
 }
 
 public abstract class SingleCapture : BaseCapture, ICapturePoll

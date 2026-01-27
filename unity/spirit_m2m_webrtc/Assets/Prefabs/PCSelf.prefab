@@ -57,20 +57,63 @@ MonoBehaviour:
         x: 0
         y: 0
         z: 0
+    pushBack:
+      x: 0
+      y: 0
+      z: 0
     sfuAddress: 
     peerUDPPort: 0
-    camClose: 0
-    camFar: 0
-    camWidth: 0
-    camHeight: 0
-    artificialSize: 0
     camFPS: 0
-    useCam: 0
     useMic: 0
+    loggerSettings:
+      logPath: 
+      appendTimestampToPath: 1
+      flushInterval: 100
+      pointCloud:
+        limitLogging: 1
+        everyNFrames: 10
+      audio:
+        limitLogging: 1
+        everyNFrames: 100
     frameMode: 0
     frameCodec: 0
-    jpegQuality: 0
+    supportedModes: []
+    supportedCapturers: []
+    capturerConfigs: []
+    useMultiCam: 0
+    activeCamIndex: 0
+    capturerName: artificial
+    artificalConfigPath: config/camera/artificial.json
+    realsenseConfigPath: config/camera/realsense.json
+    prerecordedKinectConfigPath: config/camera/prerecKinect.json
+    providersConfigPath: config/providers/prov.json
+    playbackBufferSettings:
+      holdFramePreviousFor: 100
+      usePreviousFrameData: 0
+      maxTimeBeforeIncompleteRender: 20
+      enqueueImmediately: 1
+      renderIncompleteFrames: 0
+    sessionManagerSettings:
+      type: loopback
+      defaultName: TestSession
+      configPath: /config/session/loopback_0.json
+    frameCleanupSettings:
+      blackoutBlockSize: 0
+      shouldApplyDepthFilter: 0
+      shouldCleanupDepth: 0
+      shouldBlackout: 0
+    rawEncodingSettings:
+      colorCodecName: jpeg
+      depthCodecName: vle
+      maxQueueSize: 2
+      nWorkers: 3
+      jpegSettings:
+        quality: 75
+      webPSettings:
+        quality: 75
+        method: 0
     audioPlayback:
+      useAudio: 0
       maxQueueSize: 0
       targetSamples: 0
       audioDelay: 0
@@ -119,7 +162,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1984668758913251958, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 44.7
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1984668758913251958, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -147,7 +190,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1984668759388320319, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 40
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1984668759388320319, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -183,7 +226,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1984668759906836222, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 40
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1984668759906836222, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -203,7 +246,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1984668759991436502, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 40
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1984668759991436502, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -239,7 +282,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1984668760453204319, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 44.7
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1984668760453204319, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -259,7 +302,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1984668760497519799, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 40
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1984668760497519799, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -287,7 +330,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1984668760711245992, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 40
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1984668760711245992, guid: 65eb6b98091a5734ba9d9ca871cef69a, type: 3}
       propertyPath: m_AnchoredPosition.y

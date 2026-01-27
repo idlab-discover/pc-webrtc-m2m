@@ -2,6 +2,7 @@
 #include "artificical_capturer.hpp"
 #include "rs2_capturer.hpp"
 #include "prerecorded_kinect_capturer.hpp"
+#include "ply_capturer.hpp"
 #include "log.h"
 CapturerFactory& CapturerFactory::get_instance() {
     static CapturerFactory instance;
@@ -24,6 +25,10 @@ Capturer* CapturerFactory::create_capturer(unsigned int capture_id, uint32_t fps
             case CAPTURE_TYPE::PrerecordedKinect: {
                 Log::custom_log("create_capturer: Creating prerecorded kinect capturer", LOG_LEVEL::Default, LogColor::Orange);
                 return new PrerecordedKinectCapturer(capture_id, fps, mode, cleanup_settings, static_cast<PrerecordedKinectCaptureSettings*>(capture_settings));
+            }
+            case CAPTURE_TYPE::PlyFiles: {
+                Log::custom_log("create_capturer: Creating ply file capturer", LOG_LEVEL::Default, LogColor::Orange);
+                return new PlyCapturer(capture_id, fps, mode, cleanup_settings, static_cast<PlyCaptureSettings*>(capture_settings));
             }
             default:
                 Log::custom_log("create_capturer: Unknown capture type", LOG_LEVEL::Default, LogColor::Red);

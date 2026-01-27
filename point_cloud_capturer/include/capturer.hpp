@@ -14,6 +14,7 @@ enum CAPTURE_TYPE : int {
     PrerecordedRealSense = 2,
     Kinect = 3,
     PrerecordedKinect = 4,
+    PlyFiles = 5
 };
 
 enum CAPTURER_SETUP_CODE : int {
