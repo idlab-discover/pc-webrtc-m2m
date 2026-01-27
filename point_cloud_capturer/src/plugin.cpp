@@ -21,6 +21,7 @@
 #include "prerecorded_kinect_capturer.hpp"
 #include "kinect_raw_converter.hpp"
 #include "capturer_factory.hpp"
+#include "utils/point_cloud_utils.hpp"
 using namespace std;
 
 uint32_t n_tiles;
@@ -315,6 +316,19 @@ void free_multi_capturer(MultiCapturer* capturer) {
 	}
 }
 
+PointCloud* downsample_pc_random(PointCloud* pc, unsigned int max_points, bool create_new_pc) {
+	if(pc == nullptr) {
+		return nullptr;
+	}
+	return pcutils::downsample_pc_random(pc, max_points, create_new_pc);
+}
+
+bool save_pc_to_ply(const char* file_path, PointCloud* pc) {
+	if(pc == nullptr) {
+		return false;
+	}
+	return pcutils::save_pc_to_ply(file_path, pc);
+}
 
 
 /*

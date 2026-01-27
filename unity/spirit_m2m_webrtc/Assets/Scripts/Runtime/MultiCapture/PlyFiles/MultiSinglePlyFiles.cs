@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MultiSinglePlyFiles : MultiCaptureSingleCam
 {
-    public MultiSinglePlyFiles(PlyFilesSettings settings) : base(CaptureType.Artificial, new PlyFilesCaptureHelper(settings))
+    public MultiSinglePlyFiles(PlyFilesSettings settings) : base(CaptureType.PlyFiles, new PlyFilesCaptureHelper(settings))
     {
     }
 }

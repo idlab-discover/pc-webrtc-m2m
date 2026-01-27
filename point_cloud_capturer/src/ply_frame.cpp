@@ -1,12 +1,6 @@
 #include "ply_frame.hpp"
 #include "external/plywoot/plywoot.hpp"
 #include <fstream>
-
-struct PlyPoint {
-    Vertex vertex;
-    Color color;
-};
-
 void PlyFrame::make_data_arrays(const std::string& file_path)
 {
     using PointLayout = plywoot::reflect::Layout<plywoot::reflect::Pack<float, 3>, plywoot::reflect::Pack<uint8_t, 3>>;

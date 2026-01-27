@@ -52,4 +52,9 @@ target_link_libraries(spirit_idlab_realsense ${k4a_LIBRARY} ${k4arecord_LIBRARY}
 target_link_libraries(spirit_idlab_realsense winmm.lib)
 target_link_libraries(spirit_idlab_realsense fast_float)
 # Include REALSENSE2 directories
-include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/kinect ${CMAKE_SOURCE_DIR}/include/multi_capturer ${k4a_INCLUDE_DIR} ${REALSENSE2_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include/external/plywoot ${CMAKE_SOURCE_DIR}/include/multi_capturer/external/plywoot/plywoot)
+include_directories(
+    ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/utils 
+    ${CMAKE_SOURCE_DIR}/include/kinect ${CMAKE_SOURCE_DIR}/include/multi_capturer 
+    ${k4a_INCLUDE_DIR} ${REALSENSE2_INCLUDE_DIRS} 
+    ${CMAKE_SOURCE_DIR}/include/external/plywoot ${CMAKE_SOURCE_DIR}/include/multi_capturer/external/plywoot/plywoot
+)

@@ -3,7 +3,7 @@
 #include "framework.h"
 #include "capturer.hpp"
 struct PlyCaptureSettings {
-    char cam_file[256];
+    char directory_path[256];
 };
 class PlyCapturer : public Capturer {
     public:
@@ -12,7 +12,7 @@ class PlyCapturer : public Capturer {
             unsigned int fps, FrameMode mode, FrameCleanupSettings cleanup_settings,
             PlyCaptureSettings* capture_settings
         ) : Capturer(capture_id, mode, fps, cleanup_settings),
-            directory_path(std::string(capture_settings->cam_file))
+            directory_path(std::string(capture_settings->directory_path))
         {
             interframe_delay = std::chrono::milliseconds(1000 / fps);
             previous_time = std::chrono::high_resolution_clock::now();

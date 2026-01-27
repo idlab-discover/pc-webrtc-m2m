@@ -129,6 +129,13 @@ public static class Realsense2Invoker
     public static extern void convert_raw_frame(IntPtr c, IntPtr depth, IntPtr color, IntPtr pos_out, IntPtr col_out);
     #endregion
 
+    #region Util functions
+    [DllImport(dllName)]
+    public static extern IntPtr downsample_pc_random(IntPtr pc, uint nPoints, bool createNewPc);
+    [DllImport(dllName, CallingConvention =CallingConvention.Cdecl, CharSet =CharSet.Ansi)]
+    public static extern bool save_pc_to_ply(string filePath, IntPtr pc);
+    #endregion
+
     #region Free memory functions
     [DllImport(dllName)]
     public static extern void free_point_cloud(IntPtr pc);

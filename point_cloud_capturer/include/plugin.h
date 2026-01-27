@@ -71,6 +71,10 @@ extern "C"
 	DLLExport RawConverter* create_new_raw_converter(CAPTURE_TYPE type, void* cal);
 	DLLExport void convert_raw_frame(RawConverter* c, uint16_t* depth, uint8_t* color, Vector3* pos_out, Color32* col_out);
 	
+	// Util functions
+	DLLExport PointCloud* downsample_pc_random(PointCloud* pc, unsigned int max_points, bool create_new_pc);
+	DLLExport bool save_pc_to_ply(const char* file_path, PointCloud* pc);
+
 	// Free memory functions
 	DLLExport void free_point_cloud(PointCloud * pc);
 	DLLExport void free_frame(Frame * pc);

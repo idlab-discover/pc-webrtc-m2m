@@ -6,3 +6,8 @@ struct Vertex {
 struct Color {
     uint8_t r, g, b;
 };
+
+struct PlyPoint {
+    Vertex vertex;
+    Color color;
+};
