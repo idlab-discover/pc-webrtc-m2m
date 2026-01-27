@@ -27,74 +27,81 @@ Alternatively, for Windows you can also use a [prebuilt library (DLL + header fi
 
 ## Usage
 
-##### Creates the encoding queue:
-This queue holds up to two point clouds (i.e., the frame that is currently encoding and one buffered frame).
+### MDC-based encoding queue:
+Before you can start encoding point clouds, you will first have to create an MDC-based encoding queue. This queue can hold up `max_queue` frames and will create three threads that are used to encode the MDC descriptions (this will be configurable in the future).  
 ```c++
-initialize()
-```
-##### To encode the point cloud from the capturer:
-This method is **non-blocking**, and will simply add the point cloud to the queue. Once the encoders are ready for the next frame they will retrieve it from the queue and split it into multiple descriptions. You need to make sure you have called `register_description_done_callback` at the start of your application to receive the encoded description.
-```c++
-encode_pc(PointCloud* pc)
+EncodingQueue* create_encoding_queue(unsigned int max_queue)
 ```
 
-##### To register the callback that will be used when a description has been encoded:
+:warning: Be sure to free the encoding queue once you are done.
+```cpp
+void free_encoding_queue(EncodingQueue* enc)
+```
+
+#### Encoding a point cloud:
+This method is **non-blocking**, and will simply add the point cloud to the queue. Once the encoders are ready for the next frame they will retrieve it from the queue and split it into multiple descriptions. You need to make sure you have called `register_description_done_callback` at the start of your application to receive the encoded description. The return value currently has no specific meaning.
 ```c++
-register_description_done_callback(DescriptionDoneCallback cb)
+uint32_t encode_pc(EncodingQueue* enc, PointCloud* pc)
+```
+
+:warning: You will have to manually free the `PointCloud*` as well. To know when you can free the `PointCloud*`, you can register a callback that will be called once the encoder no longer needs to use the point cloud (either because it's done encoding or because it got removed from the queue due to a more recent frame entering the queue).
+
+```c++
+register_free_pc_callback(FreePointCloudCallback cb)
+```
+This callback has to have the following function definition:
+```c++
+func(PointCloud* pc)
+```
+
+#### Registering the callback that will be used when a description has been encoded:
+```c++
+register_description_done_callback(EncodingQueue* enc_queue, DescriptionDoneCallback cb)
 ```
 
 This callback has to have the following function definition: 
 
 ```c++
-func(Description* dsc, char* raw_data_ptr, uint32_t n_points_in_total, uint32_t dsc_size, uint32_t frame_nr, uint32_t dsc_nr)
+func(Description* dsc, char* raw_data_ptr, uint32_t n_points_in_total, uint32_t dsc_size,
+                   uint32_t capturer_id, uint32_t frame_nr, uint32_t dsc_nr, uint64_t timestamp)
 ```
 
-##### To free the encoded description once you are done with it:
+:warning: Be sure to free the description once you are done with it:
+
 ```c++
 free_description(Description*)
 ```
 
-##### To decode the raw data of a single description into a point cloud:
+
+
+### Decoding a point cloud
+
 This method is **blocking**, and will only return once decoding is fully complete.
 ```c++
-DracoMDCDecoder* decode_pc(char* data, uint32_t size)
+DracoMDCDecoder* decode_pc(char* data, uint32_t size);
 ```
 
-##### Get the number of points in the decoded description:
+:warning: Be sure to free the decoder once you are done with it.
+
 ```c++
-get_n_points(DracoMDCDecoder*)
+void free_decoder(DracoMDCDecoder*)
 ```
 
-##### Get a raw pointer to an array containing the position data of decoded  description:
+#### Get the number of points in the decoded description/point cloud:
+```c++
+uint32_t get_n_points(DracoMDCDecoder* dec)
+```
+
+#### Get a raw pointer to an array containing the position data of decoded  description:
 Points are saved as <X, Y, Z>, with each axis having a 32bit value.
 ```c++
-get_point_array(DracoMDCDecoder*)
+float* get_point_array(DracoMDCDecoder* dec)
 ```
 
-##### Get the number of points in the decoded encoded description:
+#### Get the number of points in the decoded encoded description:
 Colors are saved as <R, G, B>, with each color channel having a 8bit value.
 ```c++
-get_color_array(DracoMDCDecoder*)
-```
-
-##### To free the decoded description once you are done with it:
-```c++
-free_decoder(DracoMDCDecoder*)
-```
-
-##### To know when you can free the captured point cloud:
-```c++
-register_free_pc_callback(FreePointCloudCallback cb)
-```
-This callback has to have the following function definition:
-
-```c++
-func(PointCloud* pc)
-```
-
-##### To stop the encoder threads after you are done:
-```
-cleanup()
+uint8_t* get_color_array(DracoMDCDecoder* dec)
 ```
 
 ## Tested operating systems
