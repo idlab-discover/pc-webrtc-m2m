@@ -59,8 +59,10 @@ public class BenchGenerateMDC : PipelineLocalPointcloudBase
         IntPtr frame = capture.GetSingleCombinedPointCloud();
         if (frame != IntPtr.Zero)
         {
-            uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
-            //Debug.Log($"Number of points: {nPoints}");
+            if(benchConfig.downsampleToNPoints > 0)
+            {
+                Realsense2Invoker.downsample_pc_random(frame, benchConfig.downsampleToNPoints, false);
+            }
             encodingQueue.EncodePointCloud(frame);
         }
         else

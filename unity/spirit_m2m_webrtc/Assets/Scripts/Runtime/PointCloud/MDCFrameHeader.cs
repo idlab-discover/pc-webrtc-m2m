@@ -17,6 +17,7 @@ public class MDCFrameHeader
     public uint TotalNumberOfPoints { get; private set; }
 
 
+    // This returns only the header bytes, not the data buffer
     public byte[] Bytes 
     { 
         get 

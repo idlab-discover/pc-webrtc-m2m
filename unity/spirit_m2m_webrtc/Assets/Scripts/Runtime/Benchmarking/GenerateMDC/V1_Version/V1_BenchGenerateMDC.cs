@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 using UnityEngine;
 
@@ -62,8 +63,10 @@ public class V1_BenchGenerateMDC : PipelineLocalPointcloudBase
         IntPtr frame = capture.GetSingleCombinedPointCloud();
         if (frame != IntPtr.Zero)
         {
-            uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
-            //Debug.Log($"Number of points: {nPoints}");
+            if (benchConfig.downsampleToNPoints > 0)
+            {
+                Realsense2Invoker.downsample_pc_random(frame, benchConfig.downsampleToNPoints, false);
+            }
             encodingQueue.EncodePointCloud(frame);
         }
         else
@@ -104,6 +107,10 @@ public class V1_BenchGenerateMDC : PipelineLocalPointcloudBase
                 {
                     Debug.LogError($"Failed to write frame to {filePath}: {ex.Message}");
                 }
+                if(benchConfig.validateEncoding)
+                {
+                    validateEncoding(filePath, desc);
+                }
             }
             
 
@@ -127,11 +134,15 @@ public class V1_BenchGenerateMDC : PipelineLocalPointcloudBase
         }
     }
 
+    private void validateEncoding(string filePath, EncodedMDCDescription desc)
+    {
+        v1ValidateFromBuffer(System.IO.File.ReadAllBytes(filePath), desc);
+    }
+
     protected override void cleanup()
     {
         base.cleanup();
         lock (_lock) {
-            Debug.Log("Cleanup pulse");
             pollNextFrame = true;
             Monitor.Pulse(_lock);
         }
@@ -147,7 +158,51 @@ public class V1_BenchGenerateMDC : PipelineLocalPointcloudBase
         frameNrField.CopyTo(buffer, 8);
         var nPointsFrameField = BitConverter.GetBytes(desc.Header.TotalNumberOfPoints);
         nPointsFrameField.CopyTo(buffer, 12);
-        System.Buffer.BlockCopy(desc.Bytes, 0, buffer, 16, (int)desc.Header.DataBufferSize);
+        Marshal.Copy(desc.Header.DataBuffer, buffer, 16, (int)desc.Header.DataBufferSize); 
         return buffer;
+    }
+
+    private MDCFrameHeader v1ValidateFromBuffer(byte[] buffer, EncodedMDCDescription encDesc)
+    {
+        var timestampField = BitConverter.ToUInt64(buffer, 0);
+        var frameNrField = BitConverter.ToUInt32(buffer, 8);
+        var nPointsFrameField = BitConverter.ToUInt32(buffer, 12);
+    
+        IntPtr unmanagedPointer = Marshal.AllocHGlobal(buffer.Length - 16);
+        Marshal.Copy(buffer, 16, unmanagedPointer, buffer.Length - 16);
+        MDCFrameHeader header = new(
+            dataBuffer: unmanagedPointer,
+            dataBufferSize: (uint)(buffer.Length - 16),
+            timestamp: timestampField,
+            capturerID: 0, // TODO
+            frameNr: frameNrField,
+            descriptionNr: 0, // TODO
+            codecType: 0, // TODO
+            numberOfPoints: nPointsFrameField
+        );
+        DecodedMDCDescription decDesc = new(header, decodeImmediately: true);
+        bool invalidFrame = false;
+        if (decDesc.NumberOfPoints == 0)
+        {
+            Debug.LogError($"Validation failed for frame {frameNrField}: more than 0 points, got {decDesc.NumberOfPoints} points. Total PC points in header={nPointsFrameField}");
+            invalidFrame = true;
+        }
+        if(timestampField != encDesc.Header.Timestamp)
+        {
+            Debug.LogError($"Validation failed for frame {frameNrField}: expected timestamp {encDesc.Header.Timestamp}, got {timestampField}");
+            invalidFrame = true;
+        }
+        if(frameNrField != encDesc.Header.FrameNr)
+        {
+            Debug.LogError($"Validation failed for frame {frameNrField}: expected frame number {encDesc.Header.FrameNr}, got {frameNrField}");
+            invalidFrame = true;
+        }
+        if(!invalidFrame)
+        {
+            Debug.Log($"Validation succeeded for frame {frameNrField}");
+        }
+        decDesc.Dispose();
+        Marshal.FreeHGlobal(unmanagedPointer);
+        return header;
     }
 }

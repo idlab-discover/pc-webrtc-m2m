@@ -54,7 +54,11 @@ public class DecodedMDCDescription : IDisposable
         {
             if (disposing)
             {
-                // TODO: dispose managed state (managed objects)
+                if(decodedDesc != IntPtr.Zero)
+                {
+                    DracoInvoker.free_decoder(decodedDesc);
+                    decodedDesc = IntPtr.Zero;
+                }
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
