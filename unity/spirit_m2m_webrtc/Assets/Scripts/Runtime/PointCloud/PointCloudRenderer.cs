@@ -45,7 +45,7 @@ public class PointCloudRenderer : MonoBehaviour
     public void SetPointCloud(RenderablePointCloud dec)
     {
         setQuality(dec.Quality);
-        Destroy(currentMesh);
+        Destroy(currentMesh); // TODO Assign mesh once and just clear it
         currentMesh = new Mesh();
         currentMesh.indexFormat = dec.TotalPoints > 65535 ?
                 IndexFormat.UInt32 : IndexFormat.UInt16;

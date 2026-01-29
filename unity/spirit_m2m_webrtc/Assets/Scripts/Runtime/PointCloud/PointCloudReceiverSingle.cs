@@ -27,7 +27,6 @@ public class MDCPointCloudReceiverSingle
            track.StartPollingTrack((frame) => {
                uint nDescriptions = 0;
                MDCFrameHeader header = new(frame);
-               Logger.SetFlushAll();
                Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.StartDecodingPC, clientID, header.FrameNr, header.ToString());
                DecodedMDCDescription description = new(header, true);
                frame.Dispose(); // TODO Make it so it can also not be disposed

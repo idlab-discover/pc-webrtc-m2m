@@ -87,7 +87,7 @@ public class RawConverter : IDisposable
         {
             return;
         }
-        convertRawFrameInternal(s, m.Points, m.Colors);
+       // convertRawFrameInternal(s, m.Points, m.Colors);
     }
     public void ConvertRawFrame(DecodedRawFrame dec, uint width, uint height)
     {

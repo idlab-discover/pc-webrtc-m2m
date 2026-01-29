@@ -2,7 +2,7 @@
     "clientID": 0,
     "sfuAddress": "127.0.0.1:8080",
     "peerUDPPort": 9000,
-    "providersConfigPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-webrtc-m2m\\unity\\spirit_m2m_webrtc\\Assets\\config\\providers\\prov_loopback.json",
+    "providersConfigPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-m2m-clean\\pc-webrtc-m2m\\unity\\spirit_m2m_webrtc\\Assets\\config\\providers\\prov_loopback.json",
     "startPositions": [
         {"x": 19.295, "y":0.974, "z": -0.35},
         {"x": 19.0, "y":0.974, "z": -0.931},
@@ -32,7 +32,7 @@
         }
     ],
     "loggerSettings": {
-        "logPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-webrtc-m2m\\logs\\session_log",
+        "logPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-m2m-clean\\pc-webrtc-m2m\\logs\\session_log",
         "appendTimestampToPath": false,
         "flushInterval": 100,
         "pointCloud": {

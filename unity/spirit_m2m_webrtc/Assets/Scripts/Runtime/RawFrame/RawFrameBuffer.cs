@@ -43,7 +43,7 @@ public class RawFrameBuffer : RenderablePointCloudBuffer
         bool succes = inProgessFrames.TryGetValue(s.FrameNr, out DecodedRawFrameMulti d);
         if (!succes)
         {
-            d = new DecodedRawFrameMulti(NActiveCapturers, s.FrameNr, 0);
+           // d = new DecodedRawFrameMulti(NActiveCapturers, s.FrameNr, 0);
             inProgessFrames.Add(s.FrameNr, d);
         }
         d.AddAndConvertSingle(s, c);
@@ -55,7 +55,7 @@ public class RawFrameBuffer : RenderablePointCloudBuffer
         bool succes = inProgessFrames.TryGetValue(frameNr, out DecodedRawFrameMulti d);
         if (!succes)
         {
-            d = new DecodedRawFrameMulti(NActiveCapturers, frameNr, targetTimestamp);
+          //  d = new DecodedRawFrameMulti(NActiveCapturers, frameNr, targetTimestamp);
             inProgessFrames.Add(frameNr, d);
         }
         return d.AddSingle(captureID, nPoints);
@@ -119,8 +119,8 @@ public class RawFrameBuffer : RenderablePointCloudBuffer
                 if(sOld != null)
                 {
                     sNew = newestFrame.AddSingle(i, sOld.NPoints);
-                    Array.Copy(previousFrame.Points, sOld.PointOffset, newestFrame.Points, sNew.PointOffset, sOld.NPoints);
-                    Array.Copy(previousFrame.Colors, sOld.PointOffset, newestFrame.Colors, sNew.PointOffset, sOld.NPoints);
+                  //  Array.Copy(previousFrame.Points, sOld.PointOffset, newestFrame.Points, sNew.PointOffset, sOld.NPoints);
+                   // Array.Copy(previousFrame.Colors, sOld.PointOffset, newestFrame.Colors, sNew.PointOffset, sOld.NPoints);
                 }
             }
         }

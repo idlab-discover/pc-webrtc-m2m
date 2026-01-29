@@ -25,6 +25,7 @@ public abstract class PipelineRemotePointcloudBase : PipelineRemoteBase
         {
             Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.FrameReadyToRender, RemoteClient.ClientID, completedFrame.FrameNr, completedFrame.ToString());
             pointCloudRendererPrefab.SetPointCloud(completedFrame);
+            completedFrame.Dispose();
         } 
     }
 }

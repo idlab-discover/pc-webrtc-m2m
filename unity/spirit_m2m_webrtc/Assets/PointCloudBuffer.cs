@@ -12,7 +12,7 @@ public class PointCloudBuffer : RenderablePointCloudBuffer
     private readonly object _lock = new();
     private DecodedRawFrameMulti previousFrame = null; // Used to potentially repair next frames
 
-    private Dictionary<UInt32, DecodedPointCloudMulti> inProgessFrames = new();
+    public Dictionary<UInt32, DecodedPointCloudMulti> inProgessFrames = new();
 
     public ConcurrentQueue<DecodedPointCloudMulti> queue = new();
 

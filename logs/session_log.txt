@@ -1,53 +1,75 @@
-id=SessionManagerRepository ts=1769098038952 status=FactoryCreate type=loopback configPath=/config/session/loopback_2.json
-id=SessionManagerRepository ts=1769098038961 status=FactoryCreateSucces type=loopback configPath=/config/session/loopback_2.json
-id=LoopbackSessionManager ts=1769098038962 status=ManagerReadyToConnect
-id=LoopbackSessionManager ts=1769098038963 status=ManagerConnectionStart
-id=LoopbackSessionManager ts=1769098038963 status=ManagerConnectionSuccess
-id=CodecModeRepository ts=1769098039032 status=FactoryCreate type=mdc
-id=CodecModeRepository ts=1769098039032 status=FactoryCreateSucces type=mdc
-id=MDCCodecMode ts=1769098039040 status=GatheringTrackInfo samplingPercantages=[60|25|15] maxCompletePointCount=1000000
-id=MDCCodecMode ts=1769098039046 status=NewTrackDiscovered trackID=mdc_0_0 supportedCodecs=[draco] samplingPercentage=60
-id=MDCCodecMode ts=1769098039046 status=NewTrackDiscovered trackID=mdc_0_1 supportedCodecs=[draco] samplingPercentage=25
-id=MDCCodecMode ts=1769098039046 status=NewTrackDiscovered trackID=mdc_0_2 supportedCodecs=[draco] samplingPercentage=15
-id=LoopbackSessionManager ts=1769098039047 status=ManagerSessionCreating sessionName=Loopback_Session
-id=LoopbackSessionManager ts=1769098039060 status=ManagerSessionCreated
-id=LoopbackSessionManager ts=1769098039064 status=ManagerSessionJoined
-id=LocalConnectedClient ts=1769098039065 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_1 provider=loopback
-id=LocalConnectedClient ts=1769098039065 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_0 provider=loopback
-id=LocalConnectedClient ts=1769098039065 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_2 provider=loopback
-id=LoopbackSessionManager ts=1769098039066 status=ManagerProviderRequested type=loopback provider=loopback
-id=ConnectionProviderRepository ts=1769098039129 status=FactoryCreate type=loopback key=loopback ip=none port=0
-id=ConnectionProviderRepository ts=1769098039129 status=FactoryCreateSucces type=loopback  key=loopback
-id=LoopbackProvider ts=1769098039130 status=ProviderConnectionStart mode=async
-id=LoopbackProvider ts=1769098039130 status=ProviderConnectionStart
-id=LoopbackProvider ts=1769098039130 status=ProviderConnectionSuccess
-id=LoopbackSessionManager ts=1769098039133 status=ManagerClientConnected clientID=2 codecMode=mdc nVideoTracks=1 nAudioTracks=0
-id=RemoteConnectedClient ts=1769098039134 status=ClientAddVideoTrack clientID=2 trackID=cl2_mdc_0_1 provider=loopback
-id=MultiCaptureSetup ts=1769098040313 status=Creating fps=15 frameMode=RealData nCaptures=1 startCaptureThread=True
-id=MultiCaptureSetup ts=1769098041877 status=Created
-id=MDCEncodingQueue ts=1769098041877 status=Creating
-id=MDCEncodingQueue ts=1769098041878 status=Created
-id=PipelineRemotePointcloudMDC ts=1769098041882 status=Initializing clientID=2
-id=PipelineRemotePointcloudMDC ts=1769098041883 status=Initialized clientID=2
-id=LoopbackReceiver ts=1769098041887 status=ReceiverStartPollVideoTrack clientID=2, trackID=cl2_mdc_0_1
-id=PipelineLocalPointcloudMDC ts=1769098041912 status=EndEncodingPC clientID=0 ts_frame=1769098041886 capturer_id=0 frameNr=0 descriptionNr=1 codecType=0 totalNumberOfPoints=188197
-id=PipelineLocalPointcloudMDC ts=1769098041914 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=1
-id=MDCPointCloudReceiverSingle ts=1769098041914 status=StartDecodingPC clientID=2 ts_frame=1769098041886 capturer_id=0 frameNr=0 descriptionNr=1 codecType=0 totalNumberOfPoints=188197
-id=MDCPointCloudReceiverSingle ts=1769098041918 status=EndDecodingPC clientID=2 capturerID=0 frameNr=0 descriptionID=1
-id=PipelineLocalPointcloudMDC ts=1769098041921 status=EndEncodingPC clientID=0 ts_frame=1769098041886 capturer_id=0 frameNr=0 descriptionNr=2 codecType=0 totalNumberOfPoints=188197
-id=PipelineLocalPointcloudMDC ts=1769098041921 status=EndEncodingPC clientID=0 ts_frame=1769098041886 capturer_id=0 frameNr=0 descriptionNr=0 codecType=0 totalNumberOfPoints=188197
-id=PipelineLocalPointcloudMDC ts=1769098041921 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=2
-id=PipelineLocalPointcloudMDC ts=1769098041921 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=0
-id=MDCPointCloudReceiverSingle ts=1769098041925 status=FrameEnqueued clientID=2 frameNr=0
-id=PipelineRemotePointcloudMDC ts=1769098041940 status=FrameReadyToRender clientID=2 targetTimestamp=0 totalPoints=31250 Quality=16
-id=PointCloudRenderer ts=1769098041943 status=FrameRendered clientID=2 capturerID=0 frameNr=0
-id=PipelineLocalPointcloudMDC ts=1769098044777 status=Destroying clientID=0
-id=PipelineLocalPointcloudMDC ts=1769098044778 status=Destroyed clientID=0
-id=PipelineRemotePointcloudMDC ts=1769098044778 status=Destroying clientID=2
-id=PipelineRemotePointcloudMDC ts=1769098044778 status=Destroyed clientID=2
-id=LoopbackSessionManager ts=1769098044778 status=ManagerDisconnecting
-id=LoopbackProvider ts=1769098044778 status=Disposing
-id=LoopbackProvider ts=1769098044779 status=Disposing
-id=LoopbackProvider ts=1769098044779 status=Disposed
-id=LoopbackProvider ts=1769098044779 status=Disposed
-id=LoopbackSessionManager ts=1769098044779 status=ManagerDisconnected
+id=SessionManagerRepository ts=1769699341010 status=FactoryCreate type=loopback configPath=/config/session/loopback_2.json
+id=SessionManagerRepository ts=1769699341016 status=FactoryCreateSucces type=loopback configPath=/config/session/loopback_2.json
+id=LoopbackSessionManager ts=1769699341016 status=ManagerReadyToConnect
+id=LoopbackSessionManager ts=1769699341018 status=ManagerConnectionStart
+id=LoopbackSessionManager ts=1769699341018 status=ManagerConnectionSuccess
+id=CodecModeRepository ts=1769699341120 status=FactoryCreate type=mdc
+id=CodecModeRepository ts=1769699341120 status=FactoryCreateSucces type=mdc
+id=MDCCodecMode ts=1769699341129 status=GatheringTrackInfo samplingPercantages=[60|25|15] maxCompletePointCount=1000000
+id=MDCCodecMode ts=1769699341136 status=NewTrackDiscovered trackID=mdc_0_0 supportedCodecs=[draco] samplingPercentage=60
+id=MDCCodecMode ts=1769699341136 status=NewTrackDiscovered trackID=mdc_0_1 supportedCodecs=[draco] samplingPercentage=25
+id=MDCCodecMode ts=1769699341136 status=NewTrackDiscovered trackID=mdc_0_2 supportedCodecs=[draco] samplingPercentage=15
+id=LoopbackSessionManager ts=1769699341139 status=ManagerSessionCreating sessionName=Loopback_Session
+id=LoopbackSessionManager ts=1769699341155 status=ManagerSessionCreated
+id=LoopbackSessionManager ts=1769699341159 status=ManagerSessionJoined
+id=LocalConnectedClient ts=1769699341159 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_1 provider=loopback
+id=LocalConnectedClient ts=1769699341160 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_0 provider=loopback
+id=LocalConnectedClient ts=1769699341160 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_2 provider=loopback
+id=LoopbackSessionManager ts=1769699341161 status=ManagerProviderRequested type=loopback provider=loopback
+id=ConnectionProviderRepository ts=1769699341253 status=FactoryCreate type=loopback key=loopback ip=none port=0
+id=ConnectionProviderRepository ts=1769699341254 status=FactoryCreateSucces type=loopback  key=loopback
+id=LoopbackProvider ts=1769699341254 status=ProviderConnectionStart mode=async
+id=LoopbackProvider ts=1769699341255 status=ProviderConnectionStart
+id=LoopbackProvider ts=1769699341255 status=ProviderConnectionSuccess
+id=LoopbackSessionManager ts=1769699341259 status=ManagerClientConnected clientID=2 codecMode=mdc nVideoTracks=1 nAudioTracks=0
+id=RemoteConnectedClient ts=1769699341260 status=ClientAddVideoTrack clientID=2 trackID=cl2_mdc_0_1 provider=loopback
+id=MultiCaptureSetup ts=1769699342448 status=Creating fps=15 frameMode=RealData nCaptures=1 startCaptureThread=True
+id=MultiCaptureSetup ts=1769699342455 status=Created
+id=MDCEncodingQueue ts=1769699342455 status=Creating
+id=MDCEncodingQueue ts=1769699342456 status=Created
+id=PipelineRemotePointcloudMDC ts=1769699342458 status=Initializing clientID=2
+id=PipelineRemotePointcloudMDC ts=1769699342459 status=Initialized clientID=2
+id=LoopbackReceiver ts=1769699342465 status=ReceiverStartPollVideoTrack clientID=2, trackID=cl2_mdc_0_1
+id=PipelineLocalPointcloudMDC ts=1769699342653 status=EndEncodingPC clientID=0 ts_frame=1769699342455 capturer_id=0 frameNr=0 descriptionNr=1 codecType=0 totalNumberOfPoints=784142
+id=PipelineLocalPointcloudMDC ts=1769699342656 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=1
+id=MDCPointCloudReceiverSingle ts=1769699342657 status=StartDecodingPC clientID=2 ts_frame=1769699342455 capturer_id=0 frameNr=0 descriptionNr=1 codecType=0 totalNumberOfPoints=784142
+id=MDCPointCloudReceiverSingle ts=1769699342663 status=EndDecodingPC clientID=2 capturerID=0 frameNr=0 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1769699342666 status=EndEncodingPC clientID=0 ts_frame=1769699342455 capturer_id=0 frameNr=0 descriptionNr=0 codecType=0 totalNumberOfPoints=784142
+id=PipelineLocalPointcloudMDC ts=1769699342666 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=0
+id=MDCPointCloudReceiverSingle ts=1769699342680 status=FrameEnqueued clientID=2 frameNr=0
+id=PipelineRemotePointcloudMDC ts=1769699342682 status=FrameReadyToRender clientID=2 targetTimestamp=0 totalPoints=31249 Quality=3
+id=PointCloudRenderer ts=1769699342706 status=FrameRendered clientID=2 capturerID=0 frameNr=0
+id=PipelineLocalPointcloudMDC ts=1769699342859 status=EndEncodingPC clientID=0 ts_frame=1769699342455 capturer_id=0 frameNr=0 descriptionNr=2 codecType=0 totalNumberOfPoints=784142
+id=PipelineLocalPointcloudMDC ts=1769699342862 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1769699358721 status=EndEncodingPC clientID=0 ts_frame=1769699358540 capturer_id=0 frameNr=100 descriptionNr=1 codecType=0 totalNumberOfPoints=780699
+id=PipelineLocalPointcloudMDC ts=1769699358722 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=100 descriptionID=1
+id=MDCPointCloudReceiverSingle ts=1769699358722 status=StartDecodingPC clientID=2 ts_frame=1769699358540 capturer_id=0 frameNr=100 descriptionNr=1 codecType=0 totalNumberOfPoints=780699
+id=MDCPointCloudReceiverSingle ts=1769699358727 status=EndDecodingPC clientID=2 capturerID=0 frameNr=100 descriptionID=1
+id=MDCPointCloudReceiverSingle ts=1769699358729 status=FrameEnqueued clientID=2 frameNr=100
+id=PipelineRemotePointcloudMDC ts=1769699358732 status=FrameReadyToRender clientID=2 targetTimestamp=0 totalPoints=31249 Quality=4
+id=PipelineLocalPointcloudMDC ts=1769699358733 status=EndEncodingPC clientID=0 ts_frame=1769699358540 capturer_id=0 frameNr=100 descriptionNr=0 codecType=0 totalNumberOfPoints=780699
+id=PipelineLocalPointcloudMDC ts=1769699358733 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=100 descriptionID=0
+id=PointCloudRenderer ts=1769699358749 status=FrameRendered clientID=2 capturerID=0 frameNr=100
+id=PipelineLocalPointcloudMDC ts=1769699358899 status=EndEncodingPC clientID=0 ts_frame=1769699358540 capturer_id=0 frameNr=100 descriptionNr=2 codecType=0 totalNumberOfPoints=780699
+id=PipelineLocalPointcloudMDC ts=1769699358900 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=100 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1769699372954 status=EndEncodingPC clientID=0 ts_frame=1769699372784 capturer_id=0 frameNr=200 descriptionNr=1 codecType=0 totalNumberOfPoints=778267
+id=PipelineLocalPointcloudMDC ts=1769699372955 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=200 descriptionID=1
+id=MDCPointCloudReceiverSingle ts=1769699372955 status=StartDecodingPC clientID=2 ts_frame=1769699372784 capturer_id=0 frameNr=200 descriptionNr=1 codecType=0 totalNumberOfPoints=778267
+id=MDCPointCloudReceiverSingle ts=1769699372961 status=EndDecodingPC clientID=2 capturerID=0 frameNr=200 descriptionID=1
+id=MDCPointCloudReceiverSingle ts=1769699372963 status=FrameEnqueued clientID=2 frameNr=200
+id=PipelineRemotePointcloudMDC ts=1769699372964 status=FrameReadyToRender clientID=2 targetTimestamp=0 totalPoints=31249 Quality=4
+id=PipelineLocalPointcloudMDC ts=1769699372965 status=EndEncodingPC clientID=0 ts_frame=1769699372784 capturer_id=0 frameNr=200 descriptionNr=0 codecType=0 totalNumberOfPoints=778267
+id=PipelineLocalPointcloudMDC ts=1769699372966 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=200 descriptionID=0
+id=PointCloudRenderer ts=1769699372976 status=FrameRendered clientID=2 capturerID=0 frameNr=200
+id=PipelineLocalPointcloudMDC ts=1769699373128 status=EndEncodingPC clientID=0 ts_frame=1769699372784 capturer_id=0 frameNr=200 descriptionNr=2 codecType=0 totalNumberOfPoints=778267
+id=PipelineLocalPointcloudMDC ts=1769699373130 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=200 descriptionID=2
+id=LoopbackSessionManager ts=1769699382146 status=ManagerDisconnecting
+id=LoopbackProvider ts=1769699382146 status=Disposing
+id=LoopbackProvider ts=1769699382147 status=Disposing
+id=LoopbackProvider ts=1769699382147 status=Disposed
+id=LoopbackProvider ts=1769699382147 status=Disposed
+id=LoopbackSessionManager ts=1769699382147 status=ManagerDisconnected
+id=PipelineLocalPointcloudMDC ts=1769699382191 status=Destroying clientID=0
+id=PipelineLocalPointcloudMDC ts=1769699382191 status=Destroyed clientID=0
+id=PipelineRemotePointcloudMDC ts=1769699382192 status=Destroying clientID=2
+id=PipelineRemotePointcloudMDC ts=1769699382192 status=Destroyed clientID=2

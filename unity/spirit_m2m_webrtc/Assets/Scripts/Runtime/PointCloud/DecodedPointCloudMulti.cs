@@ -62,8 +62,8 @@ public class DecodedPointCloudMulti : RenderablePointCloud
                         continue;
                     }
                     // TODO performance testing
-                    Points[ActualPoints] = new Vector3(pointsUnsafePtr[(i * 3)] * -1, pointsUnsafePtr[(i * 3) + 1] * -1, pointsUnsafePtr[(i * 3) + 2] * -1);
-                    Colors[ActualPoints] = new Color32(colorsUnsafePtr[(i * 3)], colorsUnsafePtr[(i * 3) + 1], colorsUnsafePtr[(i * 3) + 2], 255);
+                    Points[(int)ActualPoints] = new Vector3(pointsUnsafePtr[(i * 3)] * -1, pointsUnsafePtr[(i * 3) + 1] * -1, pointsUnsafePtr[(i * 3) + 2] * -1);
+                    Colors[(int)ActualPoints] = new Color32(colorsUnsafePtr[(i * 3)], colorsUnsafePtr[(i * 3) + 1], colorsUnsafePtr[(i * 3) + 2], 255);
                     ActualPoints++;
                 }
             }

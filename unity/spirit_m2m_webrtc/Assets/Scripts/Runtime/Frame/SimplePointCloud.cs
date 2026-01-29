@@ -15,7 +15,7 @@ public class SimplePointCloud : RenderablePointCloud
             {
                 float* pointsUnsafePtr = (float*)Realsense2Invoker.get_point_cloud_pos(pcptr);
                 byte* colorsUnsafePtr = (byte*)Realsense2Invoker.get_point_cloud_col(pcptr);
-                uint counter = 0;
+                int counter = 0;
                 for (int i = 0; i < TotalPoints; i++)
                 {
                     if (pointsUnsafePtr[(i * 3)] == 0 && pointsUnsafePtr[(i * 3) + 1] == 0 && pointsUnsafePtr[(i * 3) + 2] == 0)

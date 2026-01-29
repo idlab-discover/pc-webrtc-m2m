@@ -6,7 +6,7 @@ using System.Threading;
 using UnityEngine;
 
 // Used for multi camera setups with raw encoding
-
+// TODO Needs a lot of fixes, mainly with buffer sizes and native arrays
 public class DecodedRawFrameSingle : DecodedRawFrameBase
 {
     public uint CapturerID;
@@ -35,7 +35,7 @@ public class DecodedRawFrameMulti : RenderablePointCloud
             return c1; 
     } }
     private Mutex mut = new Mutex();
-    public DecodedRawFrameMulti(uint nCapturers, uint frameNr, ulong targetTimestamp) : base(targetTimestamp, frameNr, 0)
+    public DecodedRawFrameMulti(uint nCapturers, uint frameNr, ulong targetTimestamp, uint totalNumberOfPoints) : base(targetTimestamp, frameNr, totalNumberOfPoints)
     {
         NCapturers = nCapturers;
         Singles = new DecodedRawFrameSingle[NCapturers];
@@ -61,11 +61,12 @@ public class DecodedRawFrameMulti : RenderablePointCloud
         return Singles[(int)capturerID];
     }
     
+    // TODO Fix this
     public void IncreaseBuffers(uint size)
     {
         TotalPoints += size;
-        Array.Resize(ref Points, (int)TotalPoints);
-        Array.Resize(ref Colors, (int)TotalPoints);
+        //Array.Resize(ref Points, (int)TotalPoints);
+        //Array.Resize(ref Colors, (int)TotalPoints);
     }
 
     public void LockClass()

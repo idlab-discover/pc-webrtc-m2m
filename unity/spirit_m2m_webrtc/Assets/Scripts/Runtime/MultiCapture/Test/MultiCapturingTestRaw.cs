@@ -82,7 +82,7 @@ public class MultiCapturingTestRaw : MonoBehaviour
             DecodedRawFrameMulti pcData2;
             if (!inProgessFrames.TryGetValue(frameNr, out pcData2))
             {
-                pcData2 = new DecodedRawFrameMulti(2, frameNr, timestamp);
+               // pcData2 = new DecodedRawFrameMulti(2, frameNr, timestamp);
                 inProgessFrames.Add(frameNr, pcData2);
             }
             DecodedRawFrameSingle s = pcData2.GetSingle(capturerID) ?? pcData2.AddSingle(capturerID, nPoints);
@@ -153,7 +153,7 @@ public class MultiCapturingTestRaw : MonoBehaviour
             DecodedRawFrameMulti pcData2;
             if (!inProgessFrames.TryGetValue(frameNr, out pcData2))
             {
-                pcData2 = new DecodedRawFrameMulti(2, frameNr, timestamp);
+           //     pcData2 = new DecodedRawFrameMulti(2, frameNr, timestamp);
                 inProgessFrames.Add(frameNr, pcData2);
             }
             DecodedRawFrameSingle s = pcData2.GetSingle(capturerID) ?? pcData2.AddSingle(capturerID, nPoints);

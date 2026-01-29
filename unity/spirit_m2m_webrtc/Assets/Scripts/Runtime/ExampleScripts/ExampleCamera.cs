@@ -45,6 +45,7 @@ public class ExampleCamera : MonoBehaviour
         {
             Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.FrameReadyToRender, 0, completedFrame.FrameNr, completedFrame.ToString());
             pointCloudRendererPrefab.SetPointCloud(completedFrame);
+            completedFrame.Dispose();
         }
     }
 
