@@ -11,10 +11,13 @@ public abstract class RenderablePointCloud : IDisposable
     public uint FrameNr;
     public uint TotalPoints;
     public uint Quality;
+    // TODO Make borrowing pool
     public NativeArray<Vector3> Points;
     public NativeArray<Color32> Colors;
+  //  public Vector3[] Points;
+   // public Color32[] Colors;
     private bool disposedValue;
-
+    
     public RenderablePointCloud(ulong targetTimestamp, uint frameNr, uint totalPoints)
     {
         TargetTimestamp = targetTimestamp;
@@ -23,8 +26,13 @@ public abstract class RenderablePointCloud : IDisposable
 
         Points = new NativeArray<Vector3>((int)totalPoints, Allocator.Persistent);
         Colors = new NativeArray<Color32>((int)totalPoints, Allocator.Persistent);
+       // Points = new Vector3[totalPoints];
+      //  Colors = new Color32[totalPoints];
     }
-
+    ~RenderablePointCloud()
+    {
+        Debug.Log("[TEST] RenderablePointCloud Finalizer called");
+    }
     public void IncreaseBuffers(uint size)
     {
         TotalPoints += size;
@@ -49,7 +57,8 @@ public abstract class RenderablePointCloud : IDisposable
         {
             if (disposing)
             {
-                if(Points.IsCreated)
+                disposeInternal();
+                if (Points.IsCreated)
                 {
                     Points.Dispose();
                 }
@@ -63,6 +72,11 @@ public abstract class RenderablePointCloud : IDisposable
             // TODO: set large fields to null
             disposedValue = true;
         }
+    }
+
+    protected virtual void disposeInternal()
+    {
+        
     }
 
     public void Dispose()

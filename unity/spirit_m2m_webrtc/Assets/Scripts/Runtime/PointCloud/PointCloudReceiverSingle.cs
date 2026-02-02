@@ -53,6 +53,7 @@ public class MDCPointCloudReceiverSingle
                    if(singleFrame.IsCompleted && singleFrame.IsParentCompleted)
                    {
                        playbackBuffer.CompleteFrame(singleFrame.Parent, true);
+                       inProgessFrames.Remove(header.FrameNr);
                        Logger.LogPCFrameStatusLimited(NAME, Logger.Status.FrameEnqueued, clientID, header.FrameNr);
                    }
 
