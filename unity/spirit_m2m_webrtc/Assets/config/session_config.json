@@ -48,7 +48,7 @@
     "useMic": false,
     "frameMode": 0,
     "frameCodec": 1,
-    "capturerName": "plyfiles",
+    "capturerName": "prerec_kinect",
     "artificialSettings": {
         "artificialSize": 25
     },
@@ -127,5 +127,16 @@
         "dspSize": 480,
         "forceStart": true,
         "codecName": ""
+    },
+    "recordPosition": false,
+    "positionTrackerConfig": {
+        "outputPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-m2m-clean\\pc-webrtc-m2m\\logs",
+        "recordInterval": 0.1,
+        "outputFormat": "json",
+        "writeContinously": false
+    },
+    "playbackPosition": true,
+    "positionPlaybackConfig": {
+        "inputFile": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-m2m-clean\\pc-webrtc-m2m\\logs\\position_tracker_info_1770308395043.json"
     }
 }

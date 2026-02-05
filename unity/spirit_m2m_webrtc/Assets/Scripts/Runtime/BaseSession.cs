@@ -45,10 +45,16 @@ public class BaseSession : MonoBehaviour
     private PipelineLocalBase localPipeline;
     private Dictionary<uint, PipelineRemoteBase> remotePipelines = new();
 
+    private void Awake()
+    {
+        PipelineLocalPrefabFactory = LoadFactories.GetFactory<PipelineLocalBase>();
+        PipelineRemotePrefabFactory = LoadFactories.GetFactory<PipelineRemoteBase>();
+    }
     void Start()
     {
 
         sessionInfo = SessionInfo.CreateFromJSON(Application.dataPath + "/config/session_config.json");
+        //Debug.Log("session" + sessionInfo.positionPlaybackConfig.inputFile);
         Logger.Init(sessionInfo.loggerSettings);
         sessionManager = SessionManagerRepository.CreateAndGetManager(sessionInfo.sessionManagerSettings.type, sessionInfo.sessionManagerSettings.configPath);
         if(sessionManager == null)

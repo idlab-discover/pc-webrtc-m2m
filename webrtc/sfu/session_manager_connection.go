@@ -62,6 +62,17 @@ type ProviderRemoteProviderClientMessage struct {
 	AudioTracks []TrackSimple `json:"audioTracks"`
 }
 
+type ProviderClientPositionMatrixUpdateMessage struct {
+	ClientID       uint           `json:"clientID"`
+	PositionMatrix PositionMatrix `json:"positionMatrix"`
+}
+
+type PositionMatrix struct {
+	Position            [3]float32    `json:"position"`
+	WorldToCameraMatrix [4][4]float32 `json:"worldToCameraMatrix"`
+	ProjectionMatrix    [4][4]float32 `json:"projectionMatrix"`
+}
+
 type RemoteClient struct {
 	ClientID            uint          `json:"clientID"`
 	ReceiverAudioTracks []TrackSimple `json:"receiverAudioTracks"`
@@ -133,6 +144,8 @@ func (smc *SessionManagerConnection) StartListening() {
 				smc.handleVirtualClientAdded(msg.Message)
 			case "RemoveVirtualClient":
 				smc.handleVirtualClientRemoved(msg.Message)
+			case "ClientPositionMatrixUpdate":
+				// TODO handle client position matrix update
 			default:
 				// Unknown message type, ignore or log
 			}
@@ -223,6 +236,16 @@ func (smc *SessionManagerConnection) handleVirtualClientAdded(payload json.RawMe
 
 func (smc *SessionManagerConnection) handleVirtualClientRemoved(payload json.RawMessage) {
 
+}
+
+func (smc *SessionManagerConnection) handleClientPositionMatrixUpdate(payload json.RawMessage) {
+	var msg ProviderClientPositionMatrixUpdateMessage
+	if err := json.Unmarshal(payload, &msg); err != nil {
+		fmt.Printf("failed to unmarshal payload: %v\n", err)
+		return
+	}
+	fmt.Printf("Received ClientPositionMatrixUpdate: %+v\n", msg)
+	smc.sfu.UpdateClientPositionMatrix(msg)
 }
 
 // manager ip

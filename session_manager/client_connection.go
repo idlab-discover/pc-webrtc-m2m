@@ -16,6 +16,12 @@ const (
 	ClientStatusDisconnected   uint = 4
 )
 
+type PositionMatrix struct {
+	Position            [3]float32    `json:"position"`
+	WorldToCameraMatrix [4][4]float32 `json:"worldToCameraMatrix"`
+	ProjectionMatrix    [4][4]float32 `json:"projectionMatrix"`
+}
+
 type ClientConnection struct {
 	parent            *SessionManager
 	ClientID          uint
@@ -29,6 +35,8 @@ type ClientConnection struct {
 	SenderVideoTracks map[string]*ClientTrackInfo
 	SenderAudioTracks map[string]*ClientTrackInfo
 	RemoteClients     map[uint]*RemoteClient
+	PositionMatrix
+	ConnectedProviders map[string]*ProviderConnection
 
 	mut sync.Mutex
 }
@@ -171,8 +179,15 @@ func (clc *ClientConnection) startListening() {
 			LogWithMessage(NameClient, ReceivedWSMessage, true, true, fmt.Sprintf("messageType=%s", msg.MessageType))
 			switch msg.MessageType {
 			case "JoinMessage":
-				clc.handleJoinMessage(msg.Message)
+				{
+					clc.handleJoinMessage(msg.Message)
+				}
+			case "ClientPositionUpdate":
+				{
+					clc.handlePositionMatrixUpdate(msg.Message)
+				}
 			}
+
 		}
 	}()
 }
@@ -249,6 +264,21 @@ func (clc *ClientConnection) handleJoinMessage(payload json.RawMessage) {
 		pc.AddNewClient(clc.ClientID, clc.AuthKey, videoTrackPtrs, audioTrackPtrs)
 	}
 
+}
+
+func (clc *ClientConnection) handlePositionMatrixUpdate(payload json.RawMessage) {
+	var posMatrix PositionMatrix
+	if err := json.Unmarshal(payload, &posMatrix); err != nil {
+		fmt.Printf("failed to unmarshal position matrix payload: %v\n", err)
+		return
+	}
+	clc.mut.Lock()
+	defer clc.mut.Unlock()
+	clc.PositionMatrix = posMatrix
+	println("Updated position matrix for client", clc.ClientID, "to", posMatrix.Position[0], posMatrix.Position[1], posMatrix.Position[2])
+	for _, pc := range clc.ConnectedProviders {
+		pc.UpdateClientPositionMatrix(clc.ClientID, posMatrix)
+	}
 }
 
 func (clc *ClientConnection) SetTracksToConnected(clientID uint, videoTracks []TrackSimple, audioTracks []TrackSimple) {

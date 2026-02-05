@@ -283,6 +283,11 @@ type ProviderRemoteProviderClientMessage struct {
 	AudioTracks []TrackSimple `json:"audioTracks"`
 }
 
+type ProviderClientPositionMatrixUpdateMessage struct {
+	ClientID       uint           `json:"clientID"`
+	PositionMatrix PositionMatrix `json:"positionMatrix"`
+}
+
 func (pc *ProviderConnection) handleClientAdded(payload json.RawMessage) {
 	var msg ProviderClientAddedMessage
 	if err := json.Unmarshal(payload, &msg); err != nil {
@@ -351,6 +356,14 @@ func (pc *ProviderConnection) _addNewRemoteProvider(providerType string, provide
 		pc.websocket.WriteJSONMessageSafe("RemoteProviderConnected", msg)
 	}
 
+}
+
+func (pc *ProviderConnection) UpdateClientPositionMatrix(clientID uint, posMatrix PositionMatrix) {
+	msg := ProviderClientPositionMatrixUpdateMessage{
+		ClientID:       clientID,
+		PositionMatrix: posMatrix,
+	}
+	pc.websocket.WriteJSONMessageSafe("ClientPositionMatrixUpdate", msg)
 }
 
 func (clc *ProviderConnection) onClose() {

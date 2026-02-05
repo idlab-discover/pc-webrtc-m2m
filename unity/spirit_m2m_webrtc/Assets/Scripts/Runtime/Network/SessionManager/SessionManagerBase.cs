@@ -1,9 +1,12 @@
+using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 /*
  * {
@@ -58,12 +61,14 @@ public abstract class ConnectedClient<TTrackInfo> where TTrackInfo : ReceivingTr
     public delegate void UserVideoTrackRemovedCallback(string provider, string trackID);
     public delegate void UserAudioTrackAddedCallback(string provider);
     public delegate void UserAudioTrackRemovedCallback(string provider);
+    public delegate void UserPositionUpdatedCallback(ClientPositionUpdate newPostion);
     //public event ClientConnectedCallback OnClientConnected;
 
     public event UserVideoTrackAddedCallback OnUserVideoTrackAdded;
     public event UserVideoTrackRemovedCallback OnUserVideoTrackRemoved;
     public event UserAudioTrackAddedCallback OnUserAudioTrackAdded;
     public event UserAudioTrackRemovedCallback OnUserAudioTrackRemoved;
+    public event UserPositionUpdatedCallback OnUserPositionUpdated;
 
     public readonly uint ClientID;
     public readonly string CodecMode;
@@ -161,6 +166,10 @@ public abstract class ConnectedClient<TTrackInfo> where TTrackInfo : ReceivingTr
             return new Dictionary<string, TTrackInfo>(receivingTracks);
         }
     }
+    public void UpdatePositionMatrix(ClientPositionUpdate newPosition)
+    {
+        OnUserPositionUpdated?.Invoke(newPosition);
+    }
 }
 
 public class LocalConnectedClient : ConnectedClient<LocalTrackInfo>
@@ -228,6 +237,7 @@ public class LocalConnectedClient : ConnectedClient<LocalTrackInfo>
     {
         // TODO Implement audio sending
     }
+ 
 }
 
 public class RemoteConnectedClient : ConnectedClient<RemoteTrackInfo>
@@ -273,9 +283,35 @@ public class RemoteConnectedClient : ConnectedClient<RemoteTrackInfo>
     }
 }
 
+// TODO Add unsubscribe method
+public class GenericMessageList
+{
+    public List<Action<object>> subscribers = new();
+    private readonly Func<string, object> deserializer;
+    public GenericMessageList(Func<string, object> deserializer)
+    {
+        this.deserializer = deserializer;
+    }
+    public void Subscribe(Action<object> callback)
+    {
+        subscribers.Add(callback);
+    }
+    public void NotiyAll(JObject message)
+    {
+        // Convert to Object first
+       // object obj = deserializer(message);
+        foreach (var sub in subscribers)
+        {
+            sub.Invoke(message);
+        }
+    }
+}
+
 public abstract class SessionManagerBase
 {
     protected abstract string NAME { get; }
+
+    private readonly Dictionary<string, Dictionary<Type, GenericMessageList>> genericMessagesubscribers = new();
 
     public delegate void ReadyToConnectCallback();
     public delegate void ConnectionToSessionManagerCallback();
@@ -463,6 +499,7 @@ public abstract class SessionManagerBase
         onConnectedToSession(assignedClientID, connectMessage, sessionInfo);
     }
 
+
     public void CheckIfReadyToConnect()
     {
         lock (_lock)
@@ -481,4 +518,35 @@ public abstract class SessionManagerBase
         OnReadyToConnect?.Invoke();
         
     }
+
+    protected void onGenericMessageReceived(GenericSessionManagerMessage message) { 
+        if(!genericMessagesubscribers.TryGetValue(message.messageType, out var subscriberDict))
+        {
+            return; // No subscribers
+        }
+        foreach(var subscriberList in subscriberDict.Values)
+        {
+            subscriberList.NotiyAll(message.message);
+        }
+
+    }
+
+    public void SubscribeToGenericMessage<T>(string messageName, Action<T> callback)
+    {
+        lock (_lock) {
+            if (!genericMessagesubscribers.ContainsKey(messageName))
+                genericMessagesubscribers[messageName] = new();
+
+            var subscriberDict = genericMessagesubscribers[messageName];
+            if(!subscriberDict.ContainsKey(typeof(T)))
+                subscriberDict[typeof(T)] = new GenericMessageList(json => JsonConvert.DeserializeObject<T>(json));
+            var subscriberList = subscriberDict[typeof(T)];
+
+            subscriberList.Subscribe((obj) =>
+            {
+                callback((T)obj);
+            });
+        } 
+    }
 }
+

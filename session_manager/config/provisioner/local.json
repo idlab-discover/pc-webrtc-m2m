@@ -3,7 +3,7 @@
         "providerPaths": [
             {
                 "providerType": "webrtc_sfu",
-                "path": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-webrtc-m2m\\webrtc\\sfu.exe"
+                "path": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-m2m-clean\\pc-webrtc-m2m\\webrtc\\sfu.exe"
             }
         ],
         "portRanges": [

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 [AttributeUsage(AttributeTargets.Class)]
-public class RegisterAttribute : Attribute
+public abstract class RegisterAttribute : Attribute
 {
     public string Key { get; }
     public RegisterAttribute(string key)

@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9ed4a9ac1aa4ef449aadcd214f5a245d, type: 3}
-  m_Name: PipelineLocalPrefabFactory
+  m_Name: PipelineRemotePrefabFactory
   m_EditorClassIdentifier: 
+  _prefabType: PipelineRemoteBase, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
   serializedKeys:
   - mdc
-  - raw
   serializedValues:
-  - {fileID: 8236314478808469891, guid: 51b528d372474734a898899acc70e989, type: 3}
-  - {fileID: 8236314478808469891, guid: 02d72574d17be824eb5610920740029e, type: 3}
+  - {fileID: 6044640782181980240, guid: 2c6e44bd670673e4189fbe8104783a72, type: 3}

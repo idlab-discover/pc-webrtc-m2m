@@ -82,11 +82,14 @@ type ClientConnection struct {
 	ReceiverVideoTracks map[string]*ReceiverTrack
 	ReceiverAudioTracks map[string]*ReceiverTrack
 
-	camInfo *cameraInfo // TODO Provider requests camera info => callback invocation for localClient (need to ensure that this is async though!) maybe also add a function to send data async?
+	//camInfo *cameraInfo // TODO Provider requests camera info => callback invocation for localClient (need to ensure that this is async though!) maybe also add a function to send data async?
 
 	pendingCandidatesString []string
 
 	gatherTrackStats bool
+
+	PositionInited bool
+	PositionMatrix PositionMatrix
 
 	mut sync.Mutex
 }
@@ -619,17 +622,6 @@ func (clc *ClientConnection) subscribeToTracks(subMessage SubscribeToTracksMessa
 		clc.AddTrackFromOtherUnsafe("client", otherClient.clientID, t.TrackID, track)
 	}
 
-}
-
-func (clc *ClientConnection) updateCamInfo(data string) {
-	data = strings.ReplaceAll(data, ",", ".")
-	tokens := strings.Split(data, ";")
-	if len(tokens) == 36 {
-		clc.camInfo.init = true
-		clc.camInfo.camMatrix = FillMatrix(tokens, 0)
-		clc.camInfo.projectionMatrix = FillMatrix(tokens, 16)
-		clc.camInfo.position = FillPosition(tokens, 32)
-	}
 }
 
 func (clc *ClientConnection) Dispose() {

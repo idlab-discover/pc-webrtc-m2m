@@ -10,9 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9ed4a9ac1aa4ef449aadcd214f5a245d, type: 3}
-  m_Name: PipelineRemotePrefabFactory
+  m_Name: PlayerControllerPrefabFactory
   m_EditorClassIdentifier: 
+  _prefabType: PlayerControllerBase, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
   serializedKeys:
-  - mdc
+  - simple
   serializedValues:
-  - {fileID: 6044640782181980240, guid: 2c6e44bd670673e4189fbe8104783a72, type: 3}
+  - {fileID: 8005852298553256636, guid: 2b23f7ed900dcfb468d2b47e044b6f65, type: 3}

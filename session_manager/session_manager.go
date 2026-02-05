@@ -264,6 +264,7 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 		LogWithMessage(NameManager, InvalidClientID, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
 		return
 	}
+	client.ConnectedProviders[pc.ProviderKey] = pc
 	pcClient := pc.Clients[addedMsg.ClientID]
 	pcClient.IsConnected = true
 	for _, t := range addedMsg.SenderVideoTracks {

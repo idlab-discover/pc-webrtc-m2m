@@ -23,6 +23,11 @@ public class SessionInfo
 
     public LoggerSettings loggerSettings;
 
+    public bool recordPosition;
+    public PositionTrackerConfig positionTrackerConfig;
+    public bool playbackPosition;
+    public PositionPlaybackConfig positionPlaybackConfig;
+
     public FrameMode frameMode;
     public FrameCodec frameCodec;
     public List<ModeCodecPair> supportedModes; // Currently mdc or raw. In future maybe just point cloud aswell
@@ -30,6 +35,7 @@ public class SessionInfo
     public List<CapturerConfigPair> capturerConfigs;
     public bool useMultiCam = false;
     public uint activeCamIndex = 0;
+    public string playerControllerName = "simple";
     public string capturerName = "artificial";
     public string artificalConfigPath = "config/camera/artificial.json";
     public string realsenseConfigPath = "config/camera/realsense.json";
@@ -189,4 +195,22 @@ public class MicSettings
     public bool usePrerecorded; // If true, deviceName links to the a file
     public string deviceName;
     public string audioProcessor; // FMOD, Unity, WWise
+}
+
+[System.Serializable]
+public class PositionTrackerConfig
+{
+    public string outputPath;
+    public string outputFileName = "position_tracker_info";
+    public bool addTimestampToPath = true;
+    public float recordInterval = 0.1f; // in seconds
+    public string outputFormat = "json"; // JSON or binary
+    public bool writeContinously = true; // If false, write only on stops
+}
+
+[System.Serializable]
+public class PositionPlaybackConfig
+{
+    public string inputFile;
+    public bool readContinously = false; // If false, read all at start
 }

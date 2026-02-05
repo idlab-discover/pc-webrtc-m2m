@@ -21,6 +21,7 @@ public static class PrefabFactoryInitializer
         EditorApplication.update -= OnEditorLoaded;
         PipelineLocalPrefabBuilder.Rebuild("Editor load rebuild");
         PipelineRemotePrefabBuilder.Rebuild("Editor load rebuild");
+        PlayerControllerPrefabBuilder.Rebuild("Editor load rebuild");
     }
 }
 
@@ -49,6 +50,7 @@ public class PrefabFactoryAssetWatcher: AssetPostprocessor
         {
             PipelineLocalPrefabBuilder.Rebuild("Asset watcher rebuild");
             PipelineRemotePrefabBuilder.Rebuild("Asset watcher rebuild");
+            PlayerControllerPrefabBuilder.Rebuild("Asset watcher rebuild");
         }
             
     }
@@ -69,7 +71,7 @@ public class PrefabFactoryAutoBuilder<TBaseComponent, TAttribute>
     {
         var typesWithAttribute = GetTypesWithAttribute();
         Debug.Log($"{typesWithAttribute.Count} types with {typeof(TAttribute).Name} found.");
-
+        
         /*List<string> names = typesWithAttribute
             .Select(type =>
             {
@@ -85,7 +87,7 @@ public class PrefabFactoryAutoBuilder<TBaseComponent, TAttribute>
                 pair => AssetDatabase.FindAssets($"t:Prefab {pair.Value}Prefab").FirstOrDefault()
             );
 
-
+      
         Dictionary<string, GameObject> foundPrefabs = new();
         foreach (var guid in prefabGuidsByKey)
         {
@@ -112,6 +114,9 @@ public class PrefabFactoryAutoBuilder<TBaseComponent, TAttribute>
             Debug.Log("[PrefabFactory] Created new factory asset.");
         }
          
+       // factory.factoryName = factoryName;
+     //   factory.prefabType = prefabType;
+        factory.prefabType = typeof(TBaseComponent);
         factory.registeredPrefabs = foundPrefabs; // Interface-based to support multiple factory types*/
         EditorUtility.SetDirty(factory);
         AssetDatabase.SaveAssets();
@@ -139,7 +144,7 @@ public class PrefabFactoryAutoBuilder<TBaseComponent, TAttribute>
 
 public static class PipelineLocalPrefabBuilder 
 {
-    public readonly static string FactoryPath = "Assets/PipelineLocalPrefabFactory.asset"; // TODO Write this to a path scriptable object
+    public readonly static string FactoryPath = "Assets/Resources/PrefabFactories/PipelineLocalPrefabFactory.asset"; // TODO Write this to a path scriptable object
 
     [MenuItem("Tools/Prefab Factory/Rebuild Pipeline Local Factory")]
     public static void RebuildMenu()
@@ -148,7 +153,7 @@ public static class PipelineLocalPrefabBuilder
     }
     public static void Rebuild(string reason)
     {
-        PrefabFactoryAutoBuilder<PipelineLocalPointcloudBase, PipelineLocalRegisterAttribute>.RebuildFactory(
+        PrefabFactoryAutoBuilder<PipelineLocalBase, PipelineLocalRegisterAttribute>.RebuildFactory(
             FactoryPath,
             reason
         );
@@ -157,7 +162,7 @@ public static class PipelineLocalPrefabBuilder
 
 public static class PipelineRemotePrefabBuilder
 {
-    public readonly static string FactoryPath = "Assets/PipelineRemotePrefabFactory.asset"; // TODO Write this to a path scriptable object
+    public readonly static string FactoryPath = "Assets/Resources/PrefabFactories/PipelineRemotePrefabFactory.asset"; // TODO Write this to a path scriptable object
 
     [MenuItem("Tools/Prefab Factory/Rebuild Pipeline Remote Factory")]
     public static void RebuildMenu()
@@ -166,7 +171,25 @@ public static class PipelineRemotePrefabBuilder
     }
     public static void Rebuild(string reason)
     {
-        PrefabFactoryAutoBuilder<PipelineRemotePointcloudBase, PipelineRemoteRegisterAttribute>.RebuildFactory(
+        PrefabFactoryAutoBuilder<PipelineRemoteBase, PipelineRemoteRegisterAttribute>.RebuildFactory(
+            FactoryPath,
+            reason
+        );
+    }
+}
+
+public static class PlayerControllerPrefabBuilder
+{
+    public readonly static string FactoryPath = "Assets/Resources/PrefabFactories/PlayerControllerPrefabFactory.asset"; // TODO Write this to a path scriptable object
+
+    [MenuItem("Tools/Prefab Factory/Rebuild Player Controller Factory")]
+    public static void RebuildMenu()
+    {
+        Rebuild("Manual rebuild from menu");
+    }
+    public static void Rebuild(string reason)
+    {
+        PrefabFactoryAutoBuilder<PlayerControllerBase, PlayerControllerRegisterAttribute>.RebuildFactory(
             FactoryPath,
             reason
         );

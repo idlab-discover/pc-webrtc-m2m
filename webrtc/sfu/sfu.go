@@ -464,3 +464,13 @@ func (sfu *SFU) StartPerformingQualityAdaptation() {
 		}
 	}()
 }
+
+func (sfu *SFU) UpdateClientPositionMatrix(msg ProviderClientPositionMatrixUpdateMessage) {
+	sfu.mut.Lock()
+	logger.LogWithMessage(NameSFU, logger.MutLock, true, true, "func=UpdateClientPositionMatrix")
+	defer sfu.mut.Unlock()
+	defer logger.LogWithMessage(NameSFU, logger.MutUnlock, true, true, "func=UpdateClientPositionMatrix")
+	client := sfu.clients[msg.ClientID]
+	client.PositionMatrix = msg.PositionMatrix
+	client.PositionInited = true
+}

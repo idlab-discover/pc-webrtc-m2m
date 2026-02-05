@@ -178,6 +178,12 @@ public class WebSocketSessionManager : SessionManagerBase
                                 handleProviderRemoteClientTracksConnected(msg.message);
                                 break;
                             }
+                        case "GenericMessage":
+                            {
+                                // Handled by SessionManagerBase
+                                onGenericMessageReceived(msg.message.ToObject<GenericSessionManagerMessage>());
+                                break;
+                            }
                     }
                 }
             } finally
@@ -208,6 +214,7 @@ public class WebSocketSessionManager : SessionManagerBase
     {
         SessionConnectionMessage sMsg = msg.ToObject<SessionConnectionMessage>();
         onConnectedToSession(assignedClientID, sMsg, "");
+        LocalClient.OnUserPositionUpdated += sendPositionMatrixUpdate;
     }
 
     private void handleClientAddedToProvider(JObject msg)
@@ -285,6 +292,11 @@ public class WebSocketSessionManager : SessionManagerBase
         rClient.SetTracksNetworkReceiver(pMsg.videoTracks, (provider as IReceiverSupported)); // TODO Merge audio and video tracks first
 
     }
+
+    private void sendPositionMatrixUpdate(ClientPositionUpdate update) {
+        sendJSONMessage("ClientPositionUpdate", update);
+    }
+
 
     private void sendJSONMessage(string messageType, object messageObj)
     {
