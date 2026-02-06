@@ -166,6 +166,10 @@ public abstract class ConnectedClient<TTrackInfo> where TTrackInfo : ReceivingTr
             return new Dictionary<string, TTrackInfo>(receivingTracks);
         }
     }
+
+    // TODO: We probably want to extend this to include other servers
+    // i.e., metric server or maybe a GameObject sync server
+    // These components could then decide to directly forward it or only forward it every X ms
     public void UpdatePositionMatrix(ClientPositionUpdate newPosition)
     {
         OnUserPositionUpdated?.Invoke(newPosition);

@@ -16,7 +16,8 @@ public abstract class PlayerControllerBase: MonoBehaviour
         worldToCameraMatrix = new float[4, 4]
     };
 
-    protected virtual void Update()
+    // I think LateUpdate is better because this would make sure that the movement etc... was already applied
+    protected virtual void LateUpdate()
     {
         if(localClient != null)
         {

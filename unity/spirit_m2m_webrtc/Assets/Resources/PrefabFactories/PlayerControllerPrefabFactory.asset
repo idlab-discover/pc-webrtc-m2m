@@ -15,6 +15,8 @@ MonoBehaviour:
   _prefabType: PlayerControllerBase, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
     PublicKeyToken=null
   serializedKeys:
+  - randomrot
   - simple
   serializedValues:
+  - {fileID: 8610282173711568258, guid: b8182a3882d07814a818ca19c40e548f, type: 3}
   - {fileID: 8005852298553256636, guid: 2b23f7ed900dcfb468d2b47e044b6f65, type: 3}

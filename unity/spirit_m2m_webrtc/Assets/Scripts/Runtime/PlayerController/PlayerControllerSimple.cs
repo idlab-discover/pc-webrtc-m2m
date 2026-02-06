@@ -54,10 +54,8 @@ public class PlayerControllerSimple : PlayerControllerBase
 
     }
 
-    protected override void Update()
+    void Update()
     {
-        base.Update();
-
         // --- Mouse look ---
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;

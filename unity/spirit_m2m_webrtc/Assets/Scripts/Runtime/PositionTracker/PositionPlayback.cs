@@ -23,8 +23,8 @@ public class PositionPlayback : MonoBehaviour
         
     }
 
-    // Pretty sure this needs to be late, i.e. ensures that it will always be the next frame that has the updated position instead of not knowing for sure
-    void LateUpdate()
+    // Normal update is probably better for now, will make sure that we guarantee that the updated position is sent to the server
+    void Update()
     {
         if(!isInited || !isPlayingback) return;
         // Lerp between records based on time

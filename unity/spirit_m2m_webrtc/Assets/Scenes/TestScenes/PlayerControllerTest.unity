@@ -1037,6 +1037,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d1b210cde47a1645acec50ba37cd2d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PlayerControllerName: randomrot
 --- !u!4 &1652873861
 Transform:
   m_ObjectHideFlags: 0
