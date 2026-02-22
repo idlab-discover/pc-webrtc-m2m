@@ -1,6 +1,6 @@
 {
-    "outputPath": "C:\\Users\\matth\\Downloads\\output",
+    "outputPath": "C:\\Users\\matth\\Downloads\\output2",
     "filePrefix": "loot",
-    "maxFrames": 100,
+    "maxFrames": 300,
     "nPointsPerFrame": 100000
 }

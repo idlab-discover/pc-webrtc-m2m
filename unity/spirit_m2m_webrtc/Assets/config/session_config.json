@@ -48,7 +48,7 @@
     "useMic": false,
     "frameMode": 0,
     "frameCodec": 1,
-    "capturerName": "prerec_kinect",
+    "capturerName": "plyfiles",
     "artificialSettings": {
         "artificialSize": 25
     },

@@ -1,7 +1,7 @@
 {
     "outputPath": "C:\\BenchmarkContent",
-    "subDirectoryPrefix": "v1_mdc_video",
+    "subDirectoryPrefix": "v1_mdc_video_longdress",
     "downsampleToNPoints": 100000,
     "validateEncoding": true,
-    "maxFrames": 10
+    "maxFrames": 300
 }
