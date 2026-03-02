@@ -3,29 +3,41 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Maybe this is overkill; might have to investigate performance impact later
-public class GenericMetricDefinition
+public class GenericMetricDefinition<T> : MetricDefinitionBase
 {
-    public string Name { get; private set; }
-    public uint MetricId { get; private set; }
-    private List<GenericMetric> capturedValues = new();
-    // List of callbacks to be called when the metric is updated
-    private Dictionary<uint, MetricUpdateCallback> callbacks = new();
-    private uint callbackIdCounter = 0;
-    public GenericMetricDefinition(uint metricId, string name)
+    public static byte[] GetHeader()
     {
-        MetricId = metricId;
-        Name = name;
+        return ByteConverterCache<T>.GetHeader();
+    }
+    // List of callbacks to be called when the metric is updated
+    private Dictionary<uint, MetricUpdateCallback<T>> callbacks = new();
+    private uint callbackIdCounter = 0;
+    
+    public GenericMetricDefinition(uint metricId, string name): base(metricId, name)
+    {
+        
+    }
+    public void AddCapturedValue(T value)
+    {
+        lock (_lock)
+        {
+            capturedValues.Add(new GenericMetricWithValue<T>(value));
+        }
     }
 
-    public List<GenericMetric> RetrieveMetrics() { 
-        foreach(var a in callbacks)
+    public override List<GenericMetric> RetrieveMetrics()
+    {
+        lock (_lock)
         {
-            capturedValues.Add(a.Value());
+            foreach (var a in callbacks)
+            {
+                capturedValues.Add(new GenericMetricWithValue<T>(a.Value()));
+            }
+            return capturedValues;
         }
-        return capturedValues;
     }
-    public void ClearMetrics() { capturedValues.Clear(); }
-    public uint AddCallback(MetricUpdateCallback cb)
+    // TODO Maybe lock
+    public uint AddCallback(MetricUpdateCallback<T> cb)
     {
         uint retValue = callbackIdCounter;
         callbacks.Add(retValue, cb);

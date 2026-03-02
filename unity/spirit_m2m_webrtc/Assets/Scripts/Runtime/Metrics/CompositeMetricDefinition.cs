@@ -2,17 +2,42 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CompositeMetricDefinition : MonoBehaviour
+public class CompositeMetricDefinition<T> : MetricDefinitionBase where T : struct
 {
-    // Start is called before the first frame update
-    void Start()
+    public static byte[] GetHeader() { return CompositeMetricWithValue<T>.Header; }
+    private Dictionary<uint, MetricUpdateCallback<T>> callbacks = new();
+    private uint callbackIdCounter = 0;
+    public CompositeMetricDefinition(uint metricId, string name) : base(metricId, name)
     {
-        
+    }
+    // List of callbacks to be called when the metric is updated
+   
+
+    public void AddCapturedValue(T value)
+    {
+        lock (_lock)
+        {
+            capturedValues.Add(new CompositeMetricWithValue<T>(value));
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public override List<GenericMetric> RetrieveMetrics()
     {
-        
+        lock (_lock)
+        {
+            foreach (var a in callbacks)
+            {
+                capturedValues.Add(new CompositeMetricWithValue<T>(a.Value()));
+            }
+            return capturedValues;
+        }
+    }
+    // TODO Maybe lock
+    public uint AddCallback(MetricUpdateCallback<T> cb)
+    {
+        uint retValue = callbackIdCounter;
+        callbacks.Add(retValue, cb);
+        callbackIdCounter++;
+        return retValue;
     }
 }

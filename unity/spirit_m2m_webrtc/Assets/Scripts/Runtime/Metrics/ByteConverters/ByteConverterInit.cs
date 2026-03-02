@@ -6,8 +6,9 @@ public static class ByteConverterInit
 {
     public static void Init()
     {
-        ByteConverterCache<int>.Converter = new ByteConverterInt();
-        ByteConverterCache<uint>.Converter = new ByteConverterUInt();
+        Debug.Log("FIELD " + typeof(ByteConverterCache<int>));
+        ByteConverterCache<int>.Init(new ByteConverterInt(), ByteConverterType.SignedNumeric, sizeof(int));
+        ByteConverterCache<uint>.Init(new ByteConverterUInt(), ByteConverterType.UnsignedNumeric, sizeof(uint));
     }
 
 }
