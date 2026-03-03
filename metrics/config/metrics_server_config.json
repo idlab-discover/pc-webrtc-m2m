@@ -1,0 +1,22 @@
+{
+    "generalConfig": {
+        "useEnabledMetrics": true,
+        "saveToFile": true,
+        "headerPath": "metrics/headers/metric_headers.bin",
+        "dataPath": "metrics/output/metrics_output.bin"
+    },
+    "enabledMetrics": [
+        {
+            "name": "testMetric",
+            "stripTimestamps": true,
+            "saveInMemory": true,
+            "limit": 1
+        },
+        {
+            "name": "testMetric2",
+            "stripTimestamps": false,
+            "saveInMemory": false,
+            "limit": 5
+        }
+    ]
+}
