@@ -2,8 +2,9 @@
     "generalConfig": {
         "useEnabledMetrics": true,
         "saveToFile": true,
-        "headerPath": "metrics/headers/metric_headers.bin",
-        "dataPath": "metrics/output/metrics_output.bin"
+        "headerPath": "output/metric_headers.bin",
+        "dataPath": "output/metrics_output.bin",
+        "connectionType": "websocket"
     },
     "enabledMetrics": [
         {

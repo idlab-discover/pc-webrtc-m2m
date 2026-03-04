@@ -2,6 +2,7 @@ using System;
 using System.Buffers.Binary;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
@@ -26,13 +27,13 @@ public class MetricServerConnectionLocal : MetricServerConnectionBase
         {
             MetricServerDefinitionInfo info = new MetricServerDefinitionInfo
             {
-                Header = header,
                 IsComposite = true,
                 Name = metricName,
                 MetricId = metricIdCounter++,
                 NumberOfFields = 0
             };
-            Span<byte> headerSpan = new Span<byte>(info.Header);
+            byte[] newHeader = new byte[0];
+            Span<byte> headerSpan = new Span<byte>(header);
             int processedBytes = 0;
             Debug.Log($"Registering Composite Metric: {metricName}, Header Length: {header.Length}");
             while (processedBytes < header.Length)
@@ -44,10 +45,12 @@ public class MetricServerConnectionLocal : MetricServerConnectionBase
                 processedBytes += nameLength;
                 byte typeByte = headerSpan[processedBytes];
                 ByteConverterType type = (ByteConverterType)typeByte;
+                newHeader = newHeader.Concat(headerSpan.Slice(processedBytes, 5).ToArray()).ToArray();
                 processedBytes += sizeof(byte) + 4;
                 Debug.Log($"Field: {name}, Type: {type}");
                 info.NumberOfFields++;
             }
+            info.Header = newHeader;
             metricInfos[info.MetricId] = info;
             return info.MetricId;
         }
@@ -80,13 +83,13 @@ public class MetricServerConnectionLocal : MetricServerConnectionBase
         Span<byte> buffer = bytes.AsSpan(0);
         while (processedBytes < bytes.Length)
         {
-            Debug.Log("PROC: " + processedBytes + " / " + bytes.Length);
+            //Debug.Log("PROC: " + processedBytes + " / " + bytes.Length);
             
             uint metricId = BinaryPrimitives.ReadUInt32LittleEndian(buffer.Slice(processedBytes));
             processedBytes += sizeof(uint);
             int numValues = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(processedBytes));
             processedBytes += sizeof(int);
-            Debug.Log($"MetricId: {metricId}, NumValues: {numValues}");
+            //Debug.Log($"MetricId: {metricId}, NumValues: {numValues}");
             if (metricInfos.TryGetValue(metricId, out var info))
             {
                 Debug.Log($"MetricName: {info.Name}");
@@ -123,7 +126,10 @@ public class MetricServerConnectionLocal : MetricServerConnectionBase
         int foundFields = 0;
         int metricLength = 0;
         int headerOffset = 0;
-        while(foundFields < info.NumberOfFields)
+        long timeStamp = BinaryPrimitives.ReadInt64LittleEndian(buffer);
+        metricLength += sizeof(long);
+        Debug.Log("Buffer length" + buffer.Length);
+        while (foundFields < info.NumberOfFields)
         {
             foundFields++;
             ByteConverterType type = (ByteConverterType)header[headerOffset];
@@ -131,16 +137,13 @@ public class MetricServerConnectionLocal : MetricServerConnectionBase
             Debug.Log("Type: " + type);
             int length = BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(headerOffset));
             headerOffset += sizeof(int);
-            long timeStamp = BinaryPrimitives.ReadInt64LittleEndian(buffer);
-            metricLength += sizeof(long);
-            buffer = buffer.Slice(metricLength);
             Debug.Log($"Timestamp: {timeStamp}, Length: {length}");
 
             if (type == ByteConverterType.UnsignedNumeric)
             {
                 if (length == sizeof(uint))
                 {
-                    uint value = BinaryPrimitives.ReadUInt32LittleEndian(buffer);
+                    uint value = BinaryPrimitives.ReadUInt32LittleEndian(buffer.Slice(metricLength));
                     Debug.Log($"Value: {value}");
                 }
                 else
@@ -152,7 +155,7 @@ public class MetricServerConnectionLocal : MetricServerConnectionBase
             {
                 if (length == sizeof(uint))
                 {
-                    int value = BinaryPrimitives.ReadInt32LittleEndian(buffer);
+                    int value = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(metricLength));
                     Debug.Log($"Value: {value}");
                 }
                 else
@@ -164,5 +167,10 @@ public class MetricServerConnectionLocal : MetricServerConnectionBase
         }
         
         return metricLength;
+    }
+
+    protected override void connectInternal()
+    {
+        isConnected = true;
     }
 }

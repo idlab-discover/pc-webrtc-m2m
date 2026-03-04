@@ -1,29 +1,24 @@
-package metrics
+package main
 
 import (
 	"flag"
-	"net/http"
-
-	"github.com/gorilla/websocket"
-)
-
-var (
-	upgrader = websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool { return true },
-	}
+	"metrics/core"
+	"metrics/core/logger"
 )
 
 func main() {
+	logger.LogInit("METRICS", "met", logger.LogYellow)
 	config := flag.String("c", "", "Path to the config file that will be used")
+	port := flag.Uint("p", 6080, "Port to listen on")
 	flag.Parse()
 	if *config == "" {
 		println("Cannot open config file at")
 		return
 	}
 	// WebSocket handler
-	s := NewMetricsServer(*config)
+	s := core.NewMetricsServer(*config)
 	go func() {
-		s.StartListening()
+		s.StartListening(*port)
 	}()
 
 	select {}

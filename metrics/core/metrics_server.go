@@ -1,10 +1,12 @@
-package metrics
+package core
 
 import (
 	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
+	"metrics/core/logger"
+	"metrics/core/readers"
 	"net/http"
 	"os"
 	"sync"
@@ -27,6 +29,7 @@ type MetricsServerConfig struct {
 	saveToFile     bool
 	headerFilePath string
 	dataFilePath   string
+	connectionType string
 }
 
 // For all producers, maybe we pass producer type when connecting?
@@ -41,8 +44,9 @@ type MetricsServer struct {
 	definitionStringToId map[string]uint
 	producersForMetric   map[uint]map[uint]*MetricProducerConnection
 	producersPerType     map[string]map[uint]*MetricProducerConnection
-
-	mut sync.Mutex
+	readerFactory        *readers.MetricReaderFactory
+	readerConnectionType string /*We might want to be more finegrained here later, i.e., different readers for different metrics*/
+	mut                  sync.Mutex
 
 	saveToFile   bool
 	headerFile   *os.File
@@ -52,6 +56,7 @@ type MetricsServer struct {
 }
 
 func NewMetricsServer(configPath string) *MetricsServer {
+	logger.Log(NameMetricsServer, logger.Creating, true, true)
 	var config MetricsServerConfig
 	file, err := os.Open(configPath)
 	if err != nil {
@@ -87,6 +92,8 @@ func NewMetricsServer(configPath string) *MetricsServer {
 		definitionStringToId: map[string]uint{},
 		producersForMetric:   map[uint]map[uint]*MetricProducerConnection{},
 		producersPerType:     map[string]map[uint]*MetricProducerConnection{},
+		readerFactory:        readers.NewMetricReaderFactory(),
+		readerConnectionType: config.connectionType,
 		mut:                  sync.Mutex{},
 		saveToFile:           config.saveToFile,
 		headerFile:           headerFile,
@@ -97,6 +104,7 @@ func NewMetricsServer(configPath string) *MetricsServer {
 	http.HandleFunc("/connect", s.handleConnect)
 	http.HandleFunc("/metric/register/composite", s.handleAddCompositeMetric)
 	http.HandleFunc("/metric/register/generic", s.handleAddGenericMetric)
+	logger.Log(NameMetricsServer, logger.Created, true, true)
 	return s
 }
 
@@ -105,6 +113,12 @@ func (s *MetricsServer) StartListening(port uint) {
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
 		fmt.Printf("Error starting server: %s\n", err)
 	}
+}
+
+type MetricServerConnectionResponse struct {
+	MetricClientId         uint   `json:"metricClientId"`
+	ReaderConnectionType   string `json:"readerConnectionType"`
+	ReaderConnectionString string `json:"name"`
 }
 
 func (s *MetricsServer) handleConnect(w http.ResponseWriter, r *http.Request) {
@@ -116,13 +130,25 @@ func (s *MetricsServer) handleConnect(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "No producerType provided", http.StatusBadRequest)
 		return
 	}
-	newProducer := NewMetricProducerConnection(s, s.metricCounter, producerType)
+	newProducer := NewMetricProducerConnection(s, s.metricCounter, producerType, s.readerConnectionType, s.readerFactory)
 	s.producers[s.metricCounter] = newProducer
 	if _, ok := s.producersPerType[producerType]; !ok {
 		s.producersPerType[producerType] = make(map[uint]*MetricProducerConnection)
 	}
 	s.producersPerType[producerType][s.metricCounter] = newProducer
 	s.metricCounter++
+	// TODO: This should return metricCounter + connection address of the reader
+	w.Header().Set("Content-Type", "application/json")
+	response := MetricServerConnectionResponse{
+		MetricClientId:         newProducer.Id,
+		ReaderConnectionType:   s.readerConnectionType,
+		ReaderConnectionString: newProducer.reader.GetConnectionAddress(),
+	}
+	err := json.NewEncoder(w).Encode(response)
+	if err != nil {
+		http.Error(w, "Failed to marshal response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (s *MetricsServer) handleDisconnect(w http.ResponseWriter, r *http.Request) {

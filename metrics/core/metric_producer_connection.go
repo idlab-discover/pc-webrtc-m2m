@@ -1,9 +1,12 @@
-package metrics
+package core
 
 import (
-	"metrics/readers"
+	"metrics/core/logger"
+	"metrics/core/readers"
 	"unsafe"
 )
+
+const NameMetricProducerConnection = "MetricProducerConnection"
 
 type MetricProducerConnection struct {
 	Server       *MetricsServer
@@ -13,14 +16,18 @@ type MetricProducerConnection struct {
 	Metrics      map[uint]*MetricValueCollection /*TODO this needs to be change to be unique per client*/
 }
 
-func NewMetricProducerConnection(server *MetricsServer, id uint, producerType string) *MetricProducerConnection {
-	return &MetricProducerConnection{
+func NewMetricProducerConnection(server *MetricsServer, id uint, producerType string, readerConnectionType string, factory *readers.MetricReaderFactory) *MetricProducerConnection {
+	logger.Log(NameMetricProducerConnection, logger.Creating, true, true)
+	pc := &MetricProducerConnection{
 		Server:       server,
 		Id:           id,
-		reader:       readers.CreateNewMetricReader(producerType),
 		ProducerType: producerType,
+		reader:       factory.CreateNewMetricReader(readerConnectionType, id),
 		Metrics:      make(map[uint]*MetricValueCollection),
 	}
+	pc.reader.SetOnDataReceived(pc.OnDataReceived)
+	logger.Log(NameMetricProducerConnection, logger.Created, true, true)
+	return pc
 }
 
 func (p *MetricProducerConnection) AddMetric(metricId uint, definition *MetricDefinition) {

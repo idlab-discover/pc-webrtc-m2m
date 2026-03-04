@@ -5,11 +5,41 @@ using System;
 using System.Buffers.Binary;
 
 // TODO Split between reliable and unreliable metrics
-public abstract class MetricServerConnectionBase : MonoBehaviour
+public abstract class MetricServerConnectionBase 
 {
+    public uint ClientId { get; private set; }
+    protected bool isConnected = false;
+    protected bool isInited = false;
+    protected bool isConnecting = false;
     private Dictionary<string, MetricDefinitionBase> metricDefinitions = new();
    
     private readonly object _lock = new();
+
+    public void Init(uint clientId, bool connectImmediately)
+    {
+        ClientId = clientId;
+        isInited = true;
+    }
+
+    public void Connect()
+    {
+        if(!isInited)
+        {
+            throw new InvalidOperationException("MetricServerConnectionBase must be inited before connecting.");
+        }
+        lock (_lock)
+        {
+            if (!isConnected && !isConnecting)
+            {
+                isConnecting = true;
+                connectInternal();
+                isConnecting = false;
+            }
+        }
+        
+    }
+    protected abstract void connectInternal();
+
     public GenericMetricDefinition<T> RegisterPushMetric<T>(string metricName)
     {
         lock (_lock)
@@ -119,6 +149,9 @@ public abstract class MetricServerConnectionBase : MonoBehaviour
                 }
                 allMetrics[metric.Value.MetricId] = lst;
             }
+            // TODO Limit the max message size
+            // so in case we lose 1 packet we can still be certain that all metrics in 1 packet will be received
+            // Will have to make byte[] of max size and then probably span it to reduce it or something
             bytes = new byte[bufferSize];
             Span<byte> buffer = bytes.AsSpan();
             int offset = 0;

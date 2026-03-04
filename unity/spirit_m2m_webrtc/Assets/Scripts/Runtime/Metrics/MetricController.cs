@@ -35,9 +35,9 @@ public class MetricController : MonoBehaviour
         if (currentTime >= timeInterval)
         {
             Debug.Log("Updating metrics");
-            testMetricDefinition.AddCapturedValue(UnityEngine.Random.Range(0, 100));
-            testMetricDefinition.AddCapturedValue(UnityEngine.Random.Range(0, 100));
-            compositeMetricDefinition.AddCapturedValue(new CompositeMetricTestStruct
+            testMetricDefinition?.AddCapturedValue(UnityEngine.Random.Range(0, 100));
+            testMetricDefinition?.AddCapturedValue(UnityEngine.Random.Range(0, 100));
+            compositeMetricDefinition?.AddCapturedValue(new CompositeMetricTestStruct
             {
                 IntValue = UnityEngine.Random.Range(0, 100),
                 UIntValue = (uint)UnityEngine.Random.Range(0, 100)

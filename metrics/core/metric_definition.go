@@ -1,4 +1,4 @@
-package metrics
+package core
 
 type MetricType uint
 
