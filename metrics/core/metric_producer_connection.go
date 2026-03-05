@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"metrics/core/logger"
 	"metrics/core/readers"
 	"unsafe"
@@ -10,44 +11,51 @@ const NameMetricProducerConnection = "MetricProducerConnection"
 
 type MetricProducerConnection struct {
 	Server       *MetricsServer
-	Id           uint
+	Id           uint32
 	reader       readers.MetricReaderBase
 	ProducerType string
-	Metrics      map[uint]*MetricValueCollection /*TODO this needs to be change to be unique per client*/
+	Metrics      map[uint32]*MetricValueCollection /*TODO this needs to be change to be unique per client*/
 }
 
-func NewMetricProducerConnection(server *MetricsServer, id uint, producerType string, readerConnectionType string, factory *readers.MetricReaderFactory) *MetricProducerConnection {
-	logger.Log(NameMetricProducerConnection, logger.Creating, true, true)
+func NewMetricProducerConnection(server *MetricsServer, id uint32, producerType string, readerConnectionType string, factory *readers.MetricReaderFactory) *MetricProducerConnection {
+	logger.LogWithMessage(NameMetricProducerConnection, logger.Creating, true, true, fmt.Sprintf("metricClientId=%d", id))
 	pc := &MetricProducerConnection{
 		Server:       server,
 		Id:           id,
 		ProducerType: producerType,
 		reader:       factory.CreateNewMetricReader(readerConnectionType, id),
-		Metrics:      make(map[uint]*MetricValueCollection),
+		Metrics:      make(map[uint32]*MetricValueCollection),
 	}
 	pc.reader.SetOnDataReceived(pc.OnDataReceived)
-	logger.Log(NameMetricProducerConnection, logger.Created, true, true)
+	logger.LogWithMessage(NameMetricProducerConnection, logger.Created, true, true, fmt.Sprintf("metricClientId=%d", id))
 	return pc
 }
 
-func (p *MetricProducerConnection) AddMetric(metricId uint, definition *MetricDefinition) {
+func (p *MetricProducerConnection) AddMetric(metricId uint32, definition *MetricDefinition) {
+	println("Adding metric with id", metricId, "to producer", p.Id)
 	p.Metrics[metricId] = NewMetricValueCollection(definition) // TODO: Make the size configurable
 }
 
 func (p *MetricProducerConnection) OnDataReceived(buffer []byte) {
-	processedBytes := uint(0)
-	for processedBytes < uint(len(buffer)) {
-		metricId := *(*uint)(unsafe.Pointer(&buffer[0]))
+
+	processedBytes := uint32(0)
+	metricClientId := *(*uint32)(unsafe.Pointer(&buffer[processedBytes]))
+	processedBytes += 4
+	println("OnDataReceived called for metricClientId", p.Id, " == ", metricClientId, len(buffer), "bytes")
+	for processedBytes < uint32(len(buffer)) {
+		metricId := *(*uint32)(unsafe.Pointer(&buffer[processedBytes]))
 		processedBytes += 4
-		numValues := *(*int)(unsafe.Pointer(&buffer[processedBytes]))
+		numValues := *(*int32)(unsafe.Pointer(&buffer[processedBytes]))
+		println("Received data for metricId", metricId, "numValues", numValues)
 		processedBytes += 4
 		var col *MetricValueCollection
 		var ok bool
 		if col, ok = p.Metrics[metricId]; !ok {
+			println("Received data for unknown metricId, ignoring", metricId, "offset", processedBytes)
 			return
 		}
-		for i := 0; i < numValues; i++ {
-			col.AddValue(buffer[processedBytes:(col.ValueSize + 8)])
+		for i := int32(0); i < numValues; i++ {
+			col.AddValue(buffer[processedBytes : processedBytes+(col.ValueSize+8)])
 			processedBytes += col.ValueSize + 8
 		}
 	}

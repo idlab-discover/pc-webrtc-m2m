@@ -1,11 +1,14 @@
 package readers
 
-import "metrics/core/logger"
+import (
+	"fmt"
+	"metrics/core/logger"
+)
 
 const NameMetricReaderFactory = "MetricReaderFactory"
 
 type MetricReaderSubFactory interface {
-	CreateReader(metricClientId uint) MetricReaderBase
+	CreateReader(metricClientId uint32) MetricReaderBase
 }
 
 type MetricReaderFactory struct {
@@ -23,7 +26,8 @@ func NewMetricReaderFactory( /*TODO Maybe config*/ ) *MetricReaderFactory {
 	return ms
 }
 
-func (f *MetricReaderFactory) CreateNewMetricReader(connectionType string, metricClientId uint) MetricReaderBase {
+func (f *MetricReaderFactory) CreateNewMetricReader(connectionType string, metricClientId uint32) MetricReaderBase {
+	logger.LogWithMessage(NameMetricReaderFactory, logger.Creating, true, true, fmt.Sprintf("connectionType=%s", connectionType))
 	switch connectionType {
 	case "websocket":
 		return f.webSocketSubFactory.CreateReader(metricClientId)

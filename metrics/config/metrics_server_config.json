@@ -4,7 +4,7 @@
         "saveToFile": true,
         "headerPath": "output/metric_headers.bin",
         "dataPath": "output/metrics_output.bin",
-        "connectionType": "websocket"
+        "readerConnectionType": "websocket"
     },
     "enabledMetrics": [
         {

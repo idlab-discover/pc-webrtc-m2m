@@ -39,10 +39,10 @@ public class MetricServerConnectionLocal : MetricServerConnectionBase
             while (processedBytes < header.Length)
             {
                 Debug.Log("ProcessedBytes: " + processedBytes + " / " + header.Length);
-                int nameLength = BinaryPrimitives.ReadInt32LittleEndian(headerSpan.Slice(processedBytes));
+                uint nameLength = BinaryPrimitives.ReadUInt32LittleEndian(headerSpan.Slice(processedBytes));
                 processedBytes += sizeof(int);
-                string name = Encoding.UTF8.GetString(headerSpan.Slice(processedBytes, nameLength));
-                processedBytes += nameLength;
+                string name = Encoding.UTF8.GetString(headerSpan.Slice(processedBytes, (int)nameLength));
+                processedBytes += (int)nameLength;
                 byte typeByte = headerSpan[processedBytes];
                 ByteConverterType type = (ByteConverterType)typeByte;
                 newHeader = newHeader.Concat(headerSpan.Slice(processedBytes, 5).ToArray()).ToArray();
@@ -79,7 +79,7 @@ public class MetricServerConnectionLocal : MetricServerConnectionBase
     protected override void writeMetrics(byte[] bytes)
     {
         Debug.Log($"Metrics: {bytes.Length} bytes");
-        int processedBytes = 0;
+        int processedBytes = 4;
         Span<byte> buffer = bytes.AsSpan(0);
         while (processedBytes < bytes.Length)
         {

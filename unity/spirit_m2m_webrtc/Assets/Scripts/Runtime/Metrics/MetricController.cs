@@ -13,6 +13,7 @@ struct CompositeMetricTestStruct
 }
 public class MetricController : MonoBehaviour
 {
+    public bool UseLocalConnection = true;
     private float currentTime = 0f;
     private float timeInterval = 1f; // Time interval in seconds for updating metrics
     //private Dictionary<string, GenericMetricDefinition> metricDefinitions = new();
@@ -22,7 +23,15 @@ public class MetricController : MonoBehaviour
     void Start()
     {
         ByteConverterInit.Init();
-        metricServerConnection = new MetricServerConnectionLocal();
+        if (UseLocalConnection)
+        {
+            metricServerConnection = new MetricServerConnectionLocal();
+        }
+        else
+        {
+            metricServerConnection = new MetricServerConnectionRemote("127.0.0.1:6080");
+        }
+        metricServerConnection.Init(true);
         metricServerConnection.RegisterPullMetric<int>("TestMetric", GetTestMetric);
         testMetricDefinition = metricServerConnection.RegisterPushMetric<int>("TestMetric2");
         compositeMetricDefinition = metricServerConnection.RegisterCompositePushMetric<CompositeMetricTestStruct>("CompositeTestMetric");

@@ -7,7 +7,7 @@ using System.Buffers.Binary;
 // TODO Split between reliable and unreliable metrics
 public abstract class MetricServerConnectionBase 
 {
-    public uint ClientId { get; private set; }
+    public uint ClientId { get; protected set; }
     protected bool isConnected = false;
     protected bool isInited = false;
     protected bool isConnecting = false;
@@ -15,10 +15,13 @@ public abstract class MetricServerConnectionBase
    
     private readonly object _lock = new();
 
-    public void Init(uint clientId, bool connectImmediately)
+    public void Init(bool connectImmediately)
     {
-        ClientId = clientId;
         isInited = true;
+        if(connectImmediately)
+        {
+            Connect();
+        }
     }
 
     public void Connect()
@@ -81,6 +84,7 @@ public abstract class MetricServerConnectionBase
         {
             // Metric already exists, add callback to existing metric definition
             uint metricID = registerMetricDefinitionWithServer<T>(metricName, GenericMetricDefinition<T>.GetHeader() /*Header is required to know how to parse metric*/);
+            Debug.Log($"Registered metric {metricName} with ID {metricID}");
             metric = new GenericMetricDefinition<T>(metricID, metricName);
             metricDefinitions[metricName] = metric;
             // TODO Metric counter should be trieved from the metric server?
@@ -138,23 +142,28 @@ public abstract class MetricServerConnectionBase
         lock (_lock)
         {
             Dictionary<uint, List<GenericMetric>> allMetrics = new();
-            int bufferSize = 0;
+            int bufferSize = 4; // for ClientID
+            bool hasMetrics = false;
             foreach (var metric in metricDefinitions)
             {
                 List<GenericMetric> lst = metric.Value.RetrieveMetrics(); 
                 bufferSize += sizeof(uint) /*MetricID*/ + sizeof(int) /*Number of values for metric*/;
                 foreach (var m in lst)
                 {
+                    hasMetrics = true;
                     bufferSize += m.Length;
                 }
                 allMetrics[metric.Value.MetricId] = lst;
             }
+            if(!hasMetrics) return; // No metrics to send
+            
             // TODO Limit the max message size
             // so in case we lose 1 packet we can still be certain that all metrics in 1 packet will be received
             // Will have to make byte[] of max size and then probably span it to reduce it or something
             bytes = new byte[bufferSize];
             Span<byte> buffer = bytes.AsSpan();
-            int offset = 0;
+            BinaryPrimitives.WriteUInt32LittleEndian(buffer, ClientId);
+            int offset = 4;
             foreach (var lst in allMetrics)
             {
                 BinaryPrimitives.WriteUInt32LittleEndian(buffer.Slice(offset), lst.Key);

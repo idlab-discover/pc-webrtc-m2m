@@ -9,9 +9,9 @@ using UnityEngine;
 public class RemoteMetricSenderWebSocket : RemoteMetricSenderBase
 {
     private ClientWebSocket ws = new ClientWebSocket();
-    public override void Connect(string serverAddress, uint clientId)
+    public override void Connect(string serverAddress, uint metricClientId)
     {
-        Uri serverUri = new Uri($"ws://{serverAddress}/ws_metrics?clientId={clientId}");
+        Uri serverUri = new Uri($"ws://{serverAddress}?metricClientId={metricClientId}");
 
         try
         {

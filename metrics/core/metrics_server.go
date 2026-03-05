@@ -9,7 +9,9 @@ import (
 	"metrics/core/readers"
 	"net/http"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 )
 
 /*
@@ -26,10 +28,14 @@ import (
 const NameMetricsServer = "MetricsServer"
 
 type MetricsServerConfig struct {
-	saveToFile     bool
-	headerFilePath string
-	dataFilePath   string
-	connectionType string
+	GeneralConfig GeneralMetricServerConfig `json:"generalConfig"`
+}
+
+type GeneralMetricServerConfig struct {
+	SaveToFile           bool   `json:"saveToFile"`
+	HeaderFilePath       string `json:"headerPath"`
+	DataFilePath         string `json:"dataPath"`
+	ReaderConnectionType string `json:"readerConnectionType"`
 }
 
 // For all producers, maybe we pass producer type when connecting?
@@ -38,12 +44,13 @@ type MetricsServerConfig struct {
 //				* Per ProducerType (SFU, Client etc...)
 //				* Per Metric (which producers are currently producing this type of metric), hold uint as key, use lookup whenever request comes in
 type MetricsServer struct {
-	metricCounter        uint
-	producers            map[uint]*MetricProducerConnection
-	definitions          map[uint]*MetricDefinition
-	definitionStringToId map[string]uint
-	producersForMetric   map[uint]map[uint]*MetricProducerConnection
-	producersPerType     map[string]map[uint]*MetricProducerConnection
+	producerCounter      uint32
+	metricCounter        uint32
+	producers            map[uint32]*MetricProducerConnection
+	definitions          map[uint32]*MetricDefinition
+	definitionStringToId map[string]uint32
+	producersForMetric   map[uint32]map[uint32]*MetricProducerConnection
+	producersPerType     map[string]map[uint32]*MetricProducerConnection
 	readerFactory        *readers.MetricReaderFactory
 	readerConnectionType string /*We might want to be more finegrained here later, i.e., different readers for different metrics*/
 	mut                  sync.Mutex
@@ -72,13 +79,15 @@ func NewMetricsServer(configPath string) *MetricsServer {
 	var dataFile *os.File
 	var headerWriter *bufio.Writer
 	var dataWriter *bufio.Writer
-	if config.saveToFile {
-		headerFile, err := os.OpenFile(config.headerFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if config.GeneralConfig.SaveToFile {
+		headerFile, err := os.OpenFile(config.GeneralConfig.HeaderFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND|os.O_TRUNC, 0666)
 		if err != nil {
+			fmt.Printf("Failed to open header file: %v at %s \n", err, config.GeneralConfig.HeaderFilePath)
 			panic(err)
 		}
-		dataFile, err := os.OpenFile(config.dataFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		dataFile, err := os.OpenFile(config.GeneralConfig.DataFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND|os.O_TRUNC, 0666)
 		if err != nil {
+			fmt.Printf("Failed to open data file: %v at %s \n", err, config.GeneralConfig.DataFilePath)
 			panic(err)
 		}
 		headerWriter = bufio.NewWriter(headerFile)
@@ -86,16 +95,17 @@ func NewMetricsServer(configPath string) *MetricsServer {
 	}
 
 	s := &MetricsServer{
+		producerCounter:      0,
 		metricCounter:        0,
-		producers:            map[uint]*MetricProducerConnection{},
-		definitions:          map[uint]*MetricDefinition{},
-		definitionStringToId: map[string]uint{},
-		producersForMetric:   map[uint]map[uint]*MetricProducerConnection{},
-		producersPerType:     map[string]map[uint]*MetricProducerConnection{},
+		producers:            map[uint32]*MetricProducerConnection{},
+		definitions:          map[uint32]*MetricDefinition{},
+		definitionStringToId: map[string]uint32{},
+		producersForMetric:   map[uint32]map[uint32]*MetricProducerConnection{},
+		producersPerType:     map[string]map[uint32]*MetricProducerConnection{},
 		readerFactory:        readers.NewMetricReaderFactory(),
-		readerConnectionType: config.connectionType,
+		readerConnectionType: config.GeneralConfig.ReaderConnectionType,
 		mut:                  sync.Mutex{},
-		saveToFile:           config.saveToFile,
+		saveToFile:           config.GeneralConfig.SaveToFile,
 		headerFile:           headerFile,
 		dataFile:             dataFile,
 		headerWriter:         headerWriter,
@@ -116,9 +126,9 @@ func (s *MetricsServer) StartListening(port uint) {
 }
 
 type MetricServerConnectionResponse struct {
-	MetricClientId         uint   `json:"metricClientId"`
+	MetricClientId         uint32 `json:"metricClientId"`
 	ReaderConnectionType   string `json:"readerConnectionType"`
-	ReaderConnectionString string `json:"name"`
+	ReaderConnectionString string `json:"readerConnectionString"`
 }
 
 func (s *MetricsServer) handleConnect(w http.ResponseWriter, r *http.Request) {
@@ -130,13 +140,13 @@ func (s *MetricsServer) handleConnect(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "No producerType provided", http.StatusBadRequest)
 		return
 	}
-	newProducer := NewMetricProducerConnection(s, s.metricCounter, producerType, s.readerConnectionType, s.readerFactory)
-	s.producers[s.metricCounter] = newProducer
+	newProducer := NewMetricProducerConnection(s, s.producerCounter, producerType, s.readerConnectionType, s.readerFactory)
+	s.producers[s.producerCounter] = newProducer
+	s.producerCounter++
 	if _, ok := s.producersPerType[producerType]; !ok {
-		s.producersPerType[producerType] = make(map[uint]*MetricProducerConnection)
+		s.producersPerType[producerType] = make(map[uint32]*MetricProducerConnection)
 	}
-	s.producersPerType[producerType][s.metricCounter] = newProducer
-	s.metricCounter++
+	s.producersPerType[producerType][newProducer.Id] = newProducer
 	// TODO: This should return metricCounter + connection address of the reader
 	w.Header().Set("Content-Type", "application/json")
 	response := MetricServerConnectionResponse{
@@ -170,12 +180,77 @@ func (s *MetricsServer) handleDisconnectInternal(producer *MetricProducerConnect
 
 }
 
-func (s *MetricsServer) handleAddGenericMetric(w http.ResponseWriter, r *http.Request) {
+type AddMetricRequest struct {
+	MetricClientId uint32 `json:"metricClientId"`
+	MetricName     string `json:"metricName"`
+	Header         []byte `json:"header"`
+}
 
+type AddMetricResponse struct {
+	MetricId uint32 `json:"metricId"`
+}
+
+func (s *MetricsServer) addMetricDefinition(w http.ResponseWriter, r *http.Request, isComposite bool) {
+	var req AddMetricRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
+		return
+	}
+	producer, ok := s.producers[req.MetricClientId]
+	if !ok {
+		http.Error(w, "No producer found for given MetricClientId", http.StatusBadRequest)
+		return
+	}
+	var definition *MetricDefinition
+	definitionId, ok := s.definitionStringToId[req.MetricName]
+	if ok {
+		definition, ok = s.definitions[definitionId]
+	} else {
+		definitionId = s.metricCounter
+		s.definitionStringToId[req.MetricName] = definitionId
+		s.metricCounter++
+		definition = NewMetricDefinition(definitionId, req.MetricName, 5, isComposite, req.Header) // TODO: MaxValues should be provided by the client
+		s.definitions[definitionId] = definition
+		s.producersForMetric[definition.MetricId] = make(map[uint32]*MetricProducerConnection)
+		s.writeHeaderToFile(req.MetricName, definition.MetricId, req.Header)
+	}
+	producer.AddMetric(definition.MetricId, definition)
+	s.producersForMetric[definition.MetricId][producer.Id] = producer
+	w.Header().Set("Content-Type", "application/json")
+	response := AddMetricResponse{
+		MetricId: definition.MetricId,
+	}
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		http.Error(w, "Failed to marshal response", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *MetricsServer) handleAddGenericMetric(w http.ResponseWriter, r *http.Request) {
+	s.mut.Lock()
+	defer s.mut.Unlock()
+	s.addMetricDefinition(w, r, false)
 }
 
 func (s *MetricsServer) handleAddCompositeMetric(w http.ResponseWriter, r *http.Request) {
+	s.mut.Lock()
+	defer s.mut.Unlock()
+	s.addMetricDefinition(w, r, true)
+}
 
+func (s *MetricsServer) writeHeaderToFile(metricName string, metricId uint32, header []byte) {
+	if s.saveToFile {
+		fullHeader := append([]byte(fmt.Sprintf("%d%s%d", len(metricName), metricName, metricId)), header...)
+		n, err := s.headerWriter.Write(fullHeader)
+		if err != nil {
+			log.Printf("Failed to write data: %v", err)
+		}
+		if n != len(fullHeader) {
+			log.Printf("Partial write: wrote %d of %d bytes", n, len(fullHeader))
+		}
+	}
 }
 
 func (s *MetricsServer) OnDataReceived(producer *MetricProducerConnection, buffer []byte) {
@@ -194,7 +269,25 @@ func (s *MetricsServer) OnDataReceived(producer *MetricProducerConnection, buffe
 
 }
 
+func (s *MetricsServer) ListenForSigClose() {
+	sigs := make(chan os.Signal, 1)
+
+	// Register the signals we want to intercept
+	// SIGINT = Ctrl+C, SIGTERM = Generic termination signal
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	fmt.Println("Application is running. Press Ctrl+C to exit.")
+
+	// This blocks until a signal is received
+	sig := <-sigs
+	fmt.Printf("\nReceived signal: %s. Shutting down...\n", sig)
+	s.cleanup()
+}
+
 func (s *MetricsServer) cleanup() {
+	s.headerWriter.Flush()
+	s.dataWriter.Flush()
+
 	s.headerWriter.Flush()
 	s.dataWriter.Flush()
 

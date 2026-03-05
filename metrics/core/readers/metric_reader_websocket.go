@@ -31,21 +31,21 @@ type MetricReaderWebSocket struct {
 
 type MetricReaderWebSocketSubFactory struct {
 	mut                   sync.Mutex
-	incompleteConnections map[uint]*MetricReaderWebSocket
+	incompleteConnections map[uint32]*MetricReaderWebSocket
 }
 
 func NewMetricReaderWebSocketSubFactory() *MetricReaderWebSocketSubFactory {
 	logger.Log(NameMetricReaderWebSocketSubFactory, logger.Creating, true, true)
 	ms := &MetricReaderWebSocketSubFactory{
 		mut:                   sync.Mutex{},
-		incompleteConnections: make(map[uint]*MetricReaderWebSocket),
+		incompleteConnections: make(map[uint32]*MetricReaderWebSocket),
 	}
 	http.HandleFunc("/ws_metrics", ms.handleWebSocketConnection)
 	logger.Log(NameMetricReaderWebSocketSubFactory, logger.Created, true, true)
 	return ms
 }
 
-func (f *MetricReaderWebSocketSubFactory) CreateReader(metricClientId uint) MetricReaderBase {
+func (f *MetricReaderWebSocketSubFactory) CreateReader(metricClientId uint32) MetricReaderBase {
 	f.mut.Lock()
 	defer f.mut.Unlock()
 	reader := NewWebSocketMetricReader()
@@ -54,13 +54,14 @@ func (f *MetricReaderWebSocketSubFactory) CreateReader(metricClientId uint) Metr
 }
 
 func (f *MetricReaderWebSocketSubFactory) handleWebSocketConnection(w http.ResponseWriter, r *http.Request) {
+	fmt.Sprintln("handleWebSocketConnection")
 	metricClientIdS := r.URL.Query().Get("metricClientId")
 	if metricClientIdS == "" {
 		fmt.Println("Metrics: MetricReaderWebSocketSubFactory: No metricClientId provided, returning 400")
 		http.Error(w, "No clientID provided", http.StatusBadRequest)
 		return
 	}
-	var metricClientId uint
+	var metricClientId uint32
 	_, err := fmt.Sscanf(metricClientIdS, "%d", &metricClientId)
 	if err != nil {
 		fmt.Printf("Metrics: MetricReaderWebSocketSubFactory: Invalid metricClientId provided: %s, returning 400\n", metricClientIdS)
@@ -81,6 +82,7 @@ func (f *MetricReaderWebSocketSubFactory) handleWebSocketConnection(w http.Respo
 		fmt.Printf("WebRTCSFU: webSocketHandler: ERROR: %s\n", err)
 		return
 	}
+	delete(f.incompleteConnections, metricClientId)
 
 	fmt.Println("WebRTCSFU: webSocketHandler: Websocket handler upgraded")
 	reader.SetWebSocketConnection(
@@ -104,9 +106,20 @@ func (r *MetricReaderWebSocket) SetWebSocketConnection(ws *ThreadSafeWebsocket) 
 }
 
 func (r *MetricReaderWebSocket) startListening() {
-
+	for {
+		_, message, err := r.ws.ReadMessage()
+		if err != nil {
+			fmt.Printf("WebRTCPeer: StartListening: ERROR: %s\n", err)
+			break
+		}
+		r.onDataReceived(message)
+	}
 }
 
 func (r *MetricReaderWebSocket) SetOnDataReceived(onDataReceived func([]byte)) {
 	r.onDataReceived = onDataReceived
+}
+
+func (r *MetricReaderWebSocket) GetConnectionAddress() string {
+	return "/ws_metrics"
 }

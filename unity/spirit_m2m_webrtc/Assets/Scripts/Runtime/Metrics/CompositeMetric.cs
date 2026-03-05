@@ -53,7 +53,7 @@ public class CompositeMetricWithValue<T> : GenericMetric where T : struct
             var methodInfoHeader = converterType.GetMethod("GetHeader", BindingFlags.Public | BindingFlags.Static);
             byte[] typeHeader = (byte[])methodInfoHeader.Invoke(null, null);
             byte[] nameBuffer = Encoding.UTF8.GetBytes(name);
-            int nameLength = nameBuffer.Length;
+            uint nameLength = (uint)nameBuffer.Length;
 
             // Convert nameLength (int) into a byte[].
             // Using BitConverter.GetBytes produces a 4-byte array representing the int.

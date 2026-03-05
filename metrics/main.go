@@ -21,7 +21,7 @@ func main() {
 		s.StartListening(*port)
 	}()
 
-	select {}
+	s.ListenForSigClose()
 }
 
 // Provision provider
