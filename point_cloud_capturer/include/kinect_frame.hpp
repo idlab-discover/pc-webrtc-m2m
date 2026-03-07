@@ -1,5 +1,7 @@
 #pragma once
+#ifdef USE_KINECT
 #include "frame.hpp"
+
 #include <k4a/k4a.h>
 #include <k4arecord/playback.h>
 #include "log.h"
@@ -91,6 +93,11 @@ class KinectFrame : public Frame {
         k4a_image_t depth_image;
         k4a_image_t color_image;
         k4a_capture_t capture_handle;
+        void make_pc(const k4a_image_t& xy_table, const float (&trafo)[4][4]);
+        void make_raw_data_arrays(const k4a_image_t& xy_table, const float (&trafo)[4][4], FrameCleanupSettings cleanup_settings);
+        void apply_depth_filter_to_raw(const k4a_image_t& xy_table, const float (&trafo)[4][4], FrameCleanupSettings cleanup_settings);
+        inline Vertex get_transformed_vertex(const k4a_float2_t& xy_table_data, const float (&trafo)[4][4], uint16_t depth);
+        inline bool is_vertex_filtered(const Vertex& vertex);
         std::vector<Color> colors;
         std::vector<Vertex> vertices;
   
@@ -101,9 +108,6 @@ class KinectFrame : public Frame {
         unsigned int depth_width;
         unsigned int depth_height;
         unsigned int n_points = 0;
-        void make_pc(const k4a_image_t& xy_table, const float (&trafo)[4][4]);
-        void make_raw_data_arrays(const k4a_image_t& xy_table, const float (&trafo)[4][4], FrameCleanupSettings cleanup_settings);
-        void apply_depth_filter_to_raw(const k4a_image_t& xy_table, const float (&trafo)[4][4], FrameCleanupSettings cleanup_settings);
-        inline Vertex get_transformed_vertex(const k4a_float2_t& xy_table_data, const float (&trafo)[4][4], uint16_t depth);
-        inline bool is_vertex_filtered(const Vertex& vertex);
+        
 };
+#endif

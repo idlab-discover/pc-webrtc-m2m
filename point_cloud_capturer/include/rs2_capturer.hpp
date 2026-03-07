@@ -1,5 +1,7 @@
 #pragma once
+#ifdef USE_REALSENSE
 #include <librealsense2/rs.hpp>
+
 #include "framework.h"
 #include "capturer.hpp"
 #include <optional>
@@ -19,13 +21,14 @@ class RS2Capturer : public Capturer {
             unsigned int fps, FrameMode mode,
             FrameCleanupSettings cleanup_settings,
             RS2CaptureSettings* capture_settings
-        ) try : width(capture_settings->width), height(capture_settings->height), 
+        ) try : 
+            Capturer(capture_id, mode, fps, cleanup_settings),
+            width(capture_settings->width), height(capture_settings->height), 
             min_dist(capture_settings->min_dist), 
             max_dist(capture_settings->max_dist),
             align_to_depth(capture_settings->align_to_depth), 
-            Capturer(capture_id, mode, fps, cleanup_settings), 
             depth_align(rs2::align(RS2_STREAM_DEPTH)), 
-            color_align(rs2::align(RS2_STREAM_COLOR)) 
+            color_align(rs2::align(RS2_STREAM_COLOR))
         {
             
         } catch(...) {
@@ -55,11 +58,14 @@ class RS2Capturer : public Capturer {
         rs2::threshold_filter thres_filter;
         std::optional<rs2::depth_sensor> depth_sensor;
         std::optional<rs2::color_sensor> color_sensor;
+        realsense_in get_intrinsincs_from_stream(rs2::video_stream_profile profile);
+        
         unsigned int width;
         unsigned int height;
         float min_dist;
         float max_dist;
         bool align_to_depth;
         std::pair<CAPTURER_SETUP_CODE, std::string> exception_handler() noexcept;
-        realsense_in get_intrinsincs_from_stream(rs2::video_stream_profile profile);
+        
 };
+#endif

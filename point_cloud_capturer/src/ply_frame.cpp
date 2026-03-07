@@ -10,7 +10,7 @@ void PlyFrame::make_data_arrays(const std::string& file_path)
     }
     // TODO Probably optimize this
     const plywoot::IStream ply_is{file_stream};
-    const std::vector<PlyPoint> temp_vector = ply_is.readElement<PlyPoint, PointLayout>();
+    const std::vector<PlyPointRead> temp_vector = ply_is.readElement<PlyPointRead, PointLayout>();
     n_points = static_cast<unsigned int>(temp_vector.size());
     vertices.resize(n_points);
     colors.resize(n_points);

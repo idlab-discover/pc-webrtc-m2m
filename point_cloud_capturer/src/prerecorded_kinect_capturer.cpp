@@ -2,6 +2,7 @@
 #include "kinect_frame.hpp"
 #include "log.h"
 #include "kinect/kinect_helper.hpp"
+#ifdef USE_KINECT
 CAPTURER_SETUP_CODE PrerecordedKinectCapturer::init()
 {
     k4a_result_t result = k4a_playback_open(cam_file.c_str(), &camera_handle);
@@ -63,14 +64,14 @@ CAPTURER_SETUP_CODE PrerecordedKinectCapturer::capture_next_frame()
 void PrerecordedKinectCapturer::wait_for_next_frame()
 {
     timeBeginPeriod(1);
-    auto current_time = std::chrono::high_resolution_clock::now(); // Get the end time of the loop
+    auto current_time = std::chrono::steady_clock::now(); // Get the end time of the loop
     auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - previous_time); // Calculate the elapsed time in milliseconds
     
     if (elapsed_time < interframe_delay) // If the elapsed time is less than the desired frame time, sleep for the remaining time
     {
         std::this_thread::sleep_for(interframe_delay - elapsed_time);
     }
-    previous_time = std::chrono::high_resolution_clock::now();
+    previous_time = std::chrono::steady_clock::now();
     // Need to call end here for optimisation
     timeEndPeriod(1);
 }
@@ -233,3 +234,4 @@ Frame *PrerecordedKinectCapturer::poll_next_frame()
     return frame_buffer.poll_next_frame();
 }
 
+#endif

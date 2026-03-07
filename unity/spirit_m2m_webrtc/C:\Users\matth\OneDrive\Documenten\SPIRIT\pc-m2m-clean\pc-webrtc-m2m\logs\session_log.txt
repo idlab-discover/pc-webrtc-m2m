@@ -1,0 +1,3 @@
+id=ExampleCamera ts=1772906866062 status=FrameReadyToRender clientID=0 targetTimestamp=1772906864351 totalPoints=15625 Quality=100
+id=PointCloudRenderer ts=1772906866065 status=FrameRendered clientID=0 capturerID=0 frameNr=0
+id=ExampleCamera ts=1772906871075 status=FrameReadyToRender clientID=0 targetTimestamp=1772906871006 totalPoints=15625 Quality=100

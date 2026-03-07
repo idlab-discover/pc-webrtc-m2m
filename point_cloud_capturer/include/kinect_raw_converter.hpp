@@ -1,5 +1,5 @@
 #pragma once
-#include <librealsense2/rs.hpp>
+#ifdef USE_KINECT
 #include "framework.h"
 #include "raw_converter.hpp"
 #include <k4a/k4a.h>
@@ -42,3 +42,4 @@ class KinectRawConverter : public RawConverter {
         k4a_calibration_extrinsics_t copy_extrensics(kinect_cam_ex ex);
         k4a_calibration_intrinsics_t copy_intrinsics(kinect_cam_in in);
 };
+#endif

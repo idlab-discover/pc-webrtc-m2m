@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_REALSENSE
 #include <librealsense2/rs.hpp>
 #include "framework.h"
 #include "capturer.hpp"
@@ -34,3 +35,4 @@ class RS2Capturer : public Capturer {
         float max_dist;
         std::pair<CAPTURER_SETUP_CODE, std::string> exception_handler() noexcept;
 };
+#endif

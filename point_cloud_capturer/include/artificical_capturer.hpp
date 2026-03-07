@@ -1,5 +1,4 @@
 #pragma once
-#include <librealsense2/rs.hpp>
 #include "framework.h"
 #include "capturer.hpp"
 struct ArtificalCaptureSettings {
@@ -14,7 +13,7 @@ class ArtificalCapturer : public Capturer {
         ) : Capturer(capture_id, mode, fps, cleanup_settings), side_size(capture_settings->side_size) 
         {
             interframe_delay = std::chrono::milliseconds(1000 / fps);
-            previous_time = std::chrono::high_resolution_clock::now();
+            previous_time = std::chrono::steady_clock::now();
         };
         ~ArtificalCapturer() {
            // frame_buffer.stop_buffer();

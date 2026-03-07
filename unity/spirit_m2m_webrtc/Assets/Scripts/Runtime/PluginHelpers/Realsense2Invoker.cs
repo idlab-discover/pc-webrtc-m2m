@@ -62,7 +62,7 @@ public static class Realsense2Invoker
 
     #region Multi Capturer functions
     #region General functions
-    [DllImport(dllName)]
+    [DllImport(dllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern IntPtr create_new_multi_capturer
     (
      UInt32 fps, FrameMode frame_mode, FrameCleanupSettingsEx cleanup_settings, CaptureType capType, uint n_settings, IntPtr[] captureSettings

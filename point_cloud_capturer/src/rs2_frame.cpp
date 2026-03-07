@@ -1,6 +1,6 @@
 #include "rs2_frame.hpp"
 #include <algorithm>
-
+#ifdef USE_REALSENSE
 void RS2Frame::make_color_array(unsigned int bpp, unsigned int sib, const uint8_t *texture)
 {
     if(colors != nullptr) {
@@ -182,3 +182,4 @@ void RS2Frame::apply_depth_filter_to_raw(
         }
     }
 }
+#endif

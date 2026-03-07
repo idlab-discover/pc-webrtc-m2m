@@ -11,17 +11,21 @@ CAPTURER_SETUP_CODE ArtificalCapturer::init()
 CAPTURER_SETUP_CODE ArtificalCapturer::capture_next_frame()
 {
     // TODO sleep
+    #ifdef _WIN32
     timeBeginPeriod(1);
-    auto current_time = std::chrono::high_resolution_clock::now(); // Get the end time of the loop
+    #endif
+    auto current_time = std::chrono::steady_clock::now(); // Get the end time of the loop
     auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - previous_time); // Calculate the elapsed time in milliseconds
     
     if (elapsed_time < interframe_delay) // If the elapsed time is less than the desired frame time, sleep for the remaining time
     {
         std::this_thread::sleep_for(interframe_delay - elapsed_time);
     }
-    previous_time = std::chrono::high_resolution_clock::now();
+    previous_time = std::chrono::steady_clock::now();
     // Need to call end here for optimisation
+    #ifdef _WIN32
     timeEndPeriod(1);
+    #endif
     auto temp_frame = get_single_frame();
     if(frame_ready_callback_instance != nullptr) {
         frame_ready_callback_instance(capturer_id, temp_frame, true);

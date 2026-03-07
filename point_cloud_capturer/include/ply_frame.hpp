@@ -1,18 +1,18 @@
 #pragma once
-#include <librealsense2/rs.hpp>
 #include "point_cloud_data.h"
 #include "frame.hpp"
+
 
 class PlyFrame : public Frame {
     public:
         PlyFrame(unsigned int capturer_id, FrameMode mode, const std::string& file_path, unsigned int _frame_nr) 
                 : Frame(capturer_id, _frame_nr) {
-            switch (mode)
-            {
-            case FrameMode::RealData:
+            //switch (mode)
+            //{
+            //case FrameMode::RealData:
                 make_data_arrays(file_path);
-                break;
-            }
+            //    break;
+            //}
            
 
         };

@@ -1,6 +1,6 @@
 #pragma once
-#include <librealsense2/rs.hpp>
 #include "framework.h"
+#include <string>
 #include "capturer.hpp"
 struct PlyCaptureSettings {
     char directory_path[256];
@@ -15,7 +15,7 @@ class PlyCapturer : public Capturer {
             directory_path(std::string(capture_settings->directory_path))
         {
             interframe_delay = std::chrono::milliseconds(1000 / fps);
-            previous_time = std::chrono::high_resolution_clock::now();
+            previous_time = std::chrono::steady_clock::now();
         };
         ~PlyCapturer() {
            // frame_buffer.stop_buffer();

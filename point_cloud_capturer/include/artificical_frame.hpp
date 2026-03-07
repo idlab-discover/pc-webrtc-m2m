@@ -1,5 +1,5 @@
 #pragma once
-#include <librealsense2/rs.hpp>
+
 #include "point_cloud_data.h"
 #include "frame.hpp"
 class ArtificalFrame : public Frame {

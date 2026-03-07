@@ -2,6 +2,7 @@
 #include "ply_frame.hpp"
 #include <thread>
 #include <filesystem>
+#include <algorithm>
 CAPTURER_SETUP_CODE PlyCapturer::init()
 {
     if (!std::filesystem::exists(directory_path)) {
@@ -23,18 +24,22 @@ CAPTURER_SETUP_CODE PlyCapturer::init()
 CAPTURER_SETUP_CODE PlyCapturer::capture_next_frame()
 {
     // TODO sleep
+    #ifdef _WIN32
     timeBeginPeriod(1);
+    #endif
     auto temp_frame = get_single_frame(); // Get frame first so sleep can be changed based on processing time
-    auto current_time = std::chrono::high_resolution_clock::now(); // Get the end time of the loop
+    auto current_time = std::chrono::steady_clock::now(); // Get the end time of the loop
     auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - previous_time); // Calculate the elapsed time in milliseconds
     
     if (elapsed_time < interframe_delay) // If the elapsed time is less than the desired frame time, sleep for the remaining time
     {
         std::this_thread::sleep_for(interframe_delay - elapsed_time);
     }
-    previous_time = std::chrono::high_resolution_clock::now();
+    previous_time = std::chrono::steady_clock::now();
     // Need to call end here for optimisation
+    #ifdef _WIN32
     timeEndPeriod(1);
+    #endif
     if(temp_frame == nullptr) {
         return CAPTURER_SETUP_CODE::BackendError;
     }

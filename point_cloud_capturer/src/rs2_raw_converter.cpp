@@ -1,5 +1,6 @@
 #include "rs2_raw_converter.hpp"
 #include <algorithm>
+#ifdef USE_REALSENSE
 RS2RawConverter::RS2RawConverter(void* cal) 
     : depth_sensor(dev.add_sensor("Depth")), color_sensor(dev.add_sensor("Color")), RawConverter(cal) 
 {
@@ -105,3 +106,4 @@ void RS2RawConverter::convert_raw(uint16_t *depth, uint8_t *color, Vector3 *p_ou
     }
     
 }
+#endif

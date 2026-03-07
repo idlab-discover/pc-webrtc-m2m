@@ -1,5 +1,5 @@
 {
-    "outputPath": "C:\\Users\\matth\\Downloads\\output2",
+    "outputPath": "/home/matthias/Documents/output",
     "filePrefix": "loot",
     "maxFrames": 300,
     "nPointsPerFrame": 100000

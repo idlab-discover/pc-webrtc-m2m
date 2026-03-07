@@ -55,7 +55,7 @@ namespace pcutils {
         const plywoot::PlyElement point{"vertex", pc->n_points, {x, y, z, red, green, blue}};
         using PointLayout = plywoot::reflect::Layout<plywoot::reflect::Pack<float, 3>, plywoot::reflect::Pack<uint8_t, 3>>;
         plywoot::OStream ply_os{plywoot::PlyFormat::BinaryLittleEndian};
-        std::vector<PlyPoint> points(pc->n_points);
+        std::vector<PlyPointWrite> points(pc->n_points);
         for(unsigned int i = 0; i < pc->n_points; i++) {
             points[i].vertex = pc->coords[i];
             points[i].color = pc->colors[i];

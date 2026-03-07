@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_REALSENSE
 #include <librealsense2/rs.hpp>
 #include "frame.hpp"
 
@@ -73,3 +74,4 @@ class RS2Frame : public Frame {
         );
         void apply_depth_filter_to_raw(const uint16_t* rs_depth, const uint8_t* rs_color, FrameCleanupSettings cleanup_settings);
 };
+#endif

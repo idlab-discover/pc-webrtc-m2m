@@ -170,14 +170,18 @@ RawConverter* create_new_raw_converter(CAPTURE_TYPE type, void* cal) {
 			Log::custom_log("create_new_raw_converter: Creating artificial raw converter", LOG_LEVEL::Default, LogColor::Orange);
 			return new ArtificalRawConverter(cal);
 		}
+		#ifdef USE_REALSENSE
 		case CAPTURE_TYPE::RealSense: {
 			Log::custom_log("create_new_raw_converter: Creating realsense2 raw converter", LOG_LEVEL::Default, LogColor::Orange);
 			return new RS2RawConverter(cal);
 		}
+		#endif
+		#ifdef USE_KINECT
 		case CAPTURE_TYPE::PrerecordedKinect: {
 			Log::custom_log("create_new_raw_converter: Creating prerecorded kinect raw converter", LOG_LEVEL::Default, LogColor::Orange);
 			return new KinectRawConverter(cal);
 		}
+		#endif
 		default: {
 			Log::custom_log("create_new_raw_converter: Invalid capture type", LOG_LEVEL::Default, LogColor::Red);
 			return nullptr;
@@ -215,14 +219,18 @@ void free_capturer_calibration(CAPTURE_TYPE type, void* cal) {
 			ArtificalCapturer::free_calibration(cal);
 			break;
 		}
+		#ifdef USE_REALSENSE
 		case CAPTURE_TYPE::RealSense: {
 			RS2Capturer::free_calibration(cal);
 			break;
 		}
+		#endif
+		#ifdef USE_KINECT
 		case CAPTURE_TYPE::PrerecordedKinect: {
 			PrerecordedKinectCapturer::free_calibration(cal);
 			break;
 		}
+		#endif
 		default: {
 			Log::custom_log("free_capturer_calibration: Invalid capture type", LOG_LEVEL::Default, LogColor::Red);
 			break;

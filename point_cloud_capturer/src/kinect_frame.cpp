@@ -1,5 +1,6 @@
 #include "kinect_frame.hpp"
 
+#ifdef USE_KINECT
 void KinectFrame::make_pc(const k4a_image_t &xy_table, const float (&trafo)[4][4])
 {
     colors.reserve(color_width * color_height / 6);
@@ -118,4 +119,4 @@ inline bool KinectFrame::is_vertex_filtered(const Vertex &vertex)
 
     return false;
 }
-
+#endif

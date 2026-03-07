@@ -1,5 +1,6 @@
 #include "rs2_capturer.hpp"
 #include "rs2_frame.hpp"
+#ifdef USE_REALSENSE
 CAPTURER_SETUP_CODE RS2Capturer::init()
 {
     rs2::config cfg;
@@ -113,7 +114,7 @@ void* RS2Capturer::get_calibration() {
 	};
 }
 
-Frame *RS2Capturer::get_single_frame()
+Frame *RS2Capturer::+get_single_frame()
 {
 	size_t n_frames = 0;
 		rs2::frameset frames;
@@ -143,3 +144,4 @@ Frame *RS2Capturer::get_single_frame()
 		);
 		return temp_frame;
 }
+#endif

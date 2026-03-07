@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_KINECT
 #include "framework.h"
 #include "capturer.hpp"
 #include <k4a/k4a.h>
@@ -37,7 +38,7 @@ class PrerecordedKinectCapturer : public Capturer {
                 }
             }
             interframe_delay = std::chrono::milliseconds(1000 / fps);
-            previous_time = std::chrono::high_resolution_clock::now();
+            previous_time = std::chrono::steady_clock::now();
         } catch(...) {
             
         };
@@ -48,7 +49,6 @@ class PrerecordedKinectCapturer : public Capturer {
             if(transformation_handle != nullptr) {
                 k4a_transformation_destroy(transformation_handle);
             }
-           
             //pipe.stop();
            // frame_buffer.stop_buffer();
         }
@@ -73,7 +73,7 @@ class PrerecordedKinectCapturer : public Capturer {
         int64_t prev_timestamp_usec = -1;
         std::string cam_file;
         float trafo[4][4];
-        k4a_image_t xy_table = NULL;
+        
         unsigned int depth_width;
         unsigned int depth_height;
         unsigned int color_width;
@@ -84,20 +84,20 @@ class PrerecordedKinectCapturer : public Capturer {
         float radius;
         bool align_to_depth;
 
+        k4a_image_t xy_table = NULL;
         k4a_playback_t camera_handle;
         k4a_record_configuration_t record_config;
         k4a_transformation_t transformation_handle;
         k4a_calibration_t cal;
-
+        kinect_cam_ex copy_extrensics(k4a_calibration_extrinsics_t ex);
+        kinect_cam_in copy_intrinsics(k4a_calibration_intrinsics_t in);
         std::chrono::milliseconds interframe_delay;
         std::chrono::steady_clock::time_point previous_time;
 
         kinect_cam_cal create_camera_calibration(bool is_depth);
         void fill_extrensics(KinectCalibration& kin_cal);
-        kinect_cam_ex copy_extrensics(k4a_calibration_extrinsics_t ex);
-        kinect_cam_in copy_intrinsics(k4a_calibration_intrinsics_t in);
-
         void wait_for_next_frame();
         CAPTURER_SETUP_CODE capture_next_frame_internal();
        
 };
+#endif

@@ -1,5 +1,4 @@
 #pragma once
-#include <librealsense2/rs.hpp>
 #include "framework.h"
 #include "raw_converter.hpp"
 #include "capturer.hpp"

@@ -1,5 +1,5 @@
 #include "kinect_raw_converter.hpp"
-
+#ifdef USE_KINECT
 void KinectRawConverter::convert_raw(uint16_t *depth, uint8_t *color, Vector3 *p_out, Color32 *c_out)
 {
     k4a_float2_t* xy_table_data = (k4a_float2_t*)(void*)k4a_image_get_buffer(xy_table);
@@ -103,3 +103,4 @@ k4a_calibration_intrinsics_t KinectRawConverter::copy_intrinsics(kinect_cam_in i
         }
     };
 }
+#endif

@@ -7,12 +7,6 @@
       "dependencies": {},
       "url": "https://registry.npmjs.org"
     },
-    "com.meta.xr.sdk.acoustics": {
-      "version": "file:MetaXRSDKAcousticsFMOD.tgz",
-      "depth": 0,
-      "source": "local-tarball",
-      "dependencies": {}
-    },
     "com.unity.burst": {
       "version": "1.8.7",
       "depth": 1,

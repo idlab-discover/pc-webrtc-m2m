@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_REALSENSE
 #include <librealsense2/rs.hpp>
 #include <librealsense2/hpp/rs_internal.hpp>
 #include "framework.h"
@@ -22,3 +23,4 @@ class RS2RawConverter : public RawConverter {
         unsigned int width;
         unsigned int height;
 };
+#endif

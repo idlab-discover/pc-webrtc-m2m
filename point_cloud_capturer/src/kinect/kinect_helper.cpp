@@ -1,5 +1,5 @@
 #include "kinect/kinect_helper.hpp"
-
+#ifdef USE_KINECT
  void KinectHelper::create_xy_table(const k4a_calibration_t &cal, bool align_to_depth, k4a_image_t &xy_table)
 {
     k4a_result_t status;
@@ -54,3 +54,4 @@
     }
 
   }  
+  #endif

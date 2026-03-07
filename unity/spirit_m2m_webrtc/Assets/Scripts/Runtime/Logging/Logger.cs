@@ -186,7 +186,7 @@ public class Logger
         nextFlush = DateTime.Now;
         isInited = true;
 
-        RawInvoker.set_logging_settings(loggerSettings.pointCloud.limitLogging, loggerSettings.pointCloud.everyNFrames);
+        //RawInvoker.set_logging_settings(loggerSettings.pointCloud.limitLogging, loggerSettings.pointCloud.everyNFrames);
     }
     public static void Log(string message, bool writeToSocket=false)
     {

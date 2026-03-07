@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.18)
 include(FetchContent)
 
+option(USE_REALSENSE "Include RealSense support" ON)
+option(USE_KINECT    "Include Kinect (k4a) support" ON)
+
 # Define the project name and the type of project
 project(spirit_idlab_realsense LANGUAGES CXX)
 
@@ -23,12 +26,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Add the library target
 add_library(spirit_idlab_realsense SHARED ${SOURCES})
+set_target_properties(spirit_idlab_realsense PROPERTIES PREFIX "")
 
 # Set the version properties for the library
-set_target_properties(spirit_idlab_realsense PROPERTIES
-    VERSION ${spirit_idlab_realsense_VERSION_MAJOR}.${spirit_idlab_realsense_VERSION_MINOR}.${spirit_idlab_realsense_VERSION_PATCH}
-    SOVERSION ${spirit_idlab_realsense_VERSION_MAJOR}
-)
+#set_target_properties(spirit_idlab_realsense PROPERTIES
+#   VERSION ${spirit_idlab_realsense_VERSION_MAJOR}.${spirit_idlab_realsense_VERSION_MINOR}.${spirit_idlab_realsense_VERSION_PATCH}
+#    SOVERSION ${spirit_idlab_realsense_VERSION_MAJOR}
+#)
 
 FetchContent_Declare(
   fast_float
@@ -42,19 +46,37 @@ FetchContent_MakeAvailable(fast_float)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeFiles")
 
 # Find the REALSENSE2 library
-find_package(REALSENSE2 REQUIRED)
-find_package(k4a REQUIRED)
+# --- RealSense Setup ---
+if(USE_REALSENSE)
+    find_package(REALSENSE2 REQUIRED)
+    target_link_libraries(spirit_idlab_realsense PRIVATE ${REALSENSE2_LIBRARIES})
+    target_include_directories(spirit_idlab_realsense PRIVATE ${REALSENSE2_INCLUDE_DIRS})
+    target_compile_definitions(spirit_idlab_realsense PRIVATE WITH_REALSENSE)
+endif()
 
-# Link the REALSENSE2 library to the DLL
-target_link_libraries(spirit_idlab_realsense ${REALSENSE2_LIBRARIES})
-target_link_libraries(spirit_idlab_realsense ${k4a_LIBRARY} ${k4arecord_LIBRARY})
+# --- Kinect Setup ---
+if(USE_KINECT)
+    find_package(k4a REQUIRED)
+    target_link_libraries(spirit_idlab_realsense PRIVATE ${k4a_LIBRARY} ${k4arecord_LIBRARY})
+    target_include_directories(spirit_idlab_realsense PRIVATE 
+        ${CMAKE_SOURCE_DIR}/include/kinect 
+        ${k4a_INCLUDE_DIR}
+    )
+    target_compile_definitions(spirit_idlab_realsense PRIVATE WITH_KINECT)
+endif()
 
-target_link_libraries(spirit_idlab_realsense winmm.lib)
-target_link_libraries(spirit_idlab_realsense fast_float)
-# Include REALSENSE2 directories
-include_directories(
-    ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/utils 
-    ${CMAKE_SOURCE_DIR}/include/kinect ${CMAKE_SOURCE_DIR}/include/multi_capturer 
-    ${k4a_INCLUDE_DIR} ${REALSENSE2_INCLUDE_DIRS} 
-    ${CMAKE_SOURCE_DIR}/include/external/plywoot ${CMAKE_SOURCE_DIR}/include/multi_capturer/external/plywoot/plywoot
+# --- Platform Specific: Windows Multimedia ---
+if(WIN32)
+    target_link_libraries(spirit_idlab_realsense PRIVATE winmm.lib)
+endif()
+
+# --- Common setup ---
+target_link_libraries(spirit_idlab_realsense PRIVATE fast_float)
+
+target_include_directories(spirit_idlab_realsense PRIVATE
+    ${CMAKE_SOURCE_DIR}/include 
+    ${CMAKE_SOURCE_DIR}/include/utils 
+    ${CMAKE_SOURCE_DIR}/include/multi_capturer 
+    ${CMAKE_SOURCE_DIR}/include/external/plywoot 
+    ${CMAKE_SOURCE_DIR}/include/multi_capturer/external/plywoot/plywoot
 )
