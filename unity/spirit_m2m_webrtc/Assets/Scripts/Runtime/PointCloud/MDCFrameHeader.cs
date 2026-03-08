@@ -62,6 +62,7 @@ public class MDCFrameHeader
     {
         copyFromBuffer(frame);
     }
+    
     private void copyFromBuffer(NetworkFrame frame)
     {
         unsafe
@@ -77,6 +78,7 @@ public class MDCFrameHeader
          
         }
     }
+   
     public override string ToString()
     {
         return $"ts_frame={Timestamp} capturer_id={CapturerID} frameNr={FrameNr} descriptionNr={DescriptionNr} codecType={CodecType} totalNumberOfPoints={TotalNumberOfPoints}";

@@ -1,5 +1,5 @@
 {
-    "outputPath": "C:\\BenchmarkContent",
+    "outputPath": "/home/matthias/Documents/bench",
     "subDirectoryPrefix": "v1_mdc_video_longdress",
     "downsampleToNPoints": 100000,
     "validateEncoding": true,

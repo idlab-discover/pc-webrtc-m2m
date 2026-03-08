@@ -1,45 +1,57 @@
 cmake_minimum_required(VERSION 3.18)
-option(ENABLE_VCPKG OFF)
-
-# Define the project name and the type of project
 project(spirit_idlab_draco LANGUAGES CXX)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# --- 1. Automated Dependency Management (Replaces FindDRACO) ---
+include(FetchContent)
 
-# Set the version of the library
+FetchContent_Declare(
+  draco
+  GIT_REPOSITORY https://github.com/google/draco.git
+  GIT_TAG        1.5.7  # Recommended stable version
+)
+
+# Optional: Disable Draco's internal tests/features to speed up your build
+set(DRACO_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(DRACO_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(DRACO_FAST ON CACHE BOOL "" FORCE)
+set(DRACO_WASM OFF CACHE BOOL "" FORCE)
+set(DRACO_INSTALL OFF CACHE BOOL "" FORCE)
+set(DRACO_ENABLE_SSE4_1 ON CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(draco)
+
+# --- 2. Project Configuration ---
 set(spirit_idlab_draco_VERSION_MAJOR 1)
 set(spirit_idlab_draco_VERSION_MINOR 0)
 set(spirit_idlab_draco_VERSION_PATCH 0)
 
-# Specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-# Add the include directory
-include_directories(include)
-
-# Add the source directory
-file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # Set the output directory for the DLL
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# Add the library target
+# --- 3. Library Target ---
+# It's better to list files explicitly, but keeping your GLOB for now
+file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_library(spirit_idlab_draco SHARED ${SOURCES})
-
-# Set the version properties for the library
-set_target_properties(spirit_idlab_draco PROPERTIES
-    VERSION ${spirit_idlab_draco_VERSION_MAJOR}.${spirit_idlab_draco_VERSION_MINOR}.${spirit_idlab_draco_VERSION_PATCH}
-    SOVERSION ${spirit_idlab_draco_VERSION_MAJOR}
+set_target_properties(spirit_idlab_draco PROPERTIES PREFIX "")
+# --- 4. Linking and Includes ---
+# target_include_directories is preferred over the global include_directories
+target_include_directories(spirit_idlab_draco PRIVATE 
+    "${draco_SOURCE_DIR}/src" 
+    "${draco_BINARY_DIR}"
+    "${PROJECT_BINARY_DIR}"
 )
 
-# Set the CMake module path to find the custom FindREALSENSE2.cmake
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeFiles")
+target_include_directories(spirit_idlab_draco PRIVATE include)
 
-# Find the DRACO library
-find_package(DRACO REQUIRED)
-message(${DRACO_INCLUDE_DIRS})
-message(${DRACO_LIBRARIES})
-# Link the DRACO library to the DLL
-target_link_libraries(spirit_idlab_draco ${DRACO_LIBRARIES})
+# Link Draco. FetchContent makes the 'draco' target available globally.
+# This automatically handles include paths and library linking.
+target_link_libraries(spirit_idlab_draco PRIVATE draco_static)
 
-# Include REALSENSE2 directories
-include_directories(${DRACO_INCLUDE_DIRS})
+# --- 5. Target Properties ---
+#set_target_properties(spirit_idlab_draco PROPERTIES
+#    VERSION ${spirit_idlab_draco_VERSION_MAJOR}.${spirit_idlab_draco_VERSION_MINOR}.${spirit_idlab_draco_VERSION_PATCH}
+#    SOVERSION ${spirit_idlab_draco_VERSION_MAJOR}
+#)

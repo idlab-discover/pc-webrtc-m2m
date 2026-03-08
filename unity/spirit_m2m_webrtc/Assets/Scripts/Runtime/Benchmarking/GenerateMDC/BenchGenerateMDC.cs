@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 using UnityEngine;
 
@@ -103,6 +104,10 @@ public class BenchGenerateMDC : PipelineLocalPointcloudBase
                 {
                     Debug.LogError($"Failed to write frame to {filePath}: {ex.Message}");
                 }
+                if(benchConfig.validateEncoding)
+                {
+                    validateEncoding(filePath, desc);
+                }
             }
             
 
@@ -124,6 +129,58 @@ public class BenchGenerateMDC : PipelineLocalPointcloudBase
                 Monitor.Pulse(_lock);
             }
         }
+    }
+
+    private void validateEncoding(string filePath, EncodedMDCDescription desc)
+    {
+        validateFromBuffer(System.IO.File.ReadAllBytes(filePath), desc);
+    }
+
+    private MDCFrameHeader validateFromBuffer(byte[] buffer, EncodedMDCDescription encDesc)
+    {
+        var timestampField = BitConverter.ToUInt64(buffer, 0);
+        var capturerID = BitConverter.ToUInt32(buffer, 8);
+        var frameNrField = BitConverter.ToUInt32(buffer, 12);
+        var descriptionNr = BitConverter.ToUInt32(buffer, 16);
+        var codecType = BitConverter.ToUInt32(buffer, 20);
+        var totalPoints =BitConverter.ToUInt32(buffer, 24);
+
+        IntPtr unmanagedPointer = Marshal.AllocHGlobal(buffer.Length - 28);
+        Marshal.Copy(buffer, 28, unmanagedPointer, buffer.Length - 28);
+        MDCFrameHeader header = new(
+            dataBuffer: unmanagedPointer,
+            dataBufferSize: (uint)(buffer.Length - 28),
+            timestamp: timestampField,
+            capturerID: capturerID, 
+            frameNr: frameNrField,
+            descriptionNr: descriptionNr, 
+            codecType: codecType, 
+            numberOfPoints: totalPoints
+        );
+        DecodedMDCDescription decDesc = new(header, decodeImmediately: true);
+        bool invalidFrame = false;
+        if (decDesc.NumberOfPoints == 0)
+        {
+            Debug.LogError($"Validation failed for frame {frameNrField}: more than 0 points, got {decDesc.NumberOfPoints} points. Total PC points in header={totalPoints}");
+            invalidFrame = true;
+        }
+        if(timestampField != encDesc.Header.Timestamp)
+        {
+            Debug.LogError($"Validation failed for frame {frameNrField}: expected timestamp {encDesc.Header.Timestamp}, got {timestampField}");
+            invalidFrame = true;
+        }
+        if(frameNrField != encDesc.Header.FrameNr)
+        {
+            Debug.LogError($"Validation failed for frame {frameNrField}: expected frame number {encDesc.Header.FrameNr}, got {frameNrField}");
+            invalidFrame = true;
+        }
+        if(!invalidFrame)
+        {
+            Debug.Log($"Validation succeeded for frame {frameNrField}");
+        }
+        decDesc.Dispose();
+        Marshal.FreeHGlobal(unmanagedPointer);
+        return header;
     }
 
     protected override void cleanup()

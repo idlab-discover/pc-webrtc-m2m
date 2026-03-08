@@ -1,3 +1,34 @@
-id=ExampleCamera ts=1772906866062 status=FrameReadyToRender clientID=0 targetTimestamp=1772906864351 totalPoints=15625 Quality=100
-id=PointCloudRenderer ts=1772906866065 status=FrameRendered clientID=0 capturerID=0 frameNr=0
-id=ExampleCamera ts=1772906871075 status=FrameReadyToRender clientID=0 targetTimestamp=1772906871006 totalPoints=15625 Quality=100
+id=PlayerControllerRandomRotate ts=1772931240602 status=Initializing clientID=0
+id=MultiCaptureSetup ts=1772931240607 status=Creating fps=15 frameMode=RealData nCaptures=1 startCaptureThread=False
+id=MultiCaptureSetup ts=1772931240609 status=Created
+id=MDCEncodingQueue ts=1772931240609 status=Creating
+id=MDCEncodingQueue ts=1772931240609 status=Created
+id=PipelineLocalPointcloudMDC ts=1772931240616 status=EndEncodingPC clientID=0 ts_frame=1772931240611 capturer_id=0 frameNr=0 descriptionNr=2 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1772931240616 status=EndEncodingPC clientID=0 ts_frame=1772931240611 capturer_id=0 frameNr=0 descriptionNr=1 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1772931240622 status=EndEncodingPC clientID=0 ts_frame=1772931240611 capturer_id=0 frameNr=0 descriptionNr=0 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1772931240626 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1772931240626 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1772931240628 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1772931241333 status=EndEncodingPC clientID=0 ts_frame=1772931241331 capturer_id=0 frameNr=100 descriptionNr=2 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1772931241333 status=EndEncodingPC clientID=0 ts_frame=1772931241331 capturer_id=0 frameNr=100 descriptionNr=1 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1772931241334 status=EndEncodingPC clientID=0 ts_frame=1772931241331 capturer_id=0 frameNr=100 descriptionNr=0 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1772931241334 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=100 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1772931241335 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=100 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1772931241337 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=100 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1772931242133 status=EndEncodingPC clientID=0 ts_frame=1772931242131 capturer_id=0 frameNr=200 descriptionNr=2 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1772931242134 status=EndEncodingPC clientID=0 ts_frame=1772931242131 capturer_id=0 frameNr=200 descriptionNr=1 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1772931242135 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=200 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1772931242135 status=EndEncodingPC clientID=0 ts_frame=1772931242131 capturer_id=0 frameNr=200 descriptionNr=0 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1772931242136 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=200 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1772931242139 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=200 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1772931242868 status=EndEncodingPC clientID=0 ts_frame=1772931242865 capturer_id=0 frameNr=300 descriptionNr=2 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1772931242869 status=EndEncodingPC clientID=0 ts_frame=1772931242865 capturer_id=0 frameNr=300 descriptionNr=1 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1772931242870 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=300 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1772931242870 status=EndEncodingPC clientID=0 ts_frame=1772931242865 capturer_id=0 frameNr=300 descriptionNr=0 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1772931242871 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=300 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1772931242874 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=300 descriptionID=0
+id=MDCEncodingQueue ts=1772931242875 status=Disposing
+id=MDCEncodingQueue ts=1772931242876 status=Disposed
+id=MultiCaptureSetup ts=1772931242876 status=Disposing
+id=MultiCaptureSetup ts=1772931242877 status=Disposed
+id=PipelineLocalPointcloudMDC ts=1772931250438 status=Destroying clientID=0
