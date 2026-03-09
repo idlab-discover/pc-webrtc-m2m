@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "data_parser.hpp"
-#include "debug.h"
-#include "frame_buffer.hpp"
+//#include "debug.h"
+//#include "frame_buffer.hpp"
 #include "framework.h"
 #include "packet_data.hpp"
 #include "proxy_receiver.h"
-#include "received_control_packet.hpp"
+//#include "received_control_packet.hpp"
 
 #include <chrono>
 #include <fstream>
@@ -17,7 +17,7 @@
 
 using namespace std;
 
-static struct sockaddr_in si_send;
+/*static struct sockaddr_in si_send;
 static int s_send, slen = sizeof(si_send);
 
 static char* buf = (char*)malloc(BUFLEN);
@@ -32,11 +32,11 @@ static std::queue<ReceivedControlPacket> recv_control_packets;
 static DataParser data_parser;
 static FrameBuffer frame_buffer;
 static int frame_counter = 0;
-std::mutex m_recv_control;
+std::mutex m_recv_control;*/
 
 static string logfile = "log.txt";
 
-enum CONNECTION_SETUP_CODE : int {
+/*enum CONNECTION_SETUP_CODE : int {
 	ConnectionSuccess = 0,
 	StartUpError = 1,
 	SocketCreationError = 2,
@@ -48,9 +48,9 @@ struct SendPacketHeader {
 	uint32_t framelen;
 	uint32_t frameoffset;
 	uint32_t packetlen;
-};
+};*/
 
-inline string get_current_data_time() {
+/*inline string get_current_data_time() {
 	time_t now = time(0);
 	char buf[80];
 	struct tm tstruct;
@@ -184,3 +184,4 @@ void clean_up() {
 	free(buf);
 	log("clean_up terminating");
 }
+*/

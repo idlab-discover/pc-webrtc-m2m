@@ -81,15 +81,16 @@ type ClientTracksAdded struct {
 func NewClientConnection(parent *SessionManager, clientID uint, authKey string) *ClientConnection {
 	LogWithMessage(NameClient, Creating, true, true, fmt.Sprintf("clientID=%d", clientID))
 	cl := &ClientConnection{
-		parent:            parent,
-		ClientID:          clientID,
-		AuthKey:           authKey,
-		config:            map[string]interface{}{},
-		Status:            ClientStatusCreated,
-		RemoteClients:     map[uint]*RemoteClient{},
-		SenderVideoTracks: map[string]*ClientTrackInfo{}, // TrackID here has to be global unique i.e., clientID + trackID from client
-		SenderAudioTracks: map[string]*ClientTrackInfo{},
-		mut:               sync.Mutex{},
+		parent:             parent,
+		ClientID:           clientID,
+		AuthKey:            authKey,
+		config:             map[string]interface{}{},
+		Status:             ClientStatusCreated,
+		RemoteClients:      map[uint]*RemoteClient{},
+		SenderVideoTracks:  map[string]*ClientTrackInfo{}, // TrackID here has to be global unique i.e., clientID + trackID from client
+		SenderAudioTracks:  map[string]*ClientTrackInfo{},
+		mut:                sync.Mutex{},
+		ConnectedProviders: map[string]*ProviderConnection{},
 	}
 	Log(NameClient, Created, true, true)
 	return cl

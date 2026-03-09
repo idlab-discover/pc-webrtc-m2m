@@ -2,6 +2,8 @@
 
 #include "received_audio.hpp"
 #include <list>
+#include <mutex>
+#include <condition_variable>
 
 class AudioBuffer {
 

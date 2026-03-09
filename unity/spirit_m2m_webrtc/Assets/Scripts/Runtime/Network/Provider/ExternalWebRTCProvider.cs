@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using UnityEditor.PackageManager;
 using UnityEngine;
 
@@ -45,15 +46,75 @@ public class ExternalWebRTCProvider : ConnectionProviderBase, ISenderSupported, 
         }
         sender = new ExternalWebRTCSender(ptr, pMsg.senderVideoTracks, pMsg.senderAudioTracks); // TODO This will eventually need to be dynamic
         peerProcess = new Process();
-        peerProcess.StartInfo.FileName = Application.dataPath + "/peer/peer.exe"; // TODO Read this from config file, maybe add to session config pairs of {providerType, configPath}
-        peerProcess.StartInfo.Arguments = $"-i -c {localConnectedClient.ClientID} -p {_portSelf} -r {_portRemote} " +
-            $"--vt {sender.VideoTracksString} --sfuKey {pMsg.providerKey} " +
-            $"--sfuIP {pMsg.address} --sfuPort {pMsg.port} --sfuAuth TODO";
+        string peerExe = "";
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+        peerExe = "/peer/peer_win.exe";
+#elif UNITY_EDITOR_LINUX || UNITY_STANDALONE_LINUX
+        peerExe = "/peer/peer_linux.exe";
+#endif
+        string peerBinary = Application.dataPath + peerExe; // TODO Read this from config file, maybe add to session config pairs of {providerType, configPath}
+        string[] peerArgumentTokens =
+        {
+            "-i",
+            "-c", localConnectedClient.ClientID.ToString(),
+            "-p", _portSelf.ToString(),
+            "-r", _portRemote.ToString(),
+            "--vt", sender.VideoTracksString,
+            "--sfuKey", pMsg.providerKey,
+            "--sfuIP", pMsg.address,
+            "--sfuPort", pMsg.port.ToString(),
+            "--sfuAuth", "TODO"
+        };
+        string peerArguments = string.Join(" ", peerArgumentTokens);
+        peerProcess.StartInfo.FileName = peerBinary;
+        peerProcess.StartInfo.Arguments = peerArguments;
         UnityEngine.Debug.Log($"-i -c {localConnectedClient.ClientID} -p {_portSelf} -r {_portRemote} --vt {sender.VideoTracksString} --at {sender.AudioTracksString} --sfuKey {pMsg.providerKey} " +
             $"--sfuIP {pMsg.address} --sfuPort {pMsg.port} --sfuAuth TODO");
         peerProcess.StartInfo.CreateNoWindow = false;
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
         peerProcess.StartInfo.Arguments = $"/K {peerProcess.StartInfo.FileName} {peerProcess.StartInfo.Arguments}";
         peerProcess.StartInfo.FileName = "CMD.EXE";
+#elif UNITY_EDITOR_LINUX || UNITY_STANDALONE_LINUX
+    string BashQuote(string value)
+    {
+        return $"'{value.Replace("'", "'\"'\"'")}'";
+    }
+
+    string peerCommand = $"{BashQuote(peerBinary)} {string.Join(" ", Array.ConvertAll(peerArgumentTokens, BashQuote))}";
+    string linuxTerminalKeepOpen = $"bash -lc {BashQuote($"{peerCommand}; exec bash")}";
+        UnityEngine.Debug.Log($"Linux terminal command: {peerCommand}");
+        if (File.Exists("/usr/bin/x-terminal-emulator"))
+        {
+            peerProcess.StartInfo.FileName = "/usr/bin/x-terminal-emulator";
+            peerProcess.StartInfo.Arguments = $"-e {linuxTerminalKeepOpen}";
+        }
+        else if (File.Exists("/usr/bin/gnome-terminal"))
+        {
+            peerProcess.StartInfo.FileName = "/usr/bin/gnome-terminal";
+            peerProcess.StartInfo.Arguments = $"-- {linuxTerminalKeepOpen}";
+        }
+        else if (File.Exists("/usr/bin/konsole"))
+        {
+            peerProcess.StartInfo.FileName = "/usr/bin/konsole";
+            peerProcess.StartInfo.Arguments = $"-e {linuxTerminalKeepOpen}";
+        }
+        else if (File.Exists("/usr/bin/xfce4-terminal"))
+        {
+            peerProcess.StartInfo.FileName = "/usr/bin/xfce4-terminal";
+            peerProcess.StartInfo.Arguments = $"--command=\"{linuxTerminalKeepOpen}\"";
+        }
+        else if (File.Exists("/usr/bin/xterm"))
+        {
+            peerProcess.StartInfo.FileName = "/usr/bin/xterm";
+            peerProcess.StartInfo.Arguments = $"-hold -e {linuxTerminalKeepOpen}";
+        }
+        else
+        {
+            UnityEngine.Debug.LogWarning("ExternalWebRTCProvider: No terminal emulator found on Linux; starting peer without a visible terminal window.");
+            peerProcess.StartInfo.FileName = peerBinary;
+            peerProcess.StartInfo.Arguments = peerArguments;
+        }
+#endif
 
         if (!peerProcess.Start())
         {

@@ -5,6 +5,7 @@
 #include <queue>
 #include <stdio.h>
 #include <string>
+#include <cstring>
 
 class ReceivedAudio {
 

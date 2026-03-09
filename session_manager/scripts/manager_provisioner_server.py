@@ -140,3 +140,4 @@ if __name__ == "__main__":
         print(f"Configured manager_file: {file_name}")
 
     app.run(host=args.host, port=args.port, debug=args.debug)
+# e.g.  python3 ./scripts/manager_provisioner_server.py --port 9999 --manager_path /home/matthias/Documents/pc-webrtc-m2m/session_manager --file_name session_manager_linux.exe

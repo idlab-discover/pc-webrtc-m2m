@@ -2,7 +2,7 @@
     "clientID": 0,
     "sfuAddress": "127.0.0.1:8080",
     "peerUDPPort": 9000,
-    "providersConfigPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-m2m-clean\\pc-webrtc-m2m\\unity\\spirit_m2m_webrtc\\Assets\\config\\providers\\prov_loopback.json",
+    "providersConfigPath": "/home/matthias/Documents/pc-webrtc-m2m/unity/spirit_m2m_webrtc/Assets/config/providers/prov.json",
     "startPositions": [
         {"x": 19.295, "y":0.974, "z": -0.35},
         {"x": 19.0, "y":0.974, "z": -0.931},
@@ -15,9 +15,9 @@
     },
     "pushBack": {"x": 0.229103, "y":0.0, "z": 0},
     "sessionManagerSettings": {
-        "type": "loopback",
+        "type": "websocket",
         "defaultName": "Loopback_Session",
-        "configPath": "/config/session/loopback_2.json"
+        "configPath": "/config/session/websocket.json"
     },
     "supportedModes": [
         {

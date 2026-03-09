@@ -15,9 +15,6 @@ WebRTCConnection::WebRTCConnection(unsigned int port_this, unsigned int port_rem
 WebRTCConnection::~WebRTCConnection()
 {
 	disconnect();
-	std::unique_lock<std::mutex> lk(m_peer_ready);
-	connection_status = -2;
-	cv_peer_ready.notify_all();
 }
 
 int WebRTCConnection::connect() {
@@ -75,6 +72,12 @@ void WebRTCConnection::disconnect()
 	// TODO Send disconnect message to peer maybe
 	//WSACleanup();
 	keep_working = false;
+	// Shutdown the socket to wake up any blocking recvfrom() calls
+#ifdef WIN32
+	shutdown(s_recv, SD_BOTH);
+#else
+	shutdown(s_recv, SHUT_RDWR);
+#endif
 	closesocket(s_recv);
 	std::unique_lock<std::mutex> lk_recv(m_recv_data);
 	std::unique_lock<std::mutex> guard(m_send_data);
@@ -84,8 +87,9 @@ void WebRTCConnection::disconnect()
 		WSACleanup();
 #endif
 	}
-	initialized = false;
 	std::unique_lock<std::mutex> lk_peer(m_peer_ready);
+	initialized = false;
+	connection_status = -2;
 	cv_peer_ready.notify_all();
 	cv_listening_for_data.wait(lk_recv, [this] {return !is_listening_for_data; });
 	
@@ -111,10 +115,12 @@ void WebRTCConnection::listen_for_data() {
 		size_t size = 0;
 
 		if ((size = recvfrom(s_recv, buf, BUFLEN, 0, NULL, NULL)) == SOCKET_ERROR) {
+			guard.unlock();
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			continue;
 		}
 		if (size == 0) {
+			guard.unlock();
 			continue;
 		}
 		//custom_log("listen_for_data: recvfrom: got " + std::to_string(size) + " bytes", Debug);
@@ -138,6 +144,7 @@ void WebRTCConnection::listen_for_data() {
 			//custom_log("listen_for_data: connected to peer", Default, Color::Orange);
 			if (sendto(s_recv, t, BUFLEN, 0, (struct sockaddr*)&si_send, slen_send) == SOCKET_ERROR) {
 				//custom_log("initialize: sendto: ERROR: " + std::to_string(WSAGetLastError()), Default, Color::Red);
+				keep_working = false;
 				WSACleanup();
 				return;
 			}
