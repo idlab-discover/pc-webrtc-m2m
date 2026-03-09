@@ -139,7 +139,9 @@ func main() {
 	authKey := flag.String("authKey", "", "Optional authentication key provider by the session manager")
 	enableConsoleOutput := flag.Bool("console", false, "Enable console output for logger")
 	ipFilter := flag.String("ipFilter", "", "IP Prefix to filter on (e.g., 192.168.1.)")
+	metricsServerConfig := flag.String("metricsConfig", "", "Path to metrics server config file, if not set metrics server will not be started")
 	flag.Parse()
+
 	if *managerIP == "" || *address == "" || *port == 0 || *providerKey == "" {
 		println("wrongs args", *managerIP, *address, *port, *providerKey)
 		return
@@ -156,7 +158,11 @@ func main() {
 	trackLocals = map[string]*webrtc.TrackLocalStaticRTP{}
 	undesireableTracks = map[int][]string{}
 
-	sfu := NewSFU(*address, *port, *ipFilter, *providerKey)
+	sfu := NewSFU(*address, *port, *ipFilter, *providerKey, *metricsServerConfig)
+	go sfu.MetricsHelper.MetricsServer.StartListening(8000)
+	sfu.MetricsHelper.MetricsServer.ListenForSigClose()
+	return
+	// ------
 	sm, err := NewSessionManagerConnection(*managerIP, *providerKey, *authKey, sfu)
 	if err != nil {
 		panic(err)
@@ -193,7 +199,9 @@ func main() {
 			logger.LogWithMessage("SystemResources", logger.SystemResources, true, true, fmt.Sprintf("ts=%d cpuUsage=%d memUsage=%d cpuTemp=%d", time.Now().UnixMilli(), cpuUsageVal, memUsageVal, avgTempVal))
 		}
 	}()
+
 	select {}
+
 	//ticker := time.NewTicker(1 * time.Second)
 	//quit := make(chan struct{})
 	// System metrics loop:

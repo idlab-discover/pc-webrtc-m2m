@@ -32,9 +32,16 @@ type SFU struct {
 	ipFilter            string
 	mut                 sync.Mutex
 	providerKey         string
+	// Metrics related
+	MetricsHelper *MetricsServerHelper
 }
 
-func NewSFU(address string, port uint, ipFilter string, providerKey string) *SFU {
+type CompositeTest struct {
+	Field1 uint32
+	Field2 float32
+}
+
+func NewSFU(address string, port uint, ipFilter string, providerKey string, metricsServerConfigPath string) *SFU {
 	logger.Log(NameSFU, logger.Creating, true, true)
 	sfu := &SFU{
 		address:             address,
@@ -48,6 +55,17 @@ func NewSFU(address string, port uint, ipFilter string, providerKey string) *SFU
 		mut:                 sync.Mutex{},
 	}
 	sfu.overallTrackMetrics.StartMeasuring()
+	if metricsServerConfigPath != "" {
+		sfu.MetricsHelper = NewMetricsServerHelper(metricsServerConfigPath)
+		me, _ := RegisterPushMetricWithHelper[uint32](sfu.MetricsHelper, "numClients")
+		me.AddCapturedValue(5)
+		me.AddCapturedValue(15)
+		comp, _ := RegisterCompositePushMetricWithHelper[CompositeTest](sfu.MetricsHelper, "CompositeTest")
+		comp.AddCapturedValue(CompositeTest{Field1: 1, Field2: 1.0})
+		sfu.MetricsHelper.UpdateMetrics()
+		//sfu.MetricsServer = core.NewMetricsServer(metricsServerConfigPath)
+		//sfu.MetricsProvider = sfu.MetricsServer.AddLocalProducer("sfu")
+	}
 	logger.Log(NameSFU, logger.Created, true, true)
 	return sfu
 }

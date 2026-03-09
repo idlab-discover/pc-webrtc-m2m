@@ -121,6 +121,7 @@ func LogInit(name string, nameShort string, color string, everyNFrames uint, sub
 		fmt.Println("Failed to open log file:", err)
 		return
 	}
+	println("Logging to file", logPath)
 	logName = name
 	logFile = f
 	logColor = color
