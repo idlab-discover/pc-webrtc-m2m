@@ -48,6 +48,8 @@ public class SessionConnectionMessage
     public string codecMode;
     public List<ConnectionProviderMessage> providers = new();
     public List<ConnectedClientMessage> clients = new();
+    public bool useMetrics;
+    public string metricsServerAddress;
 
     public static SessionConnectionMessage CreateFromJSON(string data)
     {

@@ -1,50 +1,53 @@
-id=SessionManagerRepository ts=1773050620390 status=FactoryCreate type=websocket configPath=/config/session/websocket.json
-id=SessionManagerRepository ts=1773050620435 status=FactoryCreateSucces type=websocket configPath=/config/session/websocket.json
-id=WebSocketSessionManager ts=1773050622485 status=ManagerReadyToConnect
-id=WebSocketSessionManager ts=1773050622486 status=ManagerConnectionStart
-id=WebSocketSessionManager ts=1773050622541 status=WSMessageReceive type=FullyConnected
-id=WebSocketSessionManager ts=1773050622549 status=ManagerConnectionSuccess
-id=CodecModeRepository ts=1773050622664 status=FactoryCreate type=mdc
-id=CodecModeRepository ts=1773050622665 status=FactoryCreateSucces type=mdc
-id=MDCCodecMode ts=1773050622675 status=GatheringTrackInfo samplingPercantages=[60|25|15] maxCompletePointCount=1000000
-id=MDCCodecMode ts=1773050622678 status=NewTrackDiscovered trackID=mdc_0_0 supportedCodecs=[draco] samplingPercentage=60
-id=MDCCodecMode ts=1773050622678 status=NewTrackDiscovered trackID=mdc_0_1 supportedCodecs=[draco] samplingPercentage=25
-id=MDCCodecMode ts=1773050622678 status=NewTrackDiscovered trackID=mdc_0_2 supportedCodecs=[draco] samplingPercentage=15
-id=WebSocketSessionManager ts=1773050622682 status=ManagerSessionCreating sessionName=Loopback_Session
-id=WebSocketSessionManager ts=1773050622703 status=WSMessageReceive type=SessionJoined
-id=WebSocketSessionManager ts=1773050622709 status=ManagerSessionJoined
-id=LocalConnectedClient ts=1773050622710 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_1 provider=sfu_mdc
-id=LocalConnectedClient ts=1773050622711 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_0 provider=sfu_mdc
-id=LocalConnectedClient ts=1773050622711 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_2 provider=sfu_mdc
-id=WebSocketSessionManager ts=1773050622715 status=WSMessageReceive type=ClientAddedToProvider
-id=PlayerControllerRandomRotate ts=1773050622721 status=Initializing clientID=0
-id=WebSocketSessionManager ts=1773050622723 status=ManagerProviderRequested type=webrtc_sfu provider=sfu_mdc
-id=MultiCaptureSetup ts=1773050622725 status=Creating fps=15 frameMode=RealData nCaptures=1 startCaptureThread=True
-id=MultiCaptureSetup ts=1773050622726 status=Created
-id=MDCEncodingQueue ts=1773050622727 status=Creating
-id=MDCEncodingQueue ts=1773050622727 status=Created
-id=PipelineLocalPointcloudMDC ts=1773050622804 status=EndEncodingPC clientID=0 ts_frame=1773050622726 capturer_id=0 frameNr=0 descriptionNr=1 codecType=0 totalNumberOfPoints=15625
-id=PipelineLocalPointcloudMDC ts=1773050622804 status=EndEncodingPC clientID=0 ts_frame=1773050622726 capturer_id=0 frameNr=0 descriptionNr=0 codecType=0 totalNumberOfPoints=15625
-id=PipelineLocalPointcloudMDC ts=1773050622804 status=EndEncodingPC clientID=0 ts_frame=1773050622726 capturer_id=0 frameNr=0 descriptionNr=2 codecType=0 totalNumberOfPoints=15625
-id=LocalConnectedClient ts=1773050622806 status=ClientTrackNotStarted clientID=0 trackID=cl0_mdc_0_0
-id=LocalConnectedClient ts=1773050622806 status=ClientTrackNotStarted clientID=0 trackID=cl0_mdc_0_2
-id=LocalConnectedClient ts=1773050622806 status=ClientTrackNotStarted clientID=0 trackID=cl0_mdc_0_1
-id=PipelineLocalPointcloudMDC ts=1773050622806 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=0
-id=PipelineLocalPointcloudMDC ts=1773050622806 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=2
-id=PipelineLocalPointcloudMDC ts=1773050622806 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=1
-id=ConnectionProviderRepository ts=1773050622816 status=FactoryCreate type=webrtc_sfu key=sfu_mdc ip=127.0.0.1 port=8036
-id=ExternalWebRTCProvider ts=1773050622831 status=Creating portSelf=9000 portRemote=9001
-id=ExternalWebRTCProvider ts=1773050622868 status=Created
-id=ConnectionProviderRepository ts=1773050622869 status=FactoryCreateSucces type=webrtc_sfu  key=sfu_mdc
-id=ExternalWebRTCProvider ts=1773050622870 status=ProviderConnectionStart mode=async
-id=ExternalWebRTCProvider ts=1773050622873 status=ProviderConnectionStart
-id=LocalConnectedClient ts=1773050622874 status=ClientSettingTrackStatus clientID=0 nTracks=3 status=Started
-id=LocalConnectedClient ts=1773050622874 status=ClientTrackStatusSet clientID=0 nTracks=3 status=Started
-id=WebSocketSessionManager ts=1773050625279 status=ManagerDisconnecting
-id=ExternalWebRTCProvider ts=1773050625280 status=Disposing
-id=ExternalWebRTCProvider ts=1773050625283 status=Disposed
-id=WebSocketSessionManager ts=1773050625283 status=ManagerDisconnected
-id=PipelineLocalPointcloudMDC ts=1773050625286 status=Destroying clientID=0
-id=PipelineLocalPointcloudMDC ts=1773050625286 status=Destroyed clientID=0
-id=MultiCaptureSetup ts=1773050625487 status=Disposing
-id=MultiCaptureSetup ts=1773050625531 status=Disposed
+id=SessionManagerRepository ts=1773158854203 status=FactoryCreate type=websocket configPath=/config/session/websocket.json
+id=SessionManagerRepository ts=1773158854243 status=FactoryCreateSucces type=websocket configPath=/config/session/websocket.json
+id=WebSocketSessionManager ts=1773158856290 status=ManagerReadyToConnect
+id=WebSocketSessionManager ts=1773158856291 status=ManagerConnectionStart
+id=WebSocketSessionManager ts=1773158856338 status=WSMessageReceive type=FullyConnected
+id=WebSocketSessionManager ts=1773158856343 status=ManagerConnectionSuccess
+id=CodecModeRepository ts=1773158856442 status=FactoryCreate type=mdc
+id=CodecModeRepository ts=1773158856443 status=FactoryCreateSucces type=mdc
+id=MDCCodecMode ts=1773158856451 status=GatheringTrackInfo samplingPercantages=[60|25|15] maxCompletePointCount=1000000
+id=MDCCodecMode ts=1773158856452 status=NewTrackDiscovered trackID=mdc_0_0 supportedCodecs=[draco] samplingPercentage=60
+id=MDCCodecMode ts=1773158856452 status=NewTrackDiscovered trackID=mdc_0_1 supportedCodecs=[draco] samplingPercentage=25
+id=MDCCodecMode ts=1773158856452 status=NewTrackDiscovered trackID=mdc_0_2 supportedCodecs=[draco] samplingPercentage=15
+id=WebSocketSessionManager ts=1773158856454 status=ManagerSessionCreating sessionName=Loopback_Session
+id=WebSocketSessionManager ts=1773158856473 status=WSMessageReceive type=SessionJoined
+id=WebSocketSessionManager ts=1773158856484 status=ManagerSessionJoined
+id=LocalConnectedClient ts=1773158856485 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_1 provider=sfu_mdc
+id=LocalConnectedClient ts=1773158856486 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_0 provider=sfu_mdc
+id=LocalConnectedClient ts=1773158856486 status=ClientAddVideoTrack clientID=0 trackID=cl0_mdc_0_2 provider=sfu_mdc
+id=WebSocketSessionManager ts=1773158856490 status=WSMessageReceive type=ClientAddedToProvider
+id=WebSocketSessionManager ts=1773158856496 status=ManagerProviderRequested type=webrtc_sfu provider=sfu_mdc
+id=ConnectionProviderRepository ts=1773158856548 status=FactoryCreate type=webrtc_sfu key=sfu_mdc ip=127.0.0.1 port=8029
+id=PlayerControllerRandomRotate ts=1773158856553 status=Initializing clientID=0
+id=ExternalWebRTCProvider ts=1773158856555 status=Creating portSelf=9000 portRemote=9001
+id=MultiCaptureSetup ts=1773158856556 status=Creating fps=15 frameMode=RealData nCaptures=1 startCaptureThread=True
+id=MultiCaptureSetup ts=1773158856557 status=Created
+id=MDCEncodingQueue ts=1773158856557 status=Creating
+id=MDCEncodingQueue ts=1773158856558 status=Created
+id=ExternalWebRTCProvider ts=1773158856583 status=Created
+id=ConnectionProviderRepository ts=1773158856583 status=FactoryCreateSucces type=webrtc_sfu  key=sfu_mdc
+id=ExternalWebRTCProvider ts=1773158856584 status=ProviderConnectionStart mode=async
+id=ExternalWebRTCProvider ts=1773158856586 status=ProviderConnectionStart
+id=LocalConnectedClient ts=1773158856587 status=ClientSettingTrackStatus clientID=0 nTracks=3 status=Started
+id=LocalConnectedClient ts=1773158856587 status=ClientTrackStatusSet clientID=0 nTracks=3 status=Started
+id=PipelineLocalPointcloudMDC ts=1773158856630 status=EndEncodingPC clientID=0 ts_frame=1773158856557 capturer_id=0 frameNr=0 descriptionNr=1 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1773158856630 status=EndEncodingPC clientID=0 ts_frame=1773158856557 capturer_id=0 frameNr=0 descriptionNr=2 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1773158856631 status=EndEncodingPC clientID=0 ts_frame=1773158856557 capturer_id=0 frameNr=0 descriptionNr=0 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1773158856633 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1773158856633 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=0
+id=PipelineLocalPointcloudMDC ts=1773158856633 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1773158863280 status=EndEncodingPC clientID=0 ts_frame=1773158863211 capturer_id=0 frameNr=100 descriptionNr=2 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1773158863280 status=EndEncodingPC clientID=0 ts_frame=1773158863211 capturer_id=0 frameNr=100 descriptionNr=1 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1773158863282 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=100 descriptionID=1
+id=PipelineLocalPointcloudMDC ts=1773158863282 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=100 descriptionID=2
+id=PipelineLocalPointcloudMDC ts=1773158863282 status=EndEncodingPC clientID=0 ts_frame=1773158863211 capturer_id=0 frameNr=100 descriptionNr=0 codecType=0 totalNumberOfPoints=15625
+id=PipelineLocalPointcloudMDC ts=1773158863283 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=100 descriptionID=0
+id=WebSocketSessionManager ts=1773158866535 status=ManagerDisconnecting
+id=ExternalWebRTCProvider ts=1773158866536 status=Disposing
+id=ExternalWebRTCProvider ts=1773158866538 status=Disposed
+id=WebSocketSessionManager ts=1773158866538 status=ManagerDisconnected
+id=PipelineLocalPointcloudMDC ts=1773158866541 status=Destroying clientID=0
+id=PipelineLocalPointcloudMDC ts=1773158866541 status=Destroyed clientID=0
+id=MultiCaptureSetup ts=1773158866736 status=Disposing
+id=MultiCaptureSetup ts=1773158866738 status=Disposed

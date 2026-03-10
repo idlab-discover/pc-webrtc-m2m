@@ -48,7 +48,7 @@ func NewRemoteProviderProvisioner(configPath string) *RemoteProviderProvisioner 
 	return p
 }
 
-func (p *RemoteProviderProvisioner) CreateProvider(providerType string, managerIP string, pConn *ProviderConnection, extraCmdArgs string) {
+func (p *RemoteProviderProvisioner) CreateProvider(providerType string, managerIP string, pConn *ProviderConnection, extraCmdArgs string, metricsConfigPath string) {
 	p.mut.Lock()
 	defer p.mut.Unlock()
 	requestBody := map[string]interface{}{

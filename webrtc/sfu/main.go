@@ -148,8 +148,8 @@ func main() {
 	}
 	logger.LogInit(*providerKey, *providerKey, logger.LogBlue, 10, *subDir, *enableConsoleOutput)
 	logger.LogWithMessage(*providerKey, logger.Creating, true, true,
-		fmt.Sprintf("managerIP=%s address=%s port=%d authKey=%s",
-			*managerIP, *address, *port, *authKey))
+		fmt.Sprintf("managerIP=%s address=%s port=%d authKey=%s metricsConfig=%s",
+			*managerIP, *address, *port, *authKey, *metricsServerConfig))
 	settingEngine := webrtc.SettingEngine{}
 	settingEngine.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
 
@@ -159,9 +159,8 @@ func main() {
 	undesireableTracks = map[int][]string{}
 
 	sfu := NewSFU(*address, *port, *ipFilter, *providerKey, *metricsServerConfig)
-	go sfu.MetricsHelper.MetricsServer.StartListening(8000)
-	sfu.MetricsHelper.MetricsServer.ListenForSigClose()
-	return
+	//go sfu.MetricsHelper.MetricsServer.StartListening(8000)
+
 	// ------
 	sm, err := NewSessionManagerConnection(*managerIP, *providerKey, *authKey, sfu)
 	if err != nil {
@@ -199,8 +198,11 @@ func main() {
 			logger.LogWithMessage("SystemResources", logger.SystemResources, true, true, fmt.Sprintf("ts=%d cpuUsage=%d memUsage=%d cpuTemp=%d", time.Now().UnixMilli(), cpuUsageVal, memUsageVal, avgTempVal))
 		}
 	}()
-
-	select {}
+	if sfu.MetricsHelper != nil {
+		sfu.MetricsHelper.MetricsServer.ListenForSigClose()
+	} else {
+		select {}
+	}
 
 	//ticker := time.NewTicker(1 * time.Second)
 	//quit := make(chan struct{})

@@ -2,6 +2,8 @@ package core
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -140,13 +142,7 @@ func (s *MetricsServer) handleConnect(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "No producerType provided", http.StatusBadRequest)
 		return
 	}
-	newProducer := NewMetricProducerConnection(s, s.producerCounter, producerType, s.readerConnectionType, s.readerFactory)
-	s.producers[s.producerCounter] = newProducer
-	s.producerCounter++
-	if _, ok := s.producersPerType[producerType]; !ok {
-		s.producersPerType[producerType] = make(map[uint32]*MetricProducerConnection)
-	}
-	s.producersPerType[producerType][newProducer.Id] = newProducer
+	newProducer := s.addProducer(producerType, s.readerConnectionType, s.readerFactory)
 	// TODO: This should return metricCounter + connection address of the reader
 	w.Header().Set("Content-Type", "application/json")
 	response := MetricServerConnectionResponse{
@@ -202,6 +198,27 @@ func (s *MetricsServer) addMetricDefinition(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "No producer found for given MetricClientId", http.StatusBadRequest)
 		return
 	}
+	metricId := s.addMetricDefinitionInternal(producer, req, isComposite)
+	w.Header().Set("Content-Type", "application/json")
+	response := AddMetricResponse{
+		MetricId: metricId,
+	}
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		http.Error(w, "Failed to marshal response", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *MetricsServer) AddMetricDefinitionLocal(producer *MetricProducerConnection, metricName string, header []byte, isComposite bool) uint32 {
+	return s.addMetricDefinitionInternal(producer, AddMetricRequest{
+		MetricClientId: producer.Id,
+		MetricName:     metricName,
+		Header:         header,
+	}, isComposite)
+}
+
+func (s *MetricsServer) addMetricDefinitionInternal(producer *MetricProducerConnection, req AddMetricRequest, isComposite bool) uint32 {
 	var definition *MetricDefinition
 	definitionId, ok := s.definitionStringToId[req.MetricName]
 	if ok {
@@ -210,22 +227,14 @@ func (s *MetricsServer) addMetricDefinition(w http.ResponseWriter, r *http.Reque
 		definitionId = s.metricCounter
 		s.definitionStringToId[req.MetricName] = definitionId
 		s.metricCounter++
-		definition = NewMetricDefinition(definitionId, req.MetricName, 5, isComposite, req.Header) // TODO: MaxValues should be provided by the client
+		definition = NewMetricDefinition(definitionId, req.MetricName, 5, isComposite, req.Header, true, true) // TODO: MaxValues should be provided by the client
 		s.definitions[definitionId] = definition
 		s.producersForMetric[definition.MetricId] = make(map[uint32]*MetricProducerConnection)
 		s.writeHeaderToFile(req.MetricName, definition.MetricId, req.Header)
 	}
 	producer.AddMetric(definition.MetricId, definition)
 	s.producersForMetric[definition.MetricId][producer.Id] = producer
-	w.Header().Set("Content-Type", "application/json")
-	response := AddMetricResponse{
-		MetricId: definition.MetricId,
-	}
-	err = json.NewEncoder(w).Encode(response)
-	if err != nil {
-		http.Error(w, "Failed to marshal response", http.StatusInternalServerError)
-		return
-	}
+	return definition.MetricId
 }
 
 func (s *MetricsServer) handleAddGenericMetric(w http.ResponseWriter, r *http.Request) {
@@ -240,9 +249,43 @@ func (s *MetricsServer) handleAddCompositeMetric(w http.ResponseWriter, r *http.
 	s.addMetricDefinition(w, r, true)
 }
 
+func (s *MetricsServer) addProducer(producerType string, readerType string, readerFactory *readers.MetricReaderFactory) *MetricProducerConnection {
+	newProducer := NewMetricProducerConnection(s, s.producerCounter, producerType, readerType, readerFactory)
+	s.producers[s.producerCounter] = newProducer
+	s.producerCounter++
+	if _, ok := s.producersPerType[producerType]; !ok {
+		s.producersPerType[producerType] = make(map[uint32]*MetricProducerConnection)
+	}
+	s.producersPerType[producerType][newProducer.Id] = newProducer
+	return newProducer
+}
+
+// -------------------- Local functions -------------------
+func (s *MetricsServer) AddLocalProducer(producerType string) *MetricProducerConnection {
+	s.mut.Lock()
+	defer s.mut.Unlock()
+	return s.addProducer(producerType, "", nil) // We can just add measurements with the producer ptr
+}
+
+func (s *MetricsServer) AddLocalMetric(producer *MetricProducerConnection, metricName string, header []byte, isComposite bool) uint32 {
+	s.mut.Lock()
+	defer s.mut.Unlock()
+	// var definition *MetricDefinition
+	// definitionId, ok := s.definitionStringToId[metricName]
+	return s.metricCounter // TODO: Handle case where metric with the same name already exists, maybe we can just return the existing definition and let producer add to it?
+}
+
 func (s *MetricsServer) writeHeaderToFile(metricName string, metricId uint32, header []byte) {
 	if s.saveToFile {
-		fullHeader := append([]byte(fmt.Sprintf("%d%s%d", len(metricName), metricName, metricId)), header...)
+		buf := new(bytes.Buffer)
+
+		binary.Write(buf, binary.LittleEndian, uint32(len(metricName)))
+		buf.WriteString(metricName)
+		binary.Write(buf, binary.LittleEndian, uint32(metricId))
+		binary.Write(buf, binary.LittleEndian, uint32(len(header)))
+		buf.Write(header)
+
+		fullHeader := buf.Bytes()
 		n, err := s.headerWriter.Write(fullHeader)
 		if err != nil {
 			log.Printf("Failed to write data: %v", err)

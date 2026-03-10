@@ -20,6 +20,10 @@ class RootConfig:
     provisionerType: str = ""
     provisionerConfigPath: str = ""
     providersToCreate: List[ProviderConfig] = field(default_factory=list)
+    enableMetrics: bool = False
+    metricsServerAddress: str = ""
+    providerAsMetricsServer: str = ""
+    metricsConfigPath: str = ""
 
 
 def load_json(path: Path) -> Dict[str, Any]:
@@ -52,6 +56,14 @@ def parse_root(d: Dict[str, Any]) -> RootConfig:
                 connectedTo=p.get("connectedTo") or [],
             )
         )
+    if "enableMetrics" in d:
+        rc.enableMetrics = bool(d.get("enableMetrics"))
+    if "metricsServerAddress" in d:
+        rc.metricsServerAddress = d.get("metricsServerAddress") or rc.metricsServerAddress
+    if "providerAsMetricsServer" in d:
+        rc.providerAsMetricsServer = d.get("providerAsMetricsServer") or rc.providerAsMetricsServer
+    if "metricsConfigPath" in d:
+        rc.metricsConfigPath = d.get("metricsConfigPath") or rc.metricsConfigPath
 
     return rc
 
@@ -65,6 +77,9 @@ def validate_config(cfg: RootConfig) -> List[str]:
             errs.append(f"providersToCreate[{i}].type is required")
         if not p.key:
             errs.append(f"providersToCreate[{i}].key is required")
+    if cfg.enableMetrics:
+        if not cfg.metricsConfigPath:
+            errs.append("metricsConfigPath is required when enableMetrics is true")
     return errs
 
 
@@ -79,3 +94,7 @@ def print_summary(cfg: RootConfig) -> None:
     print(f"  Providers to Create ({len(cfg.providersToCreate)}):")
     for i, p in enumerate(cfg.providersToCreate):
         print(f"    [{i}] Type: {p.type}, Key: {p.key}, Connected To: {p.connectedTo}")
+    print(f"  Enable Metrics: {cfg.enableMetrics}")
+    print(f"  Metrics Server Address: {cfg.metricsServerAddress}")
+    print(f"  Provider as Metrics Server: {cfg.providerAsMetricsServer}")
+    print(f"  Metrics Config Path: {cfg.metricsConfigPath}")

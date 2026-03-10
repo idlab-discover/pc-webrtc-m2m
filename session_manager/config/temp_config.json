@@ -11,5 +11,9 @@
       "key": "sfu_mdc",
       "connectedTo": []
     }
-  ]
+  ],
+  "enableMetrics": true,
+  "metricsServerAddress": "",
+  "providerAsMetricsServer": "sfu_mdc",
+  "metricsConfigPath": "/home/matthias/Documents/pc-webrtc-m2m/metrics/config/metrics_server_config.json"
 }

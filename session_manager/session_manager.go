@@ -32,7 +32,11 @@ type SessionManagerConfig struct {
 	ProvisionerConfigPath     string                       `json:"provisionerConfigPath"`
 	ProvidersToCreate         []SessionManagerProviderPair `json:"providersToCreate"`
 
-	IgnorePreferredClientID bool `json:"ignorePreferredClientID"`
+	IgnorePreferredClientID bool   `json:"ignorePreferredClientID"`
+	EnableMetrics           bool   `json:"enableMetrics"`
+	MetricsServerAddress    string `json:"metricsServerAddress"`
+	ProviderAsMetricsServer string `json:"providerAsMetricsServer"` // If set, the provider with the given key will be used as metrics server, otherwise a separate connection will be created to the MetricsServerAddress
+	MetricsConfigPath       string `json:"metricsConfigPath"`
 }
 
 type SessionManagerProviderPair struct {
@@ -111,7 +115,7 @@ func (sm *SessionManager) CreateProvider(providerType string, providerKey string
 	}
 	sm.mut.Unlock()
 	LogWithMessage(NameManager, MutUnlock, true, true, "func=CreateProvider")
-	sm.provisioner.CreateProvider(providerType, sm.config.Address, pc, config.ExtraCmdArgs)
+	sm.provisioner.CreateProvider(providerType, sm.config.Address, pc, config.ExtraCmdArgs, sm.config.MetricsConfigPath)
 	return pc
 }
 
@@ -424,4 +428,18 @@ func (sm *SessionManager) OnClientClose(cl *ClientConnection) {
 	defer LogWithMessage(NameManager, MutUnlock, true, true, "e=sm func=OnClientClose")
 	// TODO
 	// Make sure to keep client connection semi-alive so he can reconnect
+}
+
+func (sm *SessionManager) GetMetricsServerAddress() string {
+	if sm.config.EnableMetrics == false {
+		return ""
+	}
+	metricsAddress := sm.config.MetricsServerAddress
+	if sm.config.ProviderAsMetricsServer != "" {
+		provider, exists := sm.providers[sm.config.ProviderAsMetricsServer]
+		if exists {
+			metricsAddress = fmt.Sprintf("%s:%d", provider.Address, provider.Port)
+		}
+	}
+	return metricsAddress
 }

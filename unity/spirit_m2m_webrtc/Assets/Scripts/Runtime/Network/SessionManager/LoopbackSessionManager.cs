@@ -103,7 +103,7 @@ public class LoopbackSessionManager : SessionManagerBase
     {
         throw new NotImplementedException();
     }
-    private void parseSessionJoined(LocalConnectedClient client, string json)
+    private void parseSessionJoined(LocalConnectedClient client, bool useMetrics, string metricsServerAddress, string json)
     {
         // Debug.Log(json);
         //SessionConnectionMessage message = SessionConnectionMessage.CreateFromJSON(json);

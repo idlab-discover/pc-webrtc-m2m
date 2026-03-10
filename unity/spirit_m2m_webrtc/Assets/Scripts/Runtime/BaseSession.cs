@@ -39,6 +39,8 @@ public class BaseSession : MonoBehaviour
     public PrefabFactory PipelineLocalPrefabFactory;
     public PrefabFactory PipelineRemotePrefabFactory;
 
+    // -----------------Temp----------------
+
     // ################# Private Variables ###############
     private readonly object _lock = new();
     private readonly ConcurrentQueue<Action> mainThreadActions = new();
@@ -179,7 +181,7 @@ public class BaseSession : MonoBehaviour
             Debug.LogException(ex);
         }
     }
-    private void connectedToSessionCallback(LocalConnectedClient client, string additionalSessionInfo)
+    private void connectedToSessionCallback(LocalConnectedClient client, bool useMetrics, string metricsServerAddress,string additionalSessionInfo)
     {
         // Potentially change trackInfo in selfProviderManager
         // Loop over tracks in client and print info
@@ -195,6 +197,13 @@ public class BaseSession : MonoBehaviour
         }
         mainThreadActions.Enqueue(() =>
         {
+            if(useMetrics)
+            {
+                MetricController ms = gameObject.AddComponent<MetricController>();
+                ms.UseLocalConnection = string.IsNullOrEmpty(metricsServerAddress);
+                ms.RemoteAddress = metricsServerAddress;
+                ms.Init();
+            }
             PipelineLocalPrefabFactory.registeredPrefabs.TryGetValue(client.CodecMode, out var prefab);
             if (prefab == null) 
             {

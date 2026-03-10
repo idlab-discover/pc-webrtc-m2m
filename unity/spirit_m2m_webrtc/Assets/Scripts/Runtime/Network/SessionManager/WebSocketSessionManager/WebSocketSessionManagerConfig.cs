@@ -13,6 +13,7 @@ public class WebSocketSessionManagerConfig
     public bool startNewManager = false;
     public string managerProvisionerIP = "";
     public string managerProvisionerConfigPath = "";
+    
     public static WebSocketSessionManagerConfig CreateFromJSON(string path)
     {
         return JsonConvert.DeserializeObject<WebSocketSessionManagerConfig>(File.ReadAllText(path));

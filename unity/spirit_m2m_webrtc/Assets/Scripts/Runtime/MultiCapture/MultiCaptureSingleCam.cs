@@ -48,7 +48,7 @@ public class MultiCaptureSingleCam : BaseCapture, ICapturePoll
         {
             return IntPtr.Zero;
         }
-        return Realsense2Invoker.poll_next_frame_for_capturer(multiCamPtr, capturerIndex);
+        return Realsense2Invoker.poll_next_point_cloud_for_capturer(multiCamPtr, capturerIndex);
     }
 
     public IntPtr PollNextFrame()

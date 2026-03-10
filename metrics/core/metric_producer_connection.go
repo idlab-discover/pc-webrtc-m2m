@@ -23,10 +23,12 @@ func NewMetricProducerConnection(server *MetricsServer, id uint32, producerType 
 		Server:       server,
 		Id:           id,
 		ProducerType: producerType,
-		reader:       factory.CreateNewMetricReader(readerConnectionType, id),
 		Metrics:      make(map[uint32]*MetricValueCollection),
 	}
-	pc.reader.SetOnDataReceived(pc.OnDataReceived)
+	if readerConnectionType != "" && factory != nil {
+		pc.reader = factory.CreateNewMetricReader(readerConnectionType, id)
+		pc.reader.SetOnDataReceived(pc.OnDataReceived)
+	}
 	logger.LogWithMessage(NameMetricProducerConnection, logger.Created, true, true, fmt.Sprintf("metricClientId=%d", id))
 	return pc
 }

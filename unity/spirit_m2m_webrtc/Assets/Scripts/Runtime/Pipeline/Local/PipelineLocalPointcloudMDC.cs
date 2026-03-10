@@ -15,11 +15,12 @@ public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
 
     protected override FrameMode FrameMode => FrameMode.RealData;
 
-    
+    // Metrics
+    private CompositeMetricDefinition<CompMDCEncodingDone> mdcEncodingDoneMetric;
 
     public override void Init(SessionInfo sessionInfo, LocalConnectedClient localClient)
     {   
-
+        mdcEncodingDoneMetric = MetricController.MetricServerConnection.RegisterCompositePushMetric<CompMDCEncodingDone>("MDCEncodingDone");
         sessionInfo.frameMode = FrameMode.RealData; // TODO fix this in the future
         base.Init(sessionInfo, localClient);
         encodingQueue = new MDCEncodingQueue(sessionInfo);
@@ -30,10 +31,13 @@ public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
     protected override void pollFramesInternal()
     {
         IntPtr frame = capture.PollNextPointCloud();
+
         if (frame != IntPtr.Zero)
         {
+            // TODO Maybe add metrics from here as well, like number of points, timestamp, etc.
            // uint nPoints = Realsense2Invoker.get_point_cloud_size(frame);
             //Debug.Log($"Number of points: {nPoints}");
+            //Debug.Log($"Got point cloud frame from capture, ts: {DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             encodingQueue.EncodePointCloud(frame);
         } 
         else
@@ -51,6 +55,16 @@ public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
         if (keepWorking)
         {
             Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.EndEncodingPC, LocalClient.ClientID, desc.Header.FrameNr, desc.Header.ToString());
+            mdcEncodingDoneMetric?.AddCapturedValue(new CompMDCEncodingDone
+            {
+                capturingTimestamp = (long)desc.Header.Timestamp,
+                encodingDoneTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                capturerID = LocalClient.ClientID,
+                frameNr = desc.Header.FrameNr,
+                descriptionID = desc.Header.DescriptionNr,
+                dataBufferSize = (uint)desc.Bytes.Length,
+                totalNumberOfPoints = desc.Header.TotalNumberOfPoints
+            });
             int nSend = 0;
             if (desc.Header.FrameNr % 100 == 0)
             {

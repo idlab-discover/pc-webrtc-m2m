@@ -625,6 +625,7 @@ func (s *SFUConnection) addTrackToPeerConnection(track webrtc.TrackLocal) {
 
 func (s *SFUConnection) onClose() {
 	// TODO
+	os.Exit(0)
 }
 
 // TODO ADD THIS FOR EACH TRACK FOR FEEDBACK ------------------------------------------------

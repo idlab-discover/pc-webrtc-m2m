@@ -320,7 +320,7 @@ public abstract class SessionManagerBase
     public delegate void ReadyToConnectCallback();
     public delegate void ConnectionToSessionManagerCallback();
     public delegate void SessionCreatedCallback();
-    public delegate void ConnectedToSessionCallback(LocalConnectedClient client, string sessionInfo);
+    public delegate void ConnectedToSessionCallback(LocalConnectedClient client, bool useMetrics, string metricsServerAddress,string sessionInfo);
     public delegate void DisconnectedFromSessionCallback();
     public delegate void NewClientConnectedCallback(RemoteConnectedClient client, string clientSettings);
     public delegate void ClientDisconnectedCallback(RemoteConnectedClient client);
@@ -483,7 +483,7 @@ public abstract class SessionManagerBase
             }
         }
 
-        OnConnectedToSession?.Invoke(LocalClient, sessionInfo);
+        OnConnectedToSession?.Invoke(LocalClient, connectionMessage.useMetrics, connectionMessage.metricsServerAddress, sessionInfo);
         foreach (var c in connectionMessage.clients)
         {
             onNewClientConnected(c); // TODO probably change this to JObject

@@ -66,7 +66,7 @@ func NewLocalProviderProvisioner(configPath string) *LocalProviderProvisioner {
 	return p
 }
 
-func (p *LocalProviderProvisioner) CreateProvider(providerType string, managerIP string, pConn *ProviderConnection, extraCmdArgs string) {
+func (p *LocalProviderProvisioner) CreateProvider(providerType string, managerIP string, pConn *ProviderConnection, extraCmdArgs string, metricsConfigPath string) {
 	p.mut.Lock()
 	defer p.mut.Unlock()
 	pConn.Address = "127.0.0.1"
@@ -93,6 +93,7 @@ func (p *LocalProviderProvisioner) CreateProvider(providerType string, managerIP
 		"--address", pConn.Address,
 		"--providerKey", pConn.ProviderKey,
 		"--port", portStr,
+		"--metricsConfig", metricsConfigPath,
 	}
 	if pConn.AuthKey != "" {
 		args = append(args, "--authKey", pConn.AuthKey)

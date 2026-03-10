@@ -107,6 +107,6 @@ func _log(msg string, writeToConsole, writeToFile bool) {
 		}
 	}
 	if fileEnabled && writeToFile {
-		(*logFile).WriteString(msg)
+		//	(*logFile).WriteString(msg)
 	}
 }

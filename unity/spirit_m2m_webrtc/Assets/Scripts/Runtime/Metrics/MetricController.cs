@@ -14,28 +14,30 @@ struct CompositeMetricTestStruct
 public class MetricController : MonoBehaviour
 {
     public bool UseLocalConnection = true;
+    public string RemoteAddress = "";
     private float currentTime = 0f;
     private float timeInterval = 1f; // Time interval in seconds for updating metrics
     //private Dictionary<string, GenericMetricDefinition> metricDefinitions = new();
-    private MetricServerConnectionBase metricServerConnection;
+    public static MetricServerConnectionBase MetricServerConnection; // TODO Probably need to change this or something
     private GenericMetricDefinition<int> testMetricDefinition;
     private CompositeMetricDefinition<CompositeMetricTestStruct> compositeMetricDefinition;
-    void Start()
+    public void Init()
     {
         ByteConverterInit.Init();
         if (UseLocalConnection)
         {
-            metricServerConnection = new MetricServerConnectionLocal();
+            MetricServerConnection = new MetricServerConnectionLocal();
         }
         else
         {
-            metricServerConnection = new MetricServerConnectionRemote("127.0.0.1:6080");
+            MetricServerConnection = new MetricServerConnectionRemote(RemoteAddress);
         }
-        metricServerConnection.Init(true);
-        metricServerConnection.RegisterPullMetric<int>("TestMetric", GetTestMetric);
-        testMetricDefinition = metricServerConnection.RegisterPushMetric<int>("TestMetric2");
-        compositeMetricDefinition = metricServerConnection.RegisterCompositePushMetric<CompositeMetricTestStruct>("CompositeTestMetric");
+        MetricServerConnection.Init(true);
+        MetricServerConnection.RegisterPullMetric<int>("TestMetric", GetTestMetric);
+        testMetricDefinition = MetricServerConnection.RegisterPushMetric<int>("TestMetric2");
+        compositeMetricDefinition = MetricServerConnection.RegisterCompositePushMetric<CompositeMetricTestStruct>("CompositeTestMetric");
     }
+
 
     // Update is called once per frame
     void Update()
@@ -51,7 +53,7 @@ public class MetricController : MonoBehaviour
                 IntValue = UnityEngine.Random.Range(0, 100),
                 UIntValue = (uint)UnityEngine.Random.Range(0, 100)
             });
-            metricServerConnection.UpdateMetrics();
+            MetricServerConnection.UpdateMetrics();
             currentTime -= timeInterval;
         }
     }

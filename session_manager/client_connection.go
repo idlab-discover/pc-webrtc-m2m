@@ -194,9 +194,11 @@ func (clc *ClientConnection) startListening() {
 }
 
 type SessionJoinedMessage struct {
-	DefaultProvider string                      `json:"defaultProvider"`
-	CodecMode       string                      `json:"codecMode"`
-	Providers       []ConnectionProviderMessage `json:"providers"`
+	DefaultProvider      string                      `json:"defaultProvider"`
+	CodecMode            string                      `json:"codecMode"`
+	Providers            []ConnectionProviderMessage `json:"providers"`
+	UseMetrics           bool                        `json:"useMetrics"`
+	MetricsServerAddress string                      `json:"metricsServerAddress"`
 	// TODO Add clients to this
 }
 
@@ -234,9 +236,11 @@ func (clc *ClientConnection) handleJoinMessage(payload json.RawMessage) {
 	}
 
 	clientMsg := SessionJoinedMessage{
-		DefaultProvider: "",
-		CodecMode:       msg.CodecMode,  // TODO Validate codec mode based on tracks
-		Providers:       validProviders, // TODO Filter this out
+		DefaultProvider:      "",
+		CodecMode:            msg.CodecMode,  // TODO Validate codec mode based on tracks
+		Providers:            validProviders, // TODO Filter this out
+		MetricsServerAddress: clc.parent.GetMetricsServerAddress(),
+		UseMetrics:           clc.parent.config.EnableMetrics,
 	}
 	clc.websocket.WriteJSONMessageSafe("SessionJoined", clientMsg)
 	// Add remote clients to new client
