@@ -9,7 +9,7 @@ using UnityEngine;
 public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
 {
     protected override string NAME => "PipelineLocalPointcloudMDC";
-    private MDCEncodingQueue encodingQueue; // TODO move this to video caputre
+    private MDCEncodingQueue encodingQueue; // TODO move this to video capture
     // TODO Add audio capture 
     private readonly object _lock = new();
 

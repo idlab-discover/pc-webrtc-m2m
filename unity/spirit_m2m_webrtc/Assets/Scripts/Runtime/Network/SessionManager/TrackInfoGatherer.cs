@@ -17,14 +17,17 @@ public static class TrackInfoGatherer
         foreach (var m in sessionInfo.supportedModes)
         {
             CodecModeBase cm = CodecModeRepository.GetAndCreateIfNotExists(m.modeName);
-            foreach(var c in cm.CollectTrackInfo(sessionInfo, m))
+            if(cm != null)
             {
-                if (tracks.ContainsKey(c.Key))
+                foreach(var c in cm.CollectTrackInfo(sessionInfo, m))
                 {
-                    Debug.LogWarning($"Track {c.Key} already exists, skipping");
-                    continue;
+                    if (tracks.ContainsKey(c.Key))
+                    {
+                        Debug.LogWarning($"Track {c.Key} already exists, skipping");
+                        continue;
+                    }
+                    tracks.Add(c.Key, c.Value);
                 }
-                tracks.Add(c.Key, c.Value);
             }
         }
         return tracks;

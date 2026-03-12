@@ -16,7 +16,9 @@ public abstract class PipelineLocalBase : MonoBehaviour
             // transform.SetParent(temp.transform); // TODO Maybe use this or maybe not. Need to make sure that we can also move self renderer when we move in the world
             playerControllerBase = temp?.GetComponent<PlayerControllerBase>();
             playerControllerBase.Init(LocalClient);
-            //temp.transform.SetParent(this.transform);
+            temp.transform.SetParent(this.transform); // For now this is fine but we need to check if this will also be fine when there will be movement. With movement maybe inverting the parenting might be better
+            temp.transform.localPosition = Vector3.zero;
+            temp.transform.localRotation = Quaternion.identity;
             if(sessionInfo.recordPosition)
             {
                 PositionRecorder rec = gameObject.AddComponent<PositionRecorder>();

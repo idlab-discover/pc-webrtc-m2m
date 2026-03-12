@@ -32,7 +32,7 @@ public class BaseSession : MonoBehaviour
     private SessionManagerBase sessionManager;
 
     // ################## GameObjects ####################
-    public List<GameObject> StartLocations;
+    private SpawnerFixedPosition spawnerFixedPosition;
     public PCSelf PCSelfPrefab;
     public PCReceiver PCReceiverPrefab;
     public GameObject Table;
@@ -54,7 +54,7 @@ public class BaseSession : MonoBehaviour
     }
     void Start()
     {
-
+        spawnerFixedPosition = GetComponent<SpawnerFixedPosition>();
         sessionInfo = SessionInfo.CreateFromJSON(Application.dataPath + "/config/session_config.json");
         //Debug.Log("session" + sessionInfo.positionPlaybackConfig.inputFile);
         Logger.Init(sessionInfo.loggerSettings);
@@ -210,11 +210,6 @@ public class BaseSession : MonoBehaviour
                 Debug.LogError($"No prefab found for codec mode {client.CodecMode}");
                 return;
             }
-            if (prefab.GetComponent<PipelineLocalBase>() == null)
-            {
-                Debug.LogError($"Prefab for coded mode {client.CodecMode} does not have a PipelineLocalBase component.");
-                return;
-            }
             Debug.Log($"Using prefab for codec mode {client.CodecMode}");
             GameObject temp = Instantiate(prefab, Vector3.zero, Quaternion.identity);
             if (temp == null)
@@ -222,6 +217,7 @@ public class BaseSession : MonoBehaviour
                 Debug.LogError("Failed to instantiate prefab for codec mode " + client.CodecMode);
                 return;
             }
+            spawnerFixedPosition.InitPositionForClient(client.ClientID, temp);
 
             localPipeline = temp.GetComponent<PipelineLocalBase>();
             localPipeline.Init(sessionInfo, client);
@@ -285,6 +281,7 @@ public class BaseSession : MonoBehaviour
                     return;
                 }
                 PipelineRemoteBase remoteipeline = temp.GetComponent<PipelineRemoteBase>();
+                spawnerFixedPosition.InitPositionForClient(client.ClientID, temp);
                 remoteipeline.Init(sessionInfo, client);
                 remotePipelines[client.ClientID] = remoteipeline;
             }

@@ -16,5 +16,7 @@ MonoBehaviour:
     PublicKeyToken=null
   serializedKeys:
   - mdc
+  - spectator
   serializedValues:
   - {fileID: 6044640782181980240, guid: 2c6e44bd670673e4189fbe8104783a72, type: 3}
+  - {fileID: 5526626573478156162, guid: 70a084159815c9391b5a28c8e1e2b5fa, type: 3}

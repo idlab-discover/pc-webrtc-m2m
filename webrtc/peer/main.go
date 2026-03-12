@@ -64,7 +64,7 @@ func main() {
 	proxyPortThis := flag.String("r", ":0", "Port of this")
 	proxyPortDLL := flag.String("p", ":0", "Port of the DLL")
 	useProxy := flag.Bool("i", false, "Receive content from the DLL to forward over WebRTC")
-	videoTracks := flag.String("vt", "0", "Pairs of video track string ID and internal integer ID")
+	videoTracks := flag.String("vt", "", "Pairs of video track string ID and internal integer ID")
 	audioTracks := flag.String("at", "", "Pairs of audio track string ID and internal integer ID")
 	sfuProviderKey := flag.String("sfuKey", "proxy", "Key of the SFU provider to use")
 	sfuIP := flag.String("sfuIP", "", "IP address of the SFU instance, with port")

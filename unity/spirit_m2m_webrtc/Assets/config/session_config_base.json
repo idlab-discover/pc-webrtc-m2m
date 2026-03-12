@@ -21,7 +21,7 @@
     },
     "supportedModes": [
         {
-            "modeName": "spectator",
+            "modeName": "mdc",
             "supportedCodecs": [
                 "draco"
             ],

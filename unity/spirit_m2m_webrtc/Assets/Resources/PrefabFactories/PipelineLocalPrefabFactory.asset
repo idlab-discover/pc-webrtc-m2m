@@ -17,6 +17,8 @@ MonoBehaviour:
   serializedKeys:
   - mdc
   - raw
+  - spectator
   serializedValues:
   - {fileID: 8236314478808469891, guid: 51b528d372474734a898899acc70e989, type: 3}
   - {fileID: 8236314478808469891, guid: 02d72574d17be824eb5610920740029e, type: 3}
+  - {fileID: 5898168331791564960, guid: d2a439460f9abcf40841e97c6d68266e, type: 3}
