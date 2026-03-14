@@ -142,11 +142,13 @@ public abstract class MetricServerConnectionBase
         lock (_lock)
         {
             Dictionary<uint, List<GenericMetric>> allMetrics = new();
-            int bufferSize = 4; // for ClientID
+            int bufferSize = 0; 
             bool hasMetrics = false;
             foreach (var metric in metricDefinitions)
             {
                 List<GenericMetric> lst = metric.Value.RetrieveMetrics(); 
+                if (lst == null || lst.Count == 0)
+                    continue;
                 bufferSize += sizeof(uint) /*MetricID*/ + sizeof(int) /*Number of values for metric*/;
                 foreach (var m in lst)
                 {
@@ -160,10 +162,14 @@ public abstract class MetricServerConnectionBase
             // TODO Limit the max message size
             // so in case we lose 1 packet we can still be certain that all metrics in 1 packet will be received
             // Will have to make byte[] of max size and then probably span it to reduce it or something
+            uint dataSize = (uint)bufferSize;
+            bufferSize += sizeof(uint) /*ClientId*/ + sizeof(uint) /*DataSize*/;
             bytes = new byte[bufferSize];
             Span<byte> buffer = bytes.AsSpan();
             BinaryPrimitives.WriteUInt32LittleEndian(buffer, ClientId);
             int offset = 4;
+            BinaryPrimitives.WriteUInt32LittleEndian(buffer.Slice(offset), dataSize);
+            offset += sizeof(uint);
             foreach (var lst in allMetrics)
             {
                 BinaryPrimitives.WriteUInt32LittleEndian(buffer.Slice(offset), lst.Key);
@@ -172,14 +178,15 @@ public abstract class MetricServerConnectionBase
                 offset += sizeof(int);
                 foreach (var m in lst.Value)
                 {
-                    offset += m.CopyToBuffer(buffer.Slice(offset));
+                    offset += m.CopyToBuffer(buffer[offset..]);
                 }
-                Debug.Log("Offset " + offset + " / " + bufferSize);
+                //Debug.Log("Offset " + offset + " / " + bufferSize);
             }
-            foreach (var metric in metricDefinitions)
+            // They already cleared their buffers when we called RetrieveMetrics, so no need to clear them here
+            /*foreach (var metric in metricDefinitions)
             {
                 metric.Value.ClearMetrics();
-            }
+            }*/
         }
         writeMetrics(bytes);
     }

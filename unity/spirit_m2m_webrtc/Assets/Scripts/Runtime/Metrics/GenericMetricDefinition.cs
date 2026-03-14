@@ -33,7 +33,11 @@ public class GenericMetricDefinition<T> : MetricDefinitionBase
             {
                 capturedValues.Add(new GenericMetricWithValue<T>(a.Value()));
             }
-            return capturedValues;
+            var temp = capturedValues;
+            capturedValues = usingBacking0 ? capturedValuesBacking1 : capturedValuesBacking0;
+            usingBacking0 = !usingBacking0;
+            capturedValues.Clear();
+            return temp;
         }
     }
     // TODO Maybe lock

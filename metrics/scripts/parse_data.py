@@ -243,6 +243,7 @@ def decode_metric_row(row_buffer: bytes, metric: MetricDefinition) -> list[objec
 	for field in metric.fields:
 		raw_value, offset = read_bytes(row_buffer, offset, field.value_size)
 		values.append(decode_field_value(raw_value, field))
+		#print(f"Decoded field {field.name} with raw value {raw_value.hex()} into {values[-1]}")
 	return values
 
 
@@ -306,25 +307,8 @@ def parse_metric_rows(
 	metrics_by_id: dict[int, MetricDefinition],
 	data_layout: str,
 ) -> tuple[ParsedRow, ...]:
-	if data_layout == "global-client":
-		client_id, offset = read_uint32(data, 0)
-		return parse_rows_for_client(data, metrics_by_id, offset, client_id)
-	if data_layout == "per-block-client":
-		return parse_rows_per_block_client(data, metrics_by_id)
-	return parse_metric_rows_auto(data, metrics_by_id)
+	return parse_rows_per_block_client(data, metrics_by_id)
 
-
-def parse_rows_for_client(
-	data: bytes,
-	metrics_by_id: dict[int, MetricDefinition],
-	offset: int,
-	client_id: int,
-) -> tuple[ParsedRow, ...]:
-	rows: list[ParsedRow] = []
-	while offset < len(data):
-		parsed_rows, offset = parse_metric_block(data, metrics_by_id, offset, client_id)
-		rows.extend(parsed_rows)
-	return tuple(rows)
 
 
 def parse_rows_per_block_client(data: bytes, metrics_by_id: dict[int, MetricDefinition]) -> tuple[ParsedRow, ...]:
@@ -332,32 +316,14 @@ def parse_rows_per_block_client(data: bytes, metrics_by_id: dict[int, MetricDefi
 	offset = 0
 	while offset < len(data):
 		client_id, offset = read_uint32(data, offset)
-		parsed_rows, offset = parse_metric_block(data, metrics_by_id, offset, client_id)
-		rows.extend(parsed_rows)
+		data_size, offset = read_uint32(data, offset)
+		current_size = 0
+		while current_size < data_size:
+			previous_offset = offset
+			parsed_rows, offset = parse_metric_block(data, metrics_by_id, offset, client_id)
+			current_size += offset-previous_offset
+			rows.extend(parsed_rows)
 	return tuple(rows)
-
-
-def parse_metric_rows_auto(data: bytes, metrics_by_id: dict[int, MetricDefinition]) -> tuple[ParsedRow, ...]:
-	@lru_cache(maxsize=None)
-	def parse_from(offset: int, current_client_id: int | None) -> tuple[ParsedRow, ...]:
-		if offset == len(data):
-			return tuple()
-
-		if current_client_id is not None:
-			try:
-				parsed_rows, next_offset = parse_metric_block(data, metrics_by_id, offset, current_client_id)
-				return parsed_rows + parse_from(next_offset, current_client_id)
-			except ParseError:
-				pass
-
-		try:
-			new_client_id, next_offset = read_uint32(data, offset)
-			parsed_rows, next_offset = parse_metric_block(data, metrics_by_id, next_offset, new_client_id)
-			return parsed_rows + parse_from(next_offset, new_client_id)
-		except ParseError as error:
-			raise ParseError(f"Unable to parse metric data at offset {offset}") from error
-
-	return parse_from(0, None)
 
 
 def parse_metric_block(
@@ -367,14 +333,17 @@ def parse_metric_block(
 	client_id: int | None,
 ) -> tuple[tuple[ParsedRow, ...], int]:
 	metric_id, offset = read_uint32(data, offset)
+	#print(f"Parsing metric block for metric ID {metrics_by_id[metric_id].name}:{metric_id} at offset {offset} (out of {len(data)})")
 	num_values, offset = read_int32(data, offset)
+	#print(f"Parsing metric block for metric ID {metrics_by_id[metric_id].name}:{metric_id} with {num_values} values at offset {offset} (out of {len(data)})")
 	if num_values < 0:
-		raise ParseError(f"Negative numValues for metricId {metric_id}")
+		raise ParseError(f"Negative numValues for metricId {metrics_by_id[metric_id].name}:{metric_id} {num_values}")
 	metric = metrics_by_id.get(metric_id)
 	if metric is None:
 		raise ParseError(f"No metric definition found for metricId {metric_id}")
 	rows: list[ParsedRow] = []
 	for _ in range(num_values):
+		#print(num_values)
 		timestamp, offset = read_uint64(data, offset)
 		row_buffer, offset = read_bytes(data, offset, metric.row_size)
 		rows.append(

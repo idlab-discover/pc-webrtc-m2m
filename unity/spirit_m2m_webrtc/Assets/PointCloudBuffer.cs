@@ -13,10 +13,11 @@ public class PointCloudBuffer : RenderablePointCloudBuffer
     private DecodedRawFrameMulti previousFrame = null; // Used to potentially repair next frames
 
     public Dictionary<UInt32, DecodedPointCloudMulti> inProgessFrames = new();
+    private Dictionary<UInt32, long> _frameFirstReceivedAt = new(); // Wall-clock ms when each frame was first buffered
 
     public ConcurrentQueue<DecodedPointCloudMulti> queue = new();
 
-
+    private uint latestCompletedFrameNr = 0;
     public uint NActiveCapturers;
 
     private Mutex mut = new Mutex();
@@ -33,6 +34,7 @@ public class PointCloudBuffer : RenderablePointCloudBuffer
                 // If the frame is not in the inProgressFrames, create a new one
                 d = new DecodedPointCloudMulti(NActiveCapturers, 0, frameNr, nPoints);
                 inProgessFrames.Add(frameNr, d);
+                _frameFirstReceivedAt[frameNr] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
             else 
             {
@@ -46,47 +48,53 @@ public class PointCloudBuffer : RenderablePointCloudBuffer
 
     public override RenderablePointCloud CheckForCompletedFrames()
     {
-
         if (!queue.IsEmpty)
         {
             bool succes = queue.TryDequeue(out DecodedPointCloudMulti dec);
             if (succes)
             {
-                if (EnqueueImmediately || (dec.TargetTimestamp >= TimestampNextDeadline))
+                lock(_lock)
                 {
-                    SetNextDeadline();
-                    return dec;
+                    if (EnqueueImmediately || (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() >= (long)TimestampNextDeadline))
+                    {
+                        SetNextDeadline();
+                        latestCompletedFrameNr = dec.FrameNr;
+                        return dec;
+                    }    
                 }
+                
             }
             return null;
         }
         
-        // TODO Rework this without lock so other threads can still add frames
         if (RenderIncompleteFrames)
         {
-            // If a frame is fully received it will already be put in the queue so check for frames beyond the deadline
-            DecodedPointCloudMulti foundFrame = null;
-            lock (_lock)
-            {
-
-                // Check if there is an incomplete frame that we can still render
-                foreach (var kvp in inProgessFrames.OrderByDescending(kvp => kvp.Key))
+  
+                // Find the oldest incomplete frame that has been held for at least MaxTimeBeforeIncompleteRender ms
+                DecodedPointCloudMulti foundFrame = null;
+                long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                lock (_lock)
                 {
-                    if ((kvp.Value.TargetTimestamp >= (TimestampNextDeadline + MaxTimeBeforeIncompleteRender)))
+                    foreach (var kvp in inProgessFrames.OrderBy(kvp => kvp.Key))
                     {
-                        foundFrame = kvp.Value;
+                        if (_frameFirstReceivedAt.TryGetValue(kvp.Key, out long receivedAt) &&
+                            (now - receivedAt) >= MaxTimeBeforeIncompleteRender)
+                        {
+                            foundFrame = kvp.Value;
+                            break; // Take the oldest eligible frame
+                        }
+                    }
+                
+                    if (foundFrame != null)
+                    {
+                        //Debug.Log($"[JitterBuffer] Rendering incomplete frame {foundFrame.FrameNr}");
+                        completeFrameInternal(foundFrame, false);
+                        SetNextDeadline();
+                        latestCompletedFrameNr = foundFrame.FrameNr;
+                        return foundFrame;
                     }
                 }
-            }
-            if (foundFrame != null)
-            {
-                Debug.Log("FOUND A FRAME");
-                CompleteFrame(foundFrame, false);
-                SetNextDeadline();
-                return foundFrame;
-            }
         }
-    
         return null;
     }
 
@@ -95,23 +103,42 @@ public class PointCloudBuffer : RenderablePointCloudBuffer
         TimestampNextDeadline += (1000 / FPS);
     }
 
-    
+    public bool ShouldDecodeFrame(uint frameNr)
+    {
+        lock (_lock)
+        {
+            if (frameNr <= latestCompletedFrameNr && latestCompletedFrameNr != 0)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
 
     public void CompleteFrame(DecodedPointCloudMulti newestFrame, bool addToQueue)
     {
         lock(_lock)
         {
-            List<uint> framesToDelete = inProgessFrames.Keys.Where(k => k <= newestFrame.FrameNr).ToList();
-            foreach (var frame in framesToDelete)
-            {
-                inProgessFrames.Remove(frame);
-            }
+            completeFrameInternal(newestFrame, addToQueue);
         }
+
+    }
+    private void completeFrameInternal(DecodedPointCloudMulti newestFrame, bool addToQueue)
+    {
+        
+
+        List<uint> framesToDelete = inProgessFrames.Keys.Where(k => k <= newestFrame.FrameNr).ToList();
+        foreach (var frame in framesToDelete)
+        {
+            inProgessFrames.Remove(frame);
+            _frameFirstReceivedAt.Remove(frame);
+        }
+        
         
         if (addToQueue)
         {
             queue.Enqueue(newestFrame);
         }
-
     }
 }
+

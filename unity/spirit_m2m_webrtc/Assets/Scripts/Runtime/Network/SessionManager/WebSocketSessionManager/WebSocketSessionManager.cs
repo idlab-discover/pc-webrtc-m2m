@@ -312,7 +312,7 @@ public class WebSocketSessionManager : SessionManagerBase
 
         // Serialize the wsMessage to JSON
         string wsMessageJson = Newtonsoft.Json.JsonConvert.SerializeObject(wsMessage);
-        Debug.Log($"Sending {messageType} message: {wsMessageJson}");
+        //Debug.Log($"Sending {messageType} message: {wsMessageJson}");
         var bytesToSend = new ArraySegment<byte>(Encoding.UTF8.GetBytes(wsMessageJson));
 
         // Send the message asynchronously

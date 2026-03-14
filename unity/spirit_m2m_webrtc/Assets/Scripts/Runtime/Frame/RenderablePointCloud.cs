@@ -43,6 +43,8 @@ public abstract class RenderablePointCloud : IDisposable
         NativeArray<Color32>.Copy(Colors, newColors, Colors.Length);
         Points.Dispose();
         Colors.Dispose();
+        Points = newPoints;
+        Colors = newColors;
         //Array.Resize(ref Points, Points.Length + (int)size);
         // Array.Resize(ref Colors, Colors.Length + (int)size);
     }

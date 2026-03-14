@@ -95,6 +95,9 @@ const (
 	MutUnlock          uint = 9995
 	InitStatus         uint = 9998
 	CriticalFail       uint = 9999
+
+	ProxyConFirstPacketRecv uint = 10000
+	ProxyConFullyRecv       uint = 10001
 )
 
 const (

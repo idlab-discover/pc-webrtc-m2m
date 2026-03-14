@@ -29,7 +29,7 @@ public class DecodedPointCloudMulti : RenderablePointCloud
     }
     public DecodedPointCloudMulti(uint nCapturers, ulong targetTimestamp, uint frameNr, uint totalPoints) : base(targetTimestamp, frameNr, totalPoints)
     {
-        Debug.Log($"NCapturers: {nCapturers}");
+//        Debug.Log($"NCapturers: {nCapturers}");
         NCapturers = nCapturers;
         ActualPoints = 0;
     }
@@ -46,6 +46,17 @@ public class DecodedPointCloudMulti : RenderablePointCloud
         {
             //Debug.Log("[MULTI] Added single from capturerID: " + single.CapturerID + " frameNr: " + single.FrameNr + " nPoints: " + single.NPoints + " with nCapturers: " + NCapturers);
             Singles[single.CapturerID] = single;
+        }
+    }
+    public DecodedPointCloudSingle GetSingle(uint capturerID)
+    {
+        lock (_lock)
+        {
+            if (Singles.TryGetValue(capturerID, out DecodedPointCloudSingle s))
+            {
+                return s;
+            }
+            return null;
         }
     }
     public void AddPoints(IntPtr posPtr, IntPtr colPtr, uint size)

@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"goweb/peer/src/utils"
+	"goweb/shared/src/logger"
 	"net"
 	"sync"
 )
@@ -106,6 +107,9 @@ func (rc *RemoteCapturer) addFrameContent(p RemoteInputPacketHeader, buffer []by
 			fileData:   make([]byte, p.FrameLen),
 		}
 		rc.incomplete_frames[p.FrameNr] = incomplete_frame
+		if p.FrameNr%10 == 0 {
+			logger.LogFrameWithMessage(NameProxyConnection, logger.ProxyConFirstPacketRecv, true, true, fmt.Sprintf("trackID=%s frameSize=%d", p.InternalTrackID, p.FrameLen), (uint)(p.FrameNr))
+		}
 	}
 	copy(incomplete_frame.fileData[p.FrameOffset:p.FrameOffset+p.PacketLen], buffer[28:28+p.PacketLen])
 	incomplete_frame.currentLen = incomplete_frame.currentLen + p.PacketLen
@@ -114,6 +118,9 @@ func (rc *RemoteCapturer) addFrameContent(p RemoteInputPacketHeader, buffer []by
 		rc.ready_status = true
 		delete(rc.incomplete_frames, p.FrameNr)
 		rc.cond.Broadcast()
+		if p.FrameNr%10 == 0 {
+			logger.LogFrameWithMessage(NameProxyConnection, logger.ProxyConFullyRecv, true, true, fmt.Sprintf("trackID=%s frameSize=%d", p.InternalTrackID, p.FrameLen), (uint)(p.FrameNr))
+		}
 	}
 }
 

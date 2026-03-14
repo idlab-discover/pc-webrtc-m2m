@@ -6,10 +6,12 @@ using UnityEngine;
 public class FactoriesTest : MonoBehaviour
 {
     public string PlayerControllerName = "simple";
+    private FoVDetectionTest fovDetectionTest;
     // Start is called before the first frame update
     PrefabFactory playerFactory;
     void Start()
     {
+        fovDetectionTest = gameObject.GetComponent<FoVDetectionTest>();
         playerFactory = LoadFactories.GetFactory<PlayerControllerBase>();
         Debug.Log("Factory loaded: " + (playerFactory != null ? "Success" : "Failed"));
         if(playerFactory != null)
@@ -20,6 +22,7 @@ public class FactoriesTest : MonoBehaviour
                 Debug.LogError("Failed");
                 return;
             }
+            fovDetectionTest?.Init(go.GetComponent<PlayerControllerBase>());
         }
 
     }

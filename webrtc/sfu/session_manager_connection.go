@@ -145,6 +145,7 @@ func (smc *SessionManagerConnection) StartListening() {
 			case "RemoveVirtualClient":
 				smc.handleVirtualClientRemoved(msg.Message)
 			case "ClientPositionMatrixUpdate":
+				smc.handleClientPositionMatrixUpdate(msg.Message)
 				// TODO handle client position matrix update
 			default:
 				// Unknown message type, ignore or log
@@ -244,7 +245,7 @@ func (smc *SessionManagerConnection) handleClientPositionMatrixUpdate(payload js
 		fmt.Printf("failed to unmarshal payload: %v\n", err)
 		return
 	}
-	fmt.Printf("Received ClientPositionMatrixUpdate: %+v\n", msg)
+	//fmt.Printf("Received ClientPositionMatrixUpdate: %+v\n", msg)
 	smc.sfu.UpdateClientPositionMatrix(msg)
 }
 

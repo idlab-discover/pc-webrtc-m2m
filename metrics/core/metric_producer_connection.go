@@ -43,7 +43,9 @@ func (p *MetricProducerConnection) OnDataReceived(buffer []byte) {
 	processedBytes := uint32(0)
 	metricClientId := *(*uint32)(unsafe.Pointer(&buffer[processedBytes]))
 	processedBytes += 4
-	println("OnDataReceived called for metricClientId", p.Id, " == ", metricClientId, len(buffer), "bytes")
+	dataSize := *(*uint32)(unsafe.Pointer(&buffer[processedBytes]))
+	processedBytes += 4
+	println("OnDataReceived called for metricClientId", p.Id, " == ", metricClientId, "dataSize", dataSize, "bytes")
 	for processedBytes < uint32(len(buffer)) {
 		metricId := *(*uint32)(unsafe.Pointer(&buffer[processedBytes]))
 		processedBytes += 4

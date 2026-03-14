@@ -68,7 +68,7 @@ public class PointCloudRenderer : MonoBehaviour
     private void setQuality(uint quality)
     {
         if(currentQuality == quality) return;
-        Debug.Log($"[PointCloudRenderer] Setting quality to {quality}");
+        //Debug.Log($"[PointCloudRenderer] Setting quality to {quality}");
         uint selectedQualityIndex = 0;
         for (uint i= 0; i < qualityBreakpoints.Count; i++)
         {
@@ -78,7 +78,7 @@ public class PointCloudRenderer : MonoBehaviour
             }
             selectedQualityIndex = i;
         }
-        Debug.Log($"[PointCloudRenderer] Selected quality index: {selectedQualityIndex}");
+        //Debug.Log($"[PointCloudRenderer] Selected quality index: {selectedQualityIndex}");
         if (currentQualityIndex == selectedQualityIndex) return;
         currentQualityIndex = selectedQualityIndex;
         for (int i = 0; i < renderers.Count; i++)

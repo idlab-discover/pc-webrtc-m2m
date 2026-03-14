@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class MDCDecodedPointCloudSingle : DecodedPointCloudSingle
 {
@@ -18,9 +19,10 @@ public class MDCDecodedPointCloudSingle : DecodedPointCloudSingle
         {
             Parent.AddPoints(desc.PointPtr, desc.ColorPtr, desc.NumberOfPoints);
             currentNDescriptions++;
+            Parent.Quality = (uint)Math.Ceiling(((float)Parent.ActualPoints / NPoints) *100); // TODO Update this for multiple singles
+            Parent.Quality = Math.Min(Parent.Quality, 100); // Just in case
             if(currentNDescriptions == nDescriptions)
             {
-                Parent.Quality = (uint)(((float)Parent.ActualPoints / NPoints) *100); // TODO Update this for multiple singles
                 IsCompleted = true;
             }
            

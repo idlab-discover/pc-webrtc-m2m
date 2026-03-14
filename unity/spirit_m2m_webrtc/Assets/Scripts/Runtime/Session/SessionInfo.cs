@@ -153,8 +153,8 @@ public class PlaybackBufferSettings
     public uint holdFramePreviousFor = 100;
     public bool usePreviousFrameData = false;
     public uint maxTimeBeforeIncompleteRender = 20;
-    public bool enqueueImmediately = true;
-    public bool renderIncompleteFrames = false;
+    public bool enqueueImmediately = false;
+    public bool renderIncompleteFrames = true;
 }
 
 [System.Serializable]

@@ -29,7 +29,11 @@ public class CompositeMetricDefinition<T> : MetricDefinitionBase where T : struc
             {
                 capturedValues.Add(new CompositeMetricWithValue<T>(a.Value()));
             }
-            return capturedValues;
+            var temp = capturedValues;
+            capturedValues = usingBacking0 ? capturedValuesBacking1 : capturedValuesBacking0;
+            usingBacking0 = !usingBacking0;
+            capturedValues.Clear();
+            return temp;
         }
     }
     // TODO Maybe lock

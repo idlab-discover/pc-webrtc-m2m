@@ -36,6 +36,10 @@ public class MetricController : MonoBehaviour
         MetricServerConnection.RegisterPullMetric<int>("TestMetric", GetTestMetric);
         testMetricDefinition = MetricServerConnection.RegisterPushMetric<int>("TestMetric2");
         compositeMetricDefinition = MetricServerConnection.RegisterCompositePushMetric<CompositeMetricTestStruct>("CompositeTestMetric");
+
+        // Add system usage component
+        gameObject.AddComponent<SystemUsage>().Init();
+
     }
 
 

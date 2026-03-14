@@ -13,6 +13,7 @@ public abstract class RenderablePointCloudPipeline : IDisposable
     {
         this.playbackBuffer = playbackBuffer;
         this.clientID = clientID;
+        
     }
 
     public abstract void OnVideoTrackAdded(NetworkStreamerBase streamer, uint capturerID, uint descriptionID, CaptureType capType, string trackInfo);

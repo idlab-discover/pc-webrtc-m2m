@@ -327,6 +327,9 @@ func (s *SFUConnection) startListening() {
 				s.handleOfferMessage(msg.Message)
 			case "CandidateMessage":
 				s.handleCandidateMessage(msg.Message)
+				// case "ActiveTrackCountUpdate"
+				// Contains frameNr and/or timestamp
+				// After timestamp/frameNr => All frames should use the active track count
 			}
 		}
 	}()

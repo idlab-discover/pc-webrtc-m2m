@@ -37,7 +37,7 @@ public class MDCCodecMode : CodecModeBase
         var settings = modeCodec.modeSettings.ToObject<MDCCodecModeSettings>();
         List<uint> rates = new(settings.samplingPercentages);
         rates = rates.OrderByDescending(n => n).ToList();
-        Logger.LogStatusWithMessage(NAME, Logger.Status.GatheringTrackInfo, $"samplingPercantages=[{string.Join('|', rates)}] maxCompletePointCount={settings.maxCompletePointCount}");
+        Logger.LogStatusWithMessage(NAME, Logger.Status.GatheringTrackInfo, $"samplingPercentages=[{string.Join('|', rates)}] maxCompletePointCount={settings.maxCompletePointCount}");
         for (int i = 0; i < rates.Count; i++)
         {
             var track = new CodecModeTrack

@@ -6,9 +6,13 @@ public abstract class PlayerControllerBase: MonoBehaviour
 {
     protected abstract string NAME { get; }
     private LocalConnectedClient localClient;
-    private float updatePositionInterval = 1.0f;
+    private float updatePositionInterval = 1.000f;
     private float currentPositionUpdateInterval = 0f;
     private bool isMovementEnabled = false;
+
+    public delegate void PlayerControllerPositionUpdatedCallback(ClientPositionUpdate newPostion);
+
+    public event PlayerControllerPositionUpdatedCallback OnPlayerControllerPositionUpdated;
     protected ClientPositionUpdate currentPositionUpdate = new ClientPositionUpdate
     {
         position = new float[3],
@@ -19,16 +23,18 @@ public abstract class PlayerControllerBase: MonoBehaviour
     // I think LateUpdate is better because this would make sure that the movement etc... was already applied
     protected virtual void LateUpdate()
     {
-        if(localClient != null)
-        {
+        
             currentPositionUpdateInterval += Time.deltaTime;
             if (currentPositionUpdateInterval >= updatePositionInterval)
             {
                 currentPositionUpdateInterval = 0f;
                 updatePositionMatrix();
-                localClient.UpdatePositionMatrix(currentPositionUpdate);
+                if(localClient != null)
+                {
+                    localClient.UpdatePositionMatrix(currentPositionUpdate);
+                }
+                OnPlayerControllerPositionUpdated?.Invoke(currentPositionUpdate);
             }
-        }
         
     }
 

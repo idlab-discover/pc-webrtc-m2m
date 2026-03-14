@@ -2,7 +2,7 @@
     "extraCmdArgs": "",
     "settings": {
         "useABR": true,
-        "adaptationMethod": "random",
+        "adaptationMethod": "mdc",
         "adaptationSettings": {
 
         },

@@ -101,7 +101,7 @@ func (c *DynamicMetricsConnection) UpdateMetrics() error {
 	if c.provider == nil {
 		return fmt.Errorf("metrics provider is nil")
 	}
-	packetSize := 4 // producer client id
+	packetSize := 0 // producer client id
 	metricData := make(map[uint32][]encodedMetricValue)
 	for _, def := range c.metricByName {
 		values, err := def.RetrieveValues()
@@ -120,9 +120,13 @@ func (c *DynamicMetricsConnection) UpdateMetrics() error {
 	if len(metricData) == 0 {
 		return nil
 	}
+	dataSize := packetSize
+	packetSize += 8 // provider client id and data size
 	buffer := make([]byte, packetSize)
 	offset := 0
 	binary.LittleEndian.PutUint32(buffer[offset:], c.provider.Id)
+	offset += 4
+	binary.LittleEndian.PutUint32(buffer[offset:], uint32(dataSize))
 	offset += 4
 	for metricID, values := range metricData {
 		binary.LittleEndian.PutUint32(buffer[offset:], metricID)
