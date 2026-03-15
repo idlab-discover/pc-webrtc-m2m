@@ -33,7 +33,8 @@ public class BenchGenerateMDC : PipelineLocalPointcloudBase
     {
         sessionInfo.frameMode = FrameMode.RealData; // TODO fix this in the future
         base.Init(sessionInfo, localClient);
-        encodingQueue = new MDCEncodingQueue(sessionInfo);
+        float[] samplingRatios = sessionInfo.supportedModes[0].modeSettings.ToObject<MDCCodecModeSettings>().samplingPercentages.ToArray();
+        encodingQueue = new MDCEncodingQueue(sessionInfo, samplingRatios);
         encodingQueue.SetDescriptionDoneCallback(OnDescriptionDoneCallback);
         pollNextFrame = true;
         startPollThread();

@@ -100,9 +100,9 @@ int initialize() {
 	initialized = true;
 }
 
-EncodingQueue* create_encoding_queue(unsigned int max_queue) {
+EncodingQueue* create_encoding_queue(unsigned int max_queue, float* layer_ratios, unsigned int number_of_layers) {
 	custom_log("create_encoding_queue: Creating encoding queue with max size " + to_string(max_queue), Default, LogColor::Orange);
-	EncodingQueue* enc_queue = new EncodingQueue(max_queue);
+	EncodingQueue* enc_queue = new EncodingQueue(max_queue, layer_ratios, number_of_layers);
 	return enc_queue;
 }
 /*

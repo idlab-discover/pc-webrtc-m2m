@@ -1,9 +1,10 @@
 {
     "generalConfig": {
+        "addTimestampDirectory": true,
         "useEnabledMetrics": true,
         "saveToFile": true,
-        "headerPath": "output/metric_headers.bin",
-        "dataPath": "output/metrics_output.bin",
+        "headerPath": "output",
+        "dataPath": "output",
         "readerConnectionType": "websocket"
     },
     "enabledMetrics": [

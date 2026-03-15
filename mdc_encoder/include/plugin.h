@@ -10,7 +10,7 @@ extern "C"
 {
 	DLLExport int initialize();
 	DLLExport void set_logging(char* log_directory, int _log_level);
-	DLLExport EncodingQueue* create_encoding_queue(unsigned int max_queue);
+	DLLExport EncodingQueue* create_encoding_queue(unsigned int max_queue, float* layer_ratios, unsigned int number_of_layers);
 	DLLExport uint32_t encode_pc(EncodingQueue* enc, PointCloud* pc);
 	DLLExport void clean_up();
 	DLLExport uint32_t get_encoded_size(DracoMDCEncoder* enc);

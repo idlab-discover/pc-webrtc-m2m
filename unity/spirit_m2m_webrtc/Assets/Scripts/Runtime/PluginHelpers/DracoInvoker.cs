@@ -20,7 +20,7 @@ public static class DracoInvoker
     [DllImport(dllName)]
     public static extern void clean_up();
     [DllImport(dllName)]
-    public static extern IntPtr create_encoding_queue(uint max_queue_size);
+    public static extern IntPtr create_encoding_queue(uint max_queue_size, IntPtr sampling_ratios, uint n_ratios);
 
     [DllImport(dllName)]
     public static extern int encode_pc(IntPtr enc, IntPtr pc);

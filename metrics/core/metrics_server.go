@@ -12,8 +12,10 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"sync"
 	"syscall"
+	"time"
 )
 
 /*
@@ -34,10 +36,11 @@ type MetricsServerConfig struct {
 }
 
 type GeneralMetricServerConfig struct {
-	SaveToFile           bool   `json:"saveToFile"`
-	HeaderFilePath       string `json:"headerPath"`
-	DataFilePath         string `json:"dataPath"`
-	ReaderConnectionType string `json:"readerConnectionType"`
+	AddTimestampDirectory bool   `json:"addTimestampDirectory"`
+	SaveToFile            bool   `json:"saveToFile"`
+	HeaderFilePath        string `json:"headerPath"`
+	DataFilePath          string `json:"dataPath"`
+	ReaderConnectionType  string `json:"readerConnectionType"`
 }
 
 // For all producers, maybe we pass producer type when connecting?
@@ -82,6 +85,23 @@ func NewMetricsServer(configPath string) *MetricsServer {
 	var headerWriter *bufio.Writer
 	var dataWriter *bufio.Writer
 	if config.GeneralConfig.SaveToFile {
+		if config.GeneralConfig.AddTimestampDirectory {
+			timestamp := time.Now().Format("2006-01-02_15-04-05")
+			config.GeneralConfig.HeaderFilePath = filepath.Join(config.GeneralConfig.HeaderFilePath, "/"+timestamp)
+			config.GeneralConfig.DataFilePath = filepath.Join(config.GeneralConfig.DataFilePath, "/"+timestamp)
+			err := os.MkdirAll(config.GeneralConfig.HeaderFilePath, os.ModePerm)
+			if err != nil {
+				fmt.Printf("Failed to create header directory: %v at %s \n", err, config.GeneralConfig.HeaderFilePath)
+				panic(err)
+			}
+			err = os.MkdirAll(config.GeneralConfig.DataFilePath, os.ModePerm)
+			if err != nil {
+				fmt.Printf("Failed to create data directory: %v at %s \n", err, config.GeneralConfig.DataFilePath)
+				panic(err)
+			}
+		}
+		config.GeneralConfig.HeaderFilePath = filepath.Join(config.GeneralConfig.HeaderFilePath, "metric_headers.bin")
+		config.GeneralConfig.DataFilePath = filepath.Join(config.GeneralConfig.DataFilePath, "metric_output.bin")
 		headerFile, err := os.OpenFile(config.GeneralConfig.HeaderFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND|os.O_TRUNC, 0666)
 		if err != nil {
 			fmt.Printf("Failed to open header file: %v at %s \n", err, config.GeneralConfig.HeaderFilePath)

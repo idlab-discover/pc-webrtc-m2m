@@ -1,3 +1,5 @@
 scripts/__pychache__
 scripts/__pychache__/*
 *csv
+output/
+output/*

@@ -103,7 +103,7 @@ public class PointCloudBuffer : RenderablePointCloudBuffer
         TimestampNextDeadline += (1000 / FPS);
     }
 
-    public bool ShouldDecodeFrame(uint frameNr)
+    public bool ShouldDecodeOrAddFrame(uint frameNr)
     {
         lock (_lock)
         {

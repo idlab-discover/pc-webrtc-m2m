@@ -22,6 +22,7 @@ import (
 const NameClientConnection = "ClientConnection"
 
 type SenderTrack struct {
+	Parent       *ClientConnection
 	TrackID      string `json:"trackID"`
 	trackBitrate *TrackBitrate
 	WebRTCTrack  *webrtc.TrackLocalStaticRTP
@@ -91,6 +92,10 @@ type ClientConnection struct {
 	PositionInited bool
 	PositionMatrix PositionMatrix
 
+	latestFrameNr uint32
+
+	adaptationsToDo *QualityAdaptationsToDo
+
 	mut sync.Mutex
 }
 
@@ -127,7 +132,14 @@ func NewClientConnection(parent *SFU, clientID uint, authKey string,
 		SDPFmtpLine:  "",
 		RTCPFeedback: nil,
 	}
-
+	cl := &ClientConnection{
+		parent:              parent,
+		clientID:            clientID,
+		authKey:             authKey,
+		ReceiverVideoTracks: make(map[string]*ReceiverTrack),
+		ReceiverAudioTracks: make(map[string]*ReceiverTrack),
+		mut:                 sync.Mutex{},
+	}
 	for i := range senderVideoTracks {
 		tempTrack := senderVideoTracks[i]
 		trackLocal, err := webrtc.NewTrackLocalStaticRTP(codecCapability, tempTrack.TrackID, tempTrack.TrackID)
@@ -136,6 +148,7 @@ func NewClientConnection(parent *SFU, clientID uint, authKey string,
 		}
 		meter := parent.overallTrackMetrics.AddTrackMeter(tempTrack.TrackID)
 		videoTracksMap[tempTrack.TrackID] = &SenderTrack{
+			Parent:       cl,
 			TrackID:      tempTrack.TrackID,
 			trackBitrate: &TrackBitrate{}, /*TODO Make constructor*/
 			WebRTCTrack:  trackLocal,
@@ -150,21 +163,14 @@ func NewClientConnection(parent *SFU, clientID uint, authKey string,
 			panic(err)
 		}
 		audioTracksMap[tempTrack.TrackID] = &SenderTrack{
+			Parent:       cl,
 			TrackID:      tempTrack.TrackID,
 			trackBitrate: &TrackBitrate{}, /*TODO Make constructor*/
 			WebRTCTrack:  trackLocal,
 		}
 	}
-	cl := &ClientConnection{
-		parent:              parent,
-		clientID:            clientID,
-		authKey:             authKey,
-		SenderVideoTracks:   videoTracksMap,
-		SenderAudioTracks:   audioTracksMap,
-		ReceiverVideoTracks: make(map[string]*ReceiverTrack),
-		ReceiverAudioTracks: make(map[string]*ReceiverTrack),
-		mut:                 sync.Mutex{},
-	}
+	cl.SenderVideoTracks = videoTracksMap
+	cl.SenderAudioTracks = audioTracksMap
 	logger.LogWithMessage(NameClientConnection, logger.Created, true, true, fmt.Sprintf("clientID=%d authKey=%s", clientID, authKey))
 	return cl
 }
@@ -328,26 +334,19 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 				if !completedFrame { // Previous frame was not completed
 					nDroppedFrames++
 				}
+				// Only perform adaptation when a new frame starts, otherwise there might be partial frames
+				// We do this for every description/track but internally the adaptations will only happen once
+				if t.Kind() == webrtc.RTPCodecTypeVideo {
+					senderTrack.Parent.SetLatestFrameAndPerformAdaptation(p.FrameNr)
+				}
+
 				completedFrame = false
+				// TODO Check if we need to perform adaptation
+
 				//logger.LogFrameWithMessage(NameClientConnection, logger.FrameFirstPacketRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s", clc.clientID, t.ID()), uint(p.FrameNr))
 			}
 			frames[p.FrameNr] += p.SeqLen
 
-			/*if clc.gatherTrackStats && t.Kind() == webrtc.RTPCodecTypeVideo {
-				nextTime := time.Now().UnixNano() //
-				nsDiff := nextTime - startTime
-				msBucket := nsDiff / int64(50*time.Millisecond)
-				// Todo implement concurrency safety => get pointer to trackbitrates once!
-				if msBucket != int64(prevBucket) {
-					trackBitrate.currentCounterCompleted = trackBitrate.currentCounter
-					trackBitrate.counters[trackBitrate.currentCounter] = trackBitrate.tempCounter
-					trackBitrate.currentCounter = (trackBitrate.currentCounter + 1) % 20
-					trackBitrate.currentCounterMax++
-					trackBitrate.tempCounter = 0
-				}
-				trackBitrate.tempCounter += uint32(i)
-				prevBucket = msBucket
-			}*/
 			if frames[p.FrameNr] == p.FrameLen { // Can maybe be optimized more because of the string being created for no reason
 				completedFrame = true
 				logger.LogFrameWithMessage(NameClientConnection, logger.FrameFullyRecv, true, true, fmt.Sprintf("clientID=%d trackID=%s totalDroppedFrames=%d", clc.clientID, t.ID(), nDroppedFrames), uint(p.FrameNr))
@@ -680,6 +679,32 @@ func SetupDefaultMediaEngine() *webrtc.MediaEngine {
 		panic(err)
 	}
 	return mediaEngine
+}
+
+// TODO Consider making this per track instead of just globally
+// Atm the current system might cause problems is a certain track is delayed a lot
+func (clc *ClientConnection) SetLatestFrameAndPerformAdaptation(frameNr uint32) {
+	clc.mut.Lock()
+	defer clc.mut.Unlock()
+	if frameNr <= clc.latestFrameNr {
+		return
+	}
+	clc.latestFrameNr = frameNr
+	if clc.adaptationsToDo != nil {
+		for _, playTrack := range clc.adaptationsToDo.ToPlay {
+			playTrack.Play()
+		}
+		for _, pauseTrack := range clc.adaptationsToDo.ToPause {
+			pauseTrack.Pause()
+		}
+	}
+	clc.adaptationsToDo = nil // Might not be needed
+}
+
+func (clc *ClientConnection) SetQualityAdaptationToDo(adaptations *QualityAdaptationsToDo) {
+	clc.mut.Lock()
+	defer clc.mut.Unlock()
+	clc.adaptationsToDo = adaptations
 }
 
 func (clc *ClientConnection) ipFilterFunc(addr net.IP) bool {

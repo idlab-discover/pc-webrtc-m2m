@@ -15,7 +15,7 @@ public class MDCTrackSettings
 [System.Serializable]
 public class MDCCodecModeSettings
 {
-    public List<uint> samplingPercentages;
+    public List<float> samplingPercentages;
     public uint maxCompletePointCount;
 }
 
@@ -35,7 +35,7 @@ public class MDCCodecMode : CodecModeBase
             return tracks;
         }
         var settings = modeCodec.modeSettings.ToObject<MDCCodecModeSettings>();
-        List<uint> rates = new(settings.samplingPercentages);
+        List<float> rates = new(settings.samplingPercentages);
         rates = rates.OrderByDescending(n => n).ToList();
         Logger.LogStatusWithMessage(NAME, Logger.Status.GatheringTrackInfo, $"samplingPercentages=[{string.Join('|', rates)}] maxCompletePointCount={settings.maxCompletePointCount}");
         for (int i = 0; i < rates.Count; i++)
@@ -45,7 +45,7 @@ public class MDCCodecMode : CodecModeBase
                 mode=  MODE_NAME,
                 trackID = $"{MODE_NAME}_0_{i}",
                 supportedCodecs = new List<string>(modeCodec.supportedCodecs),
-                trackSettings = JObject.FromObject(new MDCTrackSettings { samplingPercentage = rates[i] })
+                trackSettings = JObject.FromObject(new MDCTrackSettings { samplingPercentage = (uint)(rates[i]*100) })
             };
             Logger.LogStatusWithMessage(NAME, Logger.Status.NewTrackDiscovered, $"trackID={track.trackID} supportedCodecs=[{string.Join('|', track.supportedCodecs)}] samplingPercentage={rates[i]}");
             tracks.Add(track.trackID, track);

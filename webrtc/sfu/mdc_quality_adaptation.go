@@ -9,25 +9,23 @@ import (
 
 type CompositeQualityChoiceMetric struct {
 	ClientID           uint32
-	EstimedBandwidth   uint32
+	EstimatedBandwidth uint32
+	UsedBandwidth      uint32
 	RemainingBandwidth uint32
-	ChosenQuality      uint32
-	MaxAllowedQuality  uint32
-	Bitrate0           uint32
-	Bitrate1           uint32
-	Bitrate2           uint32
-	Bitrate3           uint32
-	Bitrate4           uint32
-	Bitrate5           uint32
-	Bitrate6           uint32
-
-	ClientX uint32
-	ClientY uint32
-	ClientZ uint32
+	SelectedQuality    int32
+	MaxAllowedQuality  int32
+	Bitrate0           uint64
+	Bitrate1           uint64
+	Bitrate2           uint64
+	Bitrate3           uint64
+	Bitrate4           uint64
+	Bitrate5           uint64
+	Bitrate6           uint64
 
 	ScreenPosX float32
 	ScreenPosY float32
 	Distance   float32
+	PacketLoss float32
 }
 
 type MDCQualityAdaptation struct {
@@ -42,7 +40,10 @@ type MDCQualityAdaptation struct {
 type MDCAdaptationClient struct {
 	clientID         uint
 	trackCounts      uint
+	startingQuality  int
 	selectedQuality  int
+	screenPos        [2]float32
+	distance         float32
 	qualitiesBitrate []uint64
 	tracks           []*MDCAdaptationClientTrack
 	clientPtr        *ClientConnection
@@ -79,7 +80,7 @@ func NewMDCQualityAdaptation() *MDCQualityAdaptation {
 		highestQualityInBand: highestQualityInBand,
 	}
 }
-func (mqa *MDCQualityAdaptation) PerformAdaptation(clc *ClientConnection, targetBitrate int, allClients map[uint]*ClientConnection) []string {
+func (mqa *MDCQualityAdaptation) PerformAdaptation(clc *ClientConnection, targetBitrate int, allClients map[uint]*ClientConnection, adaptationsToDo map[uint]*QualityAdaptationsToDo) *QualityAdaptationOutput {
 	// Implement MDC quality adaptation logic here
 
 	// Description MAX
@@ -131,7 +132,8 @@ func (mqa *MDCQualityAdaptation) PerformAdaptation(clc *ClientConnection, target
 			continue
 		}
 		totalUsedBitrate += client.qualitiesBitrate[0]
-		client.selectedQuality = mqa.calculateStartingQuality(clc, client.clientPtr)
+		client.startingQuality, client.screenPos = mqa.calculateStartingQuality(clc, client.clientPtr)
+		client.selectedQuality = client.startingQuality
 	}
 	// TODO
 	//			Sort clients based on starting quality
@@ -162,35 +164,56 @@ func (mqa *MDCQualityAdaptation) PerformAdaptation(clc *ClientConnection, target
 			totalUsedBitrate += client.qualitiesBitrate[client.selectedQuality]
 		}
 	}
+	choices := make([]QualityChoice, 0)
 	for _, client := range clients {
 		if client.selectedQuality > -1 {
 			for _, desc := range mqa.qualities[client.selectedQuality] {
 				client.tracks[desc].shouldPlay = true
 			}
 		}
-
+		choices = append(choices, QualityChoice{
+			ClientID:          client.clientID,
+			ScreenPosX:        client.screenPos[0],
+			ScreenPosY:        client.screenPos[1],
+			Distance:          client.distance,
+			SelectedQuality:   client.selectedQuality,
+			MaxAllowedQuality: client.startingQuality,
+			QualitiesBitrate:  client.qualitiesBitrate,
+		})
 		for _, track := range client.tracks {
+			// TODO Maybe move this outside and do this once globally?
+			adaptationsForClient, exists := adaptationsToDo[client.clientID]
+			if !exists {
+				adaptationsForClient = NewQualityAdaptationsToDo()
+				adaptationsToDo[client.clientID] = adaptationsForClient
+			}
 			if track.shouldPlay {
-				track.webrtcTrack.Play()
+				adaptationsForClient.ToPlay = append(adaptationsForClient.ToPlay, track.webrtcTrack)
 				adaptations = append(adaptations, track.trackID)
 			} else {
-				track.webrtcTrack.Pause()
+				adaptationsForClient.ToPause = append(adaptationsForClient.ToPause, track.webrtcTrack)
 			}
 		}
 	}
 
-	return adaptations
-}
-
-func (mqa *MDCQualityAdaptation) calculateStartingQuality(client *ClientConnection, otherClient *ClientConnection) int {
-	activeBand := mqa.calculateActiveBand(client, otherClient)
-	if activeBand < uint(len(mqa.highestQualityInBand)) {
-		return mqa.highestQualityInBand[activeBand]
+	return &QualityAdaptationOutput{
+		EstimatedBandwidth: uint32(targetBitrate),
+		UsedBandwidth:      uint32(totalUsedBitrate),
+		RemainingBandwidth: uint32(targetBitrate) - uint32(totalUsedBitrate),
+		ChoicesString:      adaptations,
+		Choices:            choices,
 	}
-	return -1
 }
 
-func (mqa *MDCQualityAdaptation) calculateActiveBand(client *ClientConnection, otherClient *ClientConnection) uint {
+func (mqa *MDCQualityAdaptation) calculateStartingQuality(client *ClientConnection, otherClient *ClientConnection) (int, [2]float32) {
+	activeBand, screenPos := mqa.calculateActiveBand(client, otherClient)
+	if activeBand < uint(len(mqa.highestQualityInBand)) {
+		return mqa.highestQualityInBand[activeBand], screenPos
+	}
+	return -1, screenPos
+}
+
+func (mqa *MDCQualityAdaptation) calculateActiveBand(client *ClientConnection, otherClient *ClientConnection) (uint, [2]float32) {
 	nBands := uint(3)
 	camSpace := MultiplyPoint(client.PositionMatrix.WorldToCameraMatrix, otherClient.PositionMatrix.Position)
 	clipSpace := ConvertToClipspace(client.PositionMatrix.ProjectionMatrix, camSpace)
@@ -204,12 +227,12 @@ func (mqa *MDCQualityAdaptation) calculateActiveBand(client *ClientConnection, o
 	bandSpacing := 1.0 / float32(nBands) * 1.0
 	for i := uint(0); i < nBands; i++ {
 		if (ndcSpace[0] >= 0-bandSpacing*float32(i+1)) && (ndcSpace[0] <= 0+bandSpacing*float32(i+1)) {
-			return i
+			return i, [2]float32{ndcSpace[0], ndcSpace[1]}
 		}
 	}
 	if ndcSpace[0] >= -1.25 && ndcSpace[0] <= 1.25 {
-		return nBands - 1
+		return nBands - 1, [2]float32{ndcSpace[0], ndcSpace[1]}
 	}
 
-	return nBands
+	return nBands, [2]float32{ndcSpace[0], ndcSpace[1]}
 }

@@ -18,11 +18,13 @@ public class MDCEncodingQueue : IDisposable
     private GCHandle freePointCloudHandle;
     private bool disposedValue;
 
-    public MDCEncodingQueue(SessionInfo sessionInfo)
+    public MDCEncodingQueue(SessionInfo sessionInfo, float[] samplingRatios)
     {
         Logger.LogStatus(NAME, Logger.Status.Creating);
-
-        ptr = DracoInvoker.create_encoding_queue(2);
+        IntPtr samplingRatiosPtr = Marshal.AllocHGlobal(sizeof(float) * samplingRatios.Length);
+        Marshal.Copy(samplingRatios, 0, samplingRatiosPtr, samplingRatios.Length);
+        ptr = DracoInvoker.create_encoding_queue(2, samplingRatiosPtr, (uint)samplingRatios.Length); // TODO make max queue size changeable
+        Marshal.FreeHGlobal(samplingRatiosPtr);
 
         if(ptr == IntPtr.Zero)
         {

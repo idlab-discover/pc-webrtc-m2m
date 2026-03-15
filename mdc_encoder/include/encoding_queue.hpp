@@ -10,6 +10,7 @@
 #include "description.h"
 #include "threadpool.h"
 #include "framework.h"
+#include "uniform_sampler.hpp"
 
 class EncodingQueue;
 extern "C" {
@@ -23,7 +24,8 @@ extern "C" {
 
 class EncodingQueue {
     public:
-        EncodingQueue(unsigned int max_queue) : max_queue(max_queue) {
+        EncodingQueue(unsigned int max_queue, float* layer_ratios, unsigned int number_of_layers) 
+        : max_queue(max_queue), us(std::vector<float>(layer_ratios, layer_ratios+number_of_layers)) {
             pool.start(3);
         };
         ~EncodingQueue() {
@@ -42,13 +44,16 @@ class EncodingQueue {
         void register_free_pc_callback(FreePointCloudCallback cb) {
             free_pc_callback_instance = cb;
         }
-        
+        std::vector<Description*> create_descriptions(PointCloud* pc, float multi) {
+            return us.create_descriptions(pc, multi);
+        }
     private:
         std::mutex m_enqueue;
         std::condition_variable cv_enqueue;
         PointCloud* current_in_wait = nullptr;
         std::queue<bool> q_enqueued;
         unsigned int max_queue;
+        UniformSampler us;
         DescriptionDoneCallback description_done_callback_instance = nullptr;
         FreePointCloudCallback free_pc_callback_instance = nullptr;
         std::map<unsigned int, unsigned int> coding_status;

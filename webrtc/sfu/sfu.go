@@ -33,7 +33,8 @@ type SFU struct {
 	mut                 sync.Mutex
 	providerKey         string
 	// Metrics related
-	MetricsHelper *MetricsServerHelper
+	MetricsHelper     *MetricsServerHelper
+	adaptationMetrics *CompositeMetricDefinition[CompositeQualityChoiceMetric]
 }
 
 type CompositeTest struct {
@@ -61,6 +62,7 @@ func NewSFU(address string, port uint, ipFilter string, providerKey string, metr
 		me.AddCapturedValue(5)
 		me.AddCapturedValue(15)
 		comp, _ := RegisterCompositePushMetricWithHelper[CompositeTest](sfu.MetricsHelper, "CompositeTest")
+		sfu.adaptationMetrics, _ = RegisterCompositePushMetricWithHelper[CompositeQualityChoiceMetric](sfu.MetricsHelper, "QualityAdaptationChoices")
 		comp.AddCapturedValue(CompositeTest{Field1: 1, Field2: 1.0})
 		sfu.MetricsHelper.UpdateMetrics()
 		//sfu.MetricsServer = core.NewMetricsServer(metricsServerConfigPath)
@@ -452,6 +454,7 @@ func (sfu *SFU) StartPerformingQualityAdaptation() {
 		for {
 			sfu.mut.Lock()
 			output := fmt.Sprintf("ts=%d stats=[", time.Now().UnixMilli())
+			adaptationsToDo := make(map[uint]*QualityAdaptationsToDo)
 			for _, client := range sfu.clients {
 				if client.BandwidthEstimator != nil {
 					targetBitrate := client.BandwidthEstimator.GetTargetBitrate()
@@ -466,19 +469,55 @@ func (sfu *SFU) StartPerformingQualityAdaptation() {
 					extraOutput := ""
 					if sfu.qualityAdaptation != nil {
 						extraOutput = "@activeTracks=("
-						tracks := sfu.qualityAdaptation.PerformAdaptation(client, targetBitrate, sfu.clients)
-						for _, trackID := range tracks {
+						adaptationInfo := sfu.qualityAdaptation.PerformAdaptation(client, targetBitrate, sfu.clients, adaptationsToDo)
+						for _, trackID := range adaptationInfo.ChoicesString {
 							extraOutput += fmt.Sprintf("%s|", trackID)
 						}
 						extraOutput += ")"
+						// TODO This part requires a lot of cleanup
+						if sfu.adaptationMetrics != nil && adaptationInfo.Choices != nil && len(adaptationInfo.Choices) > 0 {
+							clientChoice := adaptationInfo.Choices[0]
+							if len(clientChoice.QualitiesBitrate) == 7 {
+								sfu.adaptationMetrics.AddCapturedValue(CompositeQualityChoiceMetric{
+									ClientID:           uint32(clientChoice.ClientID),
+									SelectedQuality:    int32(clientChoice.SelectedQuality),
+									MaxAllowedQuality:  int32(clientChoice.MaxAllowedQuality),
+									Bitrate0:           clientChoice.QualitiesBitrate[0],
+									Bitrate1:           clientChoice.QualitiesBitrate[1],
+									Bitrate2:           clientChoice.QualitiesBitrate[2],
+									Bitrate3:           clientChoice.QualitiesBitrate[3],
+									Bitrate4:           clientChoice.QualitiesBitrate[4],
+									Bitrate5:           clientChoice.QualitiesBitrate[5],
+									Bitrate6:           clientChoice.QualitiesBitrate[6],
+									EstimatedBandwidth: adaptationInfo.EstimatedBandwidth,
+									UsedBandwidth:      adaptationInfo.UsedBandwidth,
+									RemainingBandwidth: adaptationInfo.RemainingBandwidth,
+
+									ScreenPosX: clientChoice.ScreenPosX,
+									ScreenPosY: clientChoice.ScreenPosY,
+									Distance:   clientChoice.Distance,
+									PacketLoss: float32(avgLoss.(float64)),
+								})
+							}
+						}
+
 					}
 					output += fmt.Sprintf("client=%d@bitrate=%d@avgLoss=%.5f@delayBitrate=%d@lossBitrate=%d%s;", client.clientID, targetBitrate, avgLoss, delayBitrate, lossBitrate, extraOutput)
 				}
 			}
+			for clientId, adaptations := range adaptationsToDo {
+				client, exists := sfu.clients[clientId]
+				if !exists {
+					continue
+				}
+				client.SetQualityAdaptationToDo(adaptations)
+
+			}
+			sfu.MetricsHelper.UpdateMetrics()
 			output += "]"
 			logger.LogWithMessage(NameSFU, logger.EstimatedBitrate, true, true, output)
 			sfu.mut.Unlock()
-			time.Sleep(time.Millisecond * 1000)
+			time.Sleep(time.Millisecond * 200)
 		}
 	}()
 }

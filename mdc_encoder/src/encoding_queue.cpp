@@ -50,8 +50,7 @@ void EncodingQueue::internal_enqueue_pc(PointCloud *pc)
     if(multi > 1.0f) {
         multi = 1.0f;
     }
-    UniformSampler us(std::vector<float>({ 0.6f*multi, 0.25f*multi, 0.15f*multi }));
-    std::vector<Description*> descs = us.create_descriptions(pc);
+    std::vector<Description*> descs = create_descriptions(pc, multi);
     coding_status[pc->frame_nr] = 3;
     q_enqueued.push(true);
     free_pc_callback_instance(current_in_wait);

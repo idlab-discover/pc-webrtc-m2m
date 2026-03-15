@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <numeric>
 #include <random>
-std::vector<Description*> UniformSampler::create_descriptions(PointCloud* pc) {
+std::vector<Description*> UniformSampler::create_descriptions(PointCloud* pc, float multi) {
     std::vector<Description*> descs;
     std::vector<int> pc_points(pc->n_points) ;
     std::iota (std::begin(pc_points), std::end(pc_points), 0); // Fill with 0, 1, ..., size -1.
@@ -17,7 +17,7 @@ std::vector<Description*> UniformSampler::create_descriptions(PointCloud* pc) {
         desc->description_nr = i;
         desc->n_points_in_total = pc->n_points;
         if(i < number_of_layers - 1) {
-            desc->n_points = pc->n_points*layer_ratios[i];
+            desc->n_points = pc->n_points*(layer_ratios[i]*multi);
         } else {
             desc->n_points = pc->n_points - total_points_used; // Add rounding error points to this description
         }
@@ -28,21 +28,21 @@ std::vector<Description*> UniformSampler::create_descriptions(PointCloud* pc) {
         total_points_used += desc->n_points;
     }
 
-    for(int i=0; i < pc_points.size(); i++) {
-        if(pc_points[i] >= 0 && pc_points[i] < end_border[0]) {
-            descs[0]->coords[descs[0]->current_points] = pc->coords[i];
-            descs[0]->colors[descs[0]->current_points] = pc->colors[i];
-            descs[0]->current_points++;       
-        } else if (pc_points[i] >= end_border[0] && pc_points[i] < end_border[1]) {
-            descs[1]->coords[descs[1]->current_points] = pc->coords[i];
-            descs[1]->colors[descs[1]->current_points] = pc->colors[i];
-            descs[1]->current_points++;
-          
-        } else {
-            descs[2]->coords[descs[2]->current_points] = pc->coords[i];
-            descs[2]->colors[descs[2]->current_points] = pc->colors[i];
-            descs[2]->current_points++;
+    if(descs.empty()) {
+        return descs;
+    }
+
+    for(int i = 0; i < pc_points.size(); i++) {
+        size_t layer_idx = 0;
+        while(layer_idx + 1 < end_border.size() &&
+              static_cast<unsigned int>(pc_points[i]) >= end_border[layer_idx]) {
+            layer_idx++;
         }
+
+        Description* target_desc = descs[layer_idx];
+        target_desc->coords[target_desc->current_points] = pc->coords[i];
+        target_desc->colors[target_desc->current_points] = pc->colors[i];
+        target_desc->current_points++;
     }
     return descs;
 }

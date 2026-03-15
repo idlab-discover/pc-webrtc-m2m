@@ -8,7 +8,7 @@ type RandomQualityAdaptation struct {
 func NewRandomQualityAdaptation() *RandomQualityAdaptation {
 	return &RandomQualityAdaptation{}
 }
-func (rqa *RandomQualityAdaptation) PerformAdaptation(clc *ClientConnection, targetBitrate int, allClients map[uint]*ClientConnection) []string {
+func (rqa *RandomQualityAdaptation) PerformAdaptation(clc *ClientConnection, targetBitrate int, allClients map[uint]*ClientConnection, adaptationsToDo map[uint]*QualityAdaptationsToDo) *QualityAdaptationOutput {
 	// Implement random quality adaptation logic here
 	targetBitrate = int(float64(targetBitrate) * 0.85)
 	keys := make([]string, 0, len(clc.ReceiverVideoTracks))
@@ -34,6 +34,9 @@ func (rqa *RandomQualityAdaptation) PerformAdaptation(clc *ClientConnection, tar
 		}
 
 	}
-	// For demonstration, we just return an empty list
-	return adaptations
+	return &QualityAdaptationOutput{
+		EstimatedBandwidth: uint32(targetBitrate),
+		RemainingBandwidth: uint32(targetBitrate),
+		ChoicesString:      adaptations,
+	}
 }

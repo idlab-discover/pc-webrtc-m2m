@@ -26,7 +26,7 @@
                 "draco"
             ],
             "modeSettings": {
-                "samplingPercentages": [60, 25, 15],
+                "samplingPercentages": [0.60, 0.25, 0.15],
                 "maxCompletePointCount": 1000000
             }
         }

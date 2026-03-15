@@ -8,4 +8,5 @@ public class ExternalWebRTCSettings
     public int peerUDPConnectorPort;
     public int peerUDPAppPort;
     public int nMaxTracks;
+    public bool openInWindow;
 }

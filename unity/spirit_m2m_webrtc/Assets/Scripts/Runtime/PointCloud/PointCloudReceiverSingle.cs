@@ -35,7 +35,7 @@ public class MDCPointCloudReceiverSingle
            track.StartPollingTrack((frame) => {
                uint nDescriptions = 0;
                MDCFrameHeader header = new(frame);
-               bool shouldDecode = playbackBuffer.ShouldDecodeFrame(header.FrameNr);
+               bool shouldDecode = playbackBuffer.ShouldDecodeOrAddFrame(header.FrameNr);
                if(!shouldDecode)
                {
                     mdcLateReceivedMetric?.AddCapturedValue(new CompMDCLateReceived
@@ -77,6 +77,19 @@ public class MDCPointCloudReceiverSingle
                Logger.LogPCFrameStatusWithMessageLimited(NAME, Logger.Status.EndDecodingPC, clientID, header.FrameNr, header.ToStringSmall());
                lock (_lock)
                {
+                    bool shouldAdd = playbackBuffer.ShouldDecodeOrAddFrame(header.FrameNr);
+                    if(!shouldAdd)                     {
+                        mdcLateReceivedMetric?.AddCapturedValue(new CompMDCLateReceived
+                        {
+                            lateReceivedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                            clientID = clientID,
+                            capturerID = header.CapturerID,
+                            frameNr = header.FrameNr,
+                            descriptionID = header.DescriptionNr
+                        });
+                        description.Dispose();
+                        return;
+                    }
                    foreach (var track in tracksForCapturer)
                    {
                        if (track.status == TrackStatus.Started)
@@ -84,6 +97,7 @@ public class MDCPointCloudReceiverSingle
                            nDescriptions++;
                        }
                    }
+
                    DecodedPointCloudMulti m = playbackBuffer.GetMultiFrame(header.FrameNr, header.TotalNumberOfPoints);
                    MDCDecodedPointCloudSingle singleFrame = (MDCDecodedPointCloudSingle)m.GetSingle(header.FrameNr);
                    if (singleFrame == null)

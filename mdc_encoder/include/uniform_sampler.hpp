@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 #include <string>
 #include "point_cloud.h"
@@ -7,6 +8,6 @@ class UniformSampler {
         std::vector<float> layer_ratios;
     public:
         UniformSampler(std::vector<float> layer_ratios) : layer_ratios(layer_ratios) {number_of_layers=layer_ratios.size();};   
-        std::vector<Description*> create_descriptions(PointCloud* pc);
+        std::vector<Description*> create_descriptions(PointCloud* pc, float multi);
         int number_of_layers;
 };

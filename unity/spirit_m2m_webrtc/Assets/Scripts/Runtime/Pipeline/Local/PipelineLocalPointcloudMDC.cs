@@ -23,7 +23,12 @@ public class PipelineLocalPointcloudMDC : PipelineLocalPointcloudBase
         mdcEncodingDoneMetric = MetricController.MetricServerConnection.RegisterCompositePushMetric<CompMDCEncodingDone>("MDCEncodingDone");
         sessionInfo.frameMode = FrameMode.RealData; // TODO fix this in the future
         base.Init(sessionInfo, localClient);
-        encodingQueue = new MDCEncodingQueue(sessionInfo);
+        float[] samplingRatios = sessionInfo.supportedModes[0].modeSettings.ToObject<MDCCodecModeSettings>().samplingPercentages.ToArray(); 
+        // TODO this is really hacky, change this so info is retrieved from tracks instead of modes, 
+        // also make it changeable so it can be different for different tracks, 
+        // also take into account that there might be multiple modes with different settings 
+        // and maybe even multiple tracks per mode with different settings
+        encodingQueue = new MDCEncodingQueue(sessionInfo, samplingRatios); 
         encodingQueue.SetDescriptionDoneCallback(OnDescriptionDoneCallback);
         startPollThread();
     }
