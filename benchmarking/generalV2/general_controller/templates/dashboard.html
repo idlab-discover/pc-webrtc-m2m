@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Benchmarking Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base:    #0f1117;
+      --bg-card:    #1a1d27;
+      --bg-header:  #12151f;
+      --bg-input:   #0d1018;
+      --border:     #2a2d3e;
+      --text-main:  #e0e0e0;
+      --text-muted: #8a8fa8;
+    }
+
+    body { background: var(--bg-base); color: var(--text-main); }
+
+    /* ── Cards ── */
+    .card { background: var(--bg-card); border: 1px solid var(--border); }
+    .card-header { background: var(--bg-header); border-bottom: 1px solid var(--border); font-weight: 600; color: var(--text-main); }
+
+    /* ── Nav tabs ── */
+    .nav-tabs { border-bottom-color: var(--border); }
+    .nav-tabs .nav-link { color: var(--text-muted); border-color: transparent; background: transparent; }
+    .nav-tabs .nav-link:hover { color: var(--text-main); border-color: var(--border) var(--border) transparent; }
+    .nav-tabs .nav-link.active { background: var(--bg-card); color: #fff; border-color: var(--border) var(--border) var(--bg-card); }
+
+    /* ── Table: force dark background on all Bootstrap table elements ── */
+    .table { color: var(--text-main); --bs-table-bg: var(--bg-card); --bs-table-striped-bg: #1e2130; --bs-table-hover-bg: #1e2130; --bs-table-border-color: var(--border); }
+    .table > :not(caption) > * > * { background-color: var(--bs-table-bg); color: var(--text-main); }
+    .table thead th { border-color: var(--border); color: var(--text-muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; background: var(--bg-header); }
+    .table td, .table tr { border-color: var(--border); }
+    .table tbody tr:hover > * { background-color: #1e2130; }
+
+    /* ── Form controls: dark bg that persists on focus ── */
+    .form-control {
+      background-color: var(--bg-input) !important;
+      color: var(--text-main) !important;
+      border-color: var(--border) !important;
+    }
+    .form-control:focus {
+      background-color: var(--bg-input) !important;
+      color: var(--text-main) !important;
+      border-color: #4a5068 !important;
+      box-shadow: 0 0 0 2px rgba(74, 80, 104, 0.35) !important;
+    }
+    .form-control::placeholder { color: var(--text-muted); opacity: 1; }
+
+    /* ── JSON textarea ── */
+    textarea.code {
+      font-family: monospace;
+      font-size: .82rem;
+      background: var(--bg-input) !important;
+      color: #c5e8b0 !important;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      resize: vertical;
+    }
+    textarea.code:focus {
+      background: var(--bg-input) !important;
+      color: #c5e8b0 !important;
+      border-color: #4a5068 !important;
+      box-shadow: 0 0 0 2px rgba(74, 80, 104, 0.35) !important;
+    }
+
+    /* ── Status badges ── */
+    .badge-connected   { background: #1a6e3c; color: #a8f0c6; }
+    .badge-running     { background: #1a3d7a; color: #90bbf5; }
+    .badge-completed   { background: #4a3d00; color: #f0cc60; }
+    .badge-starting    { background: #5a3a00; color: #f0a860; }
+    .badge-unknown     { background: #2e2e3e; color: var(--text-muted); }
+
+    /* ── Progress bar ── */
+    .progress { background: #1e2130; height: 6px; }
+
+    /* ── Log list ── */
+    .log-list { max-height: 140px; overflow-y: auto; font-size: .78rem; }
+    .log-list li { color: #7ec8e3; word-break: break-all; }
+
+    /* ── Toast ── */
+    #toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; }
+
+    /* ── Misc ── */
+    .section-title { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin-bottom: .5rem; }
+    .form-label { color: var(--text-muted); }
+    hr { border-color: var(--border); }
+    .text-secondary { color: var(--text-muted) !important; }
+
+    /* ── Buttons ── */
+    .btn-outline-secondary { color: var(--text-muted); border-color: var(--border); }
+    .btn-outline-secondary:hover { background: #2a2d3e; color: var(--text-main); border-color: #4a5068; }
+  </style>
+</head>
+<body>
+<div class="container-fluid py-3 px-4">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <h4 class="mb-0 fw-bold">📡 Benchmarking Dashboard</h4>
+    <span class="badge bg-secondary ms-2" id="refresh-badge">Auto-refresh: ON</span>
+    <button class="btn btn-sm btn-outline-secondary ms-auto" id="btn-toggle-refresh">Pause refresh</button>
+  </div>
+
+  <div class="row g-3">
+
+    <!-- ── Left column: Instances ───────────────────────────────────────── -->
+    <div class="col-xl-7">
+
+      <!-- Instance table -->
+      <div class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+          Connected Instance Controllers
+          <span class="badge bg-secondary ms-auto" id="instance-count">0</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0" id="instances-table">
+              <thead><tr>
+                <th>ID</th>
+                <th>Address</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th>Current Params</th>
+                <th>Logs</th>
+              </tr></thead>
+              <tbody id="instances-tbody">
+                <tr><td colspan="6" class="text-center text-secondary py-4">No instances connected</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Start experiment -->
+      <div class="card mb-3">
+        <div class="card-header">Start Experiment</div>
+        <div class="card-body">
+          <p class="text-secondary small mb-3">
+            Sends the current experiment config (plus session_config &amp; plyfiles) to all connected instance controllers.
+          </p>
+          <button class="btn btn-success" id="btn-start">▶ Start Experiment on All Instances</button>
+          <div id="start-result" class="mt-2 small text-secondary"></div>
+        </div>
+      </div>
+
+      <!-- Upload content -->
+      <div class="card">
+        <div class="card-header">Upload Content to Instance Controllers</div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label small">Destination path on Instance Controller</label>
+            <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary"
+                   id="upload-dest-path" placeholder="/data/content" />
+          </div>
+          <ul class="nav nav-tabs mb-3" id="upload-tabs">
+            <li class="nav-item"><a class="nav-link active" data-tab="browser" href="#">From browser</a></li>
+            <li class="nav-item"><a class="nav-link"        data-tab="server"  href="#">From server path</a></li>
+          </ul>
+          <div id="tab-browser">
+            <input type="file" class="form-control form-control-sm bg-dark text-light border-secondary" id="upload-files" multiple />
+          </div>
+          <div id="tab-server" class="d-none">
+            <label class="form-label small">Server-side directory path</label>
+            <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary"
+                   id="server-path" placeholder="/home/user/data/content" />
+          </div>
+          <button class="btn btn-primary mt-3" id="btn-upload">Upload</button>
+          <div id="upload-result" class="mt-2 small text-secondary"></div>
+        </div>
+      </div>
+
+    </div><!-- /left -->
+
+    <!-- ── Right column: Config editors ─────────────────────────────────── -->
+    <div class="col-xl-5">
+
+      <div class="card">
+        <div class="card-header">Configuration Files</div>
+        <div class="card-body">
+          <ul class="nav nav-tabs mb-3" id="config-tabs">
+            <li class="nav-item"><a class="nav-link active" data-cfg="experiment" href="#">experiment.json</a></li>
+            <li class="nav-item"><a class="nav-link"        data-cfg="session"    href="#">session_config.json</a></li>
+            <li class="nav-item"><a class="nav-link"        data-cfg="plyfiles"   href="#">plyfiles.json</a></li>
+            <li class="nav-item"><a class="nav-link"        data-cfg="websocket"     href="#">websocket.json</a></li>
+            <li class="nav-item"><a class="nav-link"        data-cfg="webrtc_ports"          href="#">webrtc_ports.json</a></li>
+            <li class="nav-item"><a class="nav-link"        data-cfg="external_webrtc_config" href="#">external_webrtc_config.json</a></li>
+          </ul>
+
+          <!-- experiment -->
+          <div id="cfg-experiment">
+            <p class="section-title">Experiment configuration sent to Instance Controllers on start</p>
+            <textarea class="code form-control mb-2" id="ta-experiment" rows="22">{{ experiment_config_json }}</textarea>
+            <button class="btn btn-sm btn-primary" data-save="experiment">Save</button>
+            <span class="save-status ms-2 small text-secondary" id="save-experiment"></span>
+          </div>
+
+          <!-- session -->
+          <div id="cfg-session" class="d-none">
+            <p class="section-title">Base session_config.json – camFPS and supportModes are overridden per experiment</p>
+            <textarea class="code form-control mb-2" id="ta-session" rows="22">{{ session_config_json }}</textarea>
+            <button class="btn btn-sm btn-primary" data-save="session">Save</button>
+            <span class="save-status ms-2 small text-secondary" id="save-session"></span>
+          </div>
+
+          <!-- plyfiles -->
+          <div id="cfg-plyfiles" class="d-none">
+            <p class="section-title">Base plyfiles.json – directoryPath is overridden per content path</p>
+            <textarea class="code form-control mb-2" id="ta-plyfiles" rows="22">{{ plyfiles_config_json }}</textarea>
+            <button class="btn btn-sm btn-primary" data-save="plyfiles">Save</button>
+            <span class="save-status ms-2 small text-secondary" id="save-plyfiles"></span>
+          </div>
+
+          <!-- websocket -->
+          <div id="cfg-websocket" class="d-none">
+            <p class="section-title">Base websocket.json – managerIP, preferredClientID and selectedCodecMode are overridden per client</p>
+            <textarea class="code form-control mb-2" id="ta-websocket" rows="22">{{ websocket_config_json }}</textarea>
+            <button class="btn btn-sm btn-primary" data-save="websocket">Save</button>
+            <span class="save-status ms-2 small text-secondary" id="save-websocket"></span>
+          </div>
+
+          <!-- webrtc_ports -->
+          <div id="cfg-webrtc_ports" class="d-none">
+            <p class="section-title">Base webrtc_ports.json – start/end are offset per local client to avoid port conflicts</p>
+            <textarea class="code form-control mb-2" id="ta-webrtc_ports" rows="22">{{ webrtc_ports_config_json }}</textarea>
+            <button class="btn btn-sm btn-primary" data-save="webrtc_ports">Save</button>
+            <span class="save-status ms-2 small text-secondary" id="save-webrtc_ports"></span>
+          </div>
+
+          <!-- external_webrtc_config -->
+          <div id="cfg-external_webrtc_config" class="d-none">
+            <p class="section-title">external_webrtc_config.json – uploaded to session directory of each client</p>
+            <textarea class="code form-control mb-2" id="ta-external_webrtc_config" rows="22">{{ external_webrtc_config_json }}</textarea>
+            <button class="btn btn-sm btn-primary" data-save="external_webrtc_config">Save</button>
+            <span class="save-status ms-2 small text-secondary" id="save-external_webrtc_config"></span>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /right -->
+
+  </div><!-- /row -->
+
+</div><!-- /container -->
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<script>
+/* ── Utilities ─────────────────────────────────────────────────── */
+function toast(msg, type = "success") {
+  const el = document.createElement("div");
+  el.className = `alert alert-${type} alert-dismissible fade show py-2 px-3 shadow`;
+  el.style.minWidth = "260px";
+  el.innerHTML = `${msg}<button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>`;
+  document.getElementById("toast-container").appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+function statusBadge(status) {
+  const cls = {
+    connected:          "badge-connected",
+    running:            "badge-running",
+    completed:          "badge-completed",
+    starting:           "badge-starting",
+    iteration_complete: "badge-completed",
+  }[status] || "badge-unknown";
+  return `<span class="badge ${cls}">${status}</span>`;
+}
+
+/* ── Auto refresh ──────────────────────────────────────────────── */
+let refreshActive = true;
+let refreshTimer  = null;
+
+document.getElementById("btn-toggle-refresh").addEventListener("click", () => {
+  refreshActive = !refreshActive;
+  document.getElementById("btn-toggle-refresh").textContent = refreshActive ? "Pause refresh" : "Resume refresh";
+  document.getElementById("refresh-badge").textContent      = refreshActive ? "Auto-refresh: ON" : "Auto-refresh: OFF";
+  if (refreshActive) scheduleRefresh();
+});
+
+function scheduleRefresh() {
+  clearTimeout(refreshTimer);
+  if (refreshActive) refreshTimer = setTimeout(loadInstances, 4000);
+}
+
+/* ── Instances table ────────────────────────────────────────────── */
+async function loadInstances() {
+  try {
+    const resp = await fetch("/api/instances");
+    const data = await resp.json();
+    renderInstances(data);
+  } catch (e) {
+    console.warn("refresh failed:", e);
+  } finally {
+    scheduleRefresh();
+  }
+}
+
+function renderInstances(data) {
+  const keys = Object.keys(data);
+  document.getElementById("instance-count").textContent = keys.length;
+  const tbody = document.getElementById("instances-tbody");
+
+  if (keys.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-4">No instances connected</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = keys.map(id => {
+    const inst  = data[id];
+    const done  = inst.iterations_done  || 0;
+    const total = inst.total_iterations || 0;
+    const pct   = total > 0 ? Math.round(done / total * 100) : 0;
+
+    const paramsHtml = inst.current_params
+      ? `<small class="text-secondary">${JSON.stringify(inst.current_params).substring(0, 80)}…</small>`
+      : `<span class="text-secondary">–</span>`;
+
+    const logsHtml = (inst.log_files || []).length > 0
+      ? `<ul class="log-list list-unstyled mb-0">
+           ${(inst.log_files || []).slice(0, 8).map(f => `<li>${f}</li>`).join("")}
+           ${inst.log_files.length > 8 ? `<li class="text-secondary">+${inst.log_files.length - 8} more…</li>` : ""}
+         </ul>
+         <a href="/api/logs/${id}/download" class="btn btn-xs btn-outline-secondary btn-sm mt-1" style="font-size:.7rem">⬇ Download</a>`
+      : `<span class="text-secondary small">–</span>`;
+
+    return `<tr>
+      <td class="fw-bold">${id}</td>
+      <td><small class="text-secondary">${inst.address}</small></td>
+      <td>${statusBadge(inst.status)}</td>
+      <td style="min-width:100px">
+        <div class="d-flex align-items-center gap-2">
+          <div class="progress flex-grow-1"><div class="progress-bar bg-info" style="width:${pct}%"></div></div>
+          <small class="text-secondary" style="white-space:nowrap">${done}/${total}</small>
+        </div>
+      </td>
+      <td style="max-width:240px">${paramsHtml}</td>
+      <td style="max-width:220px">${logsHtml}</td>
+    </tr>`;
+  }).join("");
+}
+
+/* ── Config tabs ────────────────────────────────────────────────── */
+document.querySelectorAll("#config-tabs .nav-link").forEach(link => {
+  link.addEventListener("click", e => {
+    e.preventDefault();
+    document.querySelectorAll("#config-tabs .nav-link").forEach(l => l.classList.remove("active"));
+    link.classList.add("active");
+    const tab = link.dataset.cfg;
+    ["experiment", "session", "plyfiles", "websocket", "webrtc_ports", "external_webrtc_config"].forEach(t => {
+      document.getElementById(`cfg-${t}`)[t === tab ? "classList" : "classList"].toggle("d-none", t !== tab);
+    });
+  });
+});
+
+/* ── Save configs ───────────────────────────────────────────────── */
+document.querySelectorAll("[data-save]").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const key      = btn.dataset.save;
+    const endpoints = { experiment: "/api/config/experiment", session: "/api/config/session", plyfiles: "/api/config/plyfiles", websocket: "/api/config/websocket", webrtc_ports: "/api/config/webrtc_ports", external_webrtc_config: "/api/config/external_webrtc_config" };
+    const ta       = document.getElementById(`ta-${key}`);
+    const statusEl = document.getElementById(`save-${key}`);
+
+    let parsed;
+    try { parsed = JSON.parse(ta.value); }
+    catch { toast("Invalid JSON – please fix syntax errors.", "danger"); return; }
+
+    try {
+      const resp = await fetch(endpoints[key], {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(parsed),
+      });
+      const data = await resp.json();
+      if (data.status === "ok") { statusEl.textContent = "Saved ✓"; toast(`${key} saved.`); }
+      else                      { toast(`Save failed: ${JSON.stringify(data)}`, "danger"); }
+    } catch (e) { toast(`Error: ${e}`, "danger"); }
+    setTimeout(() => statusEl.textContent = "", 3000);
+  });
+});
+
+/* ── Upload tabs ────────────────────────────────────────────────── */
+document.querySelectorAll("#upload-tabs .nav-link").forEach(link => {
+  link.addEventListener("click", e => {
+    e.preventDefault();
+    document.querySelectorAll("#upload-tabs .nav-link").forEach(l => l.classList.remove("active"));
+    link.classList.add("active");
+    document.getElementById("tab-browser")[link.dataset.tab === "browser" ? "classList" : "classList"].toggle("d-none", link.dataset.tab !== "browser");
+    document.getElementById("tab-server")[link.dataset.tab  === "server"  ? "classList" : "classList"].toggle("d-none", link.dataset.tab  !== "server");
+  });
+});
+
+/* ── Upload content ─────────────────────────────────────────────── */
+document.getElementById("btn-upload").addEventListener("click", async () => {
+  const destPath   = document.getElementById("upload-dest-path").value.trim();
+  const serverPath = document.getElementById("server-path").value.trim();
+  const filesInput = document.getElementById("upload-files");
+  const resultEl   = document.getElementById("upload-result");
+
+  if (!destPath) { toast("Please specify a destination path.", "warning"); return; }
+
+  const fd = new FormData();
+  fd.append("path", destPath);
+
+  if (serverPath) {
+    fd.append("server_path", serverPath);
+  } else {
+    for (const f of filesInput.files) fd.append(f.name, f);
+    if (filesInput.files.length === 0) { toast("No files selected.", "warning"); return; }
+  }
+
+  resultEl.textContent = "Uploading…";
+  try {
+    const resp = await fetch("/api/upload_content", { method: "POST", body: fd });
+    const data = await resp.json();
+    resultEl.textContent = JSON.stringify(data);
+    toast("Upload complete.");
+  } catch (e) {
+    resultEl.textContent = String(e);
+    toast(`Upload error: ${e}`, "danger");
+  }
+});
+
+/* ── Start experiment ───────────────────────────────────────────── */
+document.getElementById("btn-start").addEventListener("click", async () => {
+  const resultEl = document.getElementById("start-result");
+  resultEl.textContent = "Starting…";
+  try {
+    const resp = await fetch("/api/start_experiment", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    "{}",
+    });
+    const data = await resp.json();
+    resultEl.textContent = JSON.stringify(data);
+    toast("Start command sent to all instances.");
+  } catch (e) {
+    resultEl.textContent = String(e);
+    toast(`Error: ${e}`, "danger");
+  }
+});
+
+/* ── Bootstrap & kick off ───────────────────────────────────────── */
+loadInstances();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

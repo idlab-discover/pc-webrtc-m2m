@@ -1,0 +1,45 @@
+{
+  "iterations": 3,
+  "duration": 60,
+
+  "network_configs": [
+    {
+      "targetIP":  "192.168.1.10",
+      "bandwidth": "10mbit",
+      "latency":   "50ms",
+      "loss":      "1%"
+    },
+    {
+      "targetIP":  "192.168.1.10",
+      "bandwidth": "50mbit",
+      "latency":   "10ms",
+      "loss":      "0%"
+    }
+  ],
+
+  "content_paths": [
+    "/data/content/sequence_A",
+    "/data/content/sequence_B"
+  ],
+
+  "frame_rates": [15, 30],
+
+  "client_app_path": "/opt/myapp/client",
+  "client_app_args": ["--server", "192.168.1.100", "--port", "8080"],
+  "apply_qdisc": false,
+
+  "session_config": {
+    "camFPS": 30,
+    "supportModes": [
+      {
+        "modeName": "mdc"
+      }
+    ]
+  },
+
+  "plyfiles": [
+    {
+      "directoryPath": "/data/content/sequence_A"
+    }
+  ]
+}

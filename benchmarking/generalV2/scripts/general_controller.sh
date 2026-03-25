@@ -1,0 +1,1 @@
+python3 general_controller/server.py --port 5000 --logs-dir general_logs

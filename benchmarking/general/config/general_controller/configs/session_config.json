@@ -1,0 +1,175 @@
+{
+  "artificialSettings": {
+    "artificialSize": 25
+  },
+  "audioPlayback": {
+    "audioDelay": 0,
+    "codecName": "",
+    "defaultPlaybackFrequency": 48000,
+    "doNotWaitForPc": false,
+    "dspSize": 480,
+    "forceStart": true,
+    "ignoreJitter": false,
+    "ignoreTargetDelay": false,
+    "latencyPlaybackMultiplier": 0.02,
+    "maxPlaybackFrequency": 49000,
+    "maxQueueSize": 1,
+    "minPlaybackFrequency": 47000,
+    "sampleSizeInBytes": 3840,
+    "targetSamples": 3,
+    "useAudio": true
+  },
+  "camFPS": 15,
+  "capturerName": "artificial",
+  "clientID": 1,
+  "frameCleanupSettings": {
+    "blackoutBlockSize": 1,
+    "shouldApplyDepthFilter": true,
+    "shouldBlackout": true,
+    "shouldCleanupDepth": true
+  },
+  "frameCodec": 1,
+  "frameMode": 0,
+  "loggerSettings": {
+    "appendTimestampToPath": false,
+    "audio": {
+      "everyNFrames": 100,
+      "limitLogging": true
+    },
+    "flushInterval": 100,
+    "logPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-m2m-clean\\pc-webrtc-m2m\\logs\\session_log",
+    "pointCloud": {
+      "everyNFrames": 100,
+      "limitLogging": true
+    }
+  },
+  "peerUDPPort": 10100,
+  "playbackPosition": false,
+  "playerControllerName": "randomrot",
+  "positionPlaybackConfig": {
+    "inputFile": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-m2m-clean\\pc-webrtc-m2m\\logs\\position_tracker_info_1770308395043.json"
+  },
+  "positionTrackerConfig": {
+    "outputFormat": "json",
+    "outputPath": "C:\\Users\\matth\\OneDrive\\Documenten\\SPIRIT\\pc-m2m-clean\\pc-webrtc-m2m\\logs",
+    "recordInterval": 0.1,
+    "writeContinously": false
+  },
+  "prerecKinectSettings": {
+    "alignToDepth": false,
+    "camFile": "C:\\Users\\matth\\OneDrive\\Documenten\\kinect_test\\cam.mkv",
+    "maxHeight": 2.2,
+    "minHeight": 0.02,
+    "radius": 1.25,
+    "trafo": [
+      [
+        -0.050460393857164776,
+        0.9908430991702812,
+        -0.1252345857921381,
+        0.18253431917245674
+      ],
+      [
+        0.9710111636074161,
+        0.0193374525710938,
+        -0.23825067277536155,
+        1.4120928470584455
+      ],
+      [
+        -0.23364731712910958,
+        -0.13362640365890532,
+        -0.9630954861505899,
+        1.7199030536244353
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "providersConfigPath": "/home/matthias/Documents/pc-webrtc-m2m/unity/spirit_m2m_webrtc/Assets/config/providers/prov.json",
+  "pushBack": {
+    "x": 0.229103,
+    "y": 0.0,
+    "z": 0
+  },
+  "rawEncodingSettings": {
+    "colorCodecName": "webp",
+    "depthCodecName": "vle",
+    "jpegSettings": {
+      "quality": 75
+    },
+    "maxQueueSize": 5,
+    "nWorkers": 4,
+    "webPSettings": {
+      "method": 0,
+      "quality": 75
+    }
+  },
+  "realsenseSettings": {
+    "alignToDepth": false,
+    "height": 480,
+    "maxDist": 1.5,
+    "minDist": 0.0,
+    "width": 848
+  },
+  "recordPosition": false,
+  "sessionManagerSettings": {
+    "configPath": "/config/session/websocket.json",
+    "defaultName": "Loopback_Session",
+    "type": "websocket"
+  },
+  "sfuAddress": "127.0.0.1:8080",
+  "startPositions": [
+    {
+      "x": 19.295,
+      "y": 0.974,
+      "z": -0.35
+    },
+    {
+      "x": 19.0,
+      "y": 0.974,
+      "z": -0.931
+    },
+    {
+      "x": 18.793,
+      "y": 0.974,
+      "z": -0.117
+    },
+    {
+      "x": 19,
+      "y": 1,
+      "z": 0.4
+    }
+  ],
+  "supportedModes": [
+    {
+      "modeName": "mdc",
+      "modeSettings": {
+        "maxCompletePointCount": 1000000,
+        "samplingPercentages": [
+          0.6,
+          0.25,
+          0.15
+        ]
+      },
+      "supportedCodecs": [
+        "draco"
+      ]
+    }
+  ],
+  "table": {
+    "position": {
+      "x": 19,
+      "y": 0.69,
+      "z": -0.46
+    },
+    "scale": {
+      "x": 1.4,
+      "y": 0.1,
+      "z": 1.7
+    }
+  },
+  "useMic": false
+}

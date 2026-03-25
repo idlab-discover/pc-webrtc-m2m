@@ -85,6 +85,8 @@ func main() {
 
 		proxyConn := proxy.NewProxyConnection()
 		tr := transcoder.NewTranscoderRemote(videoTracks, proxyConn)
+		fmt.Printf("WebRTCPeer: Starting with proxy input. Video tracks: %v, Audio tracks: %v\n", videoTracks, audioTracks)
+		fmt.Printf("WebRTCPeer: Proxy ports - This: %s, DLL: %s\n", *proxyPortThis, *proxyPortDLL)
 		proxyConn.SetupConnection(*proxyPortThis, *proxyPortDLL)
 		proxyConn.StartListening((uint32(len(videoTracks) + len(audioTracks))))
 		sfuConn := sfu.NewSFUConnection(

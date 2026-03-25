@@ -3,6 +3,7 @@
 #include "webrtc_connection.h"
 #include "log.h"
 #include "packet_data.hpp"
+#include <fstream>
 // TODO
 // AddRemoteClient function
 
@@ -138,8 +139,12 @@ void WebRTCConnection::listen_for_data() {
 		switch (p_type.type) {
 		case (PacketType::ReadyPacket): {
 			// Peer is now ready to receive data
-			std::unique_lock<std::mutex> lk(m_peer_ready);
-			peer_ready = true;
+			std::vector<std::vector<char>> buffered;
+			{
+				std::unique_lock<std::mutex> lk(m_peer_ready);
+				peer_ready = true;
+				buffered = std::move(pending_track_packets);
+			}
 			char t[BUFLEN] = { 0 };
 			//custom_log("listen_for_data: connected to peer", Default, Color::Orange);
 			if (sendto(s_recv, t, BUFLEN, 0, (struct sockaddr*)&si_send, slen_send) == SOCKET_ERROR) {
@@ -148,9 +153,11 @@ void WebRTCConnection::listen_for_data() {
 				WSACleanup();
 				return;
 			}
-			lk.unlock();
 			connection_status = 1;
 			cv_peer_ready.notify_all();
+			for (auto& pkt : buffered) {
+				send_packet(pkt.data(), static_cast<uint32_t>(pkt.size()), PacketType::RemoteClientTracksPacket);
+			}
 			break;
 		};
 		case (PacketType::FramePacket): {
@@ -277,7 +284,7 @@ std::vector<unsigned int> WebRTCConnection::add_tracks(unsigned int client_id, c
 	}
 	std::vector<char> data_to_send(total_len);
 	char* data_ptr = data_to_send.data();
-	write_u32_le(data_ptr, 1);
+	write_u32_le(data_ptr, client_id);
 	write_u32_le(data_ptr, static_cast<uint32_t>(count));
 	for (unsigned int i = 0; i < count; i++) {
 		write_u32_le(data_ptr, id_lengths[i]);
@@ -289,8 +296,18 @@ std::vector<unsigned int> WebRTCConnection::add_tracks(unsigned int client_id, c
 		memcpy(data_ptr, &is_vid, sizeof(bool));
 		data_ptr += sizeof(bool);
 	}
-
-	send_packet(data_to_send.data(), total_len, PacketType::RemoteClientTracksPacket); // TODO Fill in data and size
+	{
+		std::ofstream dbg_file("total_len.txt");
+		dbg_file << total_len;
+	}
+	{
+		std::unique_lock<std::mutex> lk(m_peer_ready);
+		if (!peer_ready) {
+			pending_track_packets.push_back(data_to_send);
+			return track_ids_uint;
+		}
+	}
+	send_packet(data_to_send.data(), total_len, PacketType::RemoteClientTracksPacket);
 	return track_ids_uint;
 }
 
@@ -405,10 +422,21 @@ int WebRTCConnection::send_packet(char* data, uint32_t size, uint32_t _packet_ty
 
 	// Send the message to the Golang peer
 	if ((size_sent = sendto(s_recv, buf_msg, BUFLEN, 0, (struct sockaddr*)&si_send, slen_send)) == SOCKET_ERROR) {
+#ifdef WIN32
+		int err = WSAGetLastError();
+#else
+		int err = errno;
+#endif
+		std::ofstream err_file("send_packet_error.txt", std::ios::app);
+		err_file << "send_packet error: " << err << " (packet_type=" << _packet_type << ", size=" << size << ")\n";
 		return -1;
 	}
 
 	// Return the amount of bytes sent
+	{
+		std::ofstream dbg_file("send_packet_success.txt", std::ios::app);
+		dbg_file << "size_sent=" << size_sent << " (packet_type=" << _packet_type << ", size=" << size << ")\n";
+	}
 	return size_sent;
 }
 

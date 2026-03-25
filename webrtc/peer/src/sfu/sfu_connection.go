@@ -150,6 +150,7 @@ func (s *SFUConnection) SubscribeToRemoteClientTracks(clients []session_manager.
 	s.mut.Lock()
 	defer s.mut.Unlock()
 	if len(clients) == 0 {
+		fmt.Println("No clients to subscribe to")
 		return
 	}
 	s.websocket.WriteJSONMessageSafe("SubscribeToRemoteClientsMessage", SubscribeToRemoteClientsMessage{
@@ -192,7 +193,7 @@ func (s *SFUConnection) connectToSFU(clientID uint, authKey string) {
 	}
 	if s.ProxyConn != nil {
 		s.ProxyConn.WsHandler = s.websocket
-		s.ProxyConn.OnSubscribeToTracksReceived = s.SubscribeToRemoteClientTracksString
+		s.ProxyConn.SetOnSubscribeToTracksReceived(s.SubscribeToRemoteClientTracksString)
 	}
 	s.startListening()
 }

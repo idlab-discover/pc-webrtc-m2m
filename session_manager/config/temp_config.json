@@ -2,9 +2,9 @@
   "address": "127.0.0.1:8080",
   "verifyAuthKey": false,
   "ignorePreferredClientID": false,
-  "defaultProviderConfigPath": "config/providers/general.json",
+  "defaultProviderConfigPath": "/home/matthias/Documents/pc-webrtc-m2m/session_manager/config/providers/general.json",
   "provisionerType": "",
-  "provisionerConfigPath": "config/provisioner/local.json",
+  "provisionerConfigPath": "/home/matthias/Documents/pc-webrtc-m2m/session_manager/config/provisioner/local.json",
   "providersToCreate": [
     {
       "type": "webrtc_sfu",

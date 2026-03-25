@@ -100,6 +100,9 @@ func (sm *SessionManager) CreateProvider(providerType string, providerKey string
 	}
 	config := sm.providerConfigs.GetConfigForTypeAndKey(providerType, providerKey)
 	if config == nil {
+		fmt.Printf("Invalid provider type or key requested: %s %s\n", providerType, providerKey)
+		sm.mut.Unlock()
+		LogWithMessage(NameManager, MutUnlock, true, true, "func=CreateProvider")
 		return nil
 	}
 	pc := NewProviderConnection(sm, providerType, providerKey, address, port, authKey, config.Settings)
@@ -268,6 +271,7 @@ func (sm *SessionManager) OnClientAddedToProvider(pc *ProviderConnection, addedM
 		LogWithMessage(NameManager, InvalidClientID, true, true, fmt.Sprintf("providerKey=%s clientID=%d", pc.ProviderKey, addedMsg.ClientID))
 		return
 	}
+	fmt.Printf("WebRTCSFU: OnClientAddedToProvider: providerKey=%s clientID=%d addedMsg=%+v\n", pc.ProviderKey, addedMsg.ClientID, addedMsg)
 	client.ConnectedProviders[pc.ProviderKey] = pc
 	pcClient := pc.Clients[addedMsg.ClientID]
 	pcClient.IsConnected = true

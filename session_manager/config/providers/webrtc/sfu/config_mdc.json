@@ -20,6 +20,7 @@
             "enabled": true,
             "maxRetries": 5
         },
-        "gatherTrackStats": true
+        "gatherTrackStats": true,
+        "ipFilter": ""
     }
 }

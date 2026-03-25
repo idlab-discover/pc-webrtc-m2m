@@ -1,0 +1,11 @@
+python3 instance_controller/server.py \
+  --general-controller http://127.0.0.1:5000 \
+  --id instance-1 \
+  --address http://127.0.0.1:5001 \
+  --session-manager /home/matthias/Documents/pc-webrtc-m2m/session_manager/session_manager_linux.exe \
+  --session-manager-args "-c /home/matthias/Documents/pc-webrtc-m2m/session_manager/config/temp_config.json" \
+  --local-log-dirs output \
+  --content-base-path content_client/ \
+  --qdisc-script ./setup_qdisc.sh \
+  --config-upload-before-start \
+  --port 5001

@@ -1,0 +1,8 @@
+{
+  "camFPS": 30,
+  "supportModes": [
+    {
+      "modeName": "mdc"
+    }
+  ]
+}

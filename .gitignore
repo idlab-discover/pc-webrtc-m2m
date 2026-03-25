@@ -1,1 +1,9 @@
 **/logs/
+*.tar*
+*.zip
+planning.md
+*.venv*
+send_packet_success.txt
+total_len.txt
+*exp_configs*
+frame*.bin

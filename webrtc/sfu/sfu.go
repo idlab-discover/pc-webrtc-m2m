@@ -29,7 +29,6 @@ type SFU struct {
 	overallTrackMetrics *metrics.OverallTrackMetrics
 	qualityAdaptation   QualityAdaptation
 	websocket           *threadSafeWriter
-	ipFilter            string
 	mut                 sync.Mutex
 	providerKey         string
 	// Metrics related
@@ -42,7 +41,7 @@ type CompositeTest struct {
 	Field2 float32
 }
 
-func NewSFU(address string, port uint, ipFilter string, providerKey string, metricsServerConfigPath string) *SFU {
+func NewSFU(address string, port uint, providerKey string, metricsServerConfigPath string) *SFU {
 	logger.Log(NameSFU, logger.Creating, true, true)
 	sfu := &SFU{
 		address:             address,
@@ -51,7 +50,6 @@ func NewSFU(address string, port uint, ipFilter string, providerKey string, metr
 		virtualClients:      map[uint]string{},
 		remoteProviders:     map[string]ProviderConnection{},
 		overallTrackMetrics: metrics.NewOverallTrackMetrics(),
-		ipFilter:            ipFilter,
 		providerKey:         providerKey,
 		mut:                 sync.Mutex{},
 	}
@@ -200,7 +198,7 @@ func (sfu *SFU) websocketClientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("WebRTCSFU: webSocketHandler: Websocket handler upgraded")
+	fmt.Println("WebRTCSFU: webSocketHandler: Websocket handler upgraded for client", clientID)
 
 	client.SetupWebsocket(
 		&ThreadSafeWebsocket{
@@ -455,6 +453,7 @@ func (sfu *SFU) StartPerformingQualityAdaptation() {
 			sfu.mut.Lock()
 			output := fmt.Sprintf("ts=%d stats=[", time.Now().UnixMilli())
 			adaptationsToDo := make(map[uint]*QualityAdaptationsToDo)
+			choiceMetrics := make(map[uint][]CompositeQualityChoiceMetric, 0)
 			for _, client := range sfu.clients {
 				if client.BandwidthEstimator != nil {
 					targetBitrate := client.BandwidthEstimator.GetTargetBitrate()
@@ -478,7 +477,13 @@ func (sfu *SFU) StartPerformingQualityAdaptation() {
 						if sfu.adaptationMetrics != nil && adaptationInfo.Choices != nil && len(adaptationInfo.Choices) > 0 {
 							clientChoice := adaptationInfo.Choices[0]
 							if len(clientChoice.QualitiesBitrate) == 7 {
-								sfu.adaptationMetrics.AddCapturedValue(CompositeQualityChoiceMetric{
+								// Create choiceMetrics for client if not exists
+								if _, exists := choiceMetrics[clientChoice.ClientID]; !exists {
+									choiceMetrics[clientChoice.ClientID] = make([]CompositeQualityChoiceMetric, 0)
+								}
+
+								choiceMetrics[clientChoice.ClientID] = append(choiceMetrics[clientChoice.ClientID], CompositeQualityChoiceMetric{
+									SourceClientID:     uint32(client.clientID),
 									ClientID:           uint32(clientChoice.ClientID),
 									SelectedQuality:    int32(clientChoice.SelectedQuality),
 									MaxAllowedQuality:  int32(clientChoice.MaxAllowedQuality),
@@ -510,8 +515,11 @@ func (sfu *SFU) StartPerformingQualityAdaptation() {
 				if !exists {
 					continue
 				}
-				client.SetQualityAdaptationToDo(adaptations)
-
+				frameNr := client.SetQualityAdaptationToDo(adaptations)
+				for _, choiceMetric := range choiceMetrics[clientId] {
+					choiceMetric.FrameNr = frameNr
+					sfu.adaptationMetrics.AddCapturedValue(choiceMetric)
+				}
 			}
 			sfu.MetricsHelper.UpdateMetrics()
 			output += "]"

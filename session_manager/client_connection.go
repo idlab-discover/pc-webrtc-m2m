@@ -209,6 +209,7 @@ func (clc *ClientConnection) handleJoinMessage(payload json.RawMessage) {
 		return
 	}
 	fmt.Printf("Received JoinSessionMessage: %+v\n", msg)
+
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
 	clc.CodecMode = msg.CodecMode
@@ -220,7 +221,7 @@ func (clc *ClientConnection) handleJoinMessage(payload json.RawMessage) {
 		provider := &msg.Providers[i]
 		pc := clc.parent.CreateProvider(provider.ProviderType, provider.ProviderKey, "", 0, provider.ConnectedTo) // TODO Fix port + address
 		if pc == nil {
-
+			fmt.Printf("Invalid provider requested by client: %s\n", provider.ProviderKey)
 			continue
 			// TODO Log invalid provider
 		}

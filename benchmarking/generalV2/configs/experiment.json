@@ -1,0 +1,26 @@
+{
+  "iterations": 1,
+  "duration": 60,
+  "network_configs": [
+    {
+      "targetIP": "192.168.1.10",
+      "bandwidth": "10mbit",
+      "latency": "50ms",
+      "loss": "1%"
+    }
+  ],
+  "content_paths": [
+    "/data/content/sequence_A"
+  ],
+  "frame_rates": [
+    15
+  ],
+  "client_app_root": "/home/matthias/Documents/pc-webrtc-m2m/unity/spirit_m2m_webrtc/BuildLinux",
+  "client_app_exe": "Build.x86_64",
+  "client_config_directory": "Build_Data/config",
+  "client_app_args": [
+    "-batchmode",
+    "-nographics"
+  ],
+  "apply_qdisc": false
+}

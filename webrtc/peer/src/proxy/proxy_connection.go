@@ -126,6 +126,12 @@ func (rc *RemoteCapturer) addFrameContent(p RemoteInputPacketHeader, buffer []by
 
 type OnSubscribeToTracksReceived func(clientID uint32, videoTrackIDs []string, audioTrackIDs []string)
 
+type pendingSubscription struct {
+	clientID uint32
+	videoIDs []string
+	audioIDs []string
+}
+
 type ProxyConnection struct {
 	addr *net.UDPAddr
 	conn *net.UDPConn
@@ -138,7 +144,8 @@ type ProxyConnection struct {
 
 	WsHandler *utils.ThreadSafeWebsocket
 
-	OnSubscribeToTracksReceived OnSubscribeToTracksReceived
+	onSubscribeToTracksReceived OnSubscribeToTracksReceived
+	pending_subscriptions       []pendingSubscription
 }
 
 type SetupCallback func(int)
@@ -150,9 +157,24 @@ func NewProxyConnection() *ProxyConnection {
 		m:                    utils.NewPriorityPreferenceLock(),
 		remote_capturers:     make(map[uint32]*RemoteCapturer), // Video and audio
 		remote_client_tracks: map[string]uint32{},
-		send_mutex:           sync.Mutex{},
-		WsHandler:            nil,
+		send_mutex:            sync.Mutex{},
+		WsHandler:             nil,
+		pending_subscriptions: make([]pendingSubscription, 0),
 	}
+}
+
+func (pc *ProxyConnection) SetOnSubscribeToTracksReceived(cb OnSubscribeToTracksReceived) {
+	pc.rm_client_mutex.Lock()
+	pc.onSubscribeToTracksReceived = cb
+	pending := pc.pending_subscriptions
+	pc.pending_subscriptions = pc.pending_subscriptions[:0]
+	pc.rm_client_mutex.Unlock()
+	// Drain in a goroutine to avoid deadlocking if the caller holds a lock that cb also needs.
+	go func() {
+		for _, p := range pending {
+			cb(p.clientID, p.videoIDs, p.audioIDs)
+		}
+	}()
 }
 
 func (pc *ProxyConnection) sendPacket(b []byte, offset uint32, packet_type uint32) {
@@ -236,8 +258,14 @@ func (pc *ProxyConnection) StartListening(nTracks uint32) {
 	go func() {
 		for {
 			buffer := make([]byte, 1500)
-			_, _, _ = pc.conn.ReadFromUDP(buffer)
+			//fmt.Printf("WebRTCPeer: Waiting for frame packet for %d tracks...\n", nTracks)
+			_, _, err := pc.conn.ReadFromUDP(buffer)
+			if err != nil {
+				fmt.Printf("WebRTCPeer: Error reading UDP packet: %s\n", err)
+				continue
+			}
 			ptype := binary.LittleEndian.Uint32(buffer[:4])
+			//fmt.Printf("WebRTCPeer: Received packet of type %d\n", ptype)
 			if ptype == FramePacketType {
 				bufBinary := bytes.NewBuffer(buffer[4:28])
 				var p RemoteInputPacketHeader
@@ -275,6 +303,10 @@ func (pc *ProxyConnection) StartListening(nTracks uint32) {
 					return
 				}
 				println("Received subscription for", nEntries, "tracks for client", clientID)
+				if nEntries == 0 {
+					pc.rm_client_mutex.Unlock()
+					continue
+				}
 				videoIDs := make([]string, 0)
 				audioIDs := make([]string, 0)
 				for i := uint32(0); i < nEntries; i++ {
@@ -311,7 +343,11 @@ func (pc *ProxyConnection) StartListening(nTracks uint32) {
 					pc.remote_client_tracks[string(trackID)] = internalTrackID
 					println("Mapping remote track", string(trackID), "to internal ID", internalTrackID, "isVideo:", isVideo)
 				}
-				pc.OnSubscribeToTracksReceived(clientID, videoIDs, audioIDs)
+				if pc.onSubscribeToTracksReceived != nil {
+					pc.onSubscribeToTracksReceived(clientID, videoIDs, audioIDs)
+				} else {
+					pc.pending_subscriptions = append(pc.pending_subscriptions, pendingSubscription{clientID, videoIDs, audioIDs})
+				}
 				pc.rm_client_mutex.Unlock()
 			}
 		}

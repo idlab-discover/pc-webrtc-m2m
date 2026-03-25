@@ -204,6 +204,7 @@ public class BaseSession : MonoBehaviour
                 ms.RemoteAddress = metricsServerAddress;
                 ms.Init();
             }
+            Debug.Log($"Looking for prefab for codec mode {client.CodecMode}");
             PipelineLocalPrefabFactory.registeredPrefabs.TryGetValue(client.CodecMode, out var prefab);
             if (prefab == null) 
             {

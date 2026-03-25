@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"goweb/shared/src/logger"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
+	"syscall"
 
 	"github.com/gorilla/websocket"
 )
@@ -117,7 +119,8 @@ func (smc *SessionManagerConnection) StartListening() {
 			var msg SessionManagerMessage
 
 			if err := smc.websocket.ReadJSON(&msg); err != nil {
-				panic(err)
+				syscall.Kill(os.Getpid(), syscall.SIGINT)
+				return
 				//fmt.Printf("error reading message: %v\n", err)
 				//continue // TODO Handle errors
 			}
@@ -166,6 +169,7 @@ type SFUSettings struct {
 	VerifyAuthKey      bool            `json:"verifyAuthKey"`
 	NackSettings       NackSettings    `json:"nackSettings"`
 	GatherTrackStats   bool            `json:"gatherTrackStats"`
+	IpFilter           string          `json:"ipFilter"`
 }
 
 type NackSettings struct{}

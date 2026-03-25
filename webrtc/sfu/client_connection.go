@@ -27,6 +27,18 @@ type SenderTrack struct {
 	trackBitrate *TrackBitrate
 	WebRTCTrack  *webrtc.TrackLocalStaticRTP
 	trackMeter   *metrics.TrackMeter
+
+	latestFrameNr   uint32
+	needsAdaptation bool
+	tracksToPlay    []*ReceiverTrack
+	tracksToPause   []*ReceiverTrack
+}
+
+func (tr *SenderTrack) AddPlayTrack(toPlay *ReceiverTrack) {
+	tr.tracksToPlay = append(tr.tracksToPlay, toPlay)
+}
+func (tr *SenderTrack) AddPauseTrack(toPause *ReceiverTrack) {
+	tr.tracksToPause = append(tr.tracksToPause, toPause)
 }
 
 type ReceiverTrack struct {
@@ -92,7 +104,8 @@ type ClientConnection struct {
 	PositionInited bool
 	PositionMatrix PositionMatrix
 
-	latestFrameNr uint32
+	latestFrameNr     uint32
+	nextChoiceFrameNr uint32
 
 	adaptationsToDo *QualityAdaptationsToDo
 
@@ -148,11 +161,13 @@ func NewClientConnection(parent *SFU, clientID uint, authKey string,
 		}
 		meter := parent.overallTrackMetrics.AddTrackMeter(tempTrack.TrackID)
 		videoTracksMap[tempTrack.TrackID] = &SenderTrack{
-			Parent:       cl,
-			TrackID:      tempTrack.TrackID,
-			trackBitrate: &TrackBitrate{}, /*TODO Make constructor*/
-			WebRTCTrack:  trackLocal,
-			trackMeter:   meter,
+			Parent:        cl,
+			TrackID:       tempTrack.TrackID,
+			trackBitrate:  &TrackBitrate{}, /*TODO Make constructor*/
+			WebRTCTrack:   trackLocal,
+			trackMeter:    meter,
+			tracksToPlay:  make([]*ReceiverTrack, 0),
+			tracksToPause: make([]*ReceiverTrack, 0),
 		}
 
 	}
@@ -204,7 +219,7 @@ func (clc *ClientConnection) SetupPeerConnection(sfuSettings *SFUSettings) {
 	settingEngine2.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
 	settingEngine2.SetReceiveMTU(10000)
 	settingEngine2.SetICETimeouts(60*time.Second, 60*time.Second, 60*time.Second)
-	if clc.parent.ipFilter != "" {
+	if clc.parent.settings.IpFilter != "" {
 		settingEngine2.SetIPFilter(clc.ipFilterFunc)
 	}
 	peerConnection, err := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine2), webrtc.WithMediaEngine(mediaEngine), webrtc.WithInterceptorRegistry(interceptorRegistry)).NewPeerConnection(webrtc.Configuration{})
@@ -337,7 +352,7 @@ func (clc *ClientConnection) AddPeerConnectionCallbacks() {
 				// Only perform adaptation when a new frame starts, otherwise there might be partial frames
 				// We do this for every description/track but internally the adaptations will only happen once
 				if t.Kind() == webrtc.RTPCodecTypeVideo {
-					senderTrack.Parent.SetLatestFrameAndPerformAdaptation(p.FrameNr)
+					senderTrack.Parent.SetLatestFrameAndPerformAdaptation(p.FrameNr, senderTrack)
 				}
 
 				completedFrame = false
@@ -447,6 +462,7 @@ func (clc *ClientConnection) SignalRenegotiationUnsafe() {
 
 func (clc *ClientConnection) startListening() {
 	go func() {
+		fmt.Printf("Start listening for client %d", clc.clientID)
 		for {
 			var msg ClientMessage
 			if err := clc.websocket.ReadJSON(&msg); err != nil {
@@ -683,33 +699,52 @@ func SetupDefaultMediaEngine() *webrtc.MediaEngine {
 
 // TODO Consider making this per track instead of just globally
 // Atm the current system might cause problems is a certain track is delayed a lot
-func (clc *ClientConnection) SetLatestFrameAndPerformAdaptation(frameNr uint32) {
+func (clc *ClientConnection) SetLatestFrameAndPerformAdaptation(frameNr uint32, senderTrack *SenderTrack) {
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
-	if frameNr <= clc.latestFrameNr {
+	if frameNr > clc.latestFrameNr {
+		clc.latestFrameNr = frameNr
+	}
+
+	if frameNr <= senderTrack.latestFrameNr {
 		return
 	}
-	clc.latestFrameNr = frameNr
-	if clc.adaptationsToDo != nil {
-		for _, playTrack := range clc.adaptationsToDo.ToPlay {
+	if senderTrack.needsAdaptation {
+		fmt.Printf("Performing adaptation for track with id %s", senderTrack.TrackID)
+		for _, playTrack := range senderTrack.tracksToPlay {
 			playTrack.Play()
 		}
-		for _, pauseTrack := range clc.adaptationsToDo.ToPause {
+		for _, pauseTrack := range senderTrack.tracksToPause {
 			pauseTrack.Pause()
 		}
+		senderTrack.tracksToPlay = senderTrack.tracksToPlay[:0]
+		senderTrack.tracksToPause = senderTrack.tracksToPause[:0]
+		senderTrack.needsAdaptation = false
 	}
-	clc.adaptationsToDo = nil // Might not be needed
+
 }
 
-func (clc *ClientConnection) SetQualityAdaptationToDo(adaptations *QualityAdaptationsToDo) {
+func (clc *ClientConnection) SetQualityAdaptationToDo(adaptations *QualityAdaptationsToDo) uint32 {
 	clc.mut.Lock()
 	defer clc.mut.Unlock()
-	clc.adaptationsToDo = adaptations
+	for _, track := range clc.SenderVideoTracks {
+		track.needsAdaptation = true
+		track.latestFrameNr = clc.latestFrameNr
+	}
+	if adaptations != nil {
+		for _, playTrack := range adaptations.ToPlay {
+			playTrack.CorrespondingSenderTrack.AddPlayTrack(playTrack)
+		}
+		for _, pauseTrack := range adaptations.ToPause {
+			pauseTrack.CorrespondingSenderTrack.AddPauseTrack(pauseTrack)
+		}
+	}
+	return clc.latestFrameNr + 1
 }
 
 func (clc *ClientConnection) ipFilterFunc(addr net.IP) bool {
-	logger.LogWithMessage(NameClientConnection, logger.IPFilterCheck, true, true, fmt.Sprintf("clientID=%d ip=%s filter=%s", clc.clientID, addr.String(), clc.parent.ipFilter))
-	if strings.HasPrefix(addr.String(), clc.parent.ipFilter) {
+	logger.LogWithMessage(NameClientConnection, logger.IPFilterCheck, true, true, fmt.Sprintf("clientID=%d ip=%s filter=%s", clc.clientID, addr.String(), clc.parent.settings.IpFilter))
+	if strings.HasPrefix(addr.String(), clc.parent.settings.IpFilter) {
 		return true
 	}
 	return false

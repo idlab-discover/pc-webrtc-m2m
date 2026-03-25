@@ -1,6 +1,6 @@
 {
-    "outputPath": "/home/matthias/Documents/output",
-    "filePrefix": "loot",
+    "outputPath": "/home/matthias/Documents/soldier_100k",
+    "filePrefix": "soldier",
     "maxFrames": 300,
     "nPointsPerFrame": 100000
 }

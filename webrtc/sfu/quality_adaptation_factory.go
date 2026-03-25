@@ -15,6 +15,8 @@ func CreateQualityAdaptation(adaptationType string) QualityAdaptation {
 		adaptation = NewRandomQualityAdaptation()
 	case "mdc":
 		adaptation = NewMDCQualityAdaptation()
+	case "mdc_random":
+		adaptation = NewMDCRandomQualityAdaptation()
 	default:
 		adaptation = nil
 	}

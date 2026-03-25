@@ -1,41 +1,5 @@
-id=SessionManagerRepository ts=1773601454324 status=FactoryCreate type=websocket configPath=/config/session/websocket.json
-id=SessionManagerRepository ts=1773601454362 status=FactoryCreateSucces type=websocket configPath=/config/session/websocket.json
-id=WebSocketSessionManager ts=1773601456417 status=ManagerReadyToConnect
-id=WebSocketSessionManager ts=1773601456420 status=ManagerConnectionStart
-id=WebSocketSessionManager ts=1773601456500 status=WSMessageReceive type=FullyConnected
-id=WebSocketSessionManager ts=1773601456507 status=ManagerConnectionSuccess
-id=CodecModeRepository ts=1773601456700 status=FactoryCreate type=spectator
-id=CodecModeRepository ts=1773601456700 status=FactoryCreateFailed type=spectator
-id=WebSocketSessionManager ts=1773601456702 status=ManagerSessionCreating sessionName=Loopback_Session
-id=WebSocketSessionManager ts=1773601456730 status=WSMessageReceive type=SessionJoined
-id=WebSocketSessionManager ts=1773601456742 status=ManagerSessionJoined
-id=WebSocketSessionManager ts=1773601456747 status=WSMessageReceive type=ClientAddedToProvider
-id=WebSocketSessionManager ts=1773601456758 status=ManagerProviderRequested type=webrtc_sfu provider=sfu_mdc
-id=ConnectionProviderRepository ts=1773601456810 status=FactoryCreate type=webrtc_sfu key=sfu_mdc ip=127.0.0.1 port=8013
-id=PlayerControllerRandomRotate ts=1773601456815 status=Initializing clientID=0
-id=ExternalWebRTCProvider ts=1773601456816 status=Creating portSelf=9000 portRemote=9001
-id=MultiCaptureSetup ts=1773601456819 status=Creating fps=15 frameMode=RealData nCaptures=1 startCaptureThread=True
-id=ExternalWebRTCProvider ts=1773601456872 status=Created
-id=ConnectionProviderRepository ts=1773601456872 status=FactoryCreateSucces type=webrtc_sfu  key=sfu_mdc
-id=ExternalWebRTCProvider ts=1773601456875 status=ProviderConnectionStart mode=async
-id=ExternalWebRTCProvider ts=1773601456877 status=ProviderConnectionStart
-id=MultiCaptureSetup ts=1773601456879 status=Created
-id=MDCEncodingQueue ts=1773601456888 status=Creating
-id=MDCEncodingQueue ts=1773601456889 status=Created
-id=PipelineLocalPointcloudMDC ts=1773601456950 status=EndEncodingPC clientID=0 ts_frame=1773601456876 capturer_id=0 frameNr=0 descriptionNr=0 codecType=0 totalNumberOfPoints=15625
-id=PipelineLocalPointcloudMDC ts=1773601456950 status=EndEncodingPC clientID=0 ts_frame=1773601456876 capturer_id=0 frameNr=0 descriptionNr=1 codecType=0 totalNumberOfPoints=15625
-id=PipelineLocalPointcloudMDC ts=1773601456949 status=EndEncodingPC clientID=0 ts_frame=1773601456876 capturer_id=0 frameNr=0 descriptionNr=2 codecType=0 totalNumberOfPoints=15625
-id=LocalConnectedClient ts=1773601456952 status=ClientTrackNotFound clientID=0 trackID=cl0_mdc_0_1
-id=LocalConnectedClient ts=1773601456952 status=ClientTrackNotFound clientID=0 trackID=cl0_mdc_0_2
-id=LocalConnectedClient ts=1773601456952 status=ClientTrackNotFound clientID=0 trackID=cl0_mdc_0_0
-id=PipelineLocalPointcloudMDC ts=1773601456953 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=0
-id=PipelineLocalPointcloudMDC ts=1773601456953 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=2
-id=PipelineLocalPointcloudMDC ts=1773601456953 status=FrameAddedToSender clientID=0 capturerID=0 frameNr=0 descriptionID=1
-id=MultiCaptureSetup ts=1773601457009 status=Disposing
-id=MultiCaptureSetup ts=1773601457073 status=Disposed
-id=PipelineLocalPointcloudMDC ts=1773601516025 status=Destroying clientID=0
-id=PipelineLocalPointcloudMDC ts=1773601516025 status=Destroyed clientID=0
-id=WebSocketSessionManager ts=1773601516026 status=ManagerDisconnecting
-id=ExternalWebRTCProvider ts=1773601516028 status=Disposing
-id=ExternalWebRTCProvider ts=1773601516029 status=Disposed
-id=WebSocketSessionManager ts=1773601516029 status=ManagerDisconnected
+id=MultiCaptureSetup ts=1774359311105 status=Creating fps=15 frameMode=RealData nCaptures=1 startCaptureThread=False
+id=MultiCaptureSetup ts=1774359311106 status=Created
+id=MultiCaptureSetup ts=1774359344135 status=Disposing
+id=MultiCaptureSetup ts=1774359344137 status=Disposed
+id=BenchDownsamplePC ts=1774360302384 status=Destroying clientID=0

@@ -152,7 +152,7 @@ public class PlaybackBufferSettings
 {
     public uint holdFramePreviousFor = 100;
     public bool usePreviousFrameData = false;
-    public uint maxTimeBeforeIncompleteRender = 20;
+    public uint maxTimeBeforeIncompleteRender = 45;
     public bool enqueueImmediately = false;
     public bool renderIncompleteFrames = true;
 }

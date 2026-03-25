@@ -37,6 +37,7 @@ public abstract class PipelineLocalPointcloudBase : PipelineLocalBase
     {
         while (keepWorking)
         {
+            Debug.Log("Polling frames...");
             pollFramesInternal();
         }
         if (capture != null)

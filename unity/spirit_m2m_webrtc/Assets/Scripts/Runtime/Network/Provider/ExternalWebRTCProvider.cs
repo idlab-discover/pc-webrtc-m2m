@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using UnityEngine;
+using Newtonsoft.Json;
 
 [ConnectionProviderRegister("webrtc_sfu")]
 public class ExternalWebRTCProvider : ConnectionProviderBase, ISenderSupported, IReceiverSupported
@@ -35,7 +36,7 @@ public class ExternalWebRTCProvider : ConnectionProviderBase, ISenderSupported, 
         _portRemote = portRemote.Value;
         _portSelf = portSelf.Value;
         Logger.LogStatusWithMessage(NAME, Logger.Status.Creating, $"portSelf={_portSelf} portRemote={_portRemote}");
-        var settings = pMsg.config.ToObject<ExternalWebRTCSettings>();
+        var settings  = JsonConvert.DeserializeObject<ExternalWebRTCSettings>(File.ReadAllText($"{Application.dataPath}/config/session/external_webrtc_config.json"));
         ptr = WebRTCInvoker.create_new_webrtc_connection(_portSelf, _portRemote);
         if (ptr == IntPtr.Zero)
         {
@@ -52,67 +53,102 @@ public class ExternalWebRTCProvider : ConnectionProviderBase, ISenderSupported, 
         peerExe = "/peer/peer_linux.exe";
 #endif
         string peerBinary = Application.dataPath + peerExe; // TODO Read this from config file, maybe add to session config pairs of {providerType, configPath}
-        string[] peerArgumentTokens =
+        var peerArgumentList = new List<string>
         {
             "-i",
             "-c", localConnectedClient.ClientID.ToString(),
             "-p", _portSelf.ToString(),
             "-r", _portRemote.ToString(),
-            "--vt", sender.VideoTracksString,
             "--sfuKey", pMsg.providerKey,
             "--sfuIP", pMsg.address,
             "--sfuPort", pMsg.port.ToString(),
             "--sfuAuth", "TODO"
         };
-        string peerArguments = string.Join(" ", peerArgumentTokens);
-        peerProcess.StartInfo.FileName = peerBinary;
-        peerProcess.StartInfo.Arguments = peerArguments;
-        UnityEngine.Debug.Log($"-i -c {localConnectedClient.ClientID} -p {_portSelf} -r {_portRemote} --vt {sender.VideoTracksString} --at {sender.AudioTracksString} --sfuKey {pMsg.providerKey} " +
-            $"--sfuIP {pMsg.address} --sfuPort {pMsg.port} --sfuAuth TODO");
+        if (!string.IsNullOrEmpty(settings.ipFilter))
+        {
+            peerArgumentList.Add("--ipFilter");
+            peerArgumentList.Add(settings.ipFilter);
+        }
+        if (!string.IsNullOrEmpty(sender.VideoTracksString))
+        {
+            peerArgumentList.Add("--vt");
+            peerArgumentList.Add(sender.VideoTracksString);
+        }
+        if (!string.IsNullOrEmpty(sender.AudioTracksString))
+        {
+            peerArgumentList.Add("--at");
+            peerArgumentList.Add(sender.AudioTracksString);
+        }
+        string[] peerArgumentTokens = peerArgumentList.ToArray();
+
+        Logger.LogStatusWithMessage(NAME, Logger.Status.DebugTest, $"ipFilter={settings.ipFilter} openInWindow={settings.openInWindow} peerArgs={string.Join(" ", peerArgumentTokens)}");
         if (settings.openInWindow)
         {
             peerProcess.StartInfo.CreateNoWindow = false;
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-            peerProcess.StartInfo.Arguments = $"/K {peerProcess.StartInfo.FileName} {peerProcess.StartInfo.Arguments}";
             peerProcess.StartInfo.FileName = "CMD.EXE";
+            peerProcess.StartInfo.ArgumentList.Add("/K");
+            peerProcess.StartInfo.ArgumentList.Add(peerBinary);
+            foreach (var token in peerArgumentTokens)
+                peerProcess.StartInfo.ArgumentList.Add(token);
 #elif UNITY_EDITOR_LINUX || UNITY_STANDALONE_LINUX
             string BashQuote(string value)
             {
                 return $"'{value.Replace("'", "'\"'\"'")}'";
             }
-            string peerCommand = $"{BashQuote(peerBinary)} {string.Join(" ", Array.ConvertAll(peerArgumentTokens, BashQuote))}";
-            string linuxTerminalKeepOpen = $"bash -lc {BashQuote($"{peerCommand}; exec bash")}";
-            UnityEngine.Debug.Log($"Linux terminal command: {peerCommand}");
+            // BashQuote is used so bash itself correctly handles paths/values with special chars.
+            // ArgumentList ensures .NET passes each element as a distinct argv entry (no shell splitting).
+            string peerCommandForBash = $"{BashQuote(peerBinary)} {string.Join(" ", Array.ConvertAll(peerArgumentTokens, BashQuote))}";
+            string bashCommand = $"{peerCommandForBash}; exec bash";
+            UnityEngine.Debug.Log($"Linux terminal bash command: {bashCommand}");
             if (File.Exists("/usr/bin/x-terminal-emulator"))
             {
                 peerProcess.StartInfo.FileName = "/usr/bin/x-terminal-emulator";
-                peerProcess.StartInfo.Arguments = $"-e {linuxTerminalKeepOpen}";
+                peerProcess.StartInfo.ArgumentList.Add("-e");
+                peerProcess.StartInfo.ArgumentList.Add("bash");
+                peerProcess.StartInfo.ArgumentList.Add("-lc");
+                peerProcess.StartInfo.ArgumentList.Add(bashCommand);
             }
             else if (File.Exists("/usr/bin/gnome-terminal"))
             {
                 peerProcess.StartInfo.FileName = "/usr/bin/gnome-terminal";
-                peerProcess.StartInfo.Arguments = $"-- {linuxTerminalKeepOpen}";
+                peerProcess.StartInfo.ArgumentList.Add("--");
+                peerProcess.StartInfo.ArgumentList.Add("bash");
+                peerProcess.StartInfo.ArgumentList.Add("-lc");
+                peerProcess.StartInfo.ArgumentList.Add(bashCommand);
             }
             else if (File.Exists("/usr/bin/konsole"))
             {
                 peerProcess.StartInfo.FileName = "/usr/bin/konsole";
-                peerProcess.StartInfo.Arguments = $"-e {linuxTerminalKeepOpen}";
+                peerProcess.StartInfo.ArgumentList.Add("-e");
+                peerProcess.StartInfo.ArgumentList.Add("bash");
+                peerProcess.StartInfo.ArgumentList.Add("-lc");
+                peerProcess.StartInfo.ArgumentList.Add(bashCommand);
             }
             else if (File.Exists("/usr/bin/xfce4-terminal"))
             {
+                // xfce4-terminal --command parses its value via glib shell parsing (understands single quotes)
                 peerProcess.StartInfo.FileName = "/usr/bin/xfce4-terminal";
-                peerProcess.StartInfo.Arguments = $"--command=\"{linuxTerminalKeepOpen}\"";
+                peerProcess.StartInfo.ArgumentList.Add("--command");
+                peerProcess.StartInfo.ArgumentList.Add($"bash -lc {BashQuote(bashCommand)}");
             }
             else if (File.Exists("/usr/bin/xterm"))
             {
                 peerProcess.StartInfo.FileName = "/usr/bin/xterm";
-                peerProcess.StartInfo.Arguments = $"-hold -e {linuxTerminalKeepOpen}";
+                peerProcess.StartInfo.ArgumentList.Add("-hold");
+                peerProcess.StartInfo.ArgumentList.Add("-e");
+                peerProcess.StartInfo.ArgumentList.Add("bash");
+                peerProcess.StartInfo.ArgumentList.Add("-lc");
+                peerProcess.StartInfo.ArgumentList.Add(bashCommand);
             }
             else
             {
                 UnityEngine.Debug.LogWarning("ExternalWebRTCProvider: No terminal emulator found; falling back to background process.");
+                peerProcess.StartInfo.FileName = peerBinary;
                 peerProcess.StartInfo.CreateNoWindow = true;
                 peerProcess.StartInfo.UseShellExecute = false;
+                foreach (var token in peerArgumentTokens)
+                    peerProcess.StartInfo.ArgumentList.Add(token);
             }
 #endif
         }
@@ -120,8 +156,11 @@ public class ExternalWebRTCProvider : ConnectionProviderBase, ISenderSupported, 
         {
             // Run the peer directly in the background — peerProcess IS the peer binary,
             // so Kill() on Dispose reliably terminates it with no orphaned terminal.
+            peerProcess.StartInfo.FileName = peerBinary;
             peerProcess.StartInfo.CreateNoWindow = true;
             peerProcess.StartInfo.UseShellExecute = false;
+            foreach (var token in peerArgumentTokens)
+                peerProcess.StartInfo.ArgumentList.Add(token);
         }
 
         if (!peerProcess.Start())

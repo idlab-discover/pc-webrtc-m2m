@@ -1,0 +1,180 @@
+package main
+
+import (
+	"fmt"
+	"goweb/shared/src/logger"
+	"math/rand/v2"
+	"strconv"
+	"strings"
+)
+
+type MDCRandomQualityAdaptation struct {
+	nDescriptions        uint
+	qualities            [][]uint
+	descriptionToQuality [][]int
+	highestQualityInBand []int
+}
+
+const NameMDCRandomQualityAdaptation = "MDCRandomQualityAdaptation"
+
+func NewMDCRandomQualityAdaptation() *MDCRandomQualityAdaptation {
+	logger.Log(NameMDCRandomQualityAdaptation, logger.Creating, true, true)
+	nDescriptions := uint(3)
+	qualities := [][]uint{
+		{0, 1, 2}, // 0
+		{0, 1},    // 1
+		{0},       // 2
+		{1, 2},    // 3
+		{1},       // 4
+		{2},       // 5
+		{},
+	}
+	descriptionToQuality := [][]int{
+		{0, 1, 2},
+		{0, 1, 3, 4},
+		{0, 3, 5},
+	}
+	highestQualityInBand := []int{0, 3, 5, -1}
+	logger.Log(NameMDCRandomQualityAdaptation, logger.Created, true, true)
+	return &MDCRandomQualityAdaptation{
+		nDescriptions:        nDescriptions,
+		qualities:            qualities,
+		descriptionToQuality: descriptionToQuality,
+		highestQualityInBand: highestQualityInBand,
+	}
+}
+func (mqa *MDCRandomQualityAdaptation) PerformAdaptation(clc *ClientConnection, targetBitrate int, allClients map[uint]*ClientConnection, adaptationsToDo map[uint]*QualityAdaptationsToDo) *QualityAdaptationOutput {
+	// Implement MDC quality adaptation logic here
+
+	// Description MAX
+	clients := map[uint]*MDCAdaptationClient{}
+
+	for k := range clc.ReceiverVideoTracks {
+		if clc.ReceiverVideoTracks[k].CorrespondingSenderTrack.trackMeter.Valid == false {
+			continue
+		}
+		tokens := strings.Split(k, "_")
+		clientID64, _ := strconv.ParseUint(tokens[0][2:], 10, 32)
+		descriptionID64, _ := strconv.ParseUint(tokens[3], 10, 32)
+		clientID := uint(clientID64)
+		descriptionID := uint(descriptionID64)
+		var client *ClientConnection
+		if c, ok := allClients[clientID]; ok {
+			client = c
+		} else {
+			continue
+		}
+		if _, ok := clients[clientID]; !ok {
+			clients[clientID] = &MDCAdaptationClient{
+				clientID:         clientID,
+				trackCounts:      0,
+				tracks:           make([]*MDCAdaptationClientTrack, mqa.nDescriptions),
+				qualitiesBitrate: make([]uint64, len(mqa.qualities)),
+				selectedQuality:  -1,
+				clientPtr:        client,
+			}
+		}
+		clients[clientID].tracks[descriptionID] = &MDCAdaptationClientTrack{
+			trackID:     k,
+			shouldPlay:  false,
+			bitrate:     clc.ReceiverVideoTracks[k].CorrespondingSenderTrack.trackMeter.PrevBytes * 8,
+			webrtcTrack: clc.ReceiverVideoTracks[k],
+		}
+
+		for _, qual := range mqa.descriptionToQuality[descriptionID] {
+			clients[clientID].qualitiesBitrate[qual] += clc.ReceiverVideoTracks[k].CorrespondingSenderTrack.trackMeter.PrevBytes * 8
+		}
+
+		clients[clientID].trackCounts++
+	}
+
+	var adaptations []string
+	totalUsedBitrate := uint64(0)
+	for _, client := range clients {
+		if client.trackCounts != mqa.nDescriptions {
+			continue
+		}
+		client.startingQuality, client.screenPos = mqa.calculateStartingQuality(clc, client.clientPtr)
+		randomQuality := rand.IntN(len(mqa.qualities))
+		client.selectedQuality = randomQuality
+		totalUsedBitrate += client.qualitiesBitrate[randomQuality]
+	}
+	// TODO
+	//			Sort clients based on starting quality
+	//			If there isnt enough bitrate reduce quality of clients with higher starting quality first
+	//			Limit to max 1 quality level decrease at the same time
+	//		    Clients that have the lowest quality level should only be removed in worst case scenarios (as it will cause nothing to be rendered for this clients)
+
+	choices := make([]QualityChoice, 0)
+	for _, client := range clients {
+		if client.selectedQuality > -1 {
+			for _, desc := range mqa.qualities[client.selectedQuality] {
+				client.tracks[desc].shouldPlay = true
+			}
+		}
+		choices = append(choices, QualityChoice{
+			ClientID:          client.clientID,
+			ScreenPosX:        client.screenPos[0],
+			ScreenPosY:        client.screenPos[1],
+			Distance:          client.distance,
+			SelectedQuality:   client.selectedQuality,
+			MaxAllowedQuality: client.startingQuality,
+			QualitiesBitrate:  client.qualitiesBitrate,
+		})
+		for _, track := range client.tracks {
+			// TODO Maybe move this outside and do this once globally?
+			adaptationsForClient, exists := adaptationsToDo[client.clientID]
+			if !exists {
+				adaptationsForClient = NewQualityAdaptationsToDo()
+				adaptationsToDo[client.clientID] = adaptationsForClient
+			}
+			if track.shouldPlay {
+				adaptationsForClient.ToPlay = append(adaptationsForClient.ToPlay, track.webrtcTrack)
+				adaptations = append(adaptations, track.trackID)
+			} else {
+				adaptationsForClient.ToPause = append(adaptationsForClient.ToPause, track.webrtcTrack)
+			}
+		}
+	}
+
+	return &QualityAdaptationOutput{
+		EstimatedBandwidth: uint32(targetBitrate),
+		UsedBandwidth:      uint32(totalUsedBitrate),
+		RemainingBandwidth: uint32(targetBitrate) - uint32(totalUsedBitrate),
+		ChoicesString:      adaptations,
+		Choices:            choices,
+	}
+}
+
+// TODO Move this to common space
+func (mqa *MDCRandomQualityAdaptation) calculateStartingQuality(client *ClientConnection, otherClient *ClientConnection) (int, [2]float32) {
+	activeBand, screenPos := mqa.calculateActiveBand(client, otherClient)
+	if activeBand < uint(len(mqa.highestQualityInBand)) {
+		return mqa.highestQualityInBand[activeBand], screenPos
+	}
+	return -1, screenPos
+}
+
+func (mqa *MDCRandomQualityAdaptation) calculateActiveBand(client *ClientConnection, otherClient *ClientConnection) (uint, [2]float32) {
+	nBands := uint(3)
+	camSpace := MultiplyPoint(client.PositionMatrix.WorldToCameraMatrix, otherClient.PositionMatrix.Position)
+	clipSpace := ConvertToClipspace(client.PositionMatrix.ProjectionMatrix, camSpace)
+	ndcSpace := [3]float32{
+		clipSpace[0] / clipSpace[3],
+		clipSpace[1] / clipSpace[3],
+		clipSpace[2] / clipSpace[3],
+	}
+	fmt.Printf("WebRTCSFU: calculatePointVisibility: Pos x %f y %f z %f\n", ndcSpace[0], ndcSpace[1], ndcSpace[2])
+
+	bandSpacing := 1.0 / float32(nBands) * 1.0
+	for i := uint(0); i < nBands; i++ {
+		if (ndcSpace[0] >= 0-bandSpacing*float32(i+1)) && (ndcSpace[0] <= 0+bandSpacing*float32(i+1)) {
+			return i, [2]float32{ndcSpace[0], ndcSpace[1]}
+		}
+	}
+	if ndcSpace[0] >= -1.25 && ndcSpace[0] <= 1.25 {
+		return nBands - 1, [2]float32{ndcSpace[0], ndcSpace[1]}
+	}
+
+	return nBands, [2]float32{ndcSpace[0], ndcSpace[1]}
+}

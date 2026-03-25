@@ -41,6 +41,7 @@ private:
 	std::map<uint32_t, ConnectedClient*> clients;
 	std::map<std::string, uint32_t> track_name_to_id;
 	unsigned int track_id_counter = 0;
+	std::vector<std::vector<char>> pending_track_packets;
 	#define BUFLEN 1300
 
 	#ifdef WIN32

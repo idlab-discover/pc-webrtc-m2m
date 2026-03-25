@@ -67,7 +67,7 @@ func (rsfu *RemoteSFUConnection) SetupPeerConnection() {
 	settingEngine2 := webrtc.SettingEngine{}
 	settingEngine2.SetSCTPMaxReceiveBufferSize(16 * 1024 * 1024)
 	settingEngine2.SetReceiveMTU(10000)
-	if rsfu.parent.ipFilter != "" {
+	if rsfu.parent.settings.IpFilter != "" {
 		settingEngine2.SetIPFilter(rsfu.ipFilterFunc)
 	}
 	peerConnection, err := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine2), webrtc.WithMediaEngine(mediaEngine), webrtc.WithInterceptorRegistry(interceptorRegistry)).NewPeerConnection(webrtc.Configuration{})
@@ -118,8 +118,7 @@ func (rsfu *RemoteSFUConnection) SignalRenegotiationUnsafe() {
 	if err = rsfu.websocket.WriteJSONMessageSafe("OfferMessage", offer); err != nil {
 		panic(err)
 	}
-	
-	
+
 	rsfu.NeedsUpdate = false
 }
 
@@ -467,8 +466,8 @@ func (rsfu *RemoteSFUConnection) ForwardTracksToClient(client *ClientConnection,
 }
 
 func (rsfu *RemoteSFUConnection) ipFilterFunc(addr net.IP) bool {
-	logger.LogWithMessage(NameRemoteSFUConnection, logger.IPFilterCheck, true, true, fmt.Sprintf("providerKey=%s ip=%s filter=%s", &rsfu.providerKey, addr.String(), rsfu.parent.ipFilter))
-	if strings.HasPrefix(addr.String(), rsfu.parent.ipFilter) {
+	logger.LogWithMessage(NameRemoteSFUConnection, logger.IPFilterCheck, true, true, fmt.Sprintf("providerKey=%s ip=%s filter=%s", &rsfu.providerKey, addr.String(), rsfu.parent.settings.IpFilter))
+	if strings.HasPrefix(addr.String(), rsfu.parent.settings.IpFilter) {
 		return true
 	}
 	return false

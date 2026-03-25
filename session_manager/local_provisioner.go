@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 )
@@ -69,7 +70,11 @@ func NewLocalProviderProvisioner(configPath string) *LocalProviderProvisioner {
 func (p *LocalProviderProvisioner) CreateProvider(providerType string, managerIP string, pConn *ProviderConnection, extraCmdArgs string, metricsConfigPath string) {
 	p.mut.Lock()
 	defer p.mut.Unlock()
-	pConn.Address = "127.0.0.1"
+	if host, _, err := net.SplitHostPort(managerIP); err == nil {
+		pConn.Address = host
+	} else {
+		pConn.Address = managerIP
+	}
 	if p.AssignPort {
 		for candidatePort, inUse := range p.portsInUse {
 			if !inUse {

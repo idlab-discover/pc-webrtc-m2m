@@ -20,8 +20,9 @@ void DracoMDCEncoder::encode_pc(Description *pc)
     draco::Encoder encoder;
     encoder.SetEncodingMethod(draco::POINT_CLOUD_KD_TREE_ENCODING);
     // Can potentially change quantization here
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, 11);
-    
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, 10);
+    encoder.SetSpeedOptions(10, 10);
+
     if (!encoder.EncodePointCloudToBuffer(*draco_pc, &buffer).ok()) {
         status = ENCODING_STATUS::S_Fail;
         encoded_size = 0;

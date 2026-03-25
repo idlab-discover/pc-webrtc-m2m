@@ -465,7 +465,7 @@ public abstract class SessionManagerBase
     }
     protected void onConnectedToSession(uint assignedClientID, SessionConnectionMessage connectionMessage, string sessionInfo)
     {
-        Logger.LogStatus(NAME, Logger.Status.ManagerSessionJoined);
+        Logger.LogStatusWithMessage(NAME, Logger.Status.ManagerSessionJoined, $"codecMode={connectionMessage.codecMode} nProviders={connectionMessage.providers.Count} nClients={connectionMessage.clients.Count}");
         LocalClient = new LocalConnectedClient(assignedClientID, connectionMessage.codecMode);
 
         foreach (var p in connectionMessage.providers)

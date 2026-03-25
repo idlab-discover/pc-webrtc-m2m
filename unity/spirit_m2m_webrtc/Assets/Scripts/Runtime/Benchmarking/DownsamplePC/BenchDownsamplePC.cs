@@ -20,10 +20,13 @@ public class BenchDownsamplePC : PipelineLocalPointcloudBase
 
     void Start()
     {
+        Debug.Log("Starting BenchDownsamplePC");
         sessionInfo = SessionInfo.CreateFromJSON(Application.dataPath + "/config/session_config.json");
+        sessionInfo.playerControllerName = null; // We don't need a player controller for this benchmark
         Logger.Init(sessionInfo.loggerSettings);
         benchConfig = BenchDownsamplePCConfig.CreateFromJSON(ConfigPath);
         startCaptureThread = false; // We want to control when the capture starts
+        Debug.Log("Initializing BenchDownsamplePC");
         Init(sessionInfo, new LocalConnectedClient(0, ""));
     }
 
@@ -31,13 +34,16 @@ public class BenchDownsamplePC : PipelineLocalPointcloudBase
     {
         sessionInfo.frameMode = FrameMode.RealData; // TODO fix this in the future
         base.Init(sessionInfo, localClient);
+        Debug.Log("Starting capture thread");
         startPollThread();
+
     }
 
     protected override void pollFramesInternal()
     { 
         if (!keepWorking)
         {
+            Debug.Log("Not keeping working, skipping polling frames");
             return;
         }
         IntPtr pc = capture.GetSingleCombinedPointCloud();
@@ -52,10 +58,12 @@ public class BenchDownsamplePC : PipelineLocalPointcloudBase
         }
         else
         {
+            Debug.LogWarning("Failed to poll point cloud frame");
             keepWorking = false;
         }
         if(frameCounter >= benchConfig.maxFrames)
         {
+            Debug.Log($"Reached max frames {benchConfig.maxFrames}, stopping capture");
             keepWorking = false;
         }
 

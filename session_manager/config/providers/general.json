@@ -3,12 +3,12 @@
         "providerType": "webrtc_sfu",
         "providerKey": "sfu_mdc",
         "isDefaultForType": true,
-        "defaultConfigPath": "config/providers/webrtc/sfu/config_mdc.json"
+        "defaultConfigPath": "/home/matthias/Documents/pc-webrtc-m2m/session_manager/config/providers/webrtc/sfu/config_mdc.json"
     },
     {
         "providerType": "webrtc_sfu",
         "providerKey": "sfu_raw",
         "isDefaultForType": false,
-        "defaultConfigPath": "config/providers/webrtc/sfu/config_raw.json"
+        "defaultConfigPath": "/home/matthias/Documents/pc-webrtc-m2m/session_manager/config/providers/webrtc/sfu/config_raw.json"
     }
 ]

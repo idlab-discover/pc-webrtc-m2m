@@ -2,13 +2,16 @@ package main
 
 import (
 	"fmt"
+	"goweb/shared/src/logger"
 	"math/rand/v2"
 	"strconv"
 	"strings"
 )
 
 type CompositeQualityChoiceMetric struct {
+	SourceClientID     uint32
 	ClientID           uint32
+	FrameNr            uint32
 	EstimatedBandwidth uint32
 	UsedBandwidth      uint32
 	RemainingBandwidth uint32
@@ -56,7 +59,10 @@ type MDCAdaptationClientTrack struct {
 	webrtcTrack *ReceiverTrack
 }
 
+const NameMDCQualityAdaptation = "MDCQualityAdaptation"
+
 func NewMDCQualityAdaptation() *MDCQualityAdaptation {
+	logger.Log(NameMDCQualityAdaptation, logger.Creating, true, true)
 	nDescriptions := uint(3)
 	qualities := [][]uint{
 		{0, 1, 2}, // 0
@@ -73,6 +79,7 @@ func NewMDCQualityAdaptation() *MDCQualityAdaptation {
 		{0, 3, 5},
 	}
 	highestQualityInBand := []int{0, 3, 5, -1}
+	logger.Log(NameMDCQualityAdaptation, logger.Created, true, true)
 	return &MDCQualityAdaptation{
 		nDescriptions:        nDescriptions,
 		qualities:            qualities,

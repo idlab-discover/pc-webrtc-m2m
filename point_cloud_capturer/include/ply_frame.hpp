@@ -11,6 +11,7 @@ class PlyFrame : public Frame {
             //{
             //case FrameMode::RealData:
                 make_data_arrays(file_path);
+                timestamp = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();
             //    break;
             //}
            

@@ -138,7 +138,6 @@ func main() {
 	providerKey := flag.String("providerKey", "", "ID of this provider, assigned by the session manager")
 	authKey := flag.String("authKey", "", "Optional authentication key provider by the session manager")
 	enableConsoleOutput := flag.Bool("console", false, "Enable console output for logger")
-	ipFilter := flag.String("ipFilter", "", "IP Prefix to filter on (e.g., 192.168.1.)")
 	metricsServerConfig := flag.String("metricsConfig", "", "Path to metrics server config file, if not set metrics server will not be started")
 	flag.Parse()
 
@@ -158,7 +157,7 @@ func main() {
 	trackLocals = map[string]*webrtc.TrackLocalStaticRTP{}
 	undesireableTracks = map[int][]string{}
 
-	sfu := NewSFU(*address, *port, *ipFilter, *providerKey, *metricsServerConfig)
+	sfu := NewSFU(*address, *port, *providerKey, *metricsServerConfig)
 	//go sfu.MetricsHelper.MetricsServer.StartListening(8000)
 
 	// ------

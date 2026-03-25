@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmarking Suite</title>
+  <link rel="stylesheet" href="/static/dashboard.css">
+</head>
+<body>
+  <main class="layout">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Volumetric Streaming</p>
+        <h1>Benchmark Control Room</h1>
+        <p class="lead">Monitor instances, edit experiment JSON, push content, and launch coordinated runs.</p>
+      </div>
+      <button id="start-experiment" class="primary">Start Experiment</button>
+    </section>
+
+    <section class="panel">
+      <h2>Instances</h2>
+      <div id="instances" class="instance-grid"></div>
+    </section>
+
+    <section class="panel panel-wide">
+      <h2>Configs</h2>
+      <div class="config-grid">
+        <form class="config-form" data-config-name="experiment">
+          <label>experiment.json</label>
+          <textarea name="payload">{{ state.configs.experiment | tojson(indent=2) }}</textarea>
+          <button type="submit">Save</button>
+        </form>
+        <form class="config-form" data-config-name="session_config">
+          <label>session_config.json</label>
+          <textarea name="payload">{{ state.configs.session_config | tojson(indent=2) }}</textarea>
+          <button type="submit">Save</button>
+        </form>
+        <form class="config-form" data-config-name="plyfiles">
+          <label>plyfiles.json</label>
+          <textarea name="payload">{{ state.configs.plyfiles | tojson(indent=2) }}</textarea>
+          <button type="submit">Save</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="panel panel-wide">
+      <h2>Upload Content</h2>
+      <form id="upload-form" class="upload-form">
+        <label>Target path on instance controller</label>
+        <input name="target_path" type="text" placeholder="content/imports" required>
+        <label>Source directory on server</label>
+        <input name="server_source_path" type="text" placeholder="/path/on/server">
+        <label>Or files from browser</label>
+        <input name="files" type="file" multiple webkitdirectory directory>
+        <button type="submit">Upload Content</button>
+      </form>
+    </section>
+  </main>
+  <script>
+    window.__INITIAL_STATE__ = {{ state | tojson }};
+  </script>
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>

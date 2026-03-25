@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "benchmarking-suite"
+version = "0.1.0"
+description = "Distributed benchmarking suite for volumetric streaming experiments"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "httpx>=0.28,<1.0",
+    "jinja2>=3.1,<4.0",
+    "python-multipart>=0.0.9,<1.0",
+    "uvicorn>=0.34,<1.0",
+]
+
+[project.scripts]
+general-controller = "benchmarking_suite.general_controller.main:main"
+instance-controller = "benchmarking_suite.instance_controller.main:main"
+client-provisioner = "benchmarking_suite.client_provisioner.main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
