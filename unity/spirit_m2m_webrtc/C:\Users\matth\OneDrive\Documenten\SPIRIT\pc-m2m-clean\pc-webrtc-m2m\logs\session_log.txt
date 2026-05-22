@@ -1,5 +1,0 @@
-id=MultiCaptureSetup ts=1774359311105 status=Creating fps=15 frameMode=RealData nCaptures=1 startCaptureThread=False
-id=MultiCaptureSetup ts=1774359311106 status=Created
-id=MultiCaptureSetup ts=1774359344135 status=Disposing
-id=MultiCaptureSetup ts=1774359344137 status=Disposed
-id=BenchDownsamplePC ts=1774360302384 status=Destroying clientID=0
