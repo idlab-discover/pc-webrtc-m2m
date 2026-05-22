@@ -1,3 +1,6 @@
-C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/build/CMakeFiles/spirit_idlab_realsense.dir
-C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-webrtc-m2m/point_cloud_capturer/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-m2m-clean/pc-webrtc-m2m/point_cloud_capturer/build/CMakeFiles/spirit_idlab_realsense.dir
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-m2m-clean/pc-webrtc-m2m/point_cloud_capturer/build/CMakeFiles/INSTALL.dir
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-m2m-clean/pc-webrtc-m2m/point_cloud_capturer/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-m2m-clean/pc-webrtc-m2m/point_cloud_capturer/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-m2m-clean/pc-webrtc-m2m/point_cloud_capturer/build/_deps/fast_float-build/CMakeFiles/INSTALL.dir
+C:/Users/matth/OneDrive/Documenten/SPIRIT/pc-m2m-clean/pc-webrtc-m2m/point_cloud_capturer/build/_deps/fast_float-build/CMakeFiles/ALL_BUILD.dir

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CustomBuild Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>

@@ -44,11 +44,15 @@ CAPTURER_SETUP_CODE RS2Capturer::capture_next_frame()
 {
     try {
 		auto temp_frame = get_single_frame();
-		if(frame_ready_callback_instance != nullptr) {
-			frame_ready_callback_instance(capturer_id, temp_frame, true);
-		} else {
-			frame_buffer.add_to_buffer(temp_frame);
+		if (temp_frame->get_frame_size() > 100) {
+			if (frame_ready_callback_instance != nullptr) {
+				frame_ready_callback_instance(capturer_id, temp_frame, true);
+			}
+			else {
+				frame_buffer.add_to_buffer(temp_frame);
+			}
 		}
+		
         
     } catch (...) {
         return exception_handler().first;
@@ -114,7 +118,7 @@ void* RS2Capturer::get_calibration() {
 	};
 }
 
-Frame *RS2Capturer::+get_single_frame()
+Frame *RS2Capturer::get_single_frame()
 {
 	size_t n_frames = 0;
 		rs2::frameset frames;

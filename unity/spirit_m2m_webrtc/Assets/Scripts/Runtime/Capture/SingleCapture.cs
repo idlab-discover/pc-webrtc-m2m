@@ -26,8 +26,10 @@ public abstract class SingleCapture : BaseCapture, ICapturePoll
         if (capPtr != IntPtr.Zero)
         {
             Realsense2Invoker.start_capturing(capPtr, startCaptureThread);
+        } else {
+            Debug.LogError("Failed to create capturer of type " + capType.ToString());
         }
-        CaptureHelper.FreeSettingsEx();
+            CaptureHelper.FreeSettingsEx();
     }
 
     protected override IntPtr getCalibrationFromCapturer()

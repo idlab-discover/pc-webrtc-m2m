@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CustomBuild Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\build\CMakeFiles\7ee4080d937bc69e656ac451191fd524\generate.stamp.rule">
+    <CustomBuild Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\build\CMakeFiles\9bb0742a5c4ef8eb8bf7c7be213a5761\generate.stamp.rule">
       <Filter>CMake Rules</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="CMake Rules">
-      <UniqueIdentifier>{B1FA4935-FEB9-39F0-A094-0400FA91BB57}</UniqueIdentifier>
+      <UniqueIdentifier>{DC1D6544-46F5-3B73-8C74-BB34D0761929}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

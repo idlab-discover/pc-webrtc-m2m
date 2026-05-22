@@ -15,14 +15,14 @@ enum FrameMode {
     Both = 2,
 };
 
-#pragma pack(push, 1)
+//#pragma pack(push, 1)
 struct FrameCleanupSettings {
     unsigned int blackout_block_size;
     bool should_apply_depth_filter;
     bool should_cleanup_depth;
     bool should_blackout;
 };
-#pragma pack(pop)
+//#pragma pack(pop)
 
 
 class Frame {

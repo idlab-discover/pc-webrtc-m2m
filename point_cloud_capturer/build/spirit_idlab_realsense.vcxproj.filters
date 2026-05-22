@@ -1,73 +1,82 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\artificical_capturer.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\artificical_capturer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\artificical_frame.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\artificical_frame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\artificical_raw_converter.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\artificical_raw_converter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\capturer.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\capturer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\capturer_factory.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\capturer_factory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\dllmain.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\frame.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\frame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\framebuffer.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\framebuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\kinect\kinect_helper.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\kinect\kinect_helper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\kinect_frame.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\kinect_frame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\kinect_raw_converter.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\kinect_raw_converter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\log.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\multi_capturer\multi_capturer.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\multi_capturer\multi_capturer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\pch.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\plugin.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\plugin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\prerecorded_kinect_capturer.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\ply_capturer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\rs2_capturer.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\ply_frame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\rs2_frame.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\prerecorded_kinect_capturer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\rs2_raw_capturer.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\rs2_capturer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\src\rs2_raw_converter.cpp">
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\rs2_frame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\rs2_raw_capturer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\rs2_raw_converter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\src\utils\point_cloud_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-webrtc-m2m\point_cloud_capturer\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\matth\OneDrive\Documenten\SPIRIT\pc-m2m-clean\pc-webrtc-m2m\point_cloud_capturer\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{DF626C48-63B5-3B67-BF9E-94D2BF4B6EBD}</UniqueIdentifier>
+      <UniqueIdentifier>{04E11D85-23D8-373F-894C-D965E0195EF1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

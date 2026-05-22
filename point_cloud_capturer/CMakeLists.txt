@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18)
 include(FetchContent)
 
 option(USE_REALSENSE "Include RealSense support" ON)
-option(USE_KINECT    "Include Kinect (k4a) support" ON)
+option(USE_KINECT    "Include Kinect (k4a) support" OFF)
 
 # Define the project name and the type of project
 project(spirit_idlab_realsense LANGUAGES CXX)
@@ -48,10 +48,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeFiles")
 # Find the REALSENSE2 library
 # --- RealSense Setup ---
 if(USE_REALSENSE)
+    message("Using realsense")
     find_package(REALSENSE2 REQUIRED)
     target_link_libraries(spirit_idlab_realsense PRIVATE ${REALSENSE2_LIBRARIES})
     target_include_directories(spirit_idlab_realsense PRIVATE ${REALSENSE2_INCLUDE_DIRS})
-    target_compile_definitions(spirit_idlab_realsense PRIVATE WITH_REALSENSE)
+    target_compile_definitions(spirit_idlab_realsense PRIVATE USE_REALSENSE WITH_REALSENSE)
 endif()
 
 # --- Kinect Setup ---
@@ -62,7 +63,7 @@ if(USE_KINECT)
         ${CMAKE_SOURCE_DIR}/include/kinect 
         ${k4a_INCLUDE_DIR}
     )
-    target_compile_definitions(spirit_idlab_realsense PRIVATE WITH_KINECT)
+    target_compile_definitions(spirit_idlab_realsense PRIVATE USE_KINECT WITH_KINECT)
 endif()
 
 # --- Platform Specific: Windows Multimedia ---

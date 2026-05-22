@@ -48,7 +48,7 @@
     "useMic": false,
     "frameMode": 0,
     "frameCodec": 1,
-    "capturerName": "plyfiles",
+    "capturerName": "realsense",
     "artificialSettings": {
         "artificialSize": 25
     },
